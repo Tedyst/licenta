@@ -1,0 +1,3 @@
+
+[build]
+full_bin = "( . ./.env; ./tmp/main )"
