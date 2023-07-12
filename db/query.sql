@@ -25,3 +25,7 @@ UPDATE users SET
     email = $4,
     admin = $5
 WHERE id = $1;
+
+-- name: GetUserByUsernameOrEmail :one
+SELECT * FROM users
+WHERE username = $1 OR email = $1 LIMIT 1;
