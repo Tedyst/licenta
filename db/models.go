@@ -4,12 +4,15 @@
 
 package db
 
-import ()
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type User struct {
-	ID       int64
-	Username string
-	Password string
-	Email    string
-	Admin    bool
+	ID         int64
+	Username   string
+	Password   string
+	Email      string
+	Admin      bool
+	TotpSecret pgtype.Text
 }

@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
+	postgres_session "github.com/gofiber/storage/postgres/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/config"
@@ -32,13 +34,24 @@ func run() error {
 	if err != nil {
 		return err
 	}
-
 	queries := db.New(pool)
+	sessionStorage := postgres_session.New(postgres_session.Config{
+		DB: pool,
+	})
+	store := session.New(session.Config{
+		Storage:   sessionStorage,
+		KeyLookup: "cookie:session",
+	})
+	config.Debug = os.Getenv("DEBUG") == "true"
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Prefork: !config.Debug,
+	})
 
 	config.DatabasePool = pool
 	config.DatabaseQueries = queries
+	config.SessionStore = store
+	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World 👋!")

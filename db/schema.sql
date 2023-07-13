@@ -3,5 +3,6 @@ CREATE TABLE users (
   username TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
   email TEXT NOT NULL,
-  admin BOOLEAN NOT NULL DEFAULT FALSE
+  admin BOOLEAN NOT NULL DEFAULT FALSE,
+  totp_secret TEXT
 );

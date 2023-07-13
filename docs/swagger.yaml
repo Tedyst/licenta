@@ -1,5 +1,22 @@
 basePath: /
 definitions:
+  v1.generateTotpAPIResponse:
+    properties:
+      totp_secret:
+        type: string
+    type: object
+  v1.loginAPIRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  v1.loginAPIResponse:
+    properties:
+      status:
+        type: string
+    type: object
   v1.publicUserAPIResponse:
     properties:
       email:
@@ -7,6 +24,11 @@ definitions:
       id:
         type: integer
       username:
+        type: string
+    type: object
+  v1.totpAPIRequest:
+    properties:
+      totp:
         type: string
     type: object
   v1.userCreateAPIRequest:
@@ -31,6 +53,80 @@ info:
   title: Proiect Licenta
   version: "1.0"
 paths:
+  /api/v1/generate_totp:
+    post:
+      consumes:
+      - application/json
+      description: Generate TOTP
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.generateTotpAPIResponse'
+      summary: Generate TOTP
+      tags:
+      - auth
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/v1.loginAPIRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.loginAPIResponse'
+      summary: Login
+      tags:
+      - auth
+  /api/v1/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.loginAPIResponse'
+      summary: Logout
+      tags:
+      - auth
+  /api/v1/totp:
+    post:
+      consumes:
+      - application/json
+      description: Verify TOTP
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/v1.totpAPIRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.loginAPIResponse'
+      summary: Verify TOTP
+      tags:
+      - auth
   /api/v1/users:
     get:
       consumes:

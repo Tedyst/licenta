@@ -41,6 +41,12 @@ func HandleGetUsers(c *fiber.Ctx) error {
 			Email:    user.Email,
 		})
 	}
+	sess, err := config.SessionStore.Get(c)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	log.Print(sess.Get("user_id"))
 	return c.JSON(publicUsers)
 }
 
@@ -61,13 +67,32 @@ func HandleCreateUser(c *fiber.Ctx) error {
 	}
 	user, err := config.DatabaseQueries.CreateUser(c.Context(), db.CreateUserParams{
 		Username: request.Username,
-		Password: request.Password,
 		Email:    request.Email,
 	})
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+
+	err = user.SetPassword(request.Password)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	sess, err := config.SessionStore.Get(c)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	sess.Set("user_id", 1)
+	log.Print(sess)
+	err = sess.Save()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	return c.JSON(publicUserAPIResponse{
 		ID:       user.ID,
 		Username: user.Username,

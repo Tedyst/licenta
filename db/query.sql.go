@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -15,7 +17,7 @@ INSERT INTO users (
 ) VALUES (
   $1, $2, $3
 )
-RETURNING id, username, password, email, admin
+RETURNING id, username, password, email, admin, totp_secret
 `
 
 type CreateUserParams struct {
@@ -33,6 +35,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.Email,
 		&i.Admin,
+		&i.TotpSecret,
 	)
 	return i, err
 }
@@ -48,7 +51,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, password, email, admin FROM users
+SELECT id, username, password, email, admin, totp_secret FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -61,12 +64,13 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.Password,
 		&i.Email,
 		&i.Admin,
+		&i.TotpSecret,
 	)
 	return i, err
 }
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
-SELECT id, username, password, email, admin FROM users
+SELECT id, username, password, email, admin, totp_secret FROM users
 WHERE username = $1 OR email = $1 LIMIT 1
 `
 
@@ -79,12 +83,13 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string)
 		&i.Password,
 		&i.Email,
 		&i.Admin,
+		&i.TotpSecret,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, password, email, admin FROM users
+SELECT id, username, password, email, admin, totp_secret FROM users
 ORDER BY id
 `
 
@@ -103,6 +108,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			&i.Password,
 			&i.Email,
 			&i.Admin,
+			&i.TotpSecret,
 		); err != nil {
 			return nil, err
 		}
@@ -139,5 +145,21 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.Email,
 		arg.Admin,
 	)
+	return err
+}
+
+const updateUserTOTPSecret = `-- name: UpdateUserTOTPSecret :exec
+UPDATE users SET
+    totp_secret = $2
+WHERE id = $1
+`
+
+type UpdateUserTOTPSecretParams struct {
+	ID         int64
+	TotpSecret pgtype.Text
+}
+
+func (q *Queries) UpdateUserTOTPSecret(ctx context.Context, arg UpdateUserTOTPSecretParams) error {
+	_, err := q.db.Exec(ctx, updateUserTOTPSecret, arg.ID, arg.TotpSecret)
 	return err
 }
