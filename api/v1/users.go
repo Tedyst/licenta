@@ -28,11 +28,15 @@ type userCreateAPIRequest struct {
 // @Success		200	{array}	publicUserAPIResponse
 // @Router			/api/v1/users [get]
 func HandleGetUsers(c *fiber.Ctx) error {
-	users, err := config.DatabaseQueries.ListUsers(c.Context())
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleGetUsers")
+	defer span.End()
+
+	users, err := config.DatabaseQueries.ListUsers(ctx)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+	span.AddEvent("Creating response")
 	var publicUsers []publicUserAPIResponse
 	for _, user := range users {
 		publicUsers = append(publicUsers, publicUserAPIResponse{
@@ -41,12 +45,6 @@ func HandleGetUsers(c *fiber.Ctx) error {
 			Email:    user.Email,
 		})
 	}
-	sess, err := config.SessionStore.Get(c)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	log.Print(sess.Get("user_id"))
 	return c.JSON(publicUsers)
 }
 

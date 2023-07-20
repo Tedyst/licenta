@@ -4,14 +4,21 @@ import (
 	"context"
 	"log"
 	"os"
+	"runtime"
 
+	"github.com/exaring/otelpgx"
+	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/pprof"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	postgres_session "github.com/gofiber/storage/postgres/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/config"
 	"github.com/tedyst/licenta/db"
+	"go.opentelemetry.io/otel/trace"
 
 	_ "github.com/tedyst/licenta/docs"
 )
@@ -30,10 +37,36 @@ import (
 // @host			localhost:8080
 // @BasePath		/
 func run() error {
-	pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
+	err := parseConfig()
 	if err != nil {
 		return err
 	}
+	tp := initTracer()
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			log.Printf("Error shutting down tracer provider: %v", err)
+		}
+	}()
+	mp := initMetric()
+	defer func() {
+		if err := mp.Shutdown(context.Background()); err != nil {
+			log.Printf("Error shutting down metric provider: %v", err)
+		}
+	}()
+
+	if os.Getenv("DATABASE_URL") == "" {
+		log.Fatal("DATABASE_URL is not set")
+	}
+	cfg, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
+	if err != nil {
+		return err
+	}
+	cfg.ConnConfig.Tracer = otelpgx.NewTracer()
+	pool, err := pgxpool.NewWithConfig(context.Background(), cfg)
+	if err != nil {
+		return err
+	}
+
 	queries := db.New(pool)
 	sessionStorage := postgres_session.New(postgres_session.Config{
 		DB: pool,
@@ -48,10 +81,27 @@ func run() error {
 		Prefork: !config.Debug,
 	})
 
+	app.Use(otelfiber.Middleware())
+
 	config.DatabasePool = pool
 	config.DatabaseQueries = queries
 	config.SessionStore = store
 	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
+
+	app.Use(recover.New())
+	if config.Debug {
+		app.Use(logger.New())
+		app.Use(pprof.New())
+	}
+	if config.Debug {
+		runtime.SetMutexProfileFraction(5)
+		runtime.SetBlockProfileRate(5)
+	}
+	app.Use(func(c *fiber.Ctx) error {
+		span := trace.SpanFromContext(c.UserContext())
+		c.Response().Header.Set("X-Trace-Id", span.SpanContext().TraceID().String())
+		return c.Next()
+	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World 👋!")
@@ -64,6 +114,12 @@ func run() error {
 	}
 
 	return app.Listen(":5000")
+}
+
+func parseConfig() error {
+	config.Debug = os.Getenv("DEBUG") == "true"
+	config.JaegerEndpoint = os.Getenv("JAEGER_ENDPOINT")
+	return nil
 }
 
 func main() {
