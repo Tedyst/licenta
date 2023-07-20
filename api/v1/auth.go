@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/tedyst/licenta/config"
 	"github.com/tedyst/licenta/db"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type loginAPIRequest struct {
@@ -36,33 +37,48 @@ var (
 // @Success		200	{object}	loginAPIResponse
 // @Router			/api/v1/login [post]
 func HandleLoginAPI(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleLoginAPI")
+	defer span.End()
+
 	var req loginAPIRequest
 	if err := c.BodyParser(&req); err != nil {
+		span.SetStatus(codes.Error, "Error parsing body")
+		span.RecordError(err)
 		return err
 	}
-	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(c.Context(), req.Username)
+	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(ctx, req.Username)
 	if err != nil {
+		span.SetStatus(codes.Error, "Error getting user")
+		span.RecordError(err)
 		return c.JSON(ErrInvalidCredentials)
 	}
 	ok, err := user.VerifyPassword(req.Password)
 	if err != nil {
+		span.SetStatus(codes.Error, "Error verifying password")
+		span.RecordError(err)
 		return err
 	}
 	if !ok {
+		span.SetStatus(codes.Error, "Invalid credentials")
 		return c.JSON(ErrInvalidCredentials)
 	}
 
 	sess, err := config.SessionStore.Get(c)
 	if err != nil {
+		span.SetStatus(codes.Error, "Error getting session")
+		span.RecordError(err)
 		return err
 	}
 
 	if user.TotpSecret.Valid {
+		span.AddEvent("TOTP required")
 		sess.Set(UserID2FAKey, user.ID)
 		sess.Save()
 		return c.JSON(ErrRequireTOTOP)
 	}
-	if err := loginUser(c, &user); err != nil {
+	if err := loginUser(ctx, c, &user); err != nil {
+		span.SetStatus(codes.Error, "Error logging in user")
+		span.RecordError(err)
 		return err
 	}
 	sess.Set(UserIDKey, nil)
@@ -77,7 +93,10 @@ func HandleLoginAPI(c *fiber.Ctx) error {
 // @Success		200	{object}	loginAPIResponse
 // @Router			/api/v1/logout [post]
 func HandleLogoutAPI(c *fiber.Ctx) error {
-	if err := logoutUser(c); err != nil {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleLogoutAPI")
+	defer span.End()
+
+	if err := logoutUser(ctx, c); err != nil {
 		return err
 	}
 	return c.JSON(Success)
@@ -96,27 +115,37 @@ type totpAPIRequest struct {
 // @Success		200	{object}	loginAPIResponse
 // @Router			/api/v1/totp [post]
 func HandleTOTPAPI(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleTOTPAPI")
+	defer span.End()
+
 	var req totpAPIRequest
 	if err := c.BodyParser(&req); err != nil {
+		span.SetStatus(codes.Error, "Error parsing body")
+		span.RecordError(err)
 		return err
 	}
 	sess, err := config.SessionStore.Get(c)
 	if err != nil {
+		span.SetStatus(codes.Error, "Error getting session")
+		span.RecordError(err)
 		return err
 	}
 	userID := sess.Get(UserID2FAKey)
 	if userID == nil {
+		span.SetStatus(codes.Error, "Error getting 2FA Key from session")
 		return fiber.ErrUnauthorized
 	}
 	user, err := config.DatabaseQueries.GetUser(c.Context(), userID.(int64))
 	if err != nil {
+		span.SetStatus(codes.Error, "Error getting user")
+		span.RecordError(err)
 		return err
 	}
 	ok := user.VerifyTOTP(req.Totp)
 	if !ok {
 		return c.JSON(ErrInvalidCredentials)
 	}
-	if err := loginUser(c, &user); err != nil {
+	if err := loginUser(ctx, c, &user); err != nil {
 		return err
 	}
 	sess.Set(UserID2FAKey, nil)

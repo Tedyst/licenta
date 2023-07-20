@@ -21,7 +21,7 @@ import (
 func initTracer() *sdktrace.TracerProvider {
 	var exporter sdktrace.SpanExporter
 	var err error
-	if config.Debug || config.JaegerEndpoint == "" {
+	if config.JaegerEndpoint == "" {
 		exporter, err = stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
 			log.Fatal(err)

@@ -34,3 +34,8 @@ WHERE username = $1 OR email = $1 LIMIT 1;
 UPDATE users SET
     totp_secret = $2
 WHERE id = $1;
+
+-- name: UpdateUserPassword :exec
+UPDATE users SET
+    password = $2
+WHERE id = $1;

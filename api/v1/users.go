@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/tedyst/licenta/config"
 	"github.com/tedyst/licenta/db"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type publicUserAPIResponse struct {
@@ -31,9 +32,15 @@ func HandleGetUsers(c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(c.UserContext(), "HandleGetUsers")
 	defer span.End()
 
+	err := verifyIfAdmin(ctx, c)
+	if err != nil {
+		return err
+	}
+
 	users, err := config.DatabaseQueries.ListUsers(ctx)
 	if err != nil {
-		log.Println(err)
+		span.SetStatus(codes.Error, "Error getting users")
+		span.RecordError(err)
 		return err
 	}
 	span.AddEvent("Creating response")
@@ -57,37 +64,54 @@ func HandleGetUsers(c *fiber.Ctx) error {
 // @Success		200	{object}	publicUserAPIResponse
 // @Router			/api/v1/users [post]
 func HandleCreateUser(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleCreateUser")
+	defer span.End()
+
 	request := userCreateAPIRequest{}
 	err := c.BodyParser(&request)
 	if err != nil {
-		log.Println(err)
+		span.SetStatus(codes.Error, "Error parsing body")
+		span.RecordError(err)
 		return err
 	}
-	user, err := config.DatabaseQueries.CreateUser(c.Context(), db.CreateUserParams{
+	user, err := config.DatabaseQueries.CreateUser(ctx, db.CreateUserParams{
 		Username: request.Username,
 		Email:    request.Email,
 	})
 	if err != nil {
-		log.Println(err)
+		span.SetStatus(codes.Error, "Error creating user")
+		span.RecordError(err)
 		return err
 	}
 
 	err = user.SetPassword(request.Password)
 	if err != nil {
-		log.Println(err)
+		span.SetStatus(codes.Error, "Error setting password")
+		span.RecordError(err)
+		return err
+	}
+
+	err = config.DatabaseQueries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+		ID:       user.ID,
+		Password: user.Password,
+	})
+	if err != nil {
+		span.SetStatus(codes.Error, "Error updating password")
+		span.RecordError(err)
 		return err
 	}
 
 	sess, err := config.SessionStore.Get(c)
 	if err != nil {
-		log.Println(err)
+		span.SetStatus(codes.Error, "Error getting session")
+		span.RecordError(err)
 		return err
 	}
-	sess.Set("user_id", 1)
-	log.Print(sess)
+	sess.Set("user_id", user.ID)
 	err = sess.Save()
 	if err != nil {
-		log.Println(err)
+		span.SetStatus(codes.Error, "Error saving session")
+		span.RecordError(err)
 		return err
 	}
 

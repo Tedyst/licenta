@@ -29,5 +29,8 @@ func InitV1Router(router fiber.Router) error {
 	router.Get("/users", HandleGetUsers)
 	router.Get("/users/:id", HandleGetUser)
 	router.Post("/users", HandleCreateUser)
+
+	router.Post("/login", HandleLoginAPI)
+	router.Post("/logout", HandleLogoutAPI)
 	return nil
 }
