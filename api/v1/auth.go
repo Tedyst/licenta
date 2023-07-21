@@ -91,7 +91,7 @@ func HandleLoginAPI(c *fiber.Ctx) error {
 		span.RecordError(err)
 		return err
 	}
-	return c.JSON(Success)
+	return c.JSON(SuccessResponse)
 }
 
 // @Summary		Logout
@@ -108,7 +108,7 @@ func HandleLogoutAPI(c *fiber.Ctx) error {
 	if err := logoutUser(ctx, c); err != nil {
 		return err
 	}
-	return c.JSON(Success)
+	return c.JSON(SuccessResponse)
 }
 
 type totpAPIRequest struct {
@@ -156,7 +156,7 @@ func HandleTOTPAPI(c *fiber.Ctx) error {
 		return err
 	}
 	session.SaveSession(ctx, c, sess)
-	return c.JSON(Success)
+	return c.JSON(SuccessResponse)
 }
 
 type generateTotpAPIResponse struct {
