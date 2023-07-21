@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tedyst/licenta/config"
+	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/prometheus"
@@ -54,17 +54,13 @@ func initMetric() *sdkmetric.MeterProvider {
 	provider := sdkmetric.NewMeterProvider(sdkmetric.WithReader(exporter))
 	otel.SetMeterProvider(provider)
 
-	go serveMetrics()
-
 	return provider
 }
 
-func serveMetrics() {
-	log.Printf("serving metrics at localhost:2223/metrics")
-	http.Handle("/metrics", promhttp.Handler())
-	err := http.ListenAndServe(":2223", nil)
-	if err != nil {
-		fmt.Printf("error serving http: %v", err)
-		return
-	}
+func registerPrometheus(app *fiber.App) {
+	p := fasthttpadaptor.NewFastHTTPHandler(promhttp.Handler())
+	app.Get("/metrics", func(c *fiber.Ctx) error {
+		p(c.Context())
+		return nil
+	})
 }

@@ -12,8 +12,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/pprof"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/gofiber/fiber/v2/middleware/session"
-	postgres_session "github.com/gofiber/storage/postgres/v2"
 	"github.com/jackc/pgx/v5/pgxpool"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/config"
@@ -68,24 +66,16 @@ func run() error {
 	}
 
 	queries := db.New(pool)
-	sessionStorage := postgres_session.New(postgres_session.Config{
-		DB: pool,
-	})
-	store := session.New(session.Config{
-		Storage:   sessionStorage,
-		KeyLookup: "cookie:session",
-	})
 	config.Debug = os.Getenv("DEBUG") == "true"
 
-	app := fiber.New(fiber.Config{
-		Prefork: !config.Debug,
-	})
+	app := fiber.New()
+
+	registerPrometheus(app)
 
 	app.Use(otelfiber.Middleware())
 
 	config.DatabasePool = pool
 	config.DatabaseQueries = queries
-	config.SessionStore = store
 	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
 
 	app.Use(recover.New())

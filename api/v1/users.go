@@ -4,8 +4,10 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/config"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/middleware/session"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -101,14 +103,14 @@ func HandleCreateUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	sess, err := config.SessionStore.Get(c)
+	sess, err := session.GetSession(ctx, c)
 	if err != nil {
 		span.SetStatus(codes.Error, "Error getting session")
 		span.RecordError(err)
 		return err
 	}
-	sess.Set("user_id", user.ID)
-	err = sess.Save()
+	sess.UserID = pgtype.Int8{Int64: user.ID, Valid: true}
+	err = session.SaveSession(ctx, c, sess)
 	if err != nil {
 		span.SetStatus(codes.Error, "Error saving session")
 		span.RecordError(err)
@@ -131,7 +133,10 @@ func HandleCreateUser(c *fiber.Ctx) error {
 // @Success		200	{object}	publicUserAPIResponse
 // @Router			/api/v1/users/{id} [get]
 func HandleGetUser(c *fiber.Ctx) error {
-	user, err := config.DatabaseQueries.GetUser(c.Context(), 1)
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleGetUser")
+	defer span.End()
+
+	user, err := config.DatabaseQueries.GetUser(ctx, 1)
 	if err != nil {
 		log.Println(err)
 		return err

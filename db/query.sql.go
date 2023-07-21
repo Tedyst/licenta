@@ -8,8 +8,37 @@ package db
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createSession = `-- name: CreateSession :one
+INSERT INTO sessions (
+  id, user_id, totp_key
+) VALUES (
+  $1, $2, $3
+)
+RETURNING id, user_id, totp_key, waiting_2fa, created_at
+`
+
+type CreateSessionParams struct {
+	ID      uuid.UUID
+	UserID  pgtype.Int8
+	TotpKey pgtype.Text
+}
+
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+	row := q.db.QueryRow(ctx, createSession, arg.ID, arg.UserID, arg.TotpKey)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TotpKey,
+		&i.Waiting2fa,
+		&i.CreatedAt,
+	)
+	return i, err
+}
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
@@ -40,6 +69,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const deleteSession = `-- name: DeleteSession :exec
+DELETE FROM sessions
+WHERE id = $1
+`
+
+func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSession, id)
+	return err
+}
+
 const deleteUser = `-- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = $1
@@ -48,6 +87,24 @@ WHERE id = $1
 func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
+}
+
+const getSession = `-- name: GetSession :one
+SELECT id, user_id, totp_key, waiting_2fa, created_at FROM sessions
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (Session, error) {
+	row := q.db.QueryRow(ctx, getSession, id)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.TotpKey,
+		&i.Waiting2fa,
+		&i.CreatedAt,
+	)
+	return i, err
 }
 
 const getUser = `-- name: GetUser :one
@@ -65,6 +122,45 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.Email,
 		&i.Admin,
 		&i.TotpSecret,
+	)
+	return i, err
+}
+
+const getUserBySession = `-- name: GetUserBySession :one
+SELECT users.id, username, password, email, admin, totp_secret, sessions.id, user_id, totp_key, waiting_2fa, created_at FROM users
+INNER JOIN sessions ON sessions.user_id = users.id
+WHERE sessions.id = $1 LIMIT 1
+`
+
+type GetUserBySessionRow struct {
+	ID         int64
+	Username   string
+	Password   string
+	Email      string
+	Admin      bool
+	TotpSecret pgtype.Text
+	ID_2       uuid.UUID
+	UserID     pgtype.Int8
+	TotpKey    pgtype.Text
+	Waiting2fa bool
+	CreatedAt  pgtype.Timestamptz
+}
+
+func (q *Queries) GetUserBySession(ctx context.Context, id uuid.UUID) (GetUserBySessionRow, error) {
+	row := q.db.QueryRow(ctx, getUserBySession, id)
+	var i GetUserBySessionRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.Admin,
+		&i.TotpSecret,
+		&i.ID_2,
+		&i.UserID,
+		&i.TotpKey,
+		&i.Waiting2fa,
+		&i.CreatedAt,
 	)
 	return i, err
 }
@@ -118,6 +214,24 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateSession = `-- name: UpdateSession :exec
+UPDATE sessions SET
+    user_id = $2,
+    totp_key = $3
+WHERE id = $1
+`
+
+type UpdateSessionParams struct {
+	ID      uuid.UUID
+	UserID  pgtype.Int8
+	TotpKey pgtype.Text
+}
+
+func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {
+	_, err := q.db.Exec(ctx, updateSession, arg.ID, arg.UserID, arg.TotpKey)
+	return err
 }
 
 const updateUser = `-- name: UpdateUser :exec

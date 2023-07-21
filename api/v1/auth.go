@@ -2,8 +2,10 @@ package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/config"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/middleware/session"
 	"go.opentelemetry.io/otel/codes"
 )
 
@@ -13,9 +15,10 @@ type loginAPIRequest struct {
 }
 
 const (
-	Success            = "success"
-	RequireTOTP        = "require_totp"
-	InvalidCredentials = "invalid_credentials"
+	Success             = "success"
+	RequireTOTP         = "require_totp"
+	InvalidCredentials  = "invalid_credentials"
+	TOTPSetupNotStarted = "totp_setup_not_started"
 )
 
 type loginAPIResponse struct {
@@ -23,9 +26,10 @@ type loginAPIResponse struct {
 }
 
 var (
-	SuccessResponse       = loginAPIResponse{Status: Success}
-	ErrInvalidCredentials = loginAPIResponse{Status: InvalidCredentials}
-	ErrRequireTOTOP       = loginAPIResponse{Status: RequireTOTP}
+	SuccessResponse        = loginAPIResponse{Status: Success}
+	ErrInvalidCredentials  = loginAPIResponse{Status: InvalidCredentials}
+	ErrRequireTOTOP        = loginAPIResponse{Status: RequireTOTP}
+	ErrTotpSetupNotStarted = loginAPIResponse{Status: TOTPSetupNotStarted}
 )
 
 // @Summary		Login
@@ -63,7 +67,7 @@ func HandleLoginAPI(c *fiber.Ctx) error {
 		return c.JSON(ErrInvalidCredentials)
 	}
 
-	sess, err := config.SessionStore.Get(c)
+	sess, err := session.GetSession(ctx, c)
 	if err != nil {
 		span.SetStatus(codes.Error, "Error getting session")
 		span.RecordError(err)
@@ -72,8 +76,14 @@ func HandleLoginAPI(c *fiber.Ctx) error {
 
 	if user.TotpSecret.Valid {
 		span.AddEvent("TOTP required")
-		sess.Set(UserID2FAKey, user.ID)
-		sess.Save()
+		sess.Waiting2fa = true
+		sess.UserID = pgtype.Int8{Int64: user.ID, Valid: true}
+		err = session.SaveSession(ctx, c, sess)
+		if err != nil {
+			span.SetStatus(codes.Error, "Error saving session")
+			span.RecordError(err)
+			return err
+		}
 		return c.JSON(ErrRequireTOTOP)
 	}
 	if err := loginUser(ctx, c, &user); err != nil {
@@ -81,7 +91,6 @@ func HandleLoginAPI(c *fiber.Ctx) error {
 		span.RecordError(err)
 		return err
 	}
-	sess.Set(UserIDKey, nil)
 	return c.JSON(Success)
 }
 
@@ -124,18 +133,16 @@ func HandleTOTPAPI(c *fiber.Ctx) error {
 		span.RecordError(err)
 		return err
 	}
-	sess, err := config.SessionStore.Get(c)
+	sess, err := session.GetSession(ctx, c)
 	if err != nil {
 		span.SetStatus(codes.Error, "Error getting session")
 		span.RecordError(err)
 		return err
 	}
-	userID := sess.Get(UserID2FAKey)
-	if userID == nil {
-		span.SetStatus(codes.Error, "Error getting 2FA Key from session")
-		return fiber.ErrUnauthorized
+	if !sess.TotpKey.Valid {
+		return c.JSON(ErrInvalidCredentials)
 	}
-	user, err := config.DatabaseQueries.GetUser(c.Context(), userID.(int64))
+	user, err := config.DatabaseQueries.GetUser(ctx, sess.UserID.Int64)
 	if err != nil {
 		span.SetStatus(codes.Error, "Error getting user")
 		span.RecordError(err)
@@ -148,7 +155,7 @@ func HandleTOTPAPI(c *fiber.Ctx) error {
 	if err := loginUser(ctx, c, &user); err != nil {
 		return err
 	}
-	sess.Set(UserID2FAKey, nil)
+	session.SaveSession(ctx, c, sess)
 	return c.JSON(Success)
 }
 
@@ -164,26 +171,94 @@ type generateTotpAPIResponse struct {
 // @Success		200	{object}	generateTotpAPIResponse
 // @Router			/api/v1/generate_totp [post]
 func HandleGenerateTOTP(c *fiber.Ctx) error {
-	sess, err := config.SessionStore.Get(c)
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleGenerateTOTP")
+	defer span.End()
+
+	sess, err := session.GetSession(ctx, c)
 	if err != nil {
+		span.SetStatus(codes.Error, "Error getting session")
+		span.RecordError(err)
 		return err
 	}
-	userID := sess.Get(UserIDKey)
-	if userID == nil {
+	if sess.UserID.Valid == false {
 		return fiber.ErrUnauthorized
 	}
-	user, err := config.DatabaseQueries.GetUser(c.Context(), userID.(int64))
+	user, err := config.DatabaseQueries.GetUser(c.Context(), sess.UserID.Int64)
 	if err != nil {
+		span.SetStatus(codes.Error, "Error getting user")
+		span.RecordError(err)
 		return err
 	}
 	user.GenerateTOTPSecret()
-	if err := config.DatabaseQueries.UpdateUserTOTPSecret(c.Context(), db.UpdateUserTOTPSecretParams{
-		ID:         user.ID,
-		TotpSecret: user.TotpSecret,
-	}); err != nil {
+	sess.TotpKey = pgtype.Text{String: user.TotpSecret.String, Valid: true}
+	err = session.SaveSession(ctx, c, sess)
+	if err != nil {
+		span.SetStatus(codes.Error, "Error saving session")
+		span.RecordError(err)
 		return err
 	}
 	return c.JSON(generateTotpAPIResponse{
 		TotpSecret: user.TotpSecret.String,
 	})
+}
+
+type enableTotpAPIRequest struct {
+	Totp string `json:"totp"`
+}
+
+func HandleEnableTotp(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleEnableTOTP")
+	defer span.End()
+
+	var req enableTotpAPIRequest
+	if err := c.BodyParser(&req); err != nil {
+		span.SetStatus(codes.Error, "Error parsing body")
+		span.RecordError(err)
+		return err
+	}
+
+	sess, err := session.GetSession(ctx, c)
+	if err != nil {
+		span.SetStatus(codes.Error, "Error getting session")
+		span.RecordError(err)
+		return err
+	}
+	if sess.UserID.Valid == false {
+		return fiber.ErrUnauthorized
+	}
+	if sess.TotpKey.Valid == false {
+		return fiber.ErrUnauthorized
+	}
+	user, err := config.DatabaseQueries.GetUser(c.Context(), sess.UserID.Int64)
+	if err != nil {
+		span.SetStatus(codes.Error, "Error getting user")
+		span.RecordError(err)
+		return err
+	}
+	user.TotpSecret = sess.TotpKey
+
+	ok := user.VerifyTOTP(req.Totp)
+	if !ok {
+		return c.JSON(ErrInvalidCredentials)
+	}
+
+	sess.TotpKey = pgtype.Text{Valid: false}
+	err = session.SaveSession(ctx, c, sess)
+	if err != nil {
+		span.SetStatus(codes.Error, "Error saving session")
+		span.RecordError(err)
+		return err
+	}
+
+	err = config.DatabaseQueries.UpdateUserTOTPSecret(ctx, db.UpdateUserTOTPSecretParams{
+		ID:         user.ID,
+		TotpSecret: user.TotpSecret,
+	})
+	if err != nil {
+		span.SetStatus(codes.Error, "Error updating user")
+		span.RecordError(err)
+		return err
+	}
+
+	return c.JSON(SuccessResponse)
 }

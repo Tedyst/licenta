@@ -1,12 +1,5 @@
-CREATE TABLE users (
-  id BIGSERIAL PRIMARY KEY,
-  username TEXT NOT NULL UNIQUE,
-  password TEXT NOT NULL,
-  email TEXT NOT NULL,
-  admin BOOLEAN NOT NULL DEFAULT FALSE,
-  totp_secret TEXT
-);
 
+-- +migrate Up
 CREATE TABLE sessions (
   id UUID PRIMARY KEY,
   user_id BIGINT REFERENCES users(id),
@@ -14,3 +7,6 @@ CREATE TABLE sessions (
   waiting_2fa BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- +migrate Down
+DROP TABLE sessions;

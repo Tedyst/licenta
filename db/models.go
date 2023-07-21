@@ -5,8 +5,17 @@
 package db
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type Session struct {
+	ID         uuid.UUID
+	UserID     pgtype.Int8
+	TotpKey    pgtype.Text
+	Waiting2fa bool
+	CreatedAt  pgtype.Timestamptz
+}
 
 type User struct {
 	ID         int64
