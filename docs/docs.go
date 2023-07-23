@@ -24,9 +24,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/generate_totp": {
+        "/api/v1/enable_totp": {
             "post": {
-                "description": "Generate TOTP",
+                "description": "Enable TOTP",
                 "consumes": [
                     "application/json"
                 ],
@@ -36,12 +36,23 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Generate TOTP",
+                "summary": "Enable TOTP",
+                "parameters": [
+                    {
+                        "description": "User",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.enableTotpAPIRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/v1.generateTotpAPIResponse"
+                            "$ref": "#/definitions/v1.loginAPIResponse"
                         }
                     }
                 }
@@ -133,6 +144,29 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v1.loginAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/totp/setup": {
+            "post": {
+                "description": "Generate TOTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Generate TOTP",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.setupTOTPResponse"
                         }
                     }
                 }
@@ -232,10 +266,10 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "v1.generateTotpAPIResponse": {
+        "v1.enableTotpAPIRequest": {
             "type": "object",
             "properties": {
-                "totp_secret": {
+                "totp": {
                     "type": "string"
                 }
             }
@@ -269,6 +303,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.setupTOTPResponse": {
+            "type": "object",
+            "properties": {
+                "totp_secret": {
                     "type": "string"
                 }
             }

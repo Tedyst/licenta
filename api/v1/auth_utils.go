@@ -50,46 +50,40 @@ func logoutUser(ctx context.Context, c *fiber.Ctx) error {
 	return nil
 }
 
-func verifyIfLoggedIn(ctx context.Context, c *fiber.Ctx) error {
+func verifyIfLoggedIn(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {
 	_, span := config.Tracer.Start(ctx, "verifyIfLoggedIn")
 	defer span.End()
 
-	sess, err := session.GetSession(ctx, c)
+	sess, user, err := session.GetSessionAndUser(ctx, c)
 	if err != nil {
 		span.AddEvent("Error getting session")
 		span.RecordError(err)
-		return err
+		return nil, nil, err
 	}
-	if sess.UserID.Valid == true {
+	if user == nil {
 		span.AddEvent("User not logged in")
-		return fiber.ErrUnauthorized
+		return nil, nil, fiber.ErrUnauthorized
 	}
-	return nil
+	return sess, user, nil
 }
 
-func verifyIfAdmin(ctx context.Context, c *fiber.Ctx) error {
+func verifyIfAdmin(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {
 	ctx, span := config.Tracer.Start(ctx, "verifyIfAdmin")
 	defer span.End()
 
-	sess, err := session.GetSession(ctx, c)
+	sess, user, err := session.GetSessionAndUser(ctx, c)
 	if err != nil {
-		span.SetStatus(codes.Error, "Error getting session")
+		span.AddEvent(err.Error())
 		span.RecordError(err)
-		return err
+		return nil, nil, err
 	}
-	if sess.UserID.Valid == false {
+	if user == nil {
 		span.AddEvent("User not logged in")
-		return fiber.ErrUnauthorized
-	}
-	user, err := config.DatabaseQueries.GetUser(ctx, sess.UserID.Int64)
-	if err != nil {
-		span.SetStatus(codes.Error, "Error getting user")
-		span.RecordError(err)
-		return err
+		return nil, nil, fiber.ErrUnauthorized
 	}
 	if !user.Admin {
 		span.AddEvent("User is not admin")
-		return fiber.ErrForbidden
+		return nil, nil, fiber.ErrForbidden
 	}
-	return nil
+	return sess, user, nil
 }

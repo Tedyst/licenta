@@ -34,7 +34,7 @@ func HandleGetUsers(c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(c.UserContext(), "HandleGetUsers")
 	defer span.End()
 
-	err := verifyIfAdmin(ctx, c)
+	_, _, err := verifyIfAdmin(ctx, c)
 	if err != nil {
 		return err
 	}

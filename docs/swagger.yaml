@@ -1,8 +1,8 @@
 basePath: /
 definitions:
-  v1.generateTotpAPIResponse:
+  v1.enableTotpAPIRequest:
     properties:
-      totp_secret:
+      totp:
         type: string
     type: object
   v1.loginAPIRequest:
@@ -24,6 +24,11 @@ definitions:
       id:
         type: integer
       username:
+        type: string
+    type: object
+  v1.setupTOTPResponse:
+    properties:
+      totp_secret:
         type: string
     type: object
   v1.totpAPIRequest:
@@ -53,19 +58,26 @@ info:
   title: Proiect Licenta
   version: "1.0"
 paths:
-  /api/v1/generate_totp:
+  /api/v1/enable_totp:
     post:
       consumes:
       - application/json
-      description: Generate TOTP
+      description: Enable TOTP
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/v1.enableTotpAPIRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/v1.generateTotpAPIResponse'
-      summary: Generate TOTP
+            $ref: '#/definitions/v1.loginAPIResponse'
+      summary: Enable TOTP
       tags:
       - auth
   /api/v1/login:
@@ -125,6 +137,21 @@ paths:
           schema:
             $ref: '#/definitions/v1.loginAPIResponse'
       summary: Verify TOTP
+      tags:
+      - auth
+  /api/v1/totp/setup:
+    post:
+      consumes:
+      - application/json
+      description: Generate TOTP
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.setupTOTPResponse'
+      summary: Generate TOTP
       tags:
       - auth
   /api/v1/users:

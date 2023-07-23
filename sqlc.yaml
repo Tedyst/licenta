@@ -14,3 +14,7 @@ sql:
           - db_type: "uuid"
             go_type: "github.com/google/uuid.NullUUID"
             nullable: true
+    database: 
+      uri: "postgres://postgres:postgres@localhost:1001/postgres?sslmode=disable"
+    rules:
+      - sqlc/db-prepare

@@ -9,11 +9,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ResetPasswordToken struct {
+	ID        uuid.UUID
+	UserID    pgtype.Int8
+	CreatedAt pgtype.Timestamptz
+}
+
 type Session struct {
 	ID         uuid.UUID
 	UserID     pgtype.Int8
 	TotpKey    pgtype.Text
-	Waiting2fa bool
+	Waiting2fa pgtype.Int8
 	CreatedAt  pgtype.Timestamptz
 }
 

@@ -113,16 +113,3 @@ func (u *User) VerifyTOTP(code string) bool {
 	}
 	return totp.Validate(code, u.TotpSecret.String)
 }
-
-func (u *User) GenerateTOTPSecret() error {
-	secret, err := totp.Generate(totp.GenerateOpts{
-		Issuer:      "licenta",
-		AccountName: u.Username,
-	})
-	if err != nil {
-		return err
-	}
-	u.TotpSecret.Valid = true
-	u.TotpSecret.String = secret.Secret()
-	return nil
-}

@@ -12,6 +12,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createResetPasswordToken = `-- name: CreateResetPasswordToken :one
+INSERT INTO reset_password_tokens (
+  id, user_id
+) VALUES (
+  $1, $2
+)
+RETURNING id, user_id, created_at
+`
+
+type CreateResetPasswordTokenParams struct {
+	ID     uuid.UUID
+	UserID pgtype.Int8
+}
+
+func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (ResetPasswordToken, error) {
+	row := q.db.QueryRow(ctx, createResetPasswordToken, arg.ID, arg.UserID)
+	var i ResetPasswordToken
+	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	return i, err
+}
+
 const createSession = `-- name: CreateSession :one
 INSERT INTO sessions (
   id, user_id, totp_key
@@ -89,6 +110,18 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
+const getResetPasswordToken = `-- name: GetResetPasswordToken :one
+SELECT id, user_id, created_at FROM reset_password_tokens
+WHERE id = $1 LIMIT 1
+`
+
+func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (ResetPasswordToken, error) {
+	row := q.db.QueryRow(ctx, getResetPasswordToken, id)
+	var i ResetPasswordToken
+	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	return i, err
+}
+
 const getSession = `-- name: GetSession :one
 SELECT id, user_id, totp_key, waiting_2fa, created_at FROM sessions
 WHERE id = $1 LIMIT 1
@@ -126,41 +159,32 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 	return i, err
 }
 
-const getUserBySession = `-- name: GetUserBySession :one
-SELECT users.id, username, password, email, admin, totp_secret, sessions.id, user_id, totp_key, waiting_2fa, created_at FROM users
+const getUserAndSessionBySessionID = `-- name: GetUserAndSessionBySessionID :one
+SELECT users.id, users.username, users.password, users.email, users.admin, users.totp_secret, sessions.id, sessions.user_id, sessions.totp_key, sessions.waiting_2fa, sessions.created_at FROM users
 INNER JOIN sessions ON sessions.user_id = users.id
 WHERE sessions.id = $1 LIMIT 1
 `
 
-type GetUserBySessionRow struct {
-	ID         int64
-	Username   string
-	Password   string
-	Email      string
-	Admin      bool
-	TotpSecret pgtype.Text
-	ID_2       uuid.UUID
-	UserID     pgtype.Int8
-	TotpKey    pgtype.Text
-	Waiting2fa bool
-	CreatedAt  pgtype.Timestamptz
+type GetUserAndSessionBySessionIDRow struct {
+	User    User
+	Session Session
 }
 
-func (q *Queries) GetUserBySession(ctx context.Context, id uuid.UUID) (GetUserBySessionRow, error) {
-	row := q.db.QueryRow(ctx, getUserBySession, id)
-	var i GetUserBySessionRow
+func (q *Queries) GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID) (GetUserAndSessionBySessionIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserAndSessionBySessionID, id)
+	var i GetUserAndSessionBySessionIDRow
 	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Password,
-		&i.Email,
-		&i.Admin,
-		&i.TotpSecret,
-		&i.ID_2,
-		&i.UserID,
-		&i.TotpKey,
-		&i.Waiting2fa,
-		&i.CreatedAt,
+		&i.User.ID,
+		&i.User.Username,
+		&i.User.Password,
+		&i.User.Email,
+		&i.User.Admin,
+		&i.User.TotpSecret,
+		&i.Session.ID,
+		&i.Session.UserID,
+		&i.Session.TotpKey,
+		&i.Session.Waiting2fa,
+		&i.Session.CreatedAt,
 	)
 	return i, err
 }
