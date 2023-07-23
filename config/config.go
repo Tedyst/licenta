@@ -12,3 +12,7 @@ var Debug bool
 var Tracer = otel.Tracer("github.com/tedyst/licenta")
 var Meter = otel.Meter("github.com/tedyst/licenta")
 var JaegerEndpoint string
+
+const ResetPasswordTokenValidity = 60 * 60 // 1 hour
+const EmailSender = "no-reply@tedyst.ro"
+const BaseURL = "http://localhost:8080"

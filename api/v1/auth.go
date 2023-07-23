@@ -20,6 +20,7 @@ const (
 	RequireTOTP         = "require_totp"
 	InvalidCredentials  = "invalid_credentials"
 	TOTPSetupNotStarted = "totp_setup_not_started"
+	PasswordRequested   = "password_requested"
 )
 
 type loginAPIResponse struct {
@@ -27,10 +28,11 @@ type loginAPIResponse struct {
 }
 
 var (
-	SuccessResponse        = loginAPIResponse{Status: Success}
-	ErrInvalidCredentials  = loginAPIResponse{Status: InvalidCredentials}
-	ErrRequireTOTOP        = loginAPIResponse{Status: RequireTOTP}
-	ErrTotpSetupNotStarted = loginAPIResponse{Status: TOTPSetupNotStarted}
+	SuccessResponse           = loginAPIResponse{Status: Success}
+	ErrInvalidCredentials     = loginAPIResponse{Status: InvalidCredentials}
+	ErrRequireTOTOP           = loginAPIResponse{Status: RequireTOTP}
+	ErrTotpSetupNotStarted    = loginAPIResponse{Status: TOTPSetupNotStarted}
+	PasswordRequestedResponse = loginAPIResponse{Status: PasswordRequested}
 )
 
 // @Summary		Login
@@ -264,4 +266,71 @@ func HandleEnableTotp(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(SuccessResponse)
+}
+
+type requestResetPasswordAPIRequest struct {
+	Email string `json:"email"`
+}
+
+// @Summary		Request reset password
+// @Description	Request reset password
+// @Tags			auth
+// @Accept			json
+// @Produce		json
+// @Param 			user body requestResetPasswordAPIRequest true "User"
+// @Success		200	{object}	loginAPIResponse
+// @Router			/api/v1/request_reset_password [post]
+func HandleRequestResetPassword(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleRequestResetPassword")
+	defer span.End()
+
+	var req requestResetPasswordAPIRequest
+	if err := c.BodyParser(&req); err != nil {
+		return handleError(c, span, err)
+	}
+
+	status, err := handlers.HandleRequestResetPassword(ctx, req.Email)
+	if err != nil {
+		return handleError(c, span, err)
+	}
+
+	if status == handlers.Success {
+		return c.JSON(PasswordRequestedResponse)
+	}
+
+	return c.JSON(InvalidCredentials)
+}
+
+type resetPasswordAPIRequest struct {
+	Token    string `json:"token"`
+	Password string `json:"password"`
+}
+
+// @Summary		Reset password
+// @Description	Reset password
+// @Tags			auth
+// @Accept			json
+// @Produce		json
+// @Param 			user body resetPasswordAPIRequest true "User"
+// @Success		200	{object}	loginAPIResponse
+// @Router			/api/v1/reset_password [post]
+func HandleResetPassword(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleResetPassword")
+	defer span.End()
+
+	var req resetPasswordAPIRequest
+	if err := c.BodyParser(&req); err != nil {
+		return handleError(c, span, err)
+	}
+
+	status, err := handlers.HandleResetPassword(ctx, req.Token, req.Password)
+	if err != nil {
+		return handleError(c, span, err)
+	}
+
+	if status == handlers.Success {
+		return c.JSON(SuccessResponse)
+	}
+
+	return c.JSON(InvalidCredentials)
 }

@@ -18,7 +18,7 @@ INSERT INTO reset_password_tokens (
 ) VALUES (
   $1, $2
 )
-RETURNING id, user_id, created_at
+RETURNING id, user_id, valid, created_at
 `
 
 type CreateResetPasswordTokenParams struct {
@@ -29,7 +29,12 @@ type CreateResetPasswordTokenParams struct {
 func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (ResetPasswordToken, error) {
 	row := q.db.QueryRow(ctx, createResetPasswordToken, arg.ID, arg.UserID)
 	var i ResetPasswordToken
-	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Valid,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -111,14 +116,19 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getResetPasswordToken = `-- name: GetResetPasswordToken :one
-SELECT id, user_id, created_at FROM reset_password_tokens
+SELECT id, user_id, valid, created_at FROM reset_password_tokens
 WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (ResetPasswordToken, error) {
 	row := q.db.QueryRow(ctx, getResetPasswordToken, id)
 	var i ResetPasswordToken
-	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Valid,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -206,6 +216,17 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string)
 		&i.TotpSecret,
 	)
 	return i, err
+}
+
+const invalidateResetPasswordToken = `-- name: InvalidateResetPasswordToken :exec
+UPDATE reset_password_tokens SET
+    valid = FALSE
+WHERE id = $1
+`
+
+func (q *Queries) InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, invalidateResetPasswordToken, id)
+	return err
 }
 
 const listUsers = `-- name: ListUsers :many

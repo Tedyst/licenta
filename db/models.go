@@ -12,6 +12,7 @@ import (
 type ResetPasswordToken struct {
 	ID        uuid.UUID
 	UserID    pgtype.Int8
+	Valid     bool
 	CreatedAt pgtype.Timestamptz
 }
 

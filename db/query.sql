@@ -78,3 +78,8 @@ RETURNING *;
 -- name: GetResetPasswordToken :one
 SELECT * FROM reset_password_tokens
 WHERE id = $1 LIMIT 1;
+
+-- name: InvalidateResetPasswordToken :exec
+UPDATE reset_password_tokens SET
+    valid = FALSE
+WHERE id = $1;

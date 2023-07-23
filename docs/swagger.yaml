@@ -26,6 +26,18 @@ definitions:
       username:
         type: string
     type: object
+  v1.requestResetPasswordAPIRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  v1.resetPasswordAPIRequest:
+    properties:
+      password:
+        type: string
+      token:
+        type: string
+    type: object
   v1.setupTOTPResponse:
     properties:
       totp_secret:
@@ -115,6 +127,50 @@ paths:
           schema:
             $ref: '#/definitions/v1.loginAPIResponse'
       summary: Logout
+      tags:
+      - auth
+  /api/v1/request_reset_password:
+    post:
+      consumes:
+      - application/json
+      description: Request reset password
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/v1.requestResetPasswordAPIRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.loginAPIResponse'
+      summary: Request reset password
+      tags:
+      - auth
+  /api/v1/reset_password:
+    post:
+      consumes:
+      - application/json
+      description: Reset password
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/v1.resetPasswordAPIRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.loginAPIResponse'
+      summary: Reset password
       tags:
       - auth
   /api/v1/totp:
