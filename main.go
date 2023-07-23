@@ -23,7 +23,6 @@ import (
 
 //go:generate swag init
 //go:generate sqlc generate
-//go:generate go get -u github.com/valyala/quicktemplate/qtc
 //go:generate qtc -dir=templates
 
 // @title			Proiect Licenta
@@ -54,9 +53,6 @@ func run() error {
 		}
 	}()
 
-	if os.Getenv("DATABASE_URL") == "" {
-		log.Fatal("DATABASE_URL is not set")
-	}
 	cfg, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		return err
@@ -68,7 +64,6 @@ func run() error {
 	}
 
 	queries := db.New(pool)
-	config.Debug = os.Getenv("DEBUG") == "true"
 
 	app := fiber.New()
 
@@ -78,7 +73,6 @@ func run() error {
 
 	config.DatabasePool = pool
 	config.DatabaseQueries = queries
-	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
 
 	app.Use(recover.New())
 	if config.Debug {
@@ -109,8 +103,12 @@ func run() error {
 }
 
 func parseConfig() error {
+	if os.Getenv("DATABASE_URL") == "" {
+		log.Fatal("DATABASE_URL is not set")
+	}
 	config.Debug = os.Getenv("DEBUG") == "true"
 	config.JaegerEndpoint = os.Getenv("JAEGER_ENDPOINT")
+	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
 	return nil
 }
 
