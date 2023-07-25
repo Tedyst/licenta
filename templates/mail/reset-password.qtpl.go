@@ -24,7 +24,15 @@ func StreamSendResetPasswordHTML(qw422016 *qt422016.Writer, email string, token 
 //line templates/mail/reset-password.qtpl:2
 	qw422016.N().S(`
 	Someone requested a password reset for your account. If this was you, click the link below to reset your password.
-	{{baseUrl}}/reset-password?token={{token}}.
+	`)
+//line templates/mail/reset-password.qtpl:4
+	qw422016.E().S(baseUrl)
+//line templates/mail/reset-password.qtpl:4
+	qw422016.N().S(`/reset-password?token=`)
+//line templates/mail/reset-password.qtpl:4
+	qw422016.E().S(token)
+//line templates/mail/reset-password.qtpl:4
+	qw422016.N().S(`.
 
 	If you did not request a password reset, please ignore this email.
 	The link will expire in 24 hours.
@@ -63,7 +71,15 @@ func StreamSendResetPasswordText(qw422016 *qt422016.Writer, email string, token 
 //line templates/mail/reset-password.qtpl:10
 	qw422016.N().S(`
 	Someone requested a password reset for your account. If this was you, click the link below to reset your password.
-	{{baseUrl}}/reset-password?token={{token}}.
+	`)
+//line templates/mail/reset-password.qtpl:12
+	qw422016.E().S(baseUrl)
+//line templates/mail/reset-password.qtpl:12
+	qw422016.N().S(`/reset-password?token=`)
+//line templates/mail/reset-password.qtpl:12
+	qw422016.E().S(token)
+//line templates/mail/reset-password.qtpl:12
+	qw422016.N().S(`.
 
 	If you did not request a password reset, please ignore this email.
 	The link will expire in 24 hours.

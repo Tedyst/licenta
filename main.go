@@ -33,7 +33,6 @@ import (
 // @contact.email	fiber@swagger.io
 // @license.name	Apache 2.0
 // @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-// @host			localhost:8080
 // @BasePath		/
 func run() error {
 	err := parseConfig()
@@ -109,6 +108,7 @@ func parseConfig() error {
 	config.Debug = os.Getenv("DEBUG") == "true"
 	config.JaegerEndpoint = os.Getenv("JAEGER_ENDPOINT")
 	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
+	config.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
 	return nil
 }
 

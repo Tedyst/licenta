@@ -14,7 +14,6 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/api/v1/enable_totp": {
@@ -108,7 +107,7 @@
                 }
             }
         },
-        "/api/v1/request_reset_password": {
+        "/api/v1/request-reset-password": {
             "post": {
                 "description": "Request reset password",
                 "consumes": [
@@ -142,7 +141,7 @@
                 }
             }
         },
-        "/api/v1/reset_password": {
+        "/api/v1/reset-password": {
             "post": {
                 "description": "Reset password",
                 "consumes": [

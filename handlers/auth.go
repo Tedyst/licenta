@@ -101,7 +101,7 @@ func HandleResetPassword(ctx context.Context, token string, password string) (in
 	if err != nil || !reset_token.Valid {
 		return InvalidCredentials, err
 	}
-	if reset_token.CreatedAt.Time.Add(config.ResetPasswordTokenValidity).Before(time.Now()) {
+	if reset_token.CreatedAt.Time.Add(config.ResetPasswordTokenValidity * time.Second).Before(time.Now()) {
 		return InvalidCredentials, nil
 	}
 	user, err := config.DatabaseQueries.GetUser(ctx, reset_token.UserID.Int64)
@@ -140,9 +140,10 @@ func HandleRequestResetPassword(ctx context.Context, username string) (int, erro
 	if err != nil {
 		return Error, err
 	}
+	subject := "Reset your Licenta password"
 	html := mail.SendResetPasswordHTML(user.Email, token.String(), config.BaseURL)
 	text := mail.SendResetPasswordText(user.Email, token.String(), config.BaseURL)
-	err = email.SendMultipartEmail(user.Email, html, text)
+	err = email.SendMultipartEmail(user.Email, subject, html, text)
 	if err != nil {
 		return Error, err
 	}

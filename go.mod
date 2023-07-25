@@ -12,6 +12,7 @@ require (
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/pquerna/otp v1.4.0
 	github.com/prometheus/client_golang v1.16.0
+	github.com/sendgrid/sendgrid-go v3.12.0+incompatible
 	github.com/swaggo/swag v1.16.1
 	github.com/valyala/fasthttp v1.48.0
 	github.com/valyala/quicktemplate v1.7.0
@@ -52,6 +53,7 @@ require (
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/sendgrid/rest v2.6.9+incompatible // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

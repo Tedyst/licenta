@@ -115,7 +115,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/request_reset_password": {
+        "/api/v1/request-reset-password": {
             "post": {
                 "description": "Request reset password",
                 "consumes": [
@@ -149,7 +149,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/reset_password": {
+        "/api/v1/reset-password": {
             "post": {
                 "description": "Reset password",
                 "consumes": [
@@ -430,7 +430,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Proiect Licenta",

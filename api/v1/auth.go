@@ -276,7 +276,7 @@ type requestResetPasswordAPIRequest struct {
 // @Produce		json
 // @Param 			user body requestResetPasswordAPIRequest true "User"
 // @Success		200	{object}	loginAPIResponse
-// @Router			/api/v1/request_reset_password [post]
+// @Router			/api/v1/request-reset-password [post]
 func HandleRequestResetPassword(c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(c.UserContext(), "HandleRequestResetPassword")
 	defer span.End()
@@ -310,7 +310,7 @@ type resetPasswordAPIRequest struct {
 // @Produce		json
 // @Param 			user body resetPasswordAPIRequest true "User"
 // @Success		200	{object}	loginAPIResponse
-// @Router			/api/v1/reset_password [post]
+// @Router			/api/v1/reset-password [post]
 func HandleResetPassword(c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(c.UserContext(), "HandleResetPassword")
 	defer span.End()

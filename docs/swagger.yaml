@@ -57,7 +57,6 @@ definitions:
       username:
         type: string
     type: object
-host: localhost:8080
 info:
   contact:
     email: fiber@swagger.io
@@ -129,7 +128,7 @@ paths:
       summary: Logout
       tags:
       - auth
-  /api/v1/request_reset_password:
+  /api/v1/request-reset-password:
     post:
       consumes:
       - application/json
@@ -151,7 +150,7 @@ paths:
       summary: Request reset password
       tags:
       - auth
-  /api/v1/reset_password:
+  /api/v1/reset-password:
     post:
       consumes:
       - application/json

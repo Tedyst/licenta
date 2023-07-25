@@ -32,5 +32,8 @@ func InitV1Router(router fiber.Router) error {
 
 	router.Post("/login", HandleLoginAPI)
 	router.Post("/logout", HandleLogoutAPI)
+
+	router.Post("/reset-password", HandleResetPassword)
+	router.Post("/request-reset-password", HandleRequestResetPassword)
 	return nil
 }

@@ -1,20 +1,10 @@
 package email
 
-import (
-	email_lib "github.com/jordan-wright/email"
-	"github.com/tedyst/licenta/config"
-)
+import "github.com/tedyst/licenta/config"
 
-func SendMultipartEmail(address string, html string, text string) error {
-	mail := email_lib.NewEmail()
-	mail.From = config.EmailSender
-	mail.To = []string{address}
-	mail.HTML = []byte(html)
-	mail.Text = []byte(text)
-	bytes, err := mail.Bytes()
-	if err != nil {
-		return err
+func SendMultipartEmail(address string, subject string, html string, text string) error {
+	if config.Debug {
+		return SendMultipartEmailDebug(address, subject, html, text)
 	}
-	println(string(bytes))
-	return err
+	return SendMultipartEmailSendgrid(address, subject, html, text)
 }

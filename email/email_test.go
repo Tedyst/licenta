@@ -4,6 +4,7 @@ import "testing"
 
 func TestSendMultipartEmail(t *testing.T) {
 	type args struct {
+		subject string
 		address string
 		html    string
 		text    string
@@ -16,6 +17,7 @@ func TestSendMultipartEmail(t *testing.T) {
 		{
 			name: "TestSendMultipartEmail",
 			args: args{
+				subject: "test",
 				address: "test",
 				html:    "test",
 				text:    "test",
@@ -25,7 +27,7 @@ func TestSendMultipartEmail(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := SendMultipartEmail(tt.args.address, tt.args.html, tt.args.text); (err != nil) != tt.wantErr {
+			if err := SendMultipartEmailDebug(tt.args.address, tt.args.subject, tt.args.html, tt.args.text); (err != nil) != tt.wantErr {
 				t.Errorf("SendMultipartEmail() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
