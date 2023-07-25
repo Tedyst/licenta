@@ -228,10 +228,7 @@ func HandleEnableTotp(c *fiber.Ctx) error {
 		span.RecordError(err)
 		return err
 	}
-	if sess.UserID.Valid == false {
-		return fiber.ErrUnauthorized
-	}
-	if sess.TotpKey.Valid == false {
+	if !sess.UserID.Valid || !sess.TotpKey.Valid {
 		return fiber.ErrUnauthorized
 	}
 	user, err := config.DatabaseQueries.GetUser(c.Context(), sess.UserID.Int64)
