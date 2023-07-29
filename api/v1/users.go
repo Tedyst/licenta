@@ -28,7 +28,9 @@ type userCreateAPIRequest struct {
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Success		200	{array}	publicUserAPIResponse
+// @Param 			page query int false "Page" default(1)
+// @Param 			limit query int false "Limit" default(10)
+// @Success		200	{object}	PaginationResponse[[]publicUserAPIResponse]
 // @Router			/api/v1/users [get]
 func HandleGetUsers(c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(c.UserContext(), "HandleGetUsers")
@@ -39,13 +41,22 @@ func HandleGetUsers(c *fiber.Ctx) error {
 		return err
 	}
 
-	users, err := config.DatabaseQueries.ListUsers(ctx)
+	page, limit, err := GetPageAndLimit(c)
 	if err != nil {
-		span.SetStatus(codes.Error, "Error getting users")
-		span.RecordError(err)
-		return err
+		return handleError(c, span, err)
 	}
-	span.AddEvent("Creating response")
+
+	users, err := config.DatabaseQueries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
+		Limit:  limit,
+		Offset: getOffset(page, limit),
+	})
+	if err != nil {
+		return handleError(c, span, err)
+	}
+	count, err := config.DatabaseQueries.CountUsers(ctx)
+	if err != nil {
+		return handleError(c, span, err)
+	}
 	var publicUsers []publicUserAPIResponse
 	for _, user := range users {
 		publicUsers = append(publicUsers, publicUserAPIResponse{
@@ -54,7 +65,7 @@ func HandleGetUsers(c *fiber.Ctx) error {
 			Email:    user.Email,
 		})
 	}
-	return c.JSON(publicUsers)
+	return c.JSON(NewPaginationResponse(publicUsers, int32(count), page, limit))
 }
 
 // @Summary		Create user
@@ -69,8 +80,13 @@ func HandleCreateUser(c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(c.UserContext(), "HandleCreateUser")
 	defer span.End()
 
+	_, _, err := verifyIfAdmin(ctx, c)
+	if err != nil {
+		return err
+	}
+
 	request := userCreateAPIRequest{}
-	err := c.BodyParser(&request)
+	err = c.BodyParser(&request)
 	if err != nil {
 		span.SetStatus(codes.Error, "Error parsing body")
 		span.RecordError(err)

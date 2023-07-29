@@ -1,5 +1,20 @@
 basePath: /
 definitions:
+  v1.PaginationResponse-array_v1_publicUserAPIResponse:
+    properties:
+      current_page:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/v1.publicUserAPIResponse'
+        type: array
+      per_page:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   v1.enableTotpAPIRequest:
     properties:
       totp:
@@ -214,15 +229,24 @@ paths:
       consumes:
       - application/json
       description: Get all users
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Limit
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/v1.publicUserAPIResponse'
-            type: array
+            $ref: '#/definitions/v1.PaginationResponse-array_v1_publicUserAPIResponse'
       summary: Get users
       tags:
       - users

@@ -6,6 +6,14 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM users
 ORDER BY id;
 
+-- name: ListUsersPaginated :many
+SELECT * FROM users
+ORDER BY id
+LIMIT $1 OFFSET $2;
+
+-- name: CountUsers :one
+SELECT COUNT(*) FROM users;
+
 -- name: CreateUser :one
 INSERT INTO users (
   username, password, email

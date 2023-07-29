@@ -253,14 +253,27 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Get users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/v1.publicUserAPIResponse"
-                            }
+                            "$ref": "#/definitions/v1.PaginationResponse-array_v1_publicUserAPIResponse"
                         }
                     }
                 }
@@ -334,6 +347,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "v1.PaginationResponse-array_v1_publicUserAPIResponse": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.publicUserAPIResponse"
+                    }
+                },
+                "per_page": {
+                    "type": "integer"
+                },
+                "total_count": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
         "v1.enableTotpAPIRequest": {
             "type": "object",
             "properties": {
