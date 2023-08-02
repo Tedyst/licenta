@@ -256,9 +256,9 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "default": 1,
+                        "default": 0,
                         "description": "Page",
-                        "name": "page",
+                        "name": "offset",
                         "in": "query"
                     },
                     {

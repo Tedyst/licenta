@@ -28,7 +28,7 @@ type userCreateAPIRequest struct {
 // @Tags			users
 // @Accept			json
 // @Produce		json
-// @Param 			page query int false "Page" default(1)
+// @Param 			offset query int false "Page" default(0)
 // @Param 			limit query int false "Limit" default(10)
 // @Success		200	{object}	PaginationResponse[[]publicUserAPIResponse]
 // @Router			/api/v1/users [get]
@@ -41,14 +41,14 @@ func HandleGetUsers(c *fiber.Ctx) error {
 		return err
 	}
 
-	page, limit, err := GetPageAndLimit(c)
+	offset, limit, err := GetOffsetAndLimit(c)
 	if err != nil {
 		return handleError(c, span, err)
 	}
 
 	users, err := config.DatabaseQueries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
 		Limit:  limit,
-		Offset: getOffset(page, limit),
+		Offset: offset,
 	})
 	if err != nil {
 		return handleError(c, span, err)
@@ -65,7 +65,7 @@ func HandleGetUsers(c *fiber.Ctx) error {
 			Email:    user.Email,
 		})
 	}
-	return c.JSON(NewPaginationResponse(publicUsers, int32(count), page, limit))
+	return c.JSON(NewPaginationResponse(publicUsers, int32(count), offset, limit))
 }
 
 // @Summary		Create user

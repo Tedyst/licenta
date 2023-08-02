@@ -4,6 +4,12 @@ WHERE id = $1 LIMIT 1;
 
 -- name: ListUsers :many
 SELECT * FROM users
+WHERE
+CASE WHEN @username::text = '' THEN TRUE ELSE username = @username::text END
+AND
+CASE WHEN @email::text = '' THEN TRUE ELSE email = @email::text END
+AND
+CASE WHEN @admin::text = '' THEN TRUE ELSE admin = @admin::boolean END
 ORDER BY id;
 
 -- name: ListUsersPaginated :many

@@ -27,13 +27,13 @@ func NewPaginationResponse[T any](data T, totalCount, currentPage, perPage int32
 	}
 }
 
-func GetPageAndLimit(c *fiber.Ctx) (int32, int32, error) {
-	page, err := strconv.Atoi(c.Query("page", "1"))
+func GetOffsetAndLimit(c *fiber.Ctx) (int32, int32, error) {
+	offset, err := strconv.Atoi(c.Query("offset", "1"))
 	if err != nil {
 		return 0, 0, err
 	}
-	if page < 1 {
-		page = 1
+	if offset < 1 {
+		offset = 1
 	}
 	limit, err := strconv.Atoi(c.Query("limit", "0"))
 	if err != nil {
@@ -45,9 +45,5 @@ func GetPageAndLimit(c *fiber.Ctx) (int32, int32, error) {
 	if limit > maxPerPage {
 		limit = maxPerPage
 	}
-	return int32(page), int32(limit), nil
-}
-
-func getOffset(page, limit int32) int32 {
-	return (page - 1) * limit
+	return int32(offset), int32(limit), nil
 }

@@ -242,11 +242,23 @@ func (q *Queries) InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID
 
 const listUsers = `-- name: ListUsers :many
 SELECT id, username, password, email, admin, totp_secret FROM users
+WHERE
+CASE WHEN $1::text = '' THEN TRUE ELSE username = $1::text END
+AND
+CASE WHEN $2::text = '' THEN TRUE ELSE email = $2::text END
+AND
+CASE WHEN $3::text = '' THEN TRUE ELSE admin = $3::boolean END
 ORDER BY id
 `
 
-func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, listUsers)
+type ListUsersParams struct {
+	Username string
+	Email    string
+	Admin    string
+}
+
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsers, arg.Username, arg.Email, arg.Admin)
 	if err != nil {
 		return nil, err
 	}
