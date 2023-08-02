@@ -21,9 +21,9 @@ import (
 	_ "github.com/tedyst/licenta/docs"
 )
 
-//go:generate swag init
-//go:generate sqlc generate
-//go:generate qtc -dir=templates
+//go:generate go run github.com/swaggo/swag/cmd/swag init
+//go:generate go run github.com/sqlc-dev/sqlc/cmd/sqlc generate
+//go:generate go run github.com/valyala/quicktemplate/qtc -dir=templates
 
 // @title			Proiect Licenta
 // @version		1.0
