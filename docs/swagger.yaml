@@ -143,6 +143,21 @@ paths:
       summary: Logout
       tags:
       - auth
+  /api/v1/me:
+    get:
+      consumes:
+      - application/json
+      description: Get information about the logged in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.publicUserAPIResponse'
+      summary: Get information about the logged in user
+      tags:
+      - users
   /api/v1/request-reset-password:
     post:
       consumes:

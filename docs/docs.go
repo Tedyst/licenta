@@ -115,6 +115,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/me": {
+            "get": {
+                "description": "Get information about the logged in user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get information about the logged in user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.publicUserAPIResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/request-reset-password": {
             "post": {
                 "description": "Request reset password",
