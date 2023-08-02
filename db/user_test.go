@@ -8,7 +8,10 @@ import (
 
 func TestUserVerifyPassword(t *testing.T) {
 	user := db.User{}
-	user.SetPassword("test")
+	err := user.SetPassword("test")
+	if err != nil {
+		t.Error(err)
+	}
 	ok, err := user.VerifyPassword("test")
 	if err != nil {
 		t.Error(err)
@@ -20,7 +23,10 @@ func TestUserVerifyPassword(t *testing.T) {
 
 func TestUserWrongPassword(t *testing.T) {
 	user := db.User{}
-	user.SetPassword("test")
+	err := user.SetPassword("test")
+	if err != nil {
+		t.Error(err)
+	}
 	ok, err := user.VerifyPassword("test2")
 	if err != nil {
 		t.Error(err)

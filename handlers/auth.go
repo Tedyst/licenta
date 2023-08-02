@@ -108,7 +108,10 @@ func HandleResetPassword(ctx context.Context, token string, password string) (in
 	if err != nil {
 		return Error, err
 	}
-	user.SetPassword(password)
+	err = user.SetPassword(password)
+	if err != nil {
+		return Error, err
+	}
 	err = config.DatabaseQueries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID:       user.ID,
 		Password: user.Password,

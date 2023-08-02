@@ -163,3 +163,28 @@ func HandleGetUser(c *fiber.Ctx) error {
 		Email:    user.Email,
 	})
 }
+
+// @Summary		Get information about the logged in user
+// @Description	Get information about the logged in user
+// @Tags			users
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	publicUserAPIResponse
+// @Router			/api/v1/me [get]
+func HandleMe(c *fiber.Ctx) error {
+	ctx, span := config.Tracer.Start(c.UserContext(), "HandleMe")
+	defer span.End()
+
+	_, user, err := verifyIfLoggedIn(ctx, c)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		return fiber.ErrUnauthorized
+	}
+	return c.JSON(publicUserAPIResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	})
+}
