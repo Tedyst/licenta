@@ -1,0 +1,329 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Test
+  description: A sample API
+  termsOfService: https://swagger.io/terms/
+  contact:
+    name: Swagger API Team
+    email: apiteam@swagger.io
+    url: https://swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://localhost:5000/api
+paths:
+  /login:
+    post:
+      summary: Logs user into the system
+      tags:
+        - user
+      requestBody:
+        description: The user to login into.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUser'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid username/password supplied/More 2FA Required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /logout:
+    post:
+      summary: Logs out current logged in user session
+      tags:
+        - user
+      responses:
+        default:
+          description: successful operation
+  /register:
+    post:
+      summary: Creates a new user
+      tags:
+        - user
+      requestBody:
+        description: Created user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUser'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid field supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /2fa/totp-first-step:
+    post:
+      summary: First step of the TOTP authentication process
+      tags:
+        - user
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TOTPFirstStep'
+        "400":
+          description: Invalid username/password supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /2fa/totp-second-step:
+    post:
+      summary: Second step of the TOTP authentication process
+      tags:
+        - user
+      requestBody:
+        description: Created user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TOTPSecondStep'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        "400":
+          description: Invalid username/password supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/me:
+    get:
+      summary: Get current logged in user
+      tags:
+        - user
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users:
+    get:
+      summary: Get all users
+      tags:
+        - user
+      parameters:
+        - name: limit
+          in: query
+          description: The number of items to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: The offset of items to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            default: 0
+        - name: username
+          in: query
+          description: The username to filter
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: The email to filter
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedResult"
+                  - type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    LoginUser:
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: The user name for login
+          example: john_doe
+        password:
+          type: string
+          description: The password for login in clear text
+          example: mypassword
+        totpCode:
+          type: string
+          description: The TOTP code
+          example: 123456
+    RegisterUser:
+      required:
+        - username
+        - password
+        - email
+      properties:
+        username:
+          type: string
+          description: The user name for login
+          example: john_doe
+        password:
+          type: string
+          description: The password for login in clear text
+          example: mypassword
+        email:
+          type: string
+          description: The email of the user
+          example:
+    User:
+      required:
+        - id
+        - username
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The user ID
+          example: 1
+        username:
+          type: string
+          description: The user name for login
+          example: john_doe
+        firstName:
+          type: string
+          description: The first name of the user
+          example: John
+        lastName:
+          type: string
+          description: The last name of the user
+          example: Doe
+        email:
+          type: string
+          description: The email of the user
+          example:
+        phone:
+          type: string
+          description: The phone number of the user
+          example:
+    TOTPFirstStep:
+      type: object
+      required:
+        - totp_secret
+      properties:
+        totp_secret:
+          type: string
+          description: The TOTP secret
+          example: ASDASDASDASD
+    TOTPSecondStep:
+      type: object
+      required:
+        - totp_code
+      properties:
+        totp_code:
+          type: string
+          description: The TOTP code
+          example: 123456
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: The success status
+          example: true
+    PaginatedResult:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 1
+        next:
+          oneOf:
+            - type: string
+              format: uri
+            - type: object
+              example: null
+        previous:
+          oneOf:
+            - type: string
+              format: uri
+            - type: object
+              example: null
+          example: null
+        results: 
+          type: array
+          items: {}
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        success:
+          type: boolean
+          description: The success status
+          example: false
+        code:
+          type: integer
+          format: int32
+          description: Error code
+        message:
+          type: string
+          description: Error message

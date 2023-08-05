@@ -1,4 +1,4 @@
-package db
+package models
 
 import (
 	"crypto/rand"
@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
+	db "github.com/tedyst/licenta/db/generated"
 	"golang.org/x/crypto/argon2"
 )
 
@@ -33,7 +34,7 @@ type params struct {
 	keyLength   uint32
 }
 
-func (u *User) SetPassword(password string) error {
+func SetPassword(u db.User, password string) error {
 	salt, err := generateRandomBytes(argon2SaltLength)
 	if err != nil {
 		return err
@@ -47,7 +48,7 @@ func (u *User) SetPassword(password string) error {
 	return nil
 }
 
-func (u *User) VerifyPassword(password string) (bool, error) {
+func VerifyPassword(u db.User, password string) (bool, error) {
 	p, salt, hash, err := decodeHash(u.Password)
 	if err != nil {
 		return false, err
@@ -107,7 +108,7 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-func (u *User) VerifyTOTP(code string) bool {
+func VerifyTOTP(u db.User, code string) bool {
 	if !u.TotpSecret.Valid {
 		return false
 	}

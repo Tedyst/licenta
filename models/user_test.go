@@ -1,14 +1,15 @@
-package db_test
+package models_test
 
 import (
 	"testing"
 
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/models"
 )
 
 func TestUserVerifyPassword(t *testing.T) {
 	user := db.User{}
-	err := user.SetPassword("test")
+	err := models.SetPassword(user, "test")
 	if err != nil {
 		t.Error(err)
 	}
@@ -23,7 +24,7 @@ func TestUserVerifyPassword(t *testing.T) {
 
 func TestUserWrongPassword(t *testing.T) {
 	user := db.User{}
-	err := user.SetPassword("test")
+	err := models.SetPassword(user, "test")
 	if err != nil {
 		t.Error(err)
 	}
@@ -40,7 +41,7 @@ func TestUserVerifyPasswordFromDB(t *testing.T) {
 	user := db.User{
 		Password: "$argon2id$v=19$m=65536,t=3,p=2$GenWczla9FZ9Ub77I1zYXQ$RgiRBtL8oJp7X/gReYHhJcZfvXYKvrv0uV4ZiTVJqo8",
 	}
-	ok, err := user.VerifyPassword("test")
+	ok, err := models.VerifyPassword(user, "test")
 	if err != nil {
 		t.Error(err)
 	}

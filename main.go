@@ -17,23 +17,8 @@ import (
 	"github.com/tedyst/licenta/config"
 	"github.com/tedyst/licenta/db"
 	"go.opentelemetry.io/otel/trace"
-
-	_ "github.com/tedyst/licenta/docs"
 )
 
-//go:generate swag init
-//go:generate sqlc generate
-//go:generate qtc -dir=templates
-
-// @title			Proiect Licenta
-// @version		1.0
-// @description	This is a sample swagger for Fiber
-// @termsOfService	http://swagger.io/terms/
-// @contact.name	API Support
-// @contact.email	fiber@swagger.io
-// @license.name	Apache 2.0
-// @license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-// @BasePath		/
 func run() error {
 	err := parseConfig()
 	if err != nil {

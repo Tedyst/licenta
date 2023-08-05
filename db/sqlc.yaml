@@ -1,12 +1,12 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "db/query.sql"
-    schema: "db/schema.sql"
+    queries: "queries"
+    schema: "schema.sql"
     gen:
       go:
         package: "db"
-        out: "db"
+        out: "generated"
         sql_package: "pgx/v5"
         overrides:
           - db_type: "uuid"
@@ -15,6 +15,6 @@ sql:
             go_type: "github.com/google/uuid.NullUUID"
             nullable: true
     database: 
-      uri: "postgres://postgres:postgres@localhost:1001/postgres?sslmode=disable"
+      uri: "${DATABASE}"
     rules:
       - sqlc/db-prepare
