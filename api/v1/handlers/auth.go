@@ -62,9 +62,9 @@ func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
 	sess.Waiting2fa = sql.NullInt64{}
 	sess.TotpKey = sql.NullString{}
 
-	session.SaveSession(c.UserContext(), c, sess)
+	err = session.SaveSession(c.UserContext(), c, sess)
 
-	return nil
+	return errors.Wrap(err, "PostLogout: error saving session")
 }
 
 func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
@@ -104,9 +104,9 @@ func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
 	sess.Waiting2fa = sql.NullInt64{}
 	sess.TotpKey = sql.NullString{}
 
-	session.SaveSession(c.UserContext(), c, sess)
+	err = session.SaveSession(c.UserContext(), c, sess)
 
-	return nil
+	return errors.Wrap(err, "PostRegister: error saving session")
 }
 
 func (*ServerHandler) Post2faTotpFirstStep(c *fiber.Ctx) error {

@@ -17,6 +17,7 @@ const (
 	UserID2FAKey      = "user_id_totp"
 )
 
+//lint:ignore U1000 Ignore unused function temporarily for debugging
 func verifyIfLoggedIn(c *fiber.Ctx) (*db.Session, *db.User, error) {
 	_, span := config.Tracer.Start(c.UserContext(), "verifyIfLoggedIn")
 	defer span.End()
@@ -42,8 +43,9 @@ func verifyIfLoggedIn(c *fiber.Ctx) (*db.Session, *db.User, error) {
 	return sess, user, nil
 }
 
+//lint:ignore U1000 Ignore unused function temporarily for debugging
 func verifyIfAdmin(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {
-	ctx, span := config.Tracer.Start(ctx, "verifyIfAdmin")
+	_, span := config.Tracer.Start(ctx, "verifyIfAdmin")
 	defer span.End()
 
 	sess, user, err := verifyIfLoggedIn(c)

@@ -3,112 +3,112 @@
 
 // Sends reset password email to the user. The email contains a link to the reset password page. The link contains a token that is valid for 24 hours.
 
-//line templates/mail/reset-password.qtpl:2
+//line mail/reset-password.qtpl:2
 package mail
 
-//line templates/mail/reset-password.qtpl:2
+//line mail/reset-password.qtpl:2
 import (
 	qtio422016 "io"
 
 	qt422016 "github.com/valyala/quicktemplate"
 )
 
-//line templates/mail/reset-password.qtpl:2
+//line mail/reset-password.qtpl:2
 var (
 	_ = qtio422016.Copy
 	_ = qt422016.AcquireByteBuffer
 )
 
-//line templates/mail/reset-password.qtpl:2
+//line mail/reset-password.qtpl:2
 func StreamSendResetPasswordHTML(qw422016 *qt422016.Writer, email string, token string, baseUrl string) {
-//line templates/mail/reset-password.qtpl:2
+//line mail/reset-password.qtpl:2
 	qw422016.N().S(`
 	Someone requested a password reset for your account. If this was you, click the link below to reset your password.
 	`)
-//line templates/mail/reset-password.qtpl:4
+//line mail/reset-password.qtpl:4
 	qw422016.E().S(baseUrl)
-//line templates/mail/reset-password.qtpl:4
+//line mail/reset-password.qtpl:4
 	qw422016.N().S(`/reset-password?token=`)
-//line templates/mail/reset-password.qtpl:4
+//line mail/reset-password.qtpl:4
 	qw422016.E().S(token)
-//line templates/mail/reset-password.qtpl:4
+//line mail/reset-password.qtpl:4
 	qw422016.N().S(`.
 
 	If you did not request a password reset, please ignore this email.
 	The link will expire in 24 hours.
 `)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 }
 
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 func WriteSendResetPasswordHTML(qq422016 qtio422016.Writer, email string, token string, baseUrl string) {
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	StreamSendResetPasswordHTML(qw422016, email, token, baseUrl)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	qt422016.ReleaseWriter(qw422016)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 }
 
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 func SendResetPasswordHTML(email string, token string, baseUrl string) string {
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	qb422016 := qt422016.AcquireByteBuffer()
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	WriteSendResetPasswordHTML(qb422016, email, token, baseUrl)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	qs422016 := string(qb422016.B)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	qt422016.ReleaseByteBuffer(qb422016)
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 	return qs422016
-//line templates/mail/reset-password.qtpl:8
+//line mail/reset-password.qtpl:8
 }
 
-//line templates/mail/reset-password.qtpl:10
+//line mail/reset-password.qtpl:10
 func StreamSendResetPasswordText(qw422016 *qt422016.Writer, email string, token string, baseUrl string) {
-//line templates/mail/reset-password.qtpl:10
+//line mail/reset-password.qtpl:10
 	qw422016.N().S(`
 	Someone requested a password reset for your account. If this was you, click the link below to reset your password.
 	`)
-//line templates/mail/reset-password.qtpl:12
+//line mail/reset-password.qtpl:12
 	qw422016.E().S(baseUrl)
-//line templates/mail/reset-password.qtpl:12
+//line mail/reset-password.qtpl:12
 	qw422016.N().S(`/reset-password?token=`)
-//line templates/mail/reset-password.qtpl:12
+//line mail/reset-password.qtpl:12
 	qw422016.E().S(token)
-//line templates/mail/reset-password.qtpl:12
+//line mail/reset-password.qtpl:12
 	qw422016.N().S(`.
 
 	If you did not request a password reset, please ignore this email.
 	The link will expire in 24 hours.
 `)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 }
 
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 func WriteSendResetPasswordText(qq422016 qtio422016.Writer, email string, token string, baseUrl string) {
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	qw422016 := qt422016.AcquireWriter(qq422016)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	StreamSendResetPasswordText(qw422016, email, token, baseUrl)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	qt422016.ReleaseWriter(qw422016)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 }
 
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 func SendResetPasswordText(email string, token string, baseUrl string) string {
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	qb422016 := qt422016.AcquireByteBuffer()
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	WriteSendResetPasswordText(qb422016, email, token, baseUrl)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	qs422016 := string(qb422016.B)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	qt422016.ReleaseByteBuffer(qb422016)
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 	return qs422016
-//line templates/mail/reset-password.qtpl:16
+//line mail/reset-password.qtpl:16
 }
