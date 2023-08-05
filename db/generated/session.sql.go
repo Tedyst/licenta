@@ -7,9 +7,9 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSession = `-- name: CreateSession :one
@@ -23,11 +23,11 @@ RETURNING id, user_id, totp_key, waiting_2fa, created_at
 
 type CreateSessionParams struct {
 	ID      uuid.UUID
-	UserID  pgtype.Int8
-	TotpKey pgtype.Text
+	UserID  sql.NullInt64
+	TotpKey sql.NullString
 }
 
-func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
+func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error) {
 	row := q.db.QueryRow(ctx, createSession, arg.ID, arg.UserID, arg.TotpKey)
 	var i Session
 	err := row.Scan(
@@ -37,7 +37,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		&i.Waiting2fa,
 		&i.CreatedAt,
 	)
-	return i, err
+	return &i, err
 }
 
 const deleteSession = `-- name: DeleteSession :exec
@@ -55,7 +55,7 @@ SELECT id, user_id, totp_key, waiting_2fa, created_at FROM sessions
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (Session, error) {
+func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*Session, error) {
 	row := q.db.QueryRow(ctx, getSession, id)
 	var i Session
 	err := row.Scan(
@@ -65,7 +65,7 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (Session, error)
 		&i.Waiting2fa,
 		&i.CreatedAt,
 	)
-	return i, err
+	return &i, err
 }
 
 const updateSession = `-- name: UpdateSession :exec
@@ -77,8 +77,8 @@ WHERE id = $1
 
 type UpdateSessionParams struct {
 	ID      uuid.UUID
-	UserID  pgtype.Int8
-	TotpKey pgtype.Text
+	UserID  sql.NullInt64
+	TotpKey sql.NullString
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {

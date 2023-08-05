@@ -7,9 +7,9 @@ package db
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countUsers = `-- name: CountUsers :one
@@ -34,10 +34,10 @@ RETURNING id, user_id, valid, created_at
 
 type CreateResetPasswordTokenParams struct {
 	ID     uuid.UUID
-	UserID pgtype.Int8
+	UserID sql.NullInt64
 }
 
-func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (ResetPasswordToken, error) {
+func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error) {
 	row := q.db.QueryRow(ctx, createResetPasswordToken, arg.ID, arg.UserID)
 	var i ResetPasswordToken
 	err := row.Scan(
@@ -46,7 +46,7 @@ func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetP
 		&i.Valid,
 		&i.CreatedAt,
 	)
-	return i, err
+	return &i, err
 }
 
 const createUser = `-- name: CreateUser :one
@@ -64,7 +64,7 @@ type CreateUserParams struct {
 	Email    string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, error) {
 	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Password, arg.Email)
 	var i User
 	err := row.Scan(
@@ -75,7 +75,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Admin,
 		&i.TotpSecret,
 	)
-	return i, err
+	return &i, err
 }
 
 const deleteUser = `-- name: DeleteUser :exec
@@ -93,7 +93,7 @@ SELECT id, user_id, valid, created_at FROM reset_password_tokens
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (ResetPasswordToken, error) {
+func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error) {
 	row := q.db.QueryRow(ctx, getResetPasswordToken, id)
 	var i ResetPasswordToken
 	err := row.Scan(
@@ -102,7 +102,7 @@ func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (Rese
 		&i.Valid,
 		&i.CreatedAt,
 	)
-	return i, err
+	return &i, err
 }
 
 const getUser = `-- name: GetUser :one
@@ -110,7 +110,7 @@ SELECT id, username, password, email, admin, totp_secret FROM users
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 	row := q.db.QueryRow(ctx, getUser, id)
 	var i User
 	err := row.Scan(
@@ -121,7 +121,7 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.Admin,
 		&i.TotpSecret,
 	)
-	return i, err
+	return &i, err
 }
 
 const getUserAndSessionBySessionID = `-- name: GetUserAndSessionBySessionID :one
@@ -135,7 +135,7 @@ type GetUserAndSessionBySessionIDRow struct {
 	Session Session
 }
 
-func (q *Queries) GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID) (GetUserAndSessionBySessionIDRow, error) {
+func (q *Queries) GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID) (*GetUserAndSessionBySessionIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserAndSessionBySessionID, id)
 	var i GetUserAndSessionBySessionIDRow
 	err := row.Scan(
@@ -151,7 +151,7 @@ func (q *Queries) GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID
 		&i.Session.Waiting2fa,
 		&i.Session.CreatedAt,
 	)
-	return i, err
+	return &i, err
 }
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
@@ -159,7 +159,7 @@ SELECT id, username, password, email, admin, totp_secret FROM users
 WHERE username = $1 OR email = $1 LIMIT 1
 `
 
-func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string) (User, error) {
+func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error) {
 	row := q.db.QueryRow(ctx, getUserByUsernameOrEmail, username)
 	var i User
 	err := row.Scan(
@@ -170,7 +170,7 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string)
 		&i.Admin,
 		&i.TotpSecret,
 	)
-	return i, err
+	return &i, err
 }
 
 const invalidateResetPasswordToken = `-- name: InvalidateResetPasswordToken :exec
@@ -201,13 +201,13 @@ type ListUsersParams struct {
 	Admin    string
 }
 
-func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error) {
+func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, error) {
 	rows, err := q.db.Query(ctx, listUsers, arg.Username, arg.Email, arg.Admin)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []*User
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
@@ -220,7 +220,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 		); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, &i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -239,13 +239,13 @@ type ListUsersPaginatedParams struct {
 	Offset int32
 }
 
-func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]User, error) {
+func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error) {
 	rows, err := q.db.Query(ctx, listUsersPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	var items []*User
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
@@ -258,7 +258,7 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 		); err != nil {
 			return nil, err
 		}
-		items = append(items, i)
+		items = append(items, &i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -318,7 +318,7 @@ WHERE id = $1
 
 type UpdateUserTOTPSecretParams struct {
 	ID         int64
-	TotpSecret pgtype.Text
+	TotpSecret sql.NullString
 }
 
 func (q *Queries) UpdateUserTOTPSecret(ctx context.Context, arg UpdateUserTOTPSecretParams) error {

@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"database/sql"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/config"
 	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/middleware/session"
+	"github.com/tedyst/licenta/models"
 )
 
 func (*ServerHandler) PostLogin(c *fiber.Ctx) error {
@@ -21,7 +23,7 @@ func (*ServerHandler) PostLogin(c *fiber.Ctx) error {
 		return sendError(c, fiber.StatusUnauthorized, "Invalid credentials")
 	}
 
-	ok, err := user.VerifyPassword(body.Password)
+	ok, err := models.VerifyPassword(user, body.Password)
 	if err != nil {
 		return errors.Wrap(err, "Error verifying password")
 	}
@@ -34,13 +36,17 @@ func (*ServerHandler) PostLogin(c *fiber.Ctx) error {
 	if err != nil || sess == nil {
 		return errors.Wrap(err, "Error getting session")
 	}
-	sess.UserID = pgtype.Int8{Int64: user.ID, Valid: true}
-	sess.Waiting2fa = pgtype.Int8{Valid: false}
-	sess.TotpKey = pgtype.Text{Valid: false}
+	sess.UserID = sql.NullInt64{}
+	sess.Waiting2fa = sql.NullInt64{}
+	sess.TotpKey = sql.NullString{}
 
 	session.SaveSession(c.UserContext(), c, sess)
 
-	return nil
+	return c.JSON(generated.User{
+		Id:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	})
 }
 
 func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
@@ -48,9 +54,9 @@ func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
 	if err != nil || sess == nil {
 		return errors.Wrap(err, "Error getting session")
 	}
-	sess.UserID = pgtype.Int8{Valid: false}
-	sess.Waiting2fa = pgtype.Int8{Valid: false}
-	sess.TotpKey = pgtype.Text{Valid: false}
+	sess.UserID = sql.NullInt64{}
+	sess.Waiting2fa = sql.NullInt64{}
+	sess.TotpKey = sql.NullString{}
 
 	session.SaveSession(c.UserContext(), c, sess)
 
@@ -71,7 +77,7 @@ func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
 		return errors.Wrap(err, "Error creating user")
 	}
 
-	err = user.SetPassword(body.Password)
+	err = models.SetPassword(user, body.Password)
 	if err != nil {
 		return errors.Wrap(err, "Error setting password")
 	}
@@ -90,9 +96,9 @@ func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
 		return errors.Wrap(err, "Error getting session")
 	}
 
-	sess.UserID = pgtype.Int8{Int64: user.ID, Valid: true}
-	sess.Waiting2fa = pgtype.Int8{Valid: false}
-	sess.TotpKey = pgtype.Text{Valid: false}
+	sess.UserID = sql.NullInt64{}
+	sess.Waiting2fa = sql.NullInt64{}
+	sess.TotpKey = sql.NullString{}
 
 	session.SaveSession(c.UserContext(), c, sess)
 

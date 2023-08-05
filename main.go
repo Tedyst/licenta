@@ -16,6 +16,7 @@ import (
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/config"
 	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/models"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -78,10 +79,7 @@ func run() error {
 	})
 
 	api_v1 := app.Group("/api/v1")
-	err = v1.InitV1Router(api_v1)
-	if err != nil {
-		return err
-	}
+	v1.RegisterHandlers(api_v1)
 
 	return app.Listen(":5000")
 }
@@ -92,7 +90,7 @@ func parseConfig() error {
 	}
 	config.Debug = os.Getenv("DEBUG") == "true"
 	config.JaegerEndpoint = os.Getenv("JAEGER_ENDPOINT")
-	db.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
+	models.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
 	config.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
 	return nil
 }

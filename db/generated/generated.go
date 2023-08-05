@@ -1,1 +1,1 @@
-package generated
+package db

@@ -25,7 +25,7 @@ func createNewSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
 		HTTPOnly: true,
 		SameSite: "Strict",
 	})
-	return &sess, nil
+	return sess, nil
 }
 
 func GetSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
@@ -46,7 +46,7 @@ func GetSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
 	if err != nil {
 		return createNewSession(ctx, c)
 	}
-	return &sess, nil
+	return sess, nil
 }
 
 func GetSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {

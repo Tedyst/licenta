@@ -5,22 +5,24 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type ResetPasswordToken struct {
 	ID        uuid.UUID
-	UserID    pgtype.Int8
+	UserID    sql.NullInt64
 	Valid     bool
 	CreatedAt pgtype.Timestamptz
 }
 
 type Session struct {
 	ID         uuid.UUID
-	UserID     pgtype.Int8
-	TotpKey    pgtype.Text
-	Waiting2fa pgtype.Int8
+	UserID     sql.NullInt64
+	TotpKey    sql.NullString
+	Waiting2fa sql.NullInt64
 	CreatedAt  pgtype.Timestamptz
 }
 
@@ -30,5 +32,5 @@ type User struct {
 	Password   string
 	Email      string
 	Admin      bool
-	TotpSecret pgtype.Text
+	TotpSecret sql.NullString
 }

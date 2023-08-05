@@ -1,6 +1,10 @@
 package email_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/tedyst/licenta/email"
+)
 
 func TestSendMultipartEmail(t *testing.T) {
 	type args struct {
@@ -27,7 +31,7 @@ func TestSendMultipartEmail(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := SendMultipartEmailDebug(tt.args.address, tt.args.subject, tt.args.html, tt.args.text); (err != nil) != tt.wantErr {
+			if err := email.SendMultipartEmailDebug(tt.args.address, tt.args.subject, tt.args.html, tt.args.text); (err != nil) != tt.wantErr {
 				t.Errorf("SendMultipartEmail() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

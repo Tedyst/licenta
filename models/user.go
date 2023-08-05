@@ -34,7 +34,7 @@ type params struct {
 	keyLength   uint32
 }
 
-func SetPassword(u db.User, password string) error {
+func SetPassword(u *db.User, password string) error {
 	salt, err := generateRandomBytes(argon2SaltLength)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func SetPassword(u db.User, password string) error {
 	return nil
 }
 
-func VerifyPassword(u db.User, password string) (bool, error) {
+func VerifyPassword(u *db.User, password string) (bool, error) {
 	p, salt, hash, err := decodeHash(u.Password)
 	if err != nil {
 		return false, err
@@ -108,7 +108,7 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-func VerifyTOTP(u db.User, code string) bool {
+func VerifyTOTP(u *db.User, code string) bool {
 	if !u.TotpSecret.Valid {
 		return false
 	}
