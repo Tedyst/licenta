@@ -3,7 +3,7 @@ package models_test
 import (
 	"testing"
 
-	"github.com/tedyst/licenta/db"
+	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/models"
 )
 

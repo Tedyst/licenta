@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/tedyst/licenta/db"
+	db "github.com/tedyst/licenta/db/generated"
 	"go.opentelemetry.io/otel"
 )
 

@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/config"
-	"github.com/tedyst/licenta/db"
+	db "github.com/tedyst/licenta/db/generated"
 	"go.opentelemetry.io/otel/trace"
 )
 
