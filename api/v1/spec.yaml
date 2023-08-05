@@ -313,17 +313,13 @@ components:
           items: {}
     Error:
       required:
-        - code
         - message
+        - success
       properties:
         success:
           type: boolean
           description: The success status
           example: false
-        code:
-          type: integer
-          format: int32
-          description: Error code
         message:
           type: string
           description: Error message

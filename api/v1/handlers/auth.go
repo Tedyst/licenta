@@ -15,32 +15,36 @@ import (
 func (*ServerHandler) PostLogin(c *fiber.Ctx) error {
 	var body generated.PostLoginJSONRequestBody
 	if err := c.BodyParser(&body); err != nil {
-		return errors.Wrap(err, "Error parsing body")
+		return err
 	}
 
 	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(c.UserContext(), body.Username)
 	if err != nil {
-		return sendError(c, fiber.StatusUnauthorized, "Invalid credentials")
+		traceError(c, errors.Wrap(err, "PostLogin: error getting user"))
+		return sendError(c, fiber.StatusUnauthorized, InvalidCredentials)
 	}
 
 	ok, err := models.VerifyPassword(user, body.Password)
 	if err != nil {
-		return errors.Wrap(err, "Error verifying password")
+		return errors.Wrapf(err, "PostLogin: error verifying password for user `%s`", body.Username)
 	}
 
 	if !ok {
-		return sendError(c, fiber.StatusUnauthorized, "Invalid credentials")
+		return sendError(c, fiber.StatusUnauthorized, InvalidCredentials)
 	}
 
 	sess, err := getSession(c)
 	if err != nil || sess == nil {
-		return errors.Wrap(err, "Error getting session")
+		return errors.Wrap(err, ErrorGettingSession)
 	}
 	sess.UserID = sql.NullInt64{}
 	sess.Waiting2fa = sql.NullInt64{}
 	sess.TotpKey = sql.NullString{}
 
-	session.SaveSession(c.UserContext(), c, sess)
+	err = session.SaveSession(c.UserContext(), c, sess)
+	if err != nil {
+		return errors.Wrapf(err, "PostLogin: error saving session `%s`", sess.ID)
+	}
 
 	return c.JSON(generated.User{
 		Id:       user.ID,

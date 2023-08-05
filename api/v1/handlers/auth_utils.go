@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/config"
 	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/middleware/session"
@@ -28,12 +29,12 @@ func verifyIfLoggedIn(c *fiber.Ctx) (*db.Session, *db.User, error) {
 
 	sess, user, err := session.GetSessionAndUser(c.UserContext(), c)
 	if err != nil {
-		span.AddEvent("Error getting session")
-		span.RecordError(err)
-		return nil, nil, err
+		newErr := errors.Wrap(err, "verifyIfLoggedIn: error getting session")
+		span.RecordError(newErr)
+		return nil, nil, newErr
 	}
 	if user == nil {
-		span.AddEvent("User not logged in")
+		span.AddEvent("User is not logged in")
 		return nil, nil, fiber.ErrUnauthorized
 	}
 	c.Locals(ContextUserKey, user)
