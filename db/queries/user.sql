@@ -54,11 +54,6 @@ UPDATE users SET
     password = $2
 WHERE id = $1;
 
--- name: GetUserAndSessionBySessionID :one
-SELECT sqlc.embed(users), sqlc.embed(sessions) FROM users
-INNER JOIN sessions ON sessions.user_id = users.id
-WHERE sessions.id = $1 LIMIT 1;
-
 -- name: CreateResetPasswordToken :one
 INSERT INTO reset_password_tokens (
   id, user_id

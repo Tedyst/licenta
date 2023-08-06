@@ -88,7 +88,6 @@ func parseConfig() error {
 	if os.Getenv("DATABASE_URL") == "" {
 		log.Fatal("DATABASE_URL is not set")
 	}
-	config.Debug = os.Getenv("DEBUG") == "true"
 	config.JaegerEndpoint = os.Getenv("JAEGER_ENDPOINT")
 	models.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
 	config.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")

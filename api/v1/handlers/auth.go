@@ -12,49 +12,73 @@ import (
 	"github.com/tedyst/licenta/models"
 )
 
-func (*ServerHandler) PostLogin(c *fiber.Ctx) error {
-	var body generated.PostLoginJSONRequestBody
-	if err := c.BodyParser(&body); err != nil {
-		return err
+func (*ServerHandler) PostLogin(c *fiber.Ctx, request generated.PostLoginRequestObject) (generated.PostLoginResponseObject, error) {
+	err := valid.Struct(request)
+	if err != nil {
+		return generated.PostLogin400JSONResponse{
+			Message: err.Error(),
+			Success: false,
+		}, nil
 	}
 
-	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(c.UserContext(), body.Username)
+	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(c.UserContext(), request.Body.Username)
 	if err != nil {
 		traceError(c, errors.Wrap(err, "PostLogin: error getting user"))
-		return sendError(c, fiber.StatusUnauthorized, InvalidCredentials)
+		return generated.PostLogin401JSONResponse{
+			Message: InvalidCredentials,
+			Success: false,
+		}, nil
 	}
 
-	ok, err := models.VerifyPassword(user, body.Password)
+	ok, err := models.VerifyPassword(user, request.Body.Password)
 	if err != nil {
-		return errors.Wrapf(err, "PostLogin: error verifying password for user `%s`", body.Username)
+		return nil, errors.Wrapf(err, "PostLogin: error verifying password for user `%s`", request.Body.Username)
 	}
 
 	if !ok {
-		return sendError(c, fiber.StatusUnauthorized, InvalidCredentials)
+		return generated.PostLogin401JSONResponse{
+			Message: InvalidCredentials,
+			Success: false,
+		}, nil
 	}
 
-	sess, err := getSession(c)
+	sess, err := session.GetSession(c.UserContext(), c)
 	if err != nil || sess == nil {
-		return errors.Wrap(err, ErrorGettingSession)
+		return nil, errors.Wrap(err, "PostLogin: error getting session")
 	}
-	sess.UserID = sql.NullInt64{}
-	sess.Waiting2fa = sql.NullInt64{}
+
+	if user.TotpSecret.Valid {
+		sess.Waiting2fa = sql.NullInt64{
+			Int64: user.ID,
+			Valid: true,
+		}
+	} else {
+		sess.UserID = sql.NullInt64{
+			Int64: user.ID,
+			Valid: true,
+		}
+		sess.Waiting2fa = sql.NullInt64{}
+	}
 	sess.TotpKey = sql.NullString{}
 
 	err = session.SaveSession(c.UserContext(), c, sess)
 	if err != nil {
-		return errors.Wrapf(err, "PostLogin: error saving session `%s`", sess.ID)
+		return nil, errors.Wrapf(err, "PostLogin: error saving session `%s`", sess.ID)
 	}
 
-	return c.JSON(generated.User{
-		Id:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
-	})
+	var SuccessTrue = true
+	return generated.PostLogin200JSONResponse{
+		Success: &SuccessTrue,
+		User: &generated.User{
+			Id:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		},
+	}, nil
 }
 
 func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
-	sess, err := getSession(c)
+	sess, err := session.GetSession(c.UserContext(), c)
 	if err != nil || sess == nil {
 		return errors.Wrap(err, "Error getting session")
 	}
@@ -62,7 +86,7 @@ func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
 	sess.Waiting2fa = sql.NullInt64{}
 	sess.TotpKey = sql.NullString{}
 
-	err = session.SaveSession(c.UserContext(), c, sess)
+	err = session.ClearSession(c.UserContext(), c)
 
 	return errors.Wrap(err, "PostLogout: error saving session")
 }
@@ -70,7 +94,12 @@ func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
 func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
 	var body generated.PostRegisterJSONRequestBody
 	if err := c.BodyParser(&body); err != nil {
-		return errors.Wrap(err, "Error parsing body")
+		return sendError(c, fiber.StatusBadRequest, err.Error())
+	}
+
+	err := valid.Struct(body)
+	if err != nil {
+		return sendError(c, fiber.StatusBadRequest, err.Error())
 	}
 
 	user, err := config.DatabaseQueries.CreateUser(c.UserContext(), db.CreateUserParams{
@@ -78,7 +107,7 @@ func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
 		Email:    body.Email,
 	})
 	if err != nil {
-		return errors.Wrap(err, "Error creating user")
+		return sendError(c, fiber.StatusBadRequest, "Username or email already exists")
 	}
 
 	err = models.SetPassword(user, body.Password)

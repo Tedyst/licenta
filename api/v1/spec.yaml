@@ -32,9 +32,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
         "400":
-          description: Invalid username/password supplied/More 2FA Required
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -207,14 +218,20 @@ components:
           type: string
           description: The user name for login
           example: john_doe
+          x-oapi-codegen-extra-tags:
+            validate: "alphanum,min=3,max=20"
         password:
           type: string
           description: The password for login in clear text
           example: mypassword
+          x-oapi-codegen-extra-tags:
+            validate: "min=8,alphanum"
         totpCode:
           type: string
           description: The TOTP code
           example: 123456
+          x-oapi-codegen-extra-tags:
+            validate: "omitempty,numeric,len=6"
     RegisterUser:
       required:
         - username
@@ -225,14 +242,20 @@ components:
           type: string
           description: The user name for login
           example: john_doe
+          x-oapi-codegen-extra-tags:
+            validate: "alphanum,min=3,max=20"
         password:
           type: string
           description: The password for login in clear text
           example: mypassword
+          x-oapi-codegen-extra-tags:
+            validate: "min=8,alphanum"
         email:
           type: string
           description: The email of the user
-          example:
+          example: user@example.com
+          x-oapi-codegen-extra-tags:
+            validate: "email"
     User:
       required:
         - id

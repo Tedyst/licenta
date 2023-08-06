@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/config"
@@ -16,6 +17,8 @@ const (
 	UserIDKey         = "user_id"
 	UserID2FAKey      = "user_id_totp"
 )
+
+var valid = validator.New()
 
 //lint:ignore U1000 Ignore unused function temporarily for debugging
 func verifyIfLoggedIn(c *fiber.Ctx) (*db.Session, *db.User, error) {
@@ -57,23 +60,4 @@ func verifyIfAdmin(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, er
 		return nil, nil, fiber.ErrForbidden
 	}
 	return sess, user, nil
-}
-
-func getSession(c *fiber.Ctx) (*db.Session, error) {
-	_, span := config.Tracer.Start(c.UserContext(), "getSession")
-	defer span.End()
-
-	sess := c.Locals(ContextSessionKey).(*db.Session)
-	if sess != nil {
-		return sess, nil
-	}
-
-	sess, err := session.GetSession(c.UserContext(), c)
-	if err != nil {
-		span.AddEvent("Error getting session")
-		span.RecordError(err)
-		return nil, err
-	}
-	c.Locals(ContextSessionKey, sess)
-	return sess, nil
 }

@@ -7,11 +7,7 @@ import (
 	"github.com/tedyst/licenta/api/v1/middleware/errorhandler"
 )
 
-func GetServerHandler() generated.ServerInterface {
-	return &handlers.ServerHandler{}
-}
-
 func RegisterHandlers(router fiber.Router) {
 	router.Use(errorhandler.New())
-	generated.RegisterHandlers(router, GetServerHandler())
+	generated.RegisterHandlers(router, generated.NewStrictHandler(&handlers.ServerHandler{}, nil))
 }
