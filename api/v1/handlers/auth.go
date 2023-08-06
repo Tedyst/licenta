@@ -1,18 +1,20 @@
 package handlers
 
 import (
-	"database/sql"
+	"context"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/config"
 	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/middleware/session"
 	"github.com/tedyst/licenta/models"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func (*ServerHandler) PostLogin(c *fiber.Ctx, request generated.PostLoginRequestObject) (generated.PostLoginResponseObject, error) {
+func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLoginRequestObject) (generated.PostLoginResponseObject, error) {
+	span := trace.SpanFromContext(ctx)
+
 	err := valid.Struct(request)
 	if err != nil {
 		return generated.PostLogin400JSONResponse{
@@ -21,19 +23,21 @@ func (*ServerHandler) PostLogin(c *fiber.Ctx, request generated.PostLoginRequest
 		}, nil
 	}
 
-	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(c.UserContext(), request.Body.Username)
+	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(ctx, request.Body.Username)
 	if err != nil {
-		traceError(c, errors.Wrap(err, "PostLogin: error getting user"))
+		traceError(ctx, errors.Wrap(err, "PostLogin: error getting user"))
 		return generated.PostLogin401JSONResponse{
 			Message: InvalidCredentials,
 			Success: false,
 		}, nil
 	}
 
-	ok, err := models.VerifyPassword(user, request.Body.Password)
+	span.AddEvent("Start verifying password")
+	ok, err := models.VerifyPassword(ctx, user, request.Body.Password)
 	if err != nil {
 		return nil, errors.Wrapf(err, "PostLogin: error verifying password for user `%s`", request.Body.Username)
 	}
+	span.AddEvent("Finished verifying password")
 
 	if !ok {
 		return generated.PostLogin401JSONResponse{
@@ -42,29 +46,7 @@ func (*ServerHandler) PostLogin(c *fiber.Ctx, request generated.PostLoginRequest
 		}, nil
 	}
 
-	sess, err := session.GetSession(c.UserContext(), c)
-	if err != nil || sess == nil {
-		return nil, errors.Wrap(err, "PostLogin: error getting session")
-	}
-
-	if user.TotpSecret.Valid {
-		sess.Waiting2fa = sql.NullInt64{
-			Int64: user.ID,
-			Valid: true,
-		}
-	} else {
-		sess.UserID = sql.NullInt64{
-			Int64: user.ID,
-			Valid: true,
-		}
-		sess.Waiting2fa = sql.NullInt64{}
-	}
-	sess.TotpKey = sql.NullString{}
-
-	err = session.SaveSession(c.UserContext(), c, sess)
-	if err != nil {
-		return nil, errors.Wrapf(err, "PostLogin: error saving session `%s`", sess.ID)
-	}
+	session.SetUser(ctx, user)
 
 	var SuccessTrue = true
 	return generated.PostLogin200JSONResponse{
@@ -77,21 +59,17 @@ func (*ServerHandler) PostLogin(c *fiber.Ctx, request generated.PostLoginRequest
 	}, nil
 }
 
-func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
-	sess, err := session.GetSession(c.UserContext(), c)
-	if err != nil || sess == nil {
-		return errors.Wrap(err, "Error getting session")
-	}
-	sess.UserID = sql.NullInt64{}
-	sess.Waiting2fa = sql.NullInt64{}
-	sess.TotpKey = sql.NullString{}
+func (*ServerHandler) PostLogout(ctx context.Context, _ generated.PostLogoutRequestObject) (generated.PostLogoutResponseObject, error) {
+	session.ClearSession(ctx)
 
-	err = session.ClearSession(c.UserContext(), c)
+	var SuccessTrue = true
+	return generated.PostLogout200JSONResponse{
+		Success: &SuccessTrue,
+	}, nil
 
-	return errors.Wrap(err, "PostLogout: error saving session")
 }
 
-func PostRegister(c *fiber.Ctx, request generated.PostRegisterRequestObject) (generated.PostRegisterResponseObject, error) {
+func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRegisterRequestObject) (generated.PostRegisterResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
 		return generated.PostRegister400JSONResponse{
@@ -100,7 +78,7 @@ func PostRegister(c *fiber.Ctx, request generated.PostRegisterRequestObject) (ge
 		}, nil
 	}
 
-	user, err := config.DatabaseQueries.CreateUser(c.UserContext(), db.CreateUserParams{
+	user, err := config.DatabaseQueries.CreateUser(ctx, db.CreateUserParams{
 		Username: request.Body.Username,
 		Email:    request.Body.Email,
 	})
@@ -108,12 +86,12 @@ func PostRegister(c *fiber.Ctx, request generated.PostRegisterRequestObject) (ge
 		return nil, errors.Wrap(err, "PostRegister: error creating user")
 	}
 
-	err = models.SetPassword(user, request.Body.Password)
+	err = models.SetPassword(ctx, user, request.Body.Password)
 	if err != nil {
 		return nil, errors.Wrap(err, "PostRegister: error setting password")
 	}
 
-	err = config.DatabaseQueries.UpdateUserPassword(c.UserContext(), db.UpdateUserPasswordParams{
+	err = config.DatabaseQueries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID:       user.ID,
 		Password: user.Password,
 	})
@@ -122,19 +100,22 @@ func PostRegister(c *fiber.Ctx, request generated.PostRegisterRequestObject) (ge
 		return nil, errors.Wrap(err, "PostRegister: error updating user password")
 	}
 
-	sess, err := session.GetSession(c.UserContext(), c)
-	if err != nil || sess == nil {
-		return nil, errors.Wrap(err, "PostRegister: error getting session")
-	}
+	// sess, err := session.GetSession(c.UserContext(), c)
+	// if err != nil || sess == nil {
+	// 	return nil, errors.Wrap(err, "PostRegister: error getting session")
+	// }
 
-	sess.UserID = sql.NullInt64{
-		Int64: user.ID,
-		Valid: true,
-	}
-	sess.Waiting2fa = sql.NullInt64{}
-	sess.TotpKey = sql.NullString{}
+	// sess.UserID = sql.NullInt64{
+	// 	Int64: user.ID,
+	// 	Valid: true,
+	// }
+	// sess.Waiting2fa = sql.NullInt64{}
+	// sess.TotpKey = sql.NullString{}
 
-	err = session.SaveSession(c.UserContext(), c, sess)
+	// err = session.SaveSession(c.UserContext(), c, sess)
+	// if err != nil {
+	// 	return nil, errors.Wrapf(err, "PostRegister: error saving session `%s`", sess.ID)
+	// }
 
 	var SuccessTrue = true
 	return generated.PostRegister200JSONResponse{
@@ -147,10 +128,10 @@ func PostRegister(c *fiber.Ctx, request generated.PostRegisterRequestObject) (ge
 	}, nil
 }
 
-func (*ServerHandler) Post2faTotpFirstStep(c *fiber.Ctx, request generated.Post2faTotpFirstStepRequestObject) (generated.Post2faTotpFirstStepResponseObject, error) {
+func (*ServerHandler) Post2faTotpFirstStep(ctx context.Context, request generated.Post2faTotpFirstStepRequestObject) (generated.Post2faTotpFirstStepResponseObject, error) {
 	return nil, nil
 }
 
-func (*ServerHandler) Post2faTotpSecondStep(c *fiber.Ctx, request generated.Post2faTotpSecondStepRequestObject) (generated.Post2faTotpSecondStepResponseObject, error) {
+func (*ServerHandler) Post2faTotpSecondStep(ctx context.Context, request generated.Post2faTotpSecondStepRequestObject) (generated.Post2faTotpSecondStepResponseObject, error) {
 	return nil, nil
 }

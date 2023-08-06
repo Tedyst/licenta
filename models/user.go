@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
@@ -9,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/pquerna/otp/totp"
+	"github.com/tedyst/licenta/config"
 	db "github.com/tedyst/licenta/db/generated"
 	"golang.org/x/crypto/argon2"
 )
@@ -34,7 +36,10 @@ type params struct {
 	keyLength   uint32
 }
 
-func SetPassword(u *db.User, password string) error {
+func SetPassword(ctx context.Context, u *db.User, password string) error {
+	_, span := config.Tracer.Start(ctx, "SetPassword")
+	defer span.End()
+
 	salt, err := generateRandomBytes(argon2SaltLength)
 	if err != nil {
 		return err
@@ -48,7 +53,10 @@ func SetPassword(u *db.User, password string) error {
 	return nil
 }
 
-func VerifyPassword(u *db.User, password string) (bool, error) {
+func VerifyPassword(ctx context.Context, u *db.User, password string) (bool, error) {
+	_, span := config.Tracer.Start(ctx, "VerifyPassword")
+	defer span.End()
+
 	p, salt, hash, err := decodeHash(u.Password)
 	if err != nil {
 		return false, err
@@ -108,7 +116,10 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-func VerifyTOTP(u *db.User, code string) bool {
+func VerifyTOTP(ctx context.Context, u *db.User, code string) bool {
+	_, span := config.Tracer.Start(ctx, "VerifyTOTP")
+	defer span.End()
+
 	if !u.TotpSecret.Valid {
 		return false
 	}

@@ -19,6 +19,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+const (
+	SessionAuthScopes = "sessionAuth.Scopes"
+)
+
 // Error defines model for Error.
 type Error struct {
 	// Message Error message
@@ -67,6 +71,36 @@ type PaginatedResultPrevious1 = map[string]interface{}
 
 // PaginatedResult_Previous defines model for PaginatedResult.Previous.
 type PaginatedResult_Previous struct {
+	union json.RawMessage
+}
+
+// PaginatedUsers defines model for PaginatedUsers.
+type PaginatedUsers struct {
+	Count    *int                     `json:"count,omitempty"`
+	Next     *PaginatedUsers_Next     `json:"next,omitempty"`
+	Previous *PaginatedUsers_Previous `json:"previous,omitempty"`
+	Results  *[]User                  `json:"results,omitempty"`
+}
+
+// PaginatedUsersNext0 defines model for .
+type PaginatedUsersNext0 = string
+
+// PaginatedUsersNext1 defines model for .
+type PaginatedUsersNext1 = map[string]interface{}
+
+// PaginatedUsers_Next defines model for PaginatedUsers.Next.
+type PaginatedUsers_Next struct {
+	union json.RawMessage
+}
+
+// PaginatedUsersPrevious0 defines model for .
+type PaginatedUsersPrevious0 = string
+
+// PaginatedUsersPrevious1 defines model for .
+type PaginatedUsersPrevious1 = map[string]interface{}
+
+// PaginatedUsers_Previous defines model for PaginatedUsers.Previous.
+type PaginatedUsers_Previous struct {
 	union json.RawMessage
 }
 
@@ -269,6 +303,130 @@ func (t *PaginatedResult_Previous) UnmarshalJSON(b []byte) error {
 	return err
 }
 
+// AsPaginatedUsersNext0 returns the union data inside the PaginatedUsers_Next as a PaginatedUsersNext0
+func (t PaginatedUsers_Next) AsPaginatedUsersNext0() (PaginatedUsersNext0, error) {
+	var body PaginatedUsersNext0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPaginatedUsersNext0 overwrites any union data inside the PaginatedUsers_Next as the provided PaginatedUsersNext0
+func (t *PaginatedUsers_Next) FromPaginatedUsersNext0(v PaginatedUsersNext0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePaginatedUsersNext0 performs a merge with any union data inside the PaginatedUsers_Next, using the provided PaginatedUsersNext0
+func (t *PaginatedUsers_Next) MergePaginatedUsersNext0(v PaginatedUsersNext0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JsonMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPaginatedUsersNext1 returns the union data inside the PaginatedUsers_Next as a PaginatedUsersNext1
+func (t PaginatedUsers_Next) AsPaginatedUsersNext1() (PaginatedUsersNext1, error) {
+	var body PaginatedUsersNext1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPaginatedUsersNext1 overwrites any union data inside the PaginatedUsers_Next as the provided PaginatedUsersNext1
+func (t *PaginatedUsers_Next) FromPaginatedUsersNext1(v PaginatedUsersNext1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePaginatedUsersNext1 performs a merge with any union data inside the PaginatedUsers_Next, using the provided PaginatedUsersNext1
+func (t *PaginatedUsers_Next) MergePaginatedUsersNext1(v PaginatedUsersNext1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JsonMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PaginatedUsers_Next) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PaginatedUsers_Next) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPaginatedUsersPrevious0 returns the union data inside the PaginatedUsers_Previous as a PaginatedUsersPrevious0
+func (t PaginatedUsers_Previous) AsPaginatedUsersPrevious0() (PaginatedUsersPrevious0, error) {
+	var body PaginatedUsersPrevious0
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPaginatedUsersPrevious0 overwrites any union data inside the PaginatedUsers_Previous as the provided PaginatedUsersPrevious0
+func (t *PaginatedUsers_Previous) FromPaginatedUsersPrevious0(v PaginatedUsersPrevious0) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePaginatedUsersPrevious0 performs a merge with any union data inside the PaginatedUsers_Previous, using the provided PaginatedUsersPrevious0
+func (t *PaginatedUsers_Previous) MergePaginatedUsersPrevious0(v PaginatedUsersPrevious0) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JsonMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPaginatedUsersPrevious1 returns the union data inside the PaginatedUsers_Previous as a PaginatedUsersPrevious1
+func (t PaginatedUsers_Previous) AsPaginatedUsersPrevious1() (PaginatedUsersPrevious1, error) {
+	var body PaginatedUsersPrevious1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPaginatedUsersPrevious1 overwrites any union data inside the PaginatedUsers_Previous as the provided PaginatedUsersPrevious1
+func (t *PaginatedUsers_Previous) FromPaginatedUsersPrevious1(v PaginatedUsersPrevious1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePaginatedUsersPrevious1 performs a merge with any union data inside the PaginatedUsers_Previous, using the provided PaginatedUsersPrevious1
+func (t *PaginatedUsers_Previous) MergePaginatedUsersPrevious1(v PaginatedUsersPrevious1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JsonMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PaginatedUsers_Previous) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PaginatedUsers_Previous) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// First step of the TOTP authentication process
@@ -304,11 +462,15 @@ type MiddlewareFunc fiber.Handler
 // Post2faTotpFirstStep operation middleware
 func (siw *ServerInterfaceWrapper) Post2faTotpFirstStep(c *fiber.Ctx) error {
 
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
+
 	return siw.Handler.Post2faTotpFirstStep(c)
 }
 
 // Post2faTotpSecondStep operation middleware
 func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(c *fiber.Ctx) error {
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	return siw.Handler.Post2faTotpSecondStep(c)
 }
@@ -316,17 +478,23 @@ func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(c *fiber.Ctx) error {
 // PostLogin operation middleware
 func (siw *ServerInterfaceWrapper) PostLogin(c *fiber.Ctx) error {
 
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
+
 	return siw.Handler.PostLogin(c)
 }
 
 // PostLogout operation middleware
 func (siw *ServerInterfaceWrapper) PostLogout(c *fiber.Ctx) error {
 
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
+
 	return siw.Handler.PostLogout(c)
 }
 
 // PostRegister operation middleware
 func (siw *ServerInterfaceWrapper) PostRegister(c *fiber.Ctx) error {
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	return siw.Handler.PostRegister(c)
 }
@@ -335,6 +503,8 @@ func (siw *ServerInterfaceWrapper) PostRegister(c *fiber.Ctx) error {
 func (siw *ServerInterfaceWrapper) GetUsers(c *fiber.Ctx) error {
 
 	var err error
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersParams
@@ -378,6 +548,8 @@ func (siw *ServerInterfaceWrapper) GetUsers(c *fiber.Ctx) error {
 
 // GetUsersMe operation middleware
 func (siw *ServerInterfaceWrapper) GetUsersMe(c *fiber.Ctx) error {
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	return siw.Handler.GetUsersMe(c)
 }
@@ -515,13 +687,13 @@ type PostLogoutResponseObject interface {
 	VisitPostLogoutResponse(ctx *fiber.Ctx) error
 }
 
-type PostLogoutdefaultResponse struct {
-	StatusCode int
-}
+type PostLogout200JSONResponse Success
 
-func (response PostLogoutdefaultResponse) VisitPostLogoutResponse(ctx *fiber.Ctx) error {
-	ctx.Status(response.StatusCode)
-	return nil
+func (response PostLogout200JSONResponse) VisitPostLogoutResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(200)
+
+	return ctx.JSON(&response)
 }
 
 type PostRegisterRequestObject struct {
@@ -570,12 +742,7 @@ type GetUsersResponseObject interface {
 	VisitGetUsersResponse(ctx *fiber.Ctx) error
 }
 
-type GetUsers200JSONResponse struct {
-	Count    *int                              `json:"count,omitempty"`
-	Next     *GetUsers200JSONResponse_Next     `json:"next,omitempty"`
-	Previous *GetUsers200JSONResponse_Previous `json:"previous,omitempty"`
-	Results  *[]User                           `json:"results,omitempty"`
-}
+type GetUsers200JSONResponse PaginatedUsers
 
 func (response GetUsers200JSONResponse) VisitGetUsersResponse(ctx *fiber.Ctx) error {
 	ctx.Response().Header.Set("Content-Type", "application/json")
@@ -854,30 +1021,31 @@ func (sh *strictHandler) GetUsersMe(ctx *fiber.Ctx) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"Yq4Mxs8nk0lEE/rqavV3AAAA///csbD+1RsAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

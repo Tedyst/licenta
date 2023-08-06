@@ -21,6 +21,6 @@ UPDATE sessions SET
 WHERE id = $1;
 
 -- name: GetUserAndSessionBySessionID :one
-SELECT sqlc.embed(users), sqlc.embed(sessions) FROM users
-LEFT JOIN sessions ON sessions.user_id = users.id
+SELECT sqlc.embed(users), sqlc.embed(sessions) FROM sessions
+LEFT JOIN users ON sessions.user_id = users.id
 WHERE sessions.id = $1 LIMIT 1;

@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"context"
+
 	"go.opentelemetry.io/otel/trace"
 )
 
-func traceError(c *fiber.Ctx, err error) {
-	span := trace.SpanFromContext(c.UserContext())
+func traceError(ctx context.Context, err error) {
+	span := trace.SpanFromContext(ctx)
 	span.RecordError(err)
 }

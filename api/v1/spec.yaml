@@ -56,8 +56,12 @@ paths:
       tags:
         - user
       responses:
-        default:
+        "200":
           description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
   /register:
     post:
       summary: Creates a new user
@@ -198,14 +202,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: "#/components/schemas/PaginatedResult"
-                  - type: object
-                    properties:
-                      results:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/PaginatedUsers'
         "401":
           description: Unauthorized
           content:
@@ -339,6 +336,15 @@ components:
         results: 
           type: array
           items: {}
+    PaginatedUsers:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedResult"
+        - type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/User"
     Error:
       required:
         - message
@@ -351,3 +357,10 @@ components:
         message:
           type: string
           description: Error message
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+security:
+  - sessionAuth: []

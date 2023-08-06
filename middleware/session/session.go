@@ -2,7 +2,7 @@ package session
 
 import (
 	"context"
-	"time"
+	"database/sql"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -11,11 +11,11 @@ import (
 	db "github.com/tedyst/licenta/db/generated"
 )
 
-const (
-	cookieSessionKey  = "session"
-	contextUserKey    = "user"
-	contextSessionKey = "session"
-)
+const cookieSessionKey = "session"
+
+type contextSessionKey struct{}
+type contextUserKey struct{}
+type contextOriginalContextKey struct{}
 
 func createNewSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
 	sess, err := config.DatabaseQueries.CreateSession(ctx, db.CreateSessionParams{
@@ -30,44 +30,18 @@ func createNewSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
 		HTTPOnly: true,
 		SameSite: "Strict",
 	})
-	c.Locals(contextSessionKey, sess)
+	c.Locals(contextSessionKey{}, sess)
 	return sess, nil
 }
 
-func GetSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
-	ctx, span := config.Tracer.Start(ctx, "GetSession")
+func getSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {
+	ctx, span := config.Tracer.Start(ctx, "getSessionAndUser")
 	defer span.End()
 
-	if c.Locals(contextSessionKey) != nil {
-		return c.Locals(contextSessionKey).(*db.Session), nil
-	}
-
-	sess_id := c.Cookies(cookieSessionKey)
-	var u uuid.UUID
-	if len(sess_id) == 0 {
-		return createNewSession(ctx, c)
-	}
-	var err error
-	u, err = uuid.Parse(sess_id)
-	if err != nil {
-		return createNewSession(ctx, c)
-	}
-	sess, err := config.DatabaseQueries.GetSession(ctx, u)
-	if err != nil {
-		return createNewSession(ctx, c)
-	}
-	c.Locals(contextSessionKey, sess)
-	return sess, nil
-}
-
-func GetSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {
-	ctx, span := config.Tracer.Start(ctx, "GetSessionAndUser")
-	defer span.End()
-
-	if c.Locals(contextSessionKey) != nil && c.Locals(contextUserKey) != nil {
-		return c.Locals(contextSessionKey).(*db.Session), c.Locals(contextUserKey).(*db.User), nil
-	} else if c.Locals(contextSessionKey) != nil {
-		return c.Locals(contextSessionKey).(*db.Session), nil, nil
+	if c.Locals(contextSessionKey{}) != nil && c.Locals(contextUserKey{}) != nil {
+		return c.Locals(contextSessionKey{}).(*db.Session), c.Locals(contextUserKey{}).(*db.User), nil
+	} else if c.Locals(contextSessionKey{}) != nil {
+		return c.Locals(contextSessionKey{}).(*db.Session), nil, nil
 	}
 
 	sess_id := c.Cookies(cookieSessionKey)
@@ -88,12 +62,12 @@ func GetSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User
 		return sess, nil, errors.Wrap(err, "GetSessionAndUser: error getting user and session")
 	}
 
-	c.Locals(contextSessionKey, &row.Session)
-	c.Locals(contextUserKey, &row.User)
+	c.Locals(contextSessionKey{}, &row.Session)
+	c.Locals(contextUserKey{}, &row.User)
 	return &row.Session, &row.User, nil
 }
 
-func SaveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {
+func saveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {
 	ctx, span := config.Tracer.Start(ctx, "SaveSession")
 	defer span.End()
 
@@ -112,44 +86,97 @@ func SaveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {
 		SameSite: "Strict",
 	})
 
-	c.Locals(contextSessionKey, sess)
+	c.Locals(contextSessionKey{}, sess)
 	return nil
 }
 
-func deleteSession(ctx context.Context, sess *db.Session) error {
-	ctx, span := config.Tracer.Start(ctx, "deleteSession")
+func GetUser(ctx context.Context) (*db.User, error) {
+	ctx, span := config.Tracer.Start(ctx, "GetUser")
 	defer span.End()
 
-	return config.DatabaseQueries.DeleteSession(ctx, sess.ID)
+	c := ctx.Value(contextOriginalContextKey{})
+	if c == nil {
+		return nil, errors.New("GetUser: cannot find context")
+	}
+	cc := c.(*fiber.Ctx)
+	u := cc.Locals(contextUserKey{})
+	if u != nil {
+		return u.(*db.User), nil
+	}
+
+	_, user, err := getSessionAndUser(ctx, cc)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUser: error getting session and user")
+	}
+	return user, nil
 }
 
-func ClearSession(ctx context.Context, c *fiber.Ctx) error {
+func getSessionFromContext(ctx context.Context) (*db.Session, *fiber.Ctx, error) {
+	c := ctx.Value(contextOriginalContextKey{})
+	if c == nil {
+		return nil, nil, errors.New("getSessionFromContext: cannot find context")
+	}
+	cc := c.(*fiber.Ctx)
+	sess := cc.Locals(contextSessionKey{})
+	sesss := sess.(*db.Session)
+	return sesss, cc, nil
+}
+
+func SetUser(ctx context.Context, user *db.User) error {
+	ctx, span := config.Tracer.Start(ctx, "SetUser")
+	defer span.End()
+
+	sess, c, err := getSessionFromContext(ctx)
+	if err != nil {
+		return errors.Wrap(err, "SetUser: error getting session from context")
+	}
+
+	c.Locals(contextUserKey{}, user)
+
+	sess.UserID = sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}
+	sess.TotpKey = sql.NullString{}
+	sess.Waiting2fa = sql.NullInt64{}
+
+	return saveSession(ctx, c, sess)
+}
+
+func ClearSession(ctx context.Context) error {
 	ctx, span := config.Tracer.Start(ctx, "ClearSession")
 	defer span.End()
 
-	if c.Locals(contextSessionKey) == nil {
+	sess, c, err := getSessionFromContext(ctx)
+	if err != nil {
+		return errors.Wrap(err, "ClearSession: error getting session from context")
+	}
+
+	sess.UserID = sql.NullInt64{}
+	sess.TotpKey = sql.NullString{}
+	sess.Waiting2fa = sql.NullInt64{}
+
+	return saveSession(ctx, c, sess)
+}
+
+func SessionMiddleware() func(*fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		sess, user, err := getSessionAndUser(c.UserContext(), c)
+		if err != nil {
+			return errors.Wrap(err, "SessionMiddleware: error getting session and user")
+		}
+
+		ctx := context.WithValue(c.UserContext(), contextOriginalContextKey{}, c)
+		c.SetUserContext(ctx)
+
+		c.Locals(contextSessionKey{}, sess)
+		c.Locals(contextUserKey{}, user)
+
+		err = c.Next()
+		if err != nil {
+			return errors.Wrap(err, "SessionMiddleware: error calling next")
+		}
+
 		return nil
 	}
-
-	sess := c.Locals(contextSessionKey).(*db.Session)
-	err := deleteSession(ctx, sess)
-	if err != nil {
-		return errors.Wrap(err, "ClearSession: error deleting session")
-	}
-
-	c.Cookie(&fiber.Cookie{
-		Name:     cookieSessionKey,
-		Value:    "",
-		HTTPOnly: true,
-		SameSite: "Strict",
-		Expires:  time.Now().Add(-1 * time.Hour),
-	})
-	uuid, err := uuid.ParseBytes(c.Request().Header.Peek(cookieSessionKey))
-	if err != nil {
-		return errors.Wrap(err, "ClearSession: error parsing session id")
-	}
-
-	c.Locals(contextSessionKey, nil)
-	c.Locals(contextUserKey, nil)
-	return config.DatabaseQueries.DeleteSession(ctx, uuid)
 }

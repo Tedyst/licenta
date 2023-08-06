@@ -69,8 +69,8 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*Session, error
 }
 
 const getUserAndSessionBySessionID = `-- name: GetUserAndSessionBySessionID :one
-SELECT users.id, users.username, users.password, users.email, users.admin, users.totp_secret, sessions.id, sessions.user_id, sessions.totp_key, sessions.waiting_2fa, sessions.created_at FROM users
-LEFT JOIN sessions ON sessions.user_id = users.id
+SELECT users.id, users.username, users.password, users.email, users.admin, users.totp_secret, sessions.id, sessions.user_id, sessions.totp_key, sessions.waiting_2fa, sessions.created_at FROM sessions
+LEFT JOIN users ON sessions.user_id = users.id
 WHERE sessions.id = $1 LIMIT 1
 `
 
