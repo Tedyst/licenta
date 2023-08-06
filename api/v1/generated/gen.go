@@ -8,7 +8,6 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"path"
@@ -46,62 +45,18 @@ type LoginUser struct {
 
 // PaginatedResult defines model for PaginatedResult.
 type PaginatedResult struct {
-	Count    *int                      `json:"count,omitempty"`
-	Next     *PaginatedResult_Next     `json:"next,omitempty"`
-	Previous *PaginatedResult_Previous `json:"previous,omitempty"`
-	Results  *[]interface{}            `json:"results,omitempty"`
-}
-
-// PaginatedResultNext0 defines model for .
-type PaginatedResultNext0 = string
-
-// PaginatedResultNext1 defines model for .
-type PaginatedResultNext1 = map[string]interface{}
-
-// PaginatedResult_Next defines model for PaginatedResult.Next.
-type PaginatedResult_Next struct {
-	union json.RawMessage
-}
-
-// PaginatedResultPrevious0 defines model for .
-type PaginatedResultPrevious0 = string
-
-// PaginatedResultPrevious1 defines model for .
-type PaginatedResultPrevious1 = map[string]interface{}
-
-// PaginatedResult_Previous defines model for PaginatedResult.Previous.
-type PaginatedResult_Previous struct {
-	union json.RawMessage
+	Count    *int           `json:"count,omitempty"`
+	Next     *string        `json:"next,omitempty"`
+	Previous *string        `json:"previous,omitempty"`
+	Results  *[]interface{} `json:"results,omitempty"`
 }
 
 // PaginatedUsers defines model for PaginatedUsers.
 type PaginatedUsers struct {
-	Count    *int                     `json:"count,omitempty"`
-	Next     *PaginatedUsers_Next     `json:"next,omitempty"`
-	Previous *PaginatedUsers_Previous `json:"previous,omitempty"`
-	Results  *[]User                  `json:"results,omitempty"`
-}
-
-// PaginatedUsersNext0 defines model for .
-type PaginatedUsersNext0 = string
-
-// PaginatedUsersNext1 defines model for .
-type PaginatedUsersNext1 = map[string]interface{}
-
-// PaginatedUsers_Next defines model for PaginatedUsers.Next.
-type PaginatedUsers_Next struct {
-	union json.RawMessage
-}
-
-// PaginatedUsersPrevious0 defines model for .
-type PaginatedUsersPrevious0 = string
-
-// PaginatedUsersPrevious1 defines model for .
-type PaginatedUsersPrevious1 = map[string]interface{}
-
-// PaginatedUsers_Previous defines model for PaginatedUsers.Previous.
-type PaginatedUsers_Previous struct {
-	union json.RawMessage
+	Count    *int    `json:"count,omitempty"`
+	Next     *string `json:"next,omitempty"`
+	Previous *string `json:"previous,omitempty"`
+	Results  *[]User `json:"results,omitempty"`
 }
 
 // RegisterUser defines model for RegisterUser.
@@ -178,254 +133,6 @@ type PostLoginJSONRequestBody = LoginUser
 
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = RegisterUser
-
-// AsPaginatedResultNext0 returns the union data inside the PaginatedResult_Next as a PaginatedResultNext0
-func (t PaginatedResult_Next) AsPaginatedResultNext0() (PaginatedResultNext0, error) {
-	var body PaginatedResultNext0
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedResultNext0 overwrites any union data inside the PaginatedResult_Next as the provided PaginatedResultNext0
-func (t *PaginatedResult_Next) FromPaginatedResultNext0(v PaginatedResultNext0) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedResultNext0 performs a merge with any union data inside the PaginatedResult_Next, using the provided PaginatedResultNext0
-func (t *PaginatedResult_Next) MergePaginatedResultNext0(v PaginatedResultNext0) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-// AsPaginatedResultNext1 returns the union data inside the PaginatedResult_Next as a PaginatedResultNext1
-func (t PaginatedResult_Next) AsPaginatedResultNext1() (PaginatedResultNext1, error) {
-	var body PaginatedResultNext1
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedResultNext1 overwrites any union data inside the PaginatedResult_Next as the provided PaginatedResultNext1
-func (t *PaginatedResult_Next) FromPaginatedResultNext1(v PaginatedResultNext1) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedResultNext1 performs a merge with any union data inside the PaginatedResult_Next, using the provided PaginatedResultNext1
-func (t *PaginatedResult_Next) MergePaginatedResultNext1(v PaginatedResultNext1) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-func (t PaginatedResult_Next) MarshalJSON() ([]byte, error) {
-	b, err := t.union.MarshalJSON()
-	return b, err
-}
-
-func (t *PaginatedResult_Next) UnmarshalJSON(b []byte) error {
-	err := t.union.UnmarshalJSON(b)
-	return err
-}
-
-// AsPaginatedResultPrevious0 returns the union data inside the PaginatedResult_Previous as a PaginatedResultPrevious0
-func (t PaginatedResult_Previous) AsPaginatedResultPrevious0() (PaginatedResultPrevious0, error) {
-	var body PaginatedResultPrevious0
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedResultPrevious0 overwrites any union data inside the PaginatedResult_Previous as the provided PaginatedResultPrevious0
-func (t *PaginatedResult_Previous) FromPaginatedResultPrevious0(v PaginatedResultPrevious0) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedResultPrevious0 performs a merge with any union data inside the PaginatedResult_Previous, using the provided PaginatedResultPrevious0
-func (t *PaginatedResult_Previous) MergePaginatedResultPrevious0(v PaginatedResultPrevious0) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-// AsPaginatedResultPrevious1 returns the union data inside the PaginatedResult_Previous as a PaginatedResultPrevious1
-func (t PaginatedResult_Previous) AsPaginatedResultPrevious1() (PaginatedResultPrevious1, error) {
-	var body PaginatedResultPrevious1
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedResultPrevious1 overwrites any union data inside the PaginatedResult_Previous as the provided PaginatedResultPrevious1
-func (t *PaginatedResult_Previous) FromPaginatedResultPrevious1(v PaginatedResultPrevious1) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedResultPrevious1 performs a merge with any union data inside the PaginatedResult_Previous, using the provided PaginatedResultPrevious1
-func (t *PaginatedResult_Previous) MergePaginatedResultPrevious1(v PaginatedResultPrevious1) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-func (t PaginatedResult_Previous) MarshalJSON() ([]byte, error) {
-	b, err := t.union.MarshalJSON()
-	return b, err
-}
-
-func (t *PaginatedResult_Previous) UnmarshalJSON(b []byte) error {
-	err := t.union.UnmarshalJSON(b)
-	return err
-}
-
-// AsPaginatedUsersNext0 returns the union data inside the PaginatedUsers_Next as a PaginatedUsersNext0
-func (t PaginatedUsers_Next) AsPaginatedUsersNext0() (PaginatedUsersNext0, error) {
-	var body PaginatedUsersNext0
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedUsersNext0 overwrites any union data inside the PaginatedUsers_Next as the provided PaginatedUsersNext0
-func (t *PaginatedUsers_Next) FromPaginatedUsersNext0(v PaginatedUsersNext0) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedUsersNext0 performs a merge with any union data inside the PaginatedUsers_Next, using the provided PaginatedUsersNext0
-func (t *PaginatedUsers_Next) MergePaginatedUsersNext0(v PaginatedUsersNext0) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-// AsPaginatedUsersNext1 returns the union data inside the PaginatedUsers_Next as a PaginatedUsersNext1
-func (t PaginatedUsers_Next) AsPaginatedUsersNext1() (PaginatedUsersNext1, error) {
-	var body PaginatedUsersNext1
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedUsersNext1 overwrites any union data inside the PaginatedUsers_Next as the provided PaginatedUsersNext1
-func (t *PaginatedUsers_Next) FromPaginatedUsersNext1(v PaginatedUsersNext1) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedUsersNext1 performs a merge with any union data inside the PaginatedUsers_Next, using the provided PaginatedUsersNext1
-func (t *PaginatedUsers_Next) MergePaginatedUsersNext1(v PaginatedUsersNext1) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-func (t PaginatedUsers_Next) MarshalJSON() ([]byte, error) {
-	b, err := t.union.MarshalJSON()
-	return b, err
-}
-
-func (t *PaginatedUsers_Next) UnmarshalJSON(b []byte) error {
-	err := t.union.UnmarshalJSON(b)
-	return err
-}
-
-// AsPaginatedUsersPrevious0 returns the union data inside the PaginatedUsers_Previous as a PaginatedUsersPrevious0
-func (t PaginatedUsers_Previous) AsPaginatedUsersPrevious0() (PaginatedUsersPrevious0, error) {
-	var body PaginatedUsersPrevious0
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedUsersPrevious0 overwrites any union data inside the PaginatedUsers_Previous as the provided PaginatedUsersPrevious0
-func (t *PaginatedUsers_Previous) FromPaginatedUsersPrevious0(v PaginatedUsersPrevious0) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedUsersPrevious0 performs a merge with any union data inside the PaginatedUsers_Previous, using the provided PaginatedUsersPrevious0
-func (t *PaginatedUsers_Previous) MergePaginatedUsersPrevious0(v PaginatedUsersPrevious0) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-// AsPaginatedUsersPrevious1 returns the union data inside the PaginatedUsers_Previous as a PaginatedUsersPrevious1
-func (t PaginatedUsers_Previous) AsPaginatedUsersPrevious1() (PaginatedUsersPrevious1, error) {
-	var body PaginatedUsersPrevious1
-	err := json.Unmarshal(t.union, &body)
-	return body, err
-}
-
-// FromPaginatedUsersPrevious1 overwrites any union data inside the PaginatedUsers_Previous as the provided PaginatedUsersPrevious1
-func (t *PaginatedUsers_Previous) FromPaginatedUsersPrevious1(v PaginatedUsersPrevious1) error {
-	b, err := json.Marshal(v)
-	t.union = b
-	return err
-}
-
-// MergePaginatedUsersPrevious1 performs a merge with any union data inside the PaginatedUsers_Previous, using the provided PaginatedUsersPrevious1
-func (t *PaginatedUsers_Previous) MergePaginatedUsersPrevious1(v PaginatedUsersPrevious1) error {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return err
-	}
-
-	merged, err := runtime.JsonMerge(t.union, b)
-	t.union = merged
-	return err
-}
-
-func (t PaginatedUsers_Previous) MarshalJSON() ([]byte, error) {
-	b, err := t.union.MarshalJSON()
-	return b, err
-}
-
-func (t *PaginatedUsers_Previous) UnmarshalJSON(b []byte) error {
-	err := t.union.UnmarshalJSON(b)
-	return err
-}
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -1021,31 +728,31 @@ func (sh *strictHandler) GetUsersMe(ctx *fiber.Ctx) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"Yq4Mxs8nk0lEE/rqavV3AAAA///csbD+1RsAAA==",
+	"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",
+	"/9KfDIB7GwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

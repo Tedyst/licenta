@@ -56,15 +56,23 @@ func getSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User
 		sess, err := createNewSession(ctx, c)
 		return sess, nil, errors.Wrap(err, "GetSessionAndUser: error parsing session id")
 	}
-	row, err := config.DatabaseQueries.GetUserAndSessionBySessionID(ctx, u)
+	sess, err := config.DatabaseQueries.GetSession(ctx, u)
 	if err != nil {
 		sess, err := createNewSession(ctx, c)
-		return sess, nil, errors.Wrap(err, "GetSessionAndUser: error getting user and session")
+		return sess, nil, errors.Wrap(err, "GetSessionAndUser: error getting session")
 	}
 
-	c.Locals(contextSessionKey{}, &row.Session)
-	c.Locals(contextUserKey{}, &row.User)
-	return &row.Session, &row.User, nil
+	var user *db.User
+	if sess.UserID.Valid {
+		user, err = config.DatabaseQueries.GetUser(ctx, sess.UserID.Int64)
+		if err != nil {
+			return sess, nil, errors.Wrap(err, "GetSessionAndUser: error getting user")
+		}
+		c.Locals(contextUserKey{}, user)
+	}
+
+	c.Locals(contextSessionKey{}, sess)
+	return sess, user, nil
 }
 
 func saveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {

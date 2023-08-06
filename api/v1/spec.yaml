@@ -321,17 +321,9 @@ components:
           type: integer
           example: 1
         next:
-          oneOf:
-            - type: string
-              format: uri
-            - type: object
-              example: null
+          type: string
         previous:
-          oneOf:
-            - type: string
-              format: uri
-            - type: object
-              example: null
+          type: string
           example: null
         results: 
           type: array
