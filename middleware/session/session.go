@@ -122,6 +122,7 @@ func deleteSession(ctx context.Context, sess *db.Session) error {
 
 	return config.DatabaseQueries.DeleteSession(ctx, sess.ID)
 }
+
 func ClearSession(ctx context.Context, c *fiber.Ctx) error {
 	ctx, span := config.Tracer.Start(ctx, "ClearSession")
 	defer span.End()

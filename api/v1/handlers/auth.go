@@ -91,28 +91,26 @@ func (*ServerHandler) PostLogout(c *fiber.Ctx) error {
 	return errors.Wrap(err, "PostLogout: error saving session")
 }
 
-func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
-	var body generated.PostRegisterJSONRequestBody
-	if err := c.BodyParser(&body); err != nil {
-		return sendError(c, fiber.StatusBadRequest, err.Error())
-	}
-
-	err := valid.Struct(body)
+func PostRegister(c *fiber.Ctx, request generated.PostRegisterRequestObject) (generated.PostRegisterResponseObject, error) {
+	err := valid.Struct(request)
 	if err != nil {
-		return sendError(c, fiber.StatusBadRequest, err.Error())
+		return generated.PostRegister400JSONResponse{
+			Message: err.Error(),
+			Success: false,
+		}, nil
 	}
 
 	user, err := config.DatabaseQueries.CreateUser(c.UserContext(), db.CreateUserParams{
-		Username: body.Username,
-		Email:    body.Email,
+		Username: request.Body.Username,
+		Email:    request.Body.Email,
 	})
 	if err != nil {
-		return sendError(c, fiber.StatusBadRequest, "Username or email already exists")
+		return nil, errors.Wrap(err, "PostRegister: error creating user")
 	}
 
-	err = models.SetPassword(user, body.Password)
+	err = models.SetPassword(user, request.Body.Password)
 	if err != nil {
-		return errors.Wrap(err, "Error setting password")
+		return nil, errors.Wrap(err, "PostRegister: error setting password")
 	}
 
 	err = config.DatabaseQueries.UpdateUserPassword(c.UserContext(), db.UpdateUserPasswordParams{
@@ -121,27 +119,38 @@ func (*ServerHandler) PostRegister(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		return errors.Wrap(err, "Error updating password")
+		return nil, errors.Wrap(err, "PostRegister: error updating user password")
 	}
 
-	sess, err := getSession(c)
+	sess, err := session.GetSession(c.UserContext(), c)
 	if err != nil || sess == nil {
-		return errors.Wrap(err, "Error getting session")
+		return nil, errors.Wrap(err, "PostRegister: error getting session")
 	}
 
-	sess.UserID = sql.NullInt64{}
+	sess.UserID = sql.NullInt64{
+		Int64: user.ID,
+		Valid: true,
+	}
 	sess.Waiting2fa = sql.NullInt64{}
 	sess.TotpKey = sql.NullString{}
 
 	err = session.SaveSession(c.UserContext(), c, sess)
 
-	return errors.Wrap(err, "PostRegister: error saving session")
+	var SuccessTrue = true
+	return generated.PostRegister200JSONResponse{
+		Success: &SuccessTrue,
+		User: &generated.User{
+			Id:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		},
+	}, nil
 }
 
-func (*ServerHandler) Post2faTotpFirstStep(c *fiber.Ctx) error {
-	return nil
+func (*ServerHandler) Post2faTotpFirstStep(c *fiber.Ctx, request generated.Post2faTotpFirstStepRequestObject) (generated.Post2faTotpFirstStepResponseObject, error) {
+	return nil, nil
 }
 
-func (*ServerHandler) Post2faTotpSecondStep(c *fiber.Ctx) error {
-	return nil
+func (*ServerHandler) Post2faTotpSecondStep(c *fiber.Ctx, request generated.Post2faTotpSecondStepRequestObject) (generated.Post2faTotpSecondStepResponseObject, error) {
+	return nil, nil
 }
