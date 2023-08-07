@@ -26,7 +26,7 @@ var Meter = otel.Meter("github.com/tedyst/licenta")
 func initTracer() *sdktrace.TracerProvider {
 	var exporter sdktrace.SpanExporter
 	var err error
-	if config.JaegerEndpoint == "" {
+	if !viper.GetBool("telemetry.tracing.stdout") {
 		exporter, err = stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
 			log.Fatal(err)

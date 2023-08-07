@@ -22,6 +22,7 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	serveCmd.Flags().String("sendgrid", "", "Sendgrid API Key")
+	serveCmd.Flags().String("postmark", "", "Postmark API Key")
 
 	serveCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
 	serveCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
