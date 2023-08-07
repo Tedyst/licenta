@@ -7,9 +7,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/tedyst/licenta/config"
 	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/telemetry"
 )
 
 const cookieSessionKey = "session"
@@ -37,7 +37,7 @@ func createNewSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
 }
 
 func getSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User, error) {
-	ctx, span := config.Tracer.Start(ctx, "getSessionAndUser")
+	ctx, span := telemetry.Tracer.Start(ctx, "getSessionAndUser")
 	defer span.End()
 
 	if c.Locals(contextSessionKey{}) != nil && c.Locals(contextUserKey{}) != nil {
@@ -78,7 +78,7 @@ func getSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User
 }
 
 func saveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {
-	ctx, span := config.Tracer.Start(ctx, "SaveSession")
+	ctx, span := telemetry.Tracer.Start(ctx, "SaveSession")
 	defer span.End()
 
 	err := database.DatabaseQueries.UpdateSession(ctx, db.UpdateSessionParams{
@@ -101,7 +101,7 @@ func saveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {
 }
 
 func GetUser(ctx context.Context) (*db.User, error) {
-	ctx, span := config.Tracer.Start(ctx, "GetUser")
+	ctx, span := telemetry.Tracer.Start(ctx, "GetUser")
 	defer span.End()
 
 	c := ctx.Value(contextOriginalContextKey{})
@@ -133,7 +133,7 @@ func getSessionFromContext(ctx context.Context) (*db.Session, *fiber.Ctx, error)
 }
 
 func SetUser(ctx context.Context, user *db.User) error {
-	ctx, span := config.Tracer.Start(ctx, "SetUser")
+	ctx, span := telemetry.Tracer.Start(ctx, "SetUser")
 	defer span.End()
 
 	sess, c, err := getSessionFromContext(ctx)
@@ -154,7 +154,7 @@ func SetUser(ctx context.Context, user *db.User) error {
 }
 
 func SetWaiting2FA(ctx context.Context, waitingUser *db.User) error {
-	ctx, span := config.Tracer.Start(ctx, "SetWaiting2FA")
+	ctx, span := telemetry.Tracer.Start(ctx, "SetWaiting2FA")
 	defer span.End()
 
 	sess, c, err := getSessionFromContext(ctx)
@@ -175,7 +175,7 @@ func SetWaiting2FA(ctx context.Context, waitingUser *db.User) error {
 }
 
 func GetWaiting2FA(ctx context.Context) (*db.User, error) {
-	ctx, span := config.Tracer.Start(ctx, "GetWaiting2FA")
+	ctx, span := telemetry.Tracer.Start(ctx, "GetWaiting2FA")
 	defer span.End()
 
 	sess, _, err := getSessionFromContext(ctx)
@@ -196,7 +196,7 @@ func GetWaiting2FA(ctx context.Context) (*db.User, error) {
 }
 
 func SetTOTPKey(ctx context.Context, key string) error {
-	ctx, span := config.Tracer.Start(ctx, "SetTOTPKey")
+	ctx, span := telemetry.Tracer.Start(ctx, "SetTOTPKey")
 	defer span.End()
 
 	sess, c, err := getSessionFromContext(ctx)
@@ -213,7 +213,7 @@ func SetTOTPKey(ctx context.Context, key string) error {
 }
 
 func GetTOTPKey(ctx context.Context) (string, error) {
-	ctx, span := config.Tracer.Start(ctx, "GetTOTPKey")
+	ctx, span := telemetry.Tracer.Start(ctx, "GetTOTPKey")
 	defer span.End()
 
 	sess, _, err := getSessionFromContext(ctx)
@@ -229,7 +229,7 @@ func GetTOTPKey(ctx context.Context) (string, error) {
 }
 
 func ClearSession(ctx context.Context) error {
-	ctx, span := config.Tracer.Start(ctx, "ClearSession")
+	ctx, span := telemetry.Tracer.Start(ctx, "ClearSession")
 	defer span.End()
 
 	sess, c, err := getSessionFromContext(ctx)

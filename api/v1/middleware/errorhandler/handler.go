@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
-	"github.com/tedyst/licenta/config"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -25,7 +25,7 @@ func New() fiber.Handler {
 				})
 			}
 			message := InternalServerError
-			if config.Config.Debug {
+			if viper.GetBool("debug") {
 				message = err.Error()
 			}
 			return c.Status(fiber.StatusInternalServerError).JSON(generated.Error{

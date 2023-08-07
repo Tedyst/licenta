@@ -1,10 +1,12 @@
-package main
+package telemetry
 
 import (
+	"context"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/config"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"go.opentelemetry.io/otel"
@@ -17,6 +19,9 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
+
+var Tracer = otel.Tracer("github.com/tedyst/licenta")
+var Meter = otel.Meter("github.com/tedyst/licenta")
 
 func initTracer() *sdktrace.TracerProvider {
 	var exporter sdktrace.SpanExporter
@@ -57,10 +62,32 @@ func initMetric() *sdkmetric.MeterProvider {
 	return provider
 }
 
-func registerPrometheus(app *fiber.App) {
+func RegisterPrometheus(app *fiber.App) {
+	if !viper.GetBool("telemetry.metrics") {
+		return
+	}
 	p := fasthttpadaptor.NewFastHTTPHandler(promhttp.Handler())
 	app.Get("/metrics", func(c *fiber.Ctx) error {
 		p(c.Context())
 		return nil
 	})
+}
+
+func InitTelemetry() {
+	if viper.GetBool("telemetry.metrics") {
+		mp := initMetric()
+		defer func() {
+			if err := mp.Shutdown(context.Background()); err != nil {
+				log.Printf("Error shutting down metric provider: %v", err)
+			}
+		}()
+	}
+	if viper.GetBool("telemetry.tracing") {
+		tp := initTracer()
+		defer func() {
+			if err := tp.Shutdown(context.Background()); err != nil {
+				log.Printf("Error shutting down tracer provider: %v", err)
+			}
+		}()
+	}
 }
