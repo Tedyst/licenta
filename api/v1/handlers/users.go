@@ -24,7 +24,7 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 
 	count, err := config.DatabaseQueries.CountUsers(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsers: error counting users")
+		return nil, errors.Wrap(err, "GetUsers: error cou7nting users")
 	}
 
 	var limit int32 = DefaultPaginationLimit
@@ -64,5 +64,9 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 }
 
 func (*ServerHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
+	return nil, nil
+}
+
+func (*ServerHandler) GetUsersId(context.Context, generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
 	return nil, nil
 }

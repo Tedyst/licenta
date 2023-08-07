@@ -18,7 +18,7 @@ paths:
     post:
       summary: Logs user into the system
       tags:
-        - user
+        - auth
       requestBody:
         description: The user to login into.
         required: true
@@ -53,11 +53,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      security: []
   /login/2fa/totp:
     post:
       summary: Logs user into the system
       tags:
-        - user
+        - auth
       requestBody:
         description: The user to login into.
         required: true
@@ -92,11 +93,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      security: []
   /logout:
     post:
       summary: Logs out current logged in user session
       tags:
-        - user
+        - auth
       responses:
         "200":
           description: successful operation
@@ -108,7 +110,7 @@ paths:
     post:
       summary: Creates a new user
       tags:
-        - user
+        - auth
       requestBody:
         description: Created user object
         required: true
@@ -143,11 +145,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+      security: []
   /2fa/totp-first-step:
     post:
       summary: First step of the TOTP authentication process
       tags:
-        - user
+        - security
       responses:
         "200":
           description: successful operation
@@ -165,7 +168,7 @@ paths:
     post:
       summary: Second step of the TOTP authentication process
       tags:
-        - user
+        - security
       requestBody:
         description: Created user object
         required: true
@@ -264,6 +267,38 @@ paths:
                 $ref: '#/components/schemas/PaginatedUsers'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      tags:
+        - user
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the user to retrieve
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: User not found
           content:
             application/json:
               schema:

@@ -169,6 +169,9 @@ type ServerInterface interface {
 	// Get current logged in user
 	// (GET /users/me)
 	GetUsersMe(c *fiber.Ctx) error
+	// Get user by ID
+	// (GET /users/{id})
+	GetUsersId(c *fiber.Ctx, id int64) error
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -197,15 +200,11 @@ func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(c *fiber.Ctx) error {
 // PostLogin operation middleware
 func (siw *ServerInterfaceWrapper) PostLogin(c *fiber.Ctx) error {
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
-
 	return siw.Handler.PostLogin(c)
 }
 
 // PostLogin2faTotp operation middleware
 func (siw *ServerInterfaceWrapper) PostLogin2faTotp(c *fiber.Ctx) error {
-
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	return siw.Handler.PostLogin2faTotp(c)
 }
@@ -220,8 +219,6 @@ func (siw *ServerInterfaceWrapper) PostLogout(c *fiber.Ctx) error {
 
 // PostRegister operation middleware
 func (siw *ServerInterfaceWrapper) PostRegister(c *fiber.Ctx) error {
-
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	return siw.Handler.PostRegister(c)
 }
@@ -281,6 +278,24 @@ func (siw *ServerInterfaceWrapper) GetUsersMe(c *fiber.Ctx) error {
 	return siw.Handler.GetUsersMe(c)
 }
 
+// GetUsersId operation middleware
+func (siw *ServerInterfaceWrapper) GetUsersId(c *fiber.Ctx) error {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameter("simple", false, "id", c.Params("id"), &id)
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for parameter id: %w", err).Error())
+	}
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
+
+	return siw.Handler.GetUsersId(c, id)
+}
+
 // FiberServerOptions provides options for the Fiber server.
 type FiberServerOptions struct {
 	BaseURL     string
@@ -317,6 +332,8 @@ func RegisterHandlersWithOptions(router fiber.Router, si ServerInterface, option
 	router.Get(options.BaseURL+"/users", wrapper.GetUsers)
 
 	router.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+
+	router.Get(options.BaseURL+"/users/:id", wrapper.GetUsersId)
 
 }
 
@@ -564,6 +581,41 @@ func (response GetUsersMe401JSONResponse) VisitGetUsersMeResponse(ctx *fiber.Ctx
 	return ctx.JSON(&response)
 }
 
+type GetUsersIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetUsersIdResponseObject interface {
+	VisitGetUsersIdResponse(ctx *fiber.Ctx) error
+}
+
+type GetUsersId200JSONResponse User
+
+func (response GetUsersId200JSONResponse) VisitGetUsersIdResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(200)
+
+	return ctx.JSON(&response)
+}
+
+type GetUsersId401JSONResponse Error
+
+func (response GetUsersId401JSONResponse) VisitGetUsersIdResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(401)
+
+	return ctx.JSON(&response)
+}
+
+type GetUsersId404JSONResponse Error
+
+func (response GetUsersId404JSONResponse) VisitGetUsersIdResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(404)
+
+	return ctx.JSON(&response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// First step of the TOTP authentication process
@@ -590,6 +642,9 @@ type StrictServerInterface interface {
 	// Get current logged in user
 	// (GET /users/me)
 	GetUsersMe(ctx context.Context, request GetUsersMeRequestObject) (GetUsersMeResponseObject, error)
+	// Get user by ID
+	// (GET /users/{id})
+	GetUsersId(ctx context.Context, request GetUsersIdRequestObject) (GetUsersIdResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx *fiber.Ctx, args interface{}) (interface{}, error)
@@ -831,34 +886,63 @@ func (sh *strictHandler) GetUsersMe(ctx *fiber.Ctx) error {
 	return nil
 }
 
+// GetUsersId operation middleware
+func (sh *strictHandler) GetUsersId(ctx *fiber.Ctx, id int64) error {
+	var request GetUsersIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsersId(ctx.UserContext(), request.(GetUsersIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetUsersId")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	} else if validResponse, ok := response.(GetUsersIdResponseObject); ok {
+		if err := validResponse.VisitGetUsersIdResponse(ctx); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"JS8vy38DAAD//99bM33PIgAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
