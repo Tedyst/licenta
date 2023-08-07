@@ -1,9 +1,9 @@
 package email
 
-import "github.com/tedyst/licenta/config"
+import "github.com/spf13/viper"
 
 func SendMultipartEmail(address string, subject string, html string, text string) error {
-	if config.Debug {
+	if viper.GetBool("debug") {
 		return SendMultipartEmailDebug(address, subject, html, text)
 	}
 	return SendMultipartEmailSendgrid(address, subject, html, text)
