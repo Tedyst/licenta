@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -11,32 +8,20 @@ import (
 	"github.com/tedyst/licenta/telemetry"
 )
 
-// serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Run the server",
+	Long:  `Run the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		serve()
+		telemetry.InitTelemetry()
+		database.InitDatabase()
+		app := api.InitializeFiber()
+		app.Listen(":" + viper.GetString("port"))
 	},
 }
 
-func serve() {
-	telemetry.InitTelemetry()
-	database.InitDatabase()
-	app := api.InitializeFiber()
-	app.Listen(":" + viper.GetString("port"))
-}
-
 func init() {
-	serveCmd.Flags().Bool("sendgrid.enabled", false, "Enable Sendgrid")
-	serveCmd.Flags().String("sendgrid.key", "", "Sendgrid API Key")
-	serveCmd.MarkFlagsRequiredTogether("sendgrid.enabled", "sendgrid.key")
+	serveCmd.Flags().String("sendgrid", "", "Sendgrid API Key")
 
 	serveCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
 	serveCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
