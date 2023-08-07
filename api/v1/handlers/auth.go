@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
-	"github.com/tedyst/licenta/config"
+	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/middleware/session"
 	"github.com/tedyst/licenta/models"
@@ -20,7 +20,7 @@ func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLogin
 		}, nil
 	}
 
-	user, err := config.DatabaseQueries.GetUserByUsernameOrEmail(ctx, request.Body.Username)
+	user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(ctx, request.Body.Username)
 	if err != nil {
 		traceError(ctx, errors.Wrap(err, "PostLogin: error getting user"))
 		return generated.PostLogin401JSONResponse{
@@ -83,7 +83,7 @@ func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRe
 		}, nil
 	}
 
-	user, err := config.DatabaseQueries.CreateUser(ctx, db.CreateUserParams{
+	user, err := database.DatabaseQueries.CreateUser(ctx, db.CreateUserParams{
 		Username: request.Body.Username,
 		Email:    request.Body.Email,
 	})
@@ -96,7 +96,7 @@ func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRe
 		return nil, errors.Wrap(err, "PostRegister: error setting password")
 	}
 
-	err = config.DatabaseQueries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+	err = database.DatabaseQueries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID:       user.ID,
 		Password: user.Password,
 	})

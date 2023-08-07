@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/config"
+	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
 )
 
@@ -19,7 +20,7 @@ type contextOriginalContextKey struct{}
 type contextWaiting2FAKey struct{}
 
 func createNewSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
-	sess, err := config.DatabaseQueries.CreateSession(ctx, db.CreateSessionParams{
+	sess, err := database.DatabaseQueries.CreateSession(ctx, db.CreateSessionParams{
 		ID: uuid.New(),
 	})
 	if err != nil {
@@ -57,7 +58,7 @@ func getSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User
 		sess, err := createNewSession(ctx, c)
 		return sess, nil, errors.Wrap(err, "GetSessionAndUser: error parsing session id")
 	}
-	sess, err := config.DatabaseQueries.GetSession(ctx, u)
+	sess, err := database.DatabaseQueries.GetSession(ctx, u)
 	if err != nil {
 		sess, err := createNewSession(ctx, c)
 		return sess, nil, errors.Wrap(err, "GetSessionAndUser: error getting session")
@@ -65,7 +66,7 @@ func getSessionAndUser(ctx context.Context, c *fiber.Ctx) (*db.Session, *db.User
 
 	var user *db.User
 	if sess.UserID.Valid {
-		user, err = config.DatabaseQueries.GetUser(ctx, sess.UserID.Int64)
+		user, err = database.DatabaseQueries.GetUser(ctx, sess.UserID.Int64)
 		if err != nil {
 			return sess, nil, errors.Wrap(err, "GetSessionAndUser: error getting user")
 		}
@@ -80,7 +81,7 @@ func saveSession(ctx context.Context, c *fiber.Ctx, sess *db.Session) error {
 	ctx, span := config.Tracer.Start(ctx, "SaveSession")
 	defer span.End()
 
-	err := config.DatabaseQueries.UpdateSession(ctx, db.UpdateSessionParams{
+	err := database.DatabaseQueries.UpdateSession(ctx, db.UpdateSessionParams{
 		ID:      sess.ID,
 		UserID:  sess.UserID,
 		TotpKey: sess.TotpKey,
@@ -186,7 +187,7 @@ func GetWaiting2FA(ctx context.Context) (*db.User, error) {
 		return nil, nil
 	}
 
-	user, err := config.DatabaseQueries.GetUser(ctx, sess.Waiting2fa.Int64)
+	user, err := database.DatabaseQueries.GetUser(ctx, sess.Waiting2fa.Int64)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetWaiting2FA: error getting user")
 	}

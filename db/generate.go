@@ -1,7 +1,7 @@
 //go:build generate
 // +build generate
 
-package db_generate
+package database
 
 import (
 	_ "github.com/sqlc-dev/sqlc/cmd/sqlc"

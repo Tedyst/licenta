@@ -25,7 +25,7 @@ func New() fiber.Handler {
 				})
 			}
 			message := InternalServerError
-			if config.Debug {
+			if config.Config.Debug {
 				message = err.Error()
 			}
 			return c.Status(fiber.StatusInternalServerError).JSON(generated.Error{

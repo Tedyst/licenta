@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
-	"github.com/tedyst/licenta/config"
+	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/middleware/session"
 )
@@ -22,7 +22,7 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 	// 	}, nil
 	// }
 
-	count, err := config.DatabaseQueries.CountUsers(ctx)
+	count, err := database.DatabaseQueries.CountUsers(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsers: error cou7nting users")
 	}
@@ -36,7 +36,7 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 		offset = *request.Params.Offset
 	}
 
-	users, err := config.DatabaseQueries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
+	users, err := database.DatabaseQueries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
 		Limit:  limit,
 		Offset: offset,
 	})

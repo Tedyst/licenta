@@ -4,27 +4,28 @@ import (
 	"context"
 	"log"
 	"os"
-	"runtime"
 
 	"github.com/exaring/otelpgx"
 	"github.com/gofiber/contrib/otelfiber"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/pprof"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/num30/config"
 	v1 "github.com/tedyst/licenta/api/v1"
-	"github.com/tedyst/licenta/config"
+	conf "github.com/tedyst/licenta/config"
+	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
-	"github.com/tedyst/licenta/models"
 	"go.opentelemetry.io/otel/trace"
 )
 
 func run() error {
-	err := parseConfig()
+	err := config.NewConfReader("").Read(&conf.Config)
 	if err != nil {
-		return err
+		panic(err)
 	}
+
+	print(conf.Config.OpenTelemetry.UseMetrics)
+	print(conf.Config.OpenTelemetry.UseTracing)
+
 	tp := initTracer()
 	defer func() {
 		if err := tp.Shutdown(context.Background()); err != nil {
@@ -56,18 +57,18 @@ func run() error {
 
 	app.Use(otelfiber.Middleware())
 
-	config.DatabasePool = pool
-	config.DatabaseQueries = queries
+	database.DatabasePool = pool
+	database.DatabaseQueries = queries
 
-	app.Use(recover.New())
-	if config.Debug {
-		app.Use(logger.New())
-		app.Use(pprof.New())
-	}
-	if config.Debug {
-		runtime.SetMutexProfileFraction(5)
-		runtime.SetBlockProfileRate(5)
-	}
+	// app.Use(recover.New())
+	// if config.Debug {
+	// 	app.Use(logger.New())
+	// 	app.Use(pprof.New())
+	// }
+	// if config.Debug {
+	// 	runtime.SetMutexProfileFraction(5)
+	// 	runtime.SetBlockProfileRate(5)
+	// }
 	app.Use(func(c *fiber.Ctx) error {
 		span := trace.SpanFromContext(c.UserContext())
 		c.Response().Header.Set("X-Trace-Id", span.SpanContext().TraceID().String())
@@ -82,16 +83,6 @@ func run() error {
 	v1.RegisterHandlers(api_v1)
 
 	return app.Listen(":5000")
-}
-
-func parseConfig() error {
-	if os.Getenv("DATABASE_URL") == "" {
-		log.Fatal("DATABASE_URL is not set")
-	}
-	config.JaegerEndpoint = os.Getenv("JAEGER_ENDPOINT")
-	models.PasswordPepper = []byte(os.Getenv("PASSWORD_PEPPER"))
-	config.SendgridAPIKey = os.Getenv("SENDGRID_API_KEY")
-	return nil
 }
 
 func main() {
