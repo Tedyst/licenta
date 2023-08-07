@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
-	"github.com/tedyst/licenta/config"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
@@ -26,13 +25,13 @@ var Meter = otel.Meter("github.com/tedyst/licenta")
 func initTracer() *sdktrace.TracerProvider {
 	var exporter sdktrace.SpanExporter
 	var err error
-	if !viper.GetBool("telemetry.tracing.stdout") {
+	if !viper.IsSet("telemetry.tracing.jaeger") {
 		exporter, err = stdouttrace.New(stdouttrace.WithPrettyPrint())
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		exporter, err = jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(config.JaegerEndpoint)))
+		exporter, err = jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(viper.GetString("telemetry.tracing.jaeger"))))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,7 +62,7 @@ func initMetric() *sdkmetric.MeterProvider {
 }
 
 func RegisterPrometheus(app *fiber.App) {
-	if !viper.GetBool("telemetry.metrics") {
+	if !viper.GetBool("telemetry.metrics.enabled") {
 		return
 	}
 	p := fasthttpadaptor.NewFastHTTPHandler(promhttp.Handler())
@@ -74,7 +73,7 @@ func RegisterPrometheus(app *fiber.App) {
 }
 
 func InitTelemetry() {
-	if viper.GetBool("telemetry.metrics") {
+	if viper.GetBool("telemetry.metrics.enabled") {
 		mp := initMetric()
 		defer func() {
 			if err := mp.Shutdown(context.Background()); err != nil {
@@ -82,7 +81,7 @@ func InitTelemetry() {
 			}
 		}()
 	}
-	if viper.GetBool("telemetry.tracing") {
+	if viper.GetBool("telemetry.tracing.enabled") {
 		tp := initTracer()
 		defer func() {
 			if err := tp.Shutdown(context.Background()); err != nil {

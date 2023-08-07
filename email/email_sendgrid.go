@@ -20,6 +20,6 @@ func SendMultipartEmailSendgrid(address string, subject string, html string, tex
 	from := mail.NewEmail(viper.GetString("email.senderName"), viper.GetString("email.sender"))
 	to := mail.NewEmail("", address)
 	message := mail.NewSingleEmail(from, subject, to, text, html)
-	response, err := client.Send(message)
+	_, err := client.Send(message)
 	return err
 }

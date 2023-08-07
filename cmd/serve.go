@@ -29,8 +29,9 @@ func init() {
 
 	serveCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
 
-	serveCmd.Flags().Bool("telemetry.metrics", false, "Enable metrics")
-	serveCmd.Flags().Bool("telemetry.tracing", false, "Enable tracing")
+	serveCmd.Flags().Bool("telemetry.metrics.enabled", false, "Enable metrics")
+	serveCmd.Flags().Bool("telemetry.tracing.enabled", false, "Enable tracing")
+	serveCmd.Flags().String("telemetry.tracing.jaeger", "", "Jaeger URL")
 
 	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
