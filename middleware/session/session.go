@@ -16,6 +16,7 @@ const cookieSessionKey = "session"
 type contextSessionKey struct{}
 type contextUserKey struct{}
 type contextOriginalContextKey struct{}
+type contextWaiting2FAKey struct{}
 
 func createNewSession(ctx context.Context, c *fiber.Ctx) (*db.Session, error) {
 	sess, err := config.DatabaseQueries.CreateSession(ctx, db.CreateSessionParams{
@@ -149,6 +150,81 @@ func SetUser(ctx context.Context, user *db.User) error {
 	sess.Waiting2fa = sql.NullInt64{}
 
 	return saveSession(ctx, c, sess)
+}
+
+func SetWaiting2FA(ctx context.Context, waitingUser *db.User) error {
+	ctx, span := config.Tracer.Start(ctx, "SetWaiting2FA")
+	defer span.End()
+
+	sess, c, err := getSessionFromContext(ctx)
+	if err != nil {
+		return errors.Wrap(err, "SetWaiting2FA: error getting session from context")
+	}
+
+	c.Locals(contextWaiting2FAKey{}, waitingUser)
+
+	sess.Waiting2fa = sql.NullInt64{
+		Int64: waitingUser.ID,
+		Valid: true,
+	}
+	sess.TotpKey = sql.NullString{}
+	sess.UserID = sql.NullInt64{}
+
+	return saveSession(ctx, c, sess)
+}
+
+func GetWaiting2FA(ctx context.Context) (*db.User, error) {
+	ctx, span := config.Tracer.Start(ctx, "GetWaiting2FA")
+	defer span.End()
+
+	sess, _, err := getSessionFromContext(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetWaiting2FA: error getting session from context")
+	}
+
+	if !sess.Waiting2fa.Valid {
+		return nil, nil
+	}
+
+	user, err := config.DatabaseQueries.GetUser(ctx, sess.Waiting2fa.Int64)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetWaiting2FA: error getting user")
+	}
+
+	return user, nil
+}
+
+func SetTOTPKey(ctx context.Context, key string) error {
+	ctx, span := config.Tracer.Start(ctx, "SetTOTPKey")
+	defer span.End()
+
+	sess, c, err := getSessionFromContext(ctx)
+	if err != nil {
+		return errors.Wrap(err, "SetTOTPKey: error getting session from context")
+	}
+
+	sess.TotpKey = sql.NullString{
+		String: key,
+		Valid:  true,
+	}
+
+	return saveSession(ctx, c, sess)
+}
+
+func GetTOTPKey(ctx context.Context) (string, error) {
+	ctx, span := config.Tracer.Start(ctx, "GetTOTPKey")
+	defer span.End()
+
+	sess, _, err := getSessionFromContext(ctx)
+	if err != nil {
+		return "", errors.Wrap(err, "GetTOTPKey: error getting session from context")
+	}
+
+	if !sess.TotpKey.Valid {
+		return "", nil
+	}
+
+	return sess.TotpKey.String, nil
 }
 
 func ClearSession(ctx context.Context) error {

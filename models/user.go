@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"github.com/pquerna/otp/totp"
 	"github.com/tedyst/licenta/config"
@@ -124,4 +125,26 @@ func VerifyTOTP(ctx context.Context, u *db.User, code string) bool {
 		return false
 	}
 	return totp.Validate(code, u.TotpSecret.String)
+}
+
+func GenerateTOTP(ctx context.Context, u *db.User) (string, error) {
+	_, span := config.Tracer.Start(ctx, "GenerateTOTP")
+	defer span.End()
+
+	if !u.TotpSecret.Valid {
+		return "", errors.New("user does not have 2fa enabled")
+	}
+	key, err := totp.Generate(totp.GenerateOpts{})
+	if err != nil {
+		return "", errors.Wrap(err, "error generating totp key")
+	}
+	return key.Secret(), nil
+}
+
+func Requires2FA(ctx context.Context, u *db.User) bool {
+	return u.TotpSecret.Valid
+}
+
+func Verify2FA(ctx context.Context, u *db.User, code string) bool {
+	return VerifyTOTP(ctx, u, code)
 }

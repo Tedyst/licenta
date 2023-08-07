@@ -74,7 +74,7 @@ type RegisterUser struct {
 // Success defines model for Success.
 type Success struct {
 	// Success The success status
-	Success *bool `json:"success,omitempty"`
+	Success bool `json:"success"`
 }
 
 // TOTPFirstStep defines model for TOTPFirstStep.
@@ -83,10 +83,16 @@ type TOTPFirstStep struct {
 	TotpSecret string `json:"totp_secret"`
 }
 
+// TOTPLogin defines model for TOTPLogin.
+type TOTPLogin struct {
+	// TotpCode The TOTP code
+	TotpCode string `json:"totp_code"`
+}
+
 // TOTPSecondStep defines model for TOTPSecondStep.
 type TOTPSecondStep struct {
 	// TotpCode The TOTP code
-	TotpCode string `json:"totp_code"`
+	TotpCode string `json:"totp_code" validate:"numeric,len=6"`
 }
 
 // User defines model for User.
@@ -131,6 +137,9 @@ type Post2faTotpSecondStepJSONRequestBody = TOTPSecondStep
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = LoginUser
 
+// PostLogin2faTotpJSONRequestBody defines body for PostLogin2faTotp for application/json ContentType.
+type PostLogin2faTotpJSONRequestBody = TOTPLogin
+
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = RegisterUser
 
@@ -145,6 +154,9 @@ type ServerInterface interface {
 	// Logs user into the system
 	// (POST /login)
 	PostLogin(c *fiber.Ctx) error
+	// Logs user into the system
+	// (POST /login/2fa/totp)
+	PostLogin2faTotp(c *fiber.Ctx) error
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(c *fiber.Ctx) error
@@ -188,6 +200,14 @@ func (siw *ServerInterfaceWrapper) PostLogin(c *fiber.Ctx) error {
 	c.Context().SetUserValue(SessionAuthScopes, []string{})
 
 	return siw.Handler.PostLogin(c)
+}
+
+// PostLogin2faTotp operation middleware
+func (siw *ServerInterfaceWrapper) PostLogin2faTotp(c *fiber.Ctx) error {
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
+
+	return siw.Handler.PostLogin2faTotp(c)
 }
 
 // PostLogout operation middleware
@@ -288,6 +308,8 @@ func RegisterHandlersWithOptions(router fiber.Router, si ServerInterface, option
 
 	router.Post(options.BaseURL+"/login", wrapper.PostLogin)
 
+	router.Post(options.BaseURL+"/login/2fa/totp", wrapper.PostLogin2faTotp)
+
 	router.Post(options.BaseURL+"/logout", wrapper.PostLogout)
 
 	router.Post(options.BaseURL+"/register", wrapper.PostRegister)
@@ -314,11 +336,11 @@ func (response Post2faTotpFirstStep200JSONResponse) VisitPost2faTotpFirstStepRes
 	return ctx.JSON(&response)
 }
 
-type Post2faTotpFirstStep400JSONResponse Error
+type Post2faTotpFirstStep401JSONResponse Error
 
-func (response Post2faTotpFirstStep400JSONResponse) VisitPost2faTotpFirstStepResponse(ctx *fiber.Ctx) error {
+func (response Post2faTotpFirstStep401JSONResponse) VisitPost2faTotpFirstStepResponse(ctx *fiber.Ctx) error {
 	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(400)
+	ctx.Status(401)
 
 	return ctx.JSON(&response)
 }
@@ -331,7 +353,10 @@ type Post2faTotpSecondStepResponseObject interface {
 	VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error
 }
 
-type Post2faTotpSecondStep200JSONResponse Success
+type Post2faTotpSecondStep200JSONResponse struct {
+	Success bool `json:"success"`
+	User    User `json:"user"`
+}
 
 func (response Post2faTotpSecondStep200JSONResponse) VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error {
 	ctx.Response().Header.Set("Content-Type", "application/json")
@@ -349,6 +374,15 @@ func (response Post2faTotpSecondStep400JSONResponse) VisitPost2faTotpSecondStepR
 	return ctx.JSON(&response)
 }
 
+type Post2faTotpSecondStep401JSONResponse Error
+
+func (response Post2faTotpSecondStep401JSONResponse) VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(401)
+
+	return ctx.JSON(&response)
+}
+
 type PostLoginRequestObject struct {
 	Body *PostLoginJSONRequestBody
 }
@@ -358,8 +392,8 @@ type PostLoginResponseObject interface {
 }
 
 type PostLogin200JSONResponse struct {
-	Success *bool `json:"success,omitempty"`
-	User    *User `json:"user,omitempty"`
+	Success bool `json:"success"`
+	User    User `json:"user"`
 }
 
 func (response PostLogin200JSONResponse) VisitPostLoginResponse(ctx *fiber.Ctx) error {
@@ -381,6 +415,44 @@ func (response PostLogin400JSONResponse) VisitPostLoginResponse(ctx *fiber.Ctx) 
 type PostLogin401JSONResponse Error
 
 func (response PostLogin401JSONResponse) VisitPostLoginResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(401)
+
+	return ctx.JSON(&response)
+}
+
+type PostLogin2faTotpRequestObject struct {
+	Body *PostLogin2faTotpJSONRequestBody
+}
+
+type PostLogin2faTotpResponseObject interface {
+	VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error
+}
+
+type PostLogin2faTotp200JSONResponse struct {
+	Success bool `json:"success"`
+	User    User `json:"user"`
+}
+
+func (response PostLogin2faTotp200JSONResponse) VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(200)
+
+	return ctx.JSON(&response)
+}
+
+type PostLogin2faTotp400JSONResponse Error
+
+func (response PostLogin2faTotp400JSONResponse) VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(400)
+
+	return ctx.JSON(&response)
+}
+
+type PostLogin2faTotp401JSONResponse Error
+
+func (response PostLogin2faTotp401JSONResponse) VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error {
 	ctx.Response().Header.Set("Content-Type", "application/json")
 	ctx.Status(401)
 
@@ -412,8 +484,8 @@ type PostRegisterResponseObject interface {
 }
 
 type PostRegister200JSONResponse struct {
-	Success *bool `json:"success,omitempty"`
-	User    *User `json:"user,omitempty"`
+	Success bool `json:"success"`
+	User    User `json:"user"`
 }
 
 func (response PostRegister200JSONResponse) VisitPostRegisterResponse(ctx *fiber.Ctx) error {
@@ -503,6 +575,9 @@ type StrictServerInterface interface {
 	// Logs user into the system
 	// (POST /login)
 	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
+	// Logs user into the system
+	// (POST /login/2fa/totp)
+	PostLogin2faTotp(ctx context.Context, request PostLogin2faTotpRequestObject) (PostLogin2faTotpResponseObject, error)
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
@@ -609,6 +684,37 @@ func (sh *strictHandler) PostLogin(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
 	} else if validResponse, ok := response.(PostLoginResponseObject); ok {
 		if err := validResponse.VisitPostLoginResponse(ctx); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// PostLogin2faTotp operation middleware
+func (sh *strictHandler) PostLogin2faTotp(ctx *fiber.Ctx) error {
+	var request PostLogin2faTotpRequestObject
+
+	var body PostLogin2faTotpJSONRequestBody
+	if err := ctx.BodyParser(&body); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	request.Body = &body
+
+	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
+		return sh.ssi.PostLogin2faTotp(ctx.UserContext(), request.(PostLogin2faTotpRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostLogin2faTotp")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	} else if validResponse, ok := response.(PostLogin2faTotpResponseObject); ok {
+		if err := validResponse.VisitPostLogin2faTotpResponse(ctx); err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, err.Error())
 		}
 	} else if response != nil {
@@ -728,31 +834,31 @@ func (sh *strictHandler) GetUsersMe(ctx *fiber.Ctx) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/9KfDIB7GwAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

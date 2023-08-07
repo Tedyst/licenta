@@ -32,6 +32,48 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - success
+                  - user
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /login/2fa/totp:
+    post:
+      summary: Logs user into the system
+      tags:
+        - user
+      requestBody:
+        description: The user to login into.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TOTPLogin'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                required:
+                  - success
+                  - user
                 type: object
                 properties:
                   success:
@@ -81,6 +123,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - success
+                  - user
                 properties:
                   success:
                     type: boolean
@@ -110,8 +155,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TOTPFirstStep'
-        "400":
-          description: Invalid username/password supplied
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -134,9 +179,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Success'
+                type: object
+                required:
+                  - success
+                  - user
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
         "400":
-          description: Invalid username/password supplied
+          description: Invalid field supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -289,6 +348,15 @@ components:
           type: string
           description: The phone number of the user
           example:
+    TOTPLogin:
+      type: object
+      required:
+        - totp_code
+      properties:
+        totp_code:
+          type: string
+          description: The TOTP code
+          example: 123456
     TOTPFirstStep:
       type: object
       required:
@@ -307,8 +375,12 @@ components:
           type: string
           description: The TOTP code
           example: 123456
+          x-oapi-codegen-extra-tags:
+            validate: "numeric,len=6"
     Success:
       type: object
+      required:
+        - success
       properties:
         success:
           type: boolean
