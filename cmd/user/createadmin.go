@@ -1,7 +1,4 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
-package cmd
+package user
 
 import (
 	"context"
@@ -46,5 +43,5 @@ var createadminCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(createadminCmd)
+	userCmd.AddCommand(createadminCmd)
 }

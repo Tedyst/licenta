@@ -1,4 +1,4 @@
-package cmd
+package user
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	database "github.com/tedyst/licenta/db"
 )
 
-var deleteuserCmd = &cobra.Command{
-	Use:   "deleteuser",
+var deleteCmd = &cobra.Command{
+	Use:   "delete [username or email]",
 	Short: "Delete a user by username or email",
 	Long: `Delete a user by username or email. Usage:
 	licenta deleteuser [username or email]`,
@@ -32,5 +32,5 @@ var deleteuserCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(deleteuserCmd)
+	userCmd.AddCommand(deleteCmd)
 }

@@ -1,7 +1,4 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
-package cmd
+package user
 
 import (
 	"context"
@@ -17,6 +14,7 @@ var changepasswordCmd = &cobra.Command{
 	Short: "Change the password of a user",
 	Long: `Change the password of a user. Usage:
 	licenta changepassword [username or email] [new password]`,
+	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
@@ -37,15 +35,5 @@ var changepasswordCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(changepasswordCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// changepasswordCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// changepasswordCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	userCmd.AddCommand(changepasswordCmd)
 }
