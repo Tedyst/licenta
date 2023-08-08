@@ -22,6 +22,15 @@ const (
 	SessionAuthScopes = "sessionAuth.Scopes"
 )
 
+// ChangePasswordLoggedIn defines model for ChangePasswordLoggedIn.
+type ChangePasswordLoggedIn struct {
+	// NewPassword The new password
+	NewPassword string `json:"new_password" validate:"min=8,alphanum"`
+
+	// OldPassword The old password
+	OldPassword string `json:"old_password" validate:"min=8,alphanum"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	// Message Error message
@@ -143,6 +152,9 @@ type PostLogin2faTotpJSONRequestBody = TOTPLogin
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = RegisterUser
 
+// PostUsersMeChangePasswordJSONRequestBody defines body for PostUsersMeChangePassword for application/json ContentType.
+type PostUsersMeChangePasswordJSONRequestBody = ChangePasswordLoggedIn
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// First step of the TOTP authentication process
@@ -169,6 +181,9 @@ type ServerInterface interface {
 	// Get current logged in user
 	// (GET /users/me)
 	GetUsersMe(c *fiber.Ctx) error
+	// Change password of current logged in user
+	// (POST /users/me/change-password)
+	PostUsersMeChangePassword(c *fiber.Ctx) error
 	// Get user by ID
 	// (GET /users/{id})
 	GetUsersId(c *fiber.Ctx, id int64) error
@@ -278,6 +293,14 @@ func (siw *ServerInterfaceWrapper) GetUsersMe(c *fiber.Ctx) error {
 	return siw.Handler.GetUsersMe(c)
 }
 
+// PostUsersMeChangePassword operation middleware
+func (siw *ServerInterfaceWrapper) PostUsersMeChangePassword(c *fiber.Ctx) error {
+
+	c.Context().SetUserValue(SessionAuthScopes, []string{})
+
+	return siw.Handler.PostUsersMeChangePassword(c)
+}
+
 // GetUsersId operation middleware
 func (siw *ServerInterfaceWrapper) GetUsersId(c *fiber.Ctx) error {
 
@@ -332,6 +355,8 @@ func RegisterHandlersWithOptions(router fiber.Router, si ServerInterface, option
 	router.Get(options.BaseURL+"/users", wrapper.GetUsers)
 
 	router.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+
+	router.Post(options.BaseURL+"/users/me/change-password", wrapper.PostUsersMeChangePassword)
 
 	router.Get(options.BaseURL+"/users/:id", wrapper.GetUsersId)
 
@@ -581,6 +606,41 @@ func (response GetUsersMe401JSONResponse) VisitGetUsersMeResponse(ctx *fiber.Ctx
 	return ctx.JSON(&response)
 }
 
+type PostUsersMeChangePasswordRequestObject struct {
+	Body *PostUsersMeChangePasswordJSONRequestBody
+}
+
+type PostUsersMeChangePasswordResponseObject interface {
+	VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error
+}
+
+type PostUsersMeChangePassword200JSONResponse Success
+
+func (response PostUsersMeChangePassword200JSONResponse) VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(200)
+
+	return ctx.JSON(&response)
+}
+
+type PostUsersMeChangePassword400JSONResponse Error
+
+func (response PostUsersMeChangePassword400JSONResponse) VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(400)
+
+	return ctx.JSON(&response)
+}
+
+type PostUsersMeChangePassword401JSONResponse Error
+
+func (response PostUsersMeChangePassword401JSONResponse) VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error {
+	ctx.Response().Header.Set("Content-Type", "application/json")
+	ctx.Status(401)
+
+	return ctx.JSON(&response)
+}
+
 type GetUsersIdRequestObject struct {
 	Id int64 `json:"id"`
 }
@@ -642,6 +702,9 @@ type StrictServerInterface interface {
 	// Get current logged in user
 	// (GET /users/me)
 	GetUsersMe(ctx context.Context, request GetUsersMeRequestObject) (GetUsersMeResponseObject, error)
+	// Change password of current logged in user
+	// (POST /users/me/change-password)
+	PostUsersMeChangePassword(ctx context.Context, request PostUsersMeChangePasswordRequestObject) (PostUsersMeChangePasswordResponseObject, error)
 	// Get user by ID
 	// (GET /users/{id})
 	GetUsersId(ctx context.Context, request GetUsersIdRequestObject) (GetUsersIdResponseObject, error)
@@ -886,6 +949,37 @@ func (sh *strictHandler) GetUsersMe(ctx *fiber.Ctx) error {
 	return nil
 }
 
+// PostUsersMeChangePassword operation middleware
+func (sh *strictHandler) PostUsersMeChangePassword(ctx *fiber.Ctx) error {
+	var request PostUsersMeChangePasswordRequestObject
+
+	var body PostUsersMeChangePasswordJSONRequestBody
+	if err := ctx.BodyParser(&body); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+	request.Body = &body
+
+	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
+		return sh.ssi.PostUsersMeChangePassword(ctx.UserContext(), request.(PostUsersMeChangePasswordRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostUsersMeChangePassword")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	} else if validResponse, ok := response.(PostUsersMeChangePasswordResponseObject); ok {
+		if err := validResponse.VisitPostUsersMeChangePasswordResponse(ctx); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		}
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // GetUsersId operation middleware
 func (sh *strictHandler) GetUsersId(ctx *fiber.Ctx, id int64) error {
 	var request GetUsersIdRequestObject
@@ -916,33 +1010,35 @@ func (sh *strictHandler) GetUsersId(ctx *fiber.Ctx, id int64) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"NScAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

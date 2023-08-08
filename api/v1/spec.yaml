@@ -203,6 +203,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /users/me/change-password:
+    post:
+      summary: Change password of current logged in user
+      tags:
+        - user
+      requestBody:
+        description: The user to login into.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordLoggedIn'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users/me:
     get:
       summary: Get current logged in user
@@ -383,6 +414,23 @@ components:
           type: string
           description: The phone number of the user
           example:
+    ChangePasswordLoggedIn:
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+          description: The old password
+          example: mypassword
+          x-oapi-codegen-extra-tags:
+            validate: "min=8,alphanum"
+        new_password:
+          type: string
+          description: The new password
+          example: mynewpassword
+          x-oapi-codegen-extra-tags:
+            validate: "min=8,alphanum"
     TOTPLogin:
       type: object
       required:

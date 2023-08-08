@@ -9,6 +9,7 @@ import (
 	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
 	"github.com/tedyst/licenta/middleware/session"
+	"github.com/tedyst/licenta/models"
 )
 
 func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
@@ -111,5 +112,48 @@ func (*ServerHandler) GetUsersId(ctx context.Context, request generated.GetUsers
 		Id:       u.ID,
 		Username: u.Username,
 		Email:    u.Email,
+	}, nil
+}
+
+func (*ServerHandler) PostUsersMeChangePassword(ctx context.Context, request generated.PostUsersMeChangePasswordRequestObject) (generated.PostUsersMeChangePasswordResponseObject, error) {
+	err := valid.Struct(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error validating request")
+	}
+
+	user, err := session.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error getting user")
+	}
+	if user == nil {
+		return generated.PostUsersMeChangePassword401JSONResponse{
+			Message: Unauthorized,
+			Success: false,
+		}, nil
+	}
+
+	ok, err := models.VerifyPassword(ctx, user, request.Body.OldPassword)
+	if err != nil {
+		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error verifying password")
+	}
+	if !ok {
+		return generated.PostUsersMeChangePassword401JSONResponse{
+			Message: InvalidCredentials,
+			Success: false,
+		}, nil
+	}
+
+	err = models.SetPassword(ctx, user, request.Body.NewPassword)
+	if err != nil {
+		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error setting password")
+	}
+
+	err = database.DatabaseQueries.UpdateUser(ctx, db.UpdateUserParams{
+		ID:       user.ID,
+		Password: user.Password,
+	})
+
+	return generated.PostUsersMeChangePassword200JSONResponse{
+		Success: true,
 	}, nil
 }
