@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
 	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
@@ -11,16 +12,16 @@ import (
 )
 
 func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
-	_, err := session.GetUser(ctx)
+	user, err := session.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsers: error getting user")
 	}
-	// if user == nil || !user.Admin {
-	// 	return generated.GetUsers401JSONResponse{
-	// 		Message: Unauthorized,
-	// 		Success: false,
-	// 	}, nil
-	// }
+	if user == nil || !user.Admin {
+		return generated.GetUsers401JSONResponse{
+			Message: Unauthorized,
+			Success: false,
+		}, nil
+	}
 
 	count, err := database.DatabaseQueries.CountUsers(ctx)
 	if err != nil {
@@ -53,20 +54,62 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 		}
 	}
 
-	var text = "asd"
-	var intCount = int(count)
+	var nextURL = viper.GetString("baseurl") + Prefix + "/users?limit=" + string(limit) + "&offset=" + string(offset+limit)
+	if int(offset+limit) > int(count) {
+		nextURL = ""
+	}
+	var previousURL = viper.GetString("baseurl") + Prefix + "/users?limit=" + string(limit) + "&offset=" + string(offset-limit)
+	if int(offset-limit) < 0 {
+		previousURL = ""
+	}
+
 	return generated.GetUsers200JSONResponse{
-		Count:    &intCount,
-		Next:     &text,
-		Previous: &text,
-		Results:  &result,
+		Count:    int(count),
+		Next:     nextURL,
+		Previous: previousURL,
+		Results:  result,
 	}, nil
 }
 
 func (*ServerHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
-	return nil, nil
+	user, err := session.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUsersMe: error getting user")
+	}
+	if user == nil {
+		return generated.GetUsersMe401JSONResponse{
+			Message: Unauthorized,
+			Success: false,
+		}, nil
+	}
+
+	return generated.GetUsersMe200JSONResponse{
+		Id:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	}, nil
 }
 
-func (*ServerHandler) GetUsersId(context.Context, generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
-	return nil, nil
+func (*ServerHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
+	user, err := session.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUsersId: error getting user")
+	}
+	if user == nil || !user.Admin {
+		return generated.GetUsersId401JSONResponse{
+			Message: Unauthorized,
+			Success: false,
+		}, nil
+	}
+
+	u, err := database.DatabaseQueries.GetUser(ctx, request.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUsersId: error getting user")
+	}
+
+	return generated.GetUsersId200JSONResponse{
+		Id:       u.ID,
+		Username: u.Username,
+		Email:    u.Email,
+	}, nil
 }

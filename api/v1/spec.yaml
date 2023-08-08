@@ -422,6 +422,11 @@ components:
           description: The success status
           example: true
     PaginatedResult:
+      required:
+        - count
+        - next
+        - previous
+        - results
       type: object
       properties:
         count:
