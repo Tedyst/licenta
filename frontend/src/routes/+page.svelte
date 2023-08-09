@@ -10,3 +10,7 @@
 <p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
 
 <button class="btn btn-secondary" on:click={toggleTheme}>Secondary</button>
+
+<svelte:head>
+	<title>SvelteKit</title>
+</svelte:head>
