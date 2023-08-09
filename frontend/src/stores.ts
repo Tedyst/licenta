@@ -1,3 +1,3 @@
-import { persisted } from "svelte-local-storage-store";
+import { persisted } from 'svelte-local-storage-store';
 
-export const theme = persisted("theme", "light");
+export const theme = persisted('theme', 'light');
