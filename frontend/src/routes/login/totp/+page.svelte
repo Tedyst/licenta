@@ -33,8 +33,20 @@
 </script>
 
 <div
-	in:flyabsolute={{ delay: 0, duration: 500, easing: quartInOut, x: 300 }}
-	out:flyabsolute={{ delay: 0, duration: 500, easing: quartInOut, x: 300 }}
+	in:flyabsolute={{
+		delay: 0,
+		duration: 500,
+		easing: quartInOut,
+		x: 300,
+		otherStyling: 'text-align: center; padding: 2rem;'
+	}}
+	out:flyabsolute={{
+		delay: 0,
+		duration: 500,
+		easing: quartInOut,
+		x: 300,
+		otherStyling: 'text-align: center; padding: 2rem;'
+	}}
 >
 	<Login2fa {errors} on:submit={onSubmit} />
 </div>

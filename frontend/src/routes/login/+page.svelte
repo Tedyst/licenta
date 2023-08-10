@@ -41,8 +41,19 @@
 </script>
 
 <div
-	in:flyabsolute={{ delay: 0, duration: 500, easing: quartInOut, x: -300 }}
-	out:flyabsolute={{ duration: 500, easing: quartInOut, x: -300 }}
+	in:flyabsolute={{
+		delay: 0,
+		duration: 500,
+		easing: quartInOut,
+		x: -300,
+		otherStyling: 'text-align: center; padding: 2rem;'
+	}}
+	out:flyabsolute={{
+		duration: 500,
+		easing: quartInOut,
+		x: -300,
+		otherStyling: 'text-align: center; padding: 2rem;'
+	}}
 >
 	<Login on:submit={onSubmit} bind:errors bind:loading />
 </div>
