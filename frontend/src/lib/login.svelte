@@ -24,6 +24,7 @@
 				: ''} transition-colors duration-300 ease-in-out"
 			id="email"
 			name="email"
+			autocomplete="email"
 		/>
 	</div>
 	<div class="form-control">
@@ -38,6 +39,7 @@
 				: ''} transition-colors duration-300 ease-in-out"
 			id="password"
 			name="password"
+			autocomplete="current-password"
 		/>
 		{#if errors.password}
 			<div class="label text-error text-xs">

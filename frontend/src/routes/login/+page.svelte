@@ -50,6 +50,8 @@
 		}
 
 		need2fa = true;
+		twofaErrors = {};
+		loginErrors = {};
 	};
 
 	let on2faSubmit = (e: SubmitEvent) => {
@@ -85,7 +87,7 @@
 	}
 </script>
 
-<div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+<div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100 overflow-hidden" id="/">
 	<div class="card-body">
 		{#if need2fa}
 			<div

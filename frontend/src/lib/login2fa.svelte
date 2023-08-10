@@ -31,9 +31,9 @@
 		{/if}
 
 		<div class="label">
-			<a href="/login" class="label-text-alt link link-hover" on:click={goBackToLoginPage}
-				>Click here to go back to the login page</a
-			>
+			<button class="label-text-alt link link-hover" on:click={goBackToLoginPage}>
+				Click here to go back to the login page
+			</button>
 		</div>
 	</div>
 	<div class="form-control mt-6">
