@@ -1,3 +1,4 @@
 {
-    "go.buildTags": "postmark"
+    "go.buildTags": "postmark",
+    "editor.formatOnSave": true
 }
