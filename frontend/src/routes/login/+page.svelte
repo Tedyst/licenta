@@ -7,6 +7,7 @@
 	import { onMount } from 'svelte';
 
 	let need2fa = false;
+	let loginFetching = false;
 
 	let loginErrors: {
 		email?: string;
@@ -24,7 +25,6 @@
 	}
 
 	function validatePassword(password: string) {
-		return '';
 		if (password.length < 8) {
 			return 'Password must be at least 8 characters long';
 		}
@@ -49,9 +49,14 @@
 			return;
 		}
 
-		need2fa = true;
-		twofaErrors = {};
-		loginErrors = {};
+		loginFetching = true;
+
+		setTimeout(() => {
+			loginFetching = false;
+			need2fa = true;
+			twofaErrors = {};
+			loginErrors = {};
+		}, 1000);
 	};
 
 	let on2faSubmit = (e: SubmitEvent) => {
@@ -87,8 +92,11 @@
 	}
 </script>
 
-<div class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100 overflow-hidden" id="/">
-	<div class="card-body">
+<div
+	class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100 overflow-hidden h-[350px]"
+	id="/"
+>
+	<div class="card-body absolute justify-center m-0 left-0 right-0 top-0 bottom-0 text-center">
 		{#if need2fa}
 			<div
 				in:makeabsolute={{ delay: 0, duration: 500, easing: quartInOut, x: 300 }}
@@ -101,7 +109,7 @@
 				in:fly={{ delay: 0, duration: 500, easing: quartInOut, x: -300 }}
 				out:fly={{ duration: 500, easing: quartInOut, x: -300 }}
 			>
-				<Login on:submit={onLoginSubmit} bind:errors={loginErrors} />
+				<Login on:submit={onLoginSubmit} bind:errors={loginErrors} bind:loading={loginFetching} />
 			</div>
 		{/if}
 	</div>

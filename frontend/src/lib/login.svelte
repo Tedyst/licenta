@@ -5,9 +5,15 @@
 		password?: string;
 		email?: string;
 	} = {};
+	export let loading: boolean = false;
 
 	function clearErrors() {
 		errors = {};
+	}
+
+	let color = 'btn-primary';
+	if (Object.keys(errors).length > 0) {
+		color = 'btn-error';
 	}
 </script>
 
@@ -56,7 +62,12 @@
 			class="btn {Object.keys(errors).length === 0
 				? 'btn-primary'
 				: 'btn-error'} transition-colors duration-300 ease-in-out"
-			type="submit">Login</button
+			type="submit"
 		>
+			{#if loading}
+				<span class="loading loading-spinner" />
+			{/if}
+			Login
+		</button>
 	</div>
 </form>
