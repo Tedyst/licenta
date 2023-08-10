@@ -15,10 +15,10 @@
 <svelte:head>
 	<script>
 		(function () {
-			let temp = localStorage.getItem('theme');
-			if (temp) {
+			let localTheme = localStorage.getItem('theme');
+			if (localTheme) {
 				if (typeof document === 'undefined') return;
-				document.documentElement.setAttribute('data-theme', JSON.parse(temp));
+				document.documentElement.setAttribute('data-theme', JSON.parse(localTheme));
 			}
 		})();
 	</script>
