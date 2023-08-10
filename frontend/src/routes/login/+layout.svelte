@@ -17,3 +17,8 @@
 		</div>
 	</div>
 </div>
+
+<svelte:head>
+	<title>Login</title>
+	<meta name="description" content="Login to your account" />
+</svelte:head>

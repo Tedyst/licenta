@@ -1,7 +1,8 @@
 <script lang="ts">
 	export let errors: {
 		token: string | null;
-	} = { token: null };
+	};
+	export let loading: boolean = false;
 </script>
 
 <form on:submit|preventDefault on:input={() => (errors = { token: null })}>
@@ -31,6 +32,9 @@
 		</div>
 	</div>
 	<div class="form-control mt-6">
+		{#if loading}
+			<span class="loading loading-spinner" />
+		{/if}
 		<button
 			class="btn {!errors.token
 				? 'btn-primary'

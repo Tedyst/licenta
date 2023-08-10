@@ -12,11 +12,11 @@
 <form on:submit|preventDefault on:input={() => (errors = { password: null, email: null })}>
 	<div class="form-control">
 		<label class="label" for="email">
-			<span class="label-text">Email/Username</span>
+			<span class="label-text">Username or Email</span>
 		</label>
 		<input
 			type="text"
-			placeholder="email/username"
+			placeholder="username/email"
 			class="input input-bordered {errors.email
 				? 'wiggle input-error'
 				: ''} transition-colors duration-300 ease-in-out"
@@ -46,7 +46,7 @@
 		{/if}
 
 		<div class="label">
-			<a href="/" class="label-text-alt link link-hover">Forgot password?</a>
+			<a href="/login/forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
 		</div>
 	</div>
 	<div class="form-control mt-6">
