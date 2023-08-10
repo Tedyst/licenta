@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { quartInOut } from 'svelte/easing';
 	import { flyabsolute } from '$lib/animations';
-	import { validatePassword, validateUsername } from '$lib/login';
+	import { validatePassword, validateUsername } from '$lib/login/login';
 
-	import Login from '$lib/login.svelte';
+	import Login from '$lib/login/login.svelte';
 	import { goto } from '$app/navigation';
 
 	let loading = false;

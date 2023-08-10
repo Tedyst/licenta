@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { quartInOut } from 'svelte/easing';
 	import { flyabsolute } from '$lib/animations';
-	import { validateUsername } from '$lib/login';
-	import Login2fa from '$lib/login2fa.svelte';
+	import { validateUsername } from '$lib/login/login';
+	import Login2fa from '$lib/login/login-totp.svelte';
 	import { goto } from '$app/navigation';
-	import ForgotPassword from '$lib/forgot-password.svelte';
+	import ForgotPassword from '$lib/login/forgot-password.svelte';
 
 	let loading = false;
 	let sent = false;

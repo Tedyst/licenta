@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { quartInOut } from 'svelte/easing';
 	import { flyabsolute } from '$lib/animations';
-	import { validateTOTPToken } from '$lib/login';
-	import Login2fa from '$lib/login2fa.svelte';
+	import { validateTOTPToken } from '$lib/login/login';
+	import Login2fa from '$lib/login/login-totp.svelte';
 	import { goto } from '$app/navigation';
 
 	let loading = false;
 	let errors: {
 		token: string | null;
+	} = {
+		token: null
 	};
 
 	let onSubmit = (e: SubmitEvent) => {
