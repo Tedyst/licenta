@@ -1,16 +1,10 @@
 <script lang="ts">
-	const token: string = '';
 	export let errors: {
-		token?: string;
-	} = {};
-	export let goBackToLoginPage: () => void;
-
-	function clearErrors() {
-		errors = {};
-	}
+		token: string | null;
+	} = { token: null };
 </script>
 
-<form on:submit|preventDefault on:input={clearErrors}>
+<form on:submit|preventDefault on:input={() => (errors = { token: null })}>
 	<div class="form-control">
 		<label class="label" for="token">
 			<span class="label-text">2FA Token</span>
@@ -31,14 +25,14 @@
 		{/if}
 
 		<div class="label">
-			<button class="label-text-alt link link-hover" on:click={goBackToLoginPage}>
+			<a class="label-text-alt link link-hover" href="/login">
 				Click here to go back to the login page
-			</button>
+			</a>
 		</div>
 	</div>
 	<div class="form-control mt-6">
 		<button
-			class="btn {Object.keys(errors).length === 0
+			class="btn {!errors.token
 				? 'btn-primary'
 				: 'btn-error'} transition-colors duration-300 ease-in-out"
 			type="submit">Login</button

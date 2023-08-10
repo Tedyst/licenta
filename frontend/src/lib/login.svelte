@@ -1,30 +1,22 @@
 <script lang="ts">
-	const email: string = '';
-	const password: string = '';
 	export let errors: {
-		password?: string;
-		email?: string;
-	} = {};
+		password: string | null;
+		email: string | null;
+	} = {
+		password: null,
+		email: null
+	};
 	export let loading: boolean = false;
-
-	function clearErrors() {
-		errors = {};
-	}
-
-	let color = 'btn-primary';
-	if (Object.keys(errors).length > 0) {
-		color = 'btn-error';
-	}
 </script>
 
-<form on:submit|preventDefault on:input={clearErrors}>
+<form on:submit|preventDefault on:input={() => (errors = { password: null, email: null })}>
 	<div class="form-control">
 		<label class="label" for="email">
-			<span class="label-text">Email</span>
+			<span class="label-text">Email/Username</span>
 		</label>
 		<input
-			type="email"
-			placeholder="email"
+			type="text"
+			placeholder="email/username"
 			class="input input-bordered {errors.email
 				? 'wiggle input-error'
 				: ''} transition-colors duration-300 ease-in-out"
@@ -54,12 +46,12 @@
 		{/if}
 
 		<div class="label">
-			<a href="#/" class="label-text-alt link link-hover">Forgot password?</a>
+			<a href="/" class="label-text-alt link link-hover">Forgot password?</a>
 		</div>
 	</div>
 	<div class="form-control mt-6">
 		<button
-			class="btn {Object.keys(errors).length === 0
+			class="btn {!errors.password && !errors.email
 				? 'btn-primary'
 				: 'btn-error'} transition-colors duration-300 ease-in-out"
 			type="submit"
