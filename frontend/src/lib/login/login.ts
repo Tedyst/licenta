@@ -1,3 +1,5 @@
+import { writable } from 'svelte/store';
+
 export function validatePassword(password: string): string | null {
 	return password.length >= 8 ? null : 'Password must be at least 8 characters long';
 }
@@ -18,3 +20,5 @@ export function validateTOTPToken(token: string): string | null {
 	}
 	return null;
 }
+
+export const username = writable('');

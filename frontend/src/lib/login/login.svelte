@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let username: string;
 	export let errors: {
 		password: string | null;
 		email: string | null;
@@ -23,6 +24,7 @@
 			id="email"
 			name="email"
 			autocomplete="email"
+			bind:value={username}
 		/>
 	</div>
 	<div class="form-control">
@@ -47,6 +49,12 @@
 
 		<div class="label">
 			<a href="/login/forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
+		</div>
+
+		<div class="label">
+			<a href="/login/webauthn" class="label-text-alt link link-hover">
+				Sign in using a security key
+			</a>
 		</div>
 	</div>
 	<div class="form-control mt-6">

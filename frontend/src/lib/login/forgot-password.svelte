@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let username: string;
 	export let errors: {
 		username: string | null;
 	};
@@ -16,7 +17,7 @@
 
 <form on:submit|preventDefault on:input={() => (errors = { username: null })}>
 	<div class="form-control">
-		<label class="label" for="token">
+		<label class="label" for="username">
 			<span class="label-text">Username or Email</span>
 		</label>
 		<input
@@ -25,8 +26,9 @@
 			class="input input-bordered {errors.username
 				? 'wiggle input-error'
 				: ''} transition-colors duration-300 ease-in-out"
-			id="token"
-			name="token"
+			id="username"
+			name="username"
+			bind:value={username}
 		/>
 		{#if errors.username}
 			<div class="label text-error text-xs">

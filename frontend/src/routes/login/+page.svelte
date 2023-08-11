@@ -2,6 +2,7 @@
 	import { quartInOut } from 'svelte/easing';
 	import { flyabsolute } from '$lib/animations';
 	import { validatePassword, validateUsername } from '$lib/login/login';
+	import { username } from '$lib/login/login';
 
 	import Login from '$lib/login/login.svelte';
 	import { goto } from '$app/navigation';
@@ -55,5 +56,5 @@
 		otherStyling: 'text-align: center; padding: 2rem;'
 	}}
 >
-	<Login on:submit={onSubmit} bind:errors bind:loading />
+	<Login on:submit={onSubmit} bind:errors bind:loading bind:username={$username} />
 </div>

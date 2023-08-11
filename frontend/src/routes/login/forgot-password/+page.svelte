@@ -2,9 +2,9 @@
 	import { quartInOut } from 'svelte/easing';
 	import { flyabsolute } from '$lib/animations';
 	import { validateUsername } from '$lib/login/login';
-	import Login2fa from '$lib/login/login-totp.svelte';
 	import { goto } from '$app/navigation';
 	import ForgotPassword from '$lib/login/forgot-password.svelte';
+	import { username as usernameStore } from '$lib/login/login';
 
 	let loading = false;
 	let sent = false;
@@ -16,13 +16,13 @@
 
 	let onSubmit = (e: SubmitEvent) => {
 		const formData = new FormData(e.target as HTMLFormElement);
-		let token = formData.get('token');
-		if (typeof token !== 'string') {
-			throw new Error('Token must be a string');
+		let username = formData.get('username');
+		if (typeof username !== 'string') {
+			throw new Error('username must be a string');
 		}
 
 		errors = {
-			username: validateUsername(token)
+			username: validateUsername(username)
 		};
 		if (errors.username) {
 			return;
@@ -57,5 +57,5 @@
 		otherStyling: 'text-align: center; padding: 2rem;'
 	}}
 >
-	<ForgotPassword {errors} on:submit={onSubmit} {loading} {sent} />
+	<ForgotPassword {errors} on:submit={onSubmit} {loading} {sent} bind:username={$usernameStore} />
 </div>
