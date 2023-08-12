@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"database/sql"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -16,6 +17,7 @@ var changepasswordCmd = &cobra.Command{
 	licenta changepassword [username or email] [new password]`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
+		database.InitDatabase()
 		user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
 			panic(err)
@@ -25,7 +27,7 @@ var changepasswordCmd = &cobra.Command{
 		}
 		err = database.DatabaseQueries.UpdateUser(context.Background(), db.UpdateUserParams{
 			ID:       user.ID,
-			Password: args[1],
+			Password: sql.NullString{Valid: true, String: args[1]},
 		})
 		if err != nil {
 			log.Panic(err)

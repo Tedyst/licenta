@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -85,9 +86,12 @@ func (*ServerHandler) GetUsersMe(ctx context.Context, request generated.GetUsers
 	}
 
 	return generated.GetUsersMe200JSONResponse{
-		Id:       user.ID,
-		Username: user.Username,
-		Email:    user.Email,
+		Success: true,
+		User: generated.User{
+			Id:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		},
 	}, nil
 }
 
@@ -150,7 +154,7 @@ func (*ServerHandler) PostUsersMeChangePassword(ctx context.Context, request gen
 
 	err = database.DatabaseQueries.UpdateUser(ctx, db.UpdateUserParams{
 		ID:       user.ID,
-		Password: user.Password,
+		Password: sql.NullString{Valid: true, String: user.Password},
 	})
 
 	return generated.PostUsersMeChangePassword200JSONResponse{

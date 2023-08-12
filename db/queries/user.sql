@@ -1,72 +1,118 @@
 -- name: GetUser :one
-SELECT * FROM users
-WHERE id = $1 LIMIT 1;
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+LIMIT 1;
 
 -- name: ListUsers :many
-SELECT * FROM users
+SELECT
+  *
+FROM
+  users
 WHERE
-CASE WHEN @username::text = '' THEN TRUE ELSE username = @username::text END
-AND
-CASE WHEN @email::text = '' THEN TRUE ELSE email = @email::text END
-AND
-CASE WHEN @admin::text = '' THEN TRUE ELSE admin = @admin::boolean END
-ORDER BY id;
+  CASE WHEN @username::text = '' THEN
+    TRUE
+  ELSE
+    username = @username::text
+  END
+  AND CASE WHEN @email::text = '' THEN
+    TRUE
+  ELSE
+    email = @email::text
+  END
+  AND CASE WHEN @admin::text = '' THEN
+    TRUE
+  ELSE
+    admin = @admin::boolean
+  END
+ORDER BY
+  id;
 
 -- name: ListUsersPaginated :many
-SELECT * FROM users
-ORDER BY id
+SELECT
+  *
+FROM
+  users
+ORDER BY
+  id
 LIMIT $1 OFFSET $2;
 
 -- name: CountUsers :one
-SELECT COUNT(*) FROM users;
+SELECT
+  COUNT(*)
+FROM
+  users;
 
 -- name: CreateUser :one
-INSERT INTO users (
-  username, password, email
-) VALUES (
-  $1, $2, $3
-)
-RETURNING *;
+INSERT INTO users(username, PASSWORD, email)
+  VALUES ($1, $2, $3)
+RETURNING
+  *;
 
 -- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = $1;
 
 -- name: UpdateUser :exec
-UPDATE users SET
-    username = $2,
-    password = $3,
-    email = $4,
-    admin = $5
-WHERE id = $1;
+UPDATE
+  users
+SET
+  username = coalesce(sqlc.narg(username), username),
+  PASSWORD = coalesce(sqlc.narg(PASSWORD), PASSWORD),
+  email = coalesce(sqlc.narg(email), email),
+  admin = coalesce(sqlc.narg(admin), admin)
+WHERE
+  id = sqlc.arg(id);
 
 -- name: GetUserByUsernameOrEmail :one
-SELECT * FROM users
-WHERE username = $1 OR email = $1 LIMIT 1;
+SELECT
+  *
+FROM
+  users
+WHERE
+  username = $1
+  OR email = $1
+LIMIT 1;
 
 -- name: UpdateUserTOTPSecret :exec
-UPDATE users SET
-    totp_secret = $2
-WHERE id = $1;
+UPDATE
+  users
+SET
+  totp_secret = $2
+WHERE
+  id = $1;
 
 -- name: UpdateUserPassword :exec
-UPDATE users SET
-    password = $2
-WHERE id = $1;
+UPDATE
+  users
+SET
+  PASSWORD = $2
+WHERE
+  id = $1;
 
 -- name: CreateResetPasswordToken :one
-INSERT INTO reset_password_tokens (
-  id, user_id
-) VALUES (
-  $1, $2
-)
-RETURNING *;
+INSERT INTO reset_password_tokens(id, user_id)
+  VALUES ($1, $2)
+RETURNING
+  *;
 
 -- name: GetResetPasswordToken :one
-SELECT * FROM reset_password_tokens
-WHERE id = $1 LIMIT 1;
+SELECT
+  *
+FROM
+  reset_password_tokens
+WHERE
+  id = $1
+LIMIT 1;
 
 -- name: InvalidateResetPasswordToken :exec
-UPDATE reset_password_tokens SET
-    valid = FALSE
-WHERE id = $1;
+UPDATE
+  reset_password_tokens
+SET
+  valid = FALSE
+WHERE
+  id = $1;
+

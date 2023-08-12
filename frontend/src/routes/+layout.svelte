@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { theme } from '../stores';
+	import { theme } from '../lib/stores';
 	import { browser } from '$app/environment';
 
 	$: if (browser) {

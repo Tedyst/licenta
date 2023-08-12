@@ -2,9 +2,11 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/spf13/cobra"
 	database "github.com/tedyst/licenta/db"
 )
@@ -16,18 +18,19 @@ var deleteCmd = &cobra.Command{
 	licenta deleteuser [username or email]`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		database.InitDatabase()
 		user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
-			panic(err)
-		}
-		if user == nil {
-			log.Panic("User does not exist.")
+			if errors.Is(err, pgx.ErrNoRows) {
+				log.Fatal("User does not exist.")
+			}
+			log.Panic(err)
 		}
 		err = database.DatabaseQueries.DeleteUser(context.Background(), user.ID)
 		if err != nil {
 			log.Panic(err)
 		}
-		fmt.Println("User deleted.")
+		fmt.Printf("User %s deleted.", user.Username)
 	},
 }
 

@@ -3,7 +3,7 @@
 		<div class="text-center lg:text-left">
 			<h1 class="text-5xl font-bold">Login now!</h1>
 			<p class="py-6 md:w-max max-w-md">
-				Please appreciate my login animation. I spent 3 hours on it instead of working for my job.
+				Please appreciate my login animation. I spent 8 hours on it instead of working for my job.
 				Help
 			</p>
 		</div>

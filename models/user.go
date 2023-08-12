@@ -37,21 +37,28 @@ type params struct {
 	keyLength   uint32
 }
 
-func SetPassword(ctx context.Context, u *db.User, password string) error {
-	_, span := telemetry.Tracer.Start(ctx, "SetPassword")
+func GenerateHash(ctx context.Context, password string) (string, error) {
+	_, span := telemetry.Tracer.Start(ctx, "GenerateHash")
 	defer span.End()
 
 	salt, err := generateRandomBytes(argon2SaltLength)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	hash := argon2.IDKey([]byte(password), append(PasswordPepper, salt...), argon2Iterations, argon2Memory, argon2Parallelism, argon2KeyLength)
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Hash := base64.RawStdEncoding.EncodeToString(hash)
 	encodedHash := fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, argon2Memory, argon2Iterations, argon2Parallelism, b64Salt, b64Hash)
-	u.Password = encodedHash
-	return nil
+	return encodedHash, nil
+}
+
+func SetPassword(ctx context.Context, u *db.User, password string) error {
+	p, err := GenerateHash(ctx, password)
+	if err != nil {
+		u.Password = p
+	}
+	return err
 }
 
 func VerifyPassword(ctx context.Context, u *db.User, password string) (bool, error) {

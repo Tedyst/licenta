@@ -29,7 +29,7 @@
 		loading = true;
 
 		setTimeout(() => {
-			goto('/');
+			goto('/dashboard');
 		}, 1000);
 	};
 </script>

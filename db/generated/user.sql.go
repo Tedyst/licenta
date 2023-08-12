@@ -13,7 +13,10 @@ import (
 )
 
 const countUsers = `-- name: CountUsers :one
-SELECT COUNT(*) FROM users
+SELECT
+  COUNT(*)
+FROM
+  users
 `
 
 func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
@@ -24,12 +27,10 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 }
 
 const createResetPasswordToken = `-- name: CreateResetPasswordToken :one
-INSERT INTO reset_password_tokens (
-  id, user_id
-) VALUES (
-  $1, $2
-)
-RETURNING id, user_id, valid, created_at
+INSERT INTO reset_password_tokens(id, user_id)
+  VALUES ($1, $2)
+RETURNING
+  id, user_id, valid, created_at
 `
 
 type CreateResetPasswordTokenParams struct {
@@ -50,12 +51,10 @@ func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetP
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (
-  username, password, email
-) VALUES (
-  $1, $2, $3
-)
-RETURNING id, username, password, email, admin, totp_secret
+INSERT INTO users(username, PASSWORD, email)
+  VALUES ($1, $2, $3)
+RETURNING
+  id, username, password, email, admin, totp_secret
 `
 
 type CreateUserParams struct {
@@ -89,8 +88,13 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 }
 
 const getResetPasswordToken = `-- name: GetResetPasswordToken :one
-SELECT id, user_id, valid, created_at FROM reset_password_tokens
-WHERE id = $1 LIMIT 1
+SELECT
+  id, user_id, valid, created_at
+FROM
+  reset_password_tokens
+WHERE
+  id = $1
+LIMIT 1
 `
 
 func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error) {
@@ -106,8 +110,13 @@ func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*Res
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, password, email, admin, totp_secret FROM users
-WHERE id = $1 LIMIT 1
+SELECT
+  id, username, password, email, admin, totp_secret
+FROM
+  users
+WHERE
+  id = $1
+LIMIT 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
@@ -125,8 +134,14 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 }
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
-SELECT id, username, password, email, admin, totp_secret FROM users
-WHERE username = $1 OR email = $1 LIMIT 1
+SELECT
+  id, username, password, email, admin, totp_secret
+FROM
+  users
+WHERE
+  username = $1
+  OR email = $1
+LIMIT 1
 `
 
 func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error) {
@@ -144,9 +159,12 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string)
 }
 
 const invalidateResetPasswordToken = `-- name: InvalidateResetPasswordToken :exec
-UPDATE reset_password_tokens SET
-    valid = FALSE
-WHERE id = $1
+UPDATE
+  reset_password_tokens
+SET
+  valid = FALSE
+WHERE
+  id = $1
 `
 
 func (q *Queries) InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error {
@@ -155,14 +173,28 @@ func (q *Queries) InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, username, password, email, admin, totp_secret FROM users
+SELECT
+  id, username, password, email, admin, totp_secret
+FROM
+  users
 WHERE
-CASE WHEN $1::text = '' THEN TRUE ELSE username = $1::text END
-AND
-CASE WHEN $2::text = '' THEN TRUE ELSE email = $2::text END
-AND
-CASE WHEN $3::text = '' THEN TRUE ELSE admin = $3::boolean END
-ORDER BY id
+  CASE WHEN $1::text = '' THEN
+    TRUE
+  ELSE
+    username = $1::text
+  END
+  AND CASE WHEN $2::text = '' THEN
+    TRUE
+  ELSE
+    email = $2::text
+  END
+  AND CASE WHEN $3::text = '' THEN
+    TRUE
+  ELSE
+    admin = $3::boolean
+  END
+ORDER BY
+  id
 `
 
 type ListUsersParams struct {
@@ -199,8 +231,12 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 }
 
 const listUsersPaginated = `-- name: ListUsersPaginated :many
-SELECT id, username, password, email, admin, totp_secret FROM users
-ORDER BY id
+SELECT
+  id, username, password, email, admin, totp_secret
+FROM
+  users
+ORDER BY
+  id
 LIMIT $1 OFFSET $2
 `
 
@@ -237,37 +273,43 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 }
 
 const updateUser = `-- name: UpdateUser :exec
-UPDATE users SET
-    username = $2,
-    password = $3,
-    email = $4,
-    admin = $5
-WHERE id = $1
+UPDATE
+  users
+SET
+  username = coalesce($1, username),
+  PASSWORD = coalesce($2, PASSWORD),
+  email = coalesce($3, email),
+  admin = coalesce($4, admin)
+WHERE
+  id = $5
 `
 
 type UpdateUserParams struct {
+	Username sql.NullString
+	Password sql.NullString
+	Email    sql.NullString
+	Admin    sql.NullBool
 	ID       int64
-	Username string
-	Password string
-	Email    string
-	Admin    bool
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.Exec(ctx, updateUser,
-		arg.ID,
 		arg.Username,
 		arg.Password,
 		arg.Email,
 		arg.Admin,
+		arg.ID,
 	)
 	return err
 }
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
-UPDATE users SET
-    password = $2
-WHERE id = $1
+UPDATE
+  users
+SET
+  PASSWORD = $2
+WHERE
+  id = $1
 `
 
 type UpdateUserPasswordParams struct {
@@ -281,9 +323,12 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 }
 
 const updateUserTOTPSecret = `-- name: UpdateUserTOTPSecret :exec
-UPDATE users SET
-    totp_secret = $2
-WHERE id = $1
+UPDATE
+  users
+SET
+  totp_secret = $2
+WHERE
+  id = $1
 `
 
 type UpdateUserTOTPSecretParams struct {

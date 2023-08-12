@@ -2,11 +2,15 @@ package user
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"log"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/spf13/cobra"
 	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/models"
 )
 
 // createadminCmd represents the createadmin command
@@ -16,16 +20,21 @@ var createadminCmd = &cobra.Command{
 	Long:  `Create an admin user with the provided email and password.`,
 	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
-		user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
+		database.InitDatabase()
+		_, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
+		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+			log.Panic(err)
+		}
+		if err == nil {
+			log.Fatal("User already exists.")
+		}
+		password, err := models.GenerateHash(context.Background(), args[1])
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
-		if user != nil {
-			log.Panic("User already exists. Please use a different username or email.")
-		}
-		user, err = database.DatabaseQueries.CreateUser(context.Background(), db.CreateUserParams{
+		user, err := database.DatabaseQueries.CreateUser(context.Background(), db.CreateUserParams{
 			Email:    args[0],
-			Password: args[1],
+			Password: password,
 			Username: args[2],
 		})
 		if err != nil {
@@ -33,12 +42,12 @@ var createadminCmd = &cobra.Command{
 		}
 		err = database.DatabaseQueries.UpdateUser(context.Background(), db.UpdateUserParams{
 			ID:    user.ID,
-			Admin: true,
+			Admin: sql.NullBool{Valid: true, Bool: true},
 		})
 		if err != nil {
 			log.Panic(err)
 		}
-
+		log.Printf("Admin user %s created.", user.Username)
 	},
 }
 

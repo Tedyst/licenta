@@ -2,28 +2,46 @@
 	export let username: string;
 	export let errors: {
 		password: string | null;
-		email: string | null;
+		username: string | null;
 	} = {
 		password: null,
-		email: null
+		username: null
 	};
 	export let loading: boolean = false;
+	export let onSubmit: (data: { username: string; password: string }) => void;
+
+	const submit = (e: SubmitEvent) => {
+		const formData = new FormData(e.target as HTMLFormElement);
+		let username = formData.get('username');
+		let password = formData.get('password');
+		if (typeof username !== 'string') {
+			throw new Error('username must be a string');
+		}
+		if (typeof password !== 'string') {
+			throw new Error('Password must be a string');
+		}
+
+		onSubmit({ username, password });
+	};
 </script>
 
-<form on:submit|preventDefault on:input={() => (errors = { password: null, email: null })}>
+<form
+	on:submit|preventDefault={submit}
+	on:input={() => (errors = { password: null, username: null })}
+>
 	<div class="form-control">
-		<label class="label" for="email">
-			<span class="label-text">Username or Email</span>
+		<label class="label" for="username">
+			<span class="label-text">Username or username</span>
 		</label>
 		<input
 			type="text"
-			placeholder="username/email"
-			class="input input-bordered {errors.email
+			placeholder="username/username"
+			class="input input-bordered {errors.username
 				? 'wiggle input-error'
 				: ''} transition-colors duration-300 ease-in-out"
-			id="email"
-			name="email"
-			autocomplete="email"
+			id="username"
+			name="username"
+			autocomplete="username"
 			bind:value={username}
 		/>
 	</div>
@@ -59,7 +77,7 @@
 	</div>
 	<div class="form-control mt-6">
 		<button
-			class="btn {!errors.password && !errors.email
+			class="btn {!errors.password && !errors.username
 				? 'btn-primary'
 				: 'btn-error'} transition-colors duration-300 ease-in-out"
 			type="submit"

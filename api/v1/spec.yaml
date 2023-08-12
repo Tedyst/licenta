@@ -245,7 +245,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                required:
+                  - success
+                  - user
+                properties:
+                  success:
+                    type: boolean
+                  user:
+                    $ref: '#/components/schemas/User'
         "401":
           description: Unauthorized
           content:
