@@ -1,6 +1,6 @@
 package: generated
 generate:
-  fiber-server: true
+  chi-server: true
   strict-server: true
   models: true
   embedded-spec: true

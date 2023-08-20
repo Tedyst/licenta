@@ -7,17 +7,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
-	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
-	"github.com/tedyst/licenta/middleware/session"
 	"github.com/tedyst/licenta/models"
 )
 
-func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
-	user, err := session.GetUser(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "GetUsers: error getting user")
-	}
+func (server *serverHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
+	user := server.SessionStore.GetUser(ctx)
 	if user == nil || !user.Admin {
 		return generated.GetUsers401JSONResponse{
 			Message: Unauthorized,
@@ -25,7 +20,7 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 		}, nil
 	}
 
-	count, err := database.DatabaseQueries.CountUsers(ctx)
+	count, err := server.Queries.CountUsers(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsers: error cou7nting users")
 	}
@@ -39,7 +34,7 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 		offset = *request.Params.Offset
 	}
 
-	users, err := database.DatabaseQueries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
+	users, err := server.Queries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -73,11 +68,8 @@ func (*ServerHandler) GetUsers(ctx context.Context, request generated.GetUsersRe
 	}, nil
 }
 
-func (*ServerHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
-	user, err := session.GetUser(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "GetUsersMe: error getting user")
-	}
+func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
+	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
 		return generated.GetUsersMe401JSONResponse{
 			Message: Unauthorized,
@@ -95,11 +87,8 @@ func (*ServerHandler) GetUsersMe(ctx context.Context, request generated.GetUsers
 	}, nil
 }
 
-func (*ServerHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
-	user, err := session.GetUser(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "GetUsersId: error getting user")
-	}
+func (server *serverHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
+	user := server.SessionStore.GetUser(ctx)
 	if user == nil || !user.Admin {
 		return generated.GetUsersId401JSONResponse{
 			Message: Unauthorized,
@@ -107,7 +96,7 @@ func (*ServerHandler) GetUsersId(ctx context.Context, request generated.GetUsers
 		}, nil
 	}
 
-	u, err := database.DatabaseQueries.GetUser(ctx, request.Id)
+	u, err := server.Queries.GetUser(ctx, request.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsersId: error getting user")
 	}
@@ -119,16 +108,13 @@ func (*ServerHandler) GetUsersId(ctx context.Context, request generated.GetUsers
 	}, nil
 }
 
-func (*ServerHandler) PostUsersMeChangePassword(ctx context.Context, request generated.PostUsersMeChangePasswordRequestObject) (generated.PostUsersMeChangePasswordResponseObject, error) {
+func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, request generated.PostUsersMeChangePasswordRequestObject) (generated.PostUsersMeChangePasswordResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error validating request")
 	}
 
-	user, err := session.GetUser(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error getting user")
-	}
+	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
 		return generated.PostUsersMeChangePassword401JSONResponse{
 			Message: Unauthorized,
@@ -152,10 +138,13 @@ func (*ServerHandler) PostUsersMeChangePassword(ctx context.Context, request gen
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error setting password")
 	}
 
-	err = database.DatabaseQueries.UpdateUser(ctx, db.UpdateUserParams{
+	err = server.Queries.UpdateUser(ctx, db.UpdateUserParams{
 		ID:       user.ID,
 		Password: sql.NullString{Valid: true, String: user.Password},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error updating user")
+	}
 
 	return generated.PostUsersMeChangePassword200JSONResponse{
 		Success: true,

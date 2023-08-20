@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"net/http"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
+	"github.com/tedyst/licenta/api/v1/middleware/session"
 	database "github.com/tedyst/licenta/db"
-	"github.com/tedyst/licenta/telemetry"
 )
 
 var serveCmd = &cobra.Command{
@@ -13,10 +15,18 @@ var serveCmd = &cobra.Command{
 	Short: "Run the server",
 	Long:  `Run the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		telemetry.InitTelemetry()
-		database.InitDatabase()
-		app := api.InitializeFiber()
-		app.Listen(":" + viper.GetString("port"))
+		db := database.InitDatabase()
+		sessionStore := session.New(db, viper.GetBool("debug"))
+		app := api.Initialize(db, sessionStore, api.ApiConfig{
+			Debug:  false,
+			Origin: viper.GetString("baseurl"),
+		})
+
+		print("Listening on port " + viper.GetString("port") + "\n")
+		err := http.ListenAndServe(":"+viper.GetString("port"), app)
+		if err != nil {
+			panic(err)
+		}
 	},
 }
 

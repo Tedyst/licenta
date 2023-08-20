@@ -5,13 +5,11 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
-	database "github.com/tedyst/licenta/db"
 	db "github.com/tedyst/licenta/db/generated"
-	"github.com/tedyst/licenta/middleware/session"
 	"github.com/tedyst/licenta/models"
 )
 
-func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLoginRequestObject) (generated.PostLoginResponseObject, error) {
+func (server *serverHandler) PostLogin(ctx context.Context, request generated.PostLoginRequestObject) (generated.PostLoginResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
 		return generated.PostLogin400JSONResponse{
@@ -20,7 +18,7 @@ func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLogin
 		}, nil
 	}
 
-	user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(ctx, request.Body.Username)
+	user, err := server.Queries.GetUserByUsernameOrEmail(ctx, request.Body.Username)
 	if err != nil {
 		traceError(ctx, errors.Wrap(err, "PostLogin: error getting user"))
 		return generated.PostLogin401JSONResponse{
@@ -42,10 +40,7 @@ func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLogin
 	}
 
 	if models.Requires2FA(ctx, user) {
-		err = session.SetWaiting2FA(ctx, user)
-		if err != nil {
-			return nil, errors.Wrap(err, "PostLogin: error setting waiting2fa")
-		}
+		server.SessionStore.SetWaiting2FA(ctx, user)
 
 		return generated.PostLogin401JSONResponse{
 			Success: false,
@@ -53,7 +48,7 @@ func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLogin
 		}, nil
 	}
 
-	session.SetUser(ctx, user)
+	server.SessionStore.SetUser(ctx, user)
 
 	return generated.PostLogin200JSONResponse{
 		Success: true,
@@ -65,16 +60,15 @@ func (*ServerHandler) PostLogin(ctx context.Context, request generated.PostLogin
 	}, nil
 }
 
-func (*ServerHandler) PostLogout(ctx context.Context, _ generated.PostLogoutRequestObject) (generated.PostLogoutResponseObject, error) {
-	session.ClearSession(ctx)
+func (server *serverHandler) PostLogout(ctx context.Context, _ generated.PostLogoutRequestObject) (generated.PostLogoutResponseObject, error) {
+	server.SessionStore.ClearSession(ctx)
 
 	return generated.PostLogout200JSONResponse{
 		Success: true,
 	}, nil
-
 }
 
-func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRegisterRequestObject) (generated.PostRegisterResponseObject, error) {
+func (server *serverHandler) PostRegister(ctx context.Context, request generated.PostRegisterRequestObject) (generated.PostRegisterResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
 		return generated.PostRegister400JSONResponse{
@@ -83,7 +77,7 @@ func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRe
 		}, nil
 	}
 
-	user, err := database.DatabaseQueries.CreateUser(ctx, db.CreateUserParams{
+	user, err := server.Queries.CreateUser(ctx, db.CreateUserParams{
 		Username: request.Body.Username,
 		Email:    request.Body.Email,
 	})
@@ -96,7 +90,7 @@ func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRe
 		return nil, errors.Wrap(err, "PostRegister: error setting password")
 	}
 
-	err = database.DatabaseQueries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+	err = server.Queries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
 		ID:       user.ID,
 		Password: user.Password,
 	})
@@ -105,10 +99,7 @@ func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRe
 		return nil, errors.Wrap(err, "PostRegister: error updating user password")
 	}
 
-	err = session.SetUser(ctx, user)
-	if err != nil {
-		return nil, errors.Wrap(err, "PostRegister: error setting user")
-	}
+	server.SessionStore.SetUser(ctx, user)
 
 	return generated.PostRegister200JSONResponse{
 		Success: true,
@@ -120,12 +111,8 @@ func (*ServerHandler) PostRegister(ctx context.Context, request generated.PostRe
 	}, nil
 }
 
-func (*ServerHandler) Post2faTotpFirstStep(ctx context.Context, request generated.Post2faTotpFirstStepRequestObject) (generated.Post2faTotpFirstStepResponseObject, error) {
-	user, err := session.GetUser(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "Post2faTotpFirstStep: error getting user")
-	}
-
+func (server *serverHandler) Post2faTotpFirstStep(ctx context.Context, request generated.Post2faTotpFirstStepRequestObject) (generated.Post2faTotpFirstStepResponseObject, error) {
+	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
 		return generated.Post2faTotpFirstStep401JSONResponse{
 			Message: Unauthorized,
@@ -138,17 +125,14 @@ func (*ServerHandler) Post2faTotpFirstStep(ctx context.Context, request generate
 		return nil, errors.Wrap(err, "Post2faTotpFirstStep: error generating totp key")
 	}
 
-	err = session.SetTOTPKey(ctx, key)
-	if err != nil {
-		return nil, errors.Wrap(err, "Post2faTotpFirstStep: error setting totp key")
-	}
+	server.SessionStore.SetTOTPKey(ctx, key)
 
 	return generated.Post2faTotpFirstStep200JSONResponse{
 		TotpSecret: key,
 	}, nil
 }
 
-func (*ServerHandler) Post2faTotpSecondStep(ctx context.Context, request generated.Post2faTotpSecondStepRequestObject) (generated.Post2faTotpSecondStepResponseObject, error) {
+func (server *serverHandler) Post2faTotpSecondStep(ctx context.Context, request generated.Post2faTotpSecondStepRequestObject) (generated.Post2faTotpSecondStepResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
 		return generated.Post2faTotpSecondStep400JSONResponse{
@@ -157,11 +141,7 @@ func (*ServerHandler) Post2faTotpSecondStep(ctx context.Context, request generat
 		}, nil
 	}
 
-	user, err := session.GetWaiting2FA(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "Post2faTotpSecondStep: error getting waiting 2fa user")
-	}
-
+	user := server.SessionStore.GetWaiting2FA(ctx)
 	if user == nil {
 		return generated.Post2faTotpSecondStep401JSONResponse{
 			Message: Unauthorized,
@@ -177,10 +157,7 @@ func (*ServerHandler) Post2faTotpSecondStep(ctx context.Context, request generat
 		}, nil
 	}
 
-	err = session.SetUser(ctx, user)
-	if err != nil {
-		return nil, errors.Wrap(err, "Post2faTotpSecondStep: error setting user")
-	}
+	server.SessionStore.SetUser(ctx, user)
 
 	return generated.Post2faTotpSecondStep200JSONResponse{
 		Success: true,
@@ -192,7 +169,7 @@ func (*ServerHandler) Post2faTotpSecondStep(ctx context.Context, request generat
 	}, nil
 }
 
-func (*ServerHandler) PostLogin2faTotp(ctx context.Context, request generated.PostLogin2faTotpRequestObject) (generated.PostLogin2faTotpResponseObject, error) {
+func (server *serverHandler) PostLogin2faTotp(ctx context.Context, request generated.PostLogin2faTotpRequestObject) (generated.PostLogin2faTotpResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
 		return generated.PostLogin2faTotp400JSONResponse{
@@ -201,8 +178,8 @@ func (*ServerHandler) PostLogin2faTotp(ctx context.Context, request generated.Po
 		}, nil
 	}
 
-	user, err := session.GetWaiting2FA(ctx)
-	if err != nil {
+	user := server.SessionStore.GetWaiting2FA(ctx)
+	if user == nil {
 		traceError(ctx, errors.Wrap(err, "PostLogin2faTotp: error getting user"))
 		return generated.PostLogin2faTotp401JSONResponse{
 			Message: InvalidCredentials,
@@ -218,7 +195,7 @@ func (*ServerHandler) PostLogin2faTotp(ctx context.Context, request generated.Po
 		}, nil
 	}
 
-	session.SetUser(ctx, user)
+	server.SessionStore.SetUser(ctx, user)
 
 	return generated.PostLogin2faTotp200JSONResponse{
 		Success: true,

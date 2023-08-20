@@ -13,7 +13,7 @@ import (
 var DatabasePool *pgxpool.Pool
 var DatabaseQueries *db.Queries
 
-func InitDatabase() {
+func InitDatabase() *db.Queries {
 	cfg, err := pgxpool.ParseConfig(viper.GetString("database"))
 	if err != nil {
 		log.Fatal(err)
@@ -24,4 +24,9 @@ func InitDatabase() {
 		log.Fatal(err)
 	}
 	DatabaseQueries = db.New(DatabasePool)
+	err = DatabasePool.Ping(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	return DatabaseQueries
 }

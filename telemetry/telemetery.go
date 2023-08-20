@@ -4,10 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/viper"
-	"github.com/valyala/fasthttp/fasthttpadaptor"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/prometheus"
@@ -59,17 +56,6 @@ func initMetric() *sdkmetric.MeterProvider {
 	otel.SetMeterProvider(provider)
 
 	return provider
-}
-
-func RegisterPrometheus(app *fiber.App) {
-	if !viper.GetBool("telemetry.metrics.enabled") {
-		return
-	}
-	p := fasthttpadaptor.NewFastHTTPHandler(promhttp.Handler())
-	app.Get("/metrics", func(c *fiber.Ctx) error {
-		p(c.Context())
-		return nil
-	})
 }
 
 func InitTelemetry() {

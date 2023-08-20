@@ -8,14 +8,16 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/gofiber/fiber/v2"
+	"github.com/go-chi/chi/v5"
 )
 
 const (
@@ -159,232 +161,491 @@ type PostUsersMeChangePasswordJSONRequestBody = ChangePasswordLoggedIn
 type ServerInterface interface {
 	// First step of the TOTP authentication process
 	// (POST /2fa/totp-first-step)
-	Post2faTotpFirstStep(c *fiber.Ctx) error
+	Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request)
 	// Second step of the TOTP authentication process
 	// (POST /2fa/totp-second-step)
-	Post2faTotpSecondStep(c *fiber.Ctx) error
+	Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request)
 	// Logs user into the system
 	// (POST /login)
-	PostLogin(c *fiber.Ctx) error
+	PostLogin(w http.ResponseWriter, r *http.Request)
 	// Logs user into the system
 	// (POST /login/2fa/totp)
-	PostLogin2faTotp(c *fiber.Ctx) error
+	PostLogin2faTotp(w http.ResponseWriter, r *http.Request)
 	// Logs out current logged in user session
 	// (POST /logout)
-	PostLogout(c *fiber.Ctx) error
+	PostLogout(w http.ResponseWriter, r *http.Request)
 	// Creates a new user
 	// (POST /register)
-	PostRegister(c *fiber.Ctx) error
+	PostRegister(w http.ResponseWriter, r *http.Request)
 	// Get all users
 	// (GET /users)
-	GetUsers(c *fiber.Ctx, params GetUsersParams) error
+	GetUsers(w http.ResponseWriter, r *http.Request, params GetUsersParams)
 	// Get current logged in user
 	// (GET /users/me)
-	GetUsersMe(c *fiber.Ctx) error
+	GetUsersMe(w http.ResponseWriter, r *http.Request)
 	// Change password of current logged in user
 	// (POST /users/me/change-password)
-	PostUsersMeChangePassword(c *fiber.Ctx) error
+	PostUsersMeChangePassword(w http.ResponseWriter, r *http.Request)
 	// Get user by ID
 	// (GET /users/{id})
-	GetUsersId(c *fiber.Ctx, id int64) error
+	GetUsersId(w http.ResponseWriter, r *http.Request, id int64)
+}
+
+// Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
+
+type Unimplemented struct{}
+
+// First step of the TOTP authentication process
+// (POST /2fa/totp-first-step)
+func (_ Unimplemented) Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Second step of the TOTP authentication process
+// (POST /2fa/totp-second-step)
+func (_ Unimplemented) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Logs user into the system
+// (POST /login)
+func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Logs user into the system
+// (POST /login/2fa/totp)
+func (_ Unimplemented) PostLogin2faTotp(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Logs out current logged in user session
+// (POST /logout)
+func (_ Unimplemented) PostLogout(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Creates a new user
+// (POST /register)
+func (_ Unimplemented) PostRegister(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all users
+// (GET /users)
+func (_ Unimplemented) GetUsers(w http.ResponseWriter, r *http.Request, params GetUsersParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get current logged in user
+// (GET /users/me)
+func (_ Unimplemented) GetUsersMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Change password of current logged in user
+// (POST /users/me/change-password)
+func (_ Unimplemented) PostUsersMeChangePassword(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get user by ID
+// (GET /users/{id})
+func (_ Unimplemented) GetUsersId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
-	Handler ServerInterface
+	Handler            ServerInterface
+	HandlerMiddlewares []MiddlewareFunc
+	ErrorHandlerFunc   func(w http.ResponseWriter, r *http.Request, err error)
 }
 
-type MiddlewareFunc fiber.Handler
+type MiddlewareFunc func(http.Handler) http.Handler
 
 // Post2faTotpFirstStep operation middleware
-func (siw *ServerInterfaceWrapper) Post2faTotpFirstStep(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
-	return siw.Handler.Post2faTotpFirstStep(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Post2faTotpFirstStep(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // Post2faTotpSecondStep operation middleware
-func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
-	return siw.Handler.Post2faTotpSecondStep(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.Post2faTotpSecondStep(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // PostLogin operation middleware
-func (siw *ServerInterfaceWrapper) PostLogin(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) PostLogin(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	return siw.Handler.PostLogin(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostLogin(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // PostLogin2faTotp operation middleware
-func (siw *ServerInterfaceWrapper) PostLogin2faTotp(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) PostLogin2faTotp(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	return siw.Handler.PostLogin2faTotp(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostLogin2faTotp(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // PostLogout operation middleware
-func (siw *ServerInterfaceWrapper) PostLogout(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) PostLogout(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
-	return siw.Handler.PostLogout(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostLogout(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // PostRegister operation middleware
-func (siw *ServerInterfaceWrapper) PostRegister(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) PostRegister(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	return siw.Handler.PostRegister(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRegister(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // GetUsers operation middleware
-func (siw *ServerInterfaceWrapper) GetUsers(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	var err error
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersParams
 
-	var query url.Values
-	query, err = url.ParseQuery(string(c.Request().URI().QueryString()))
-	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for query string: %w", err).Error())
-	}
-
 	// ------------- Optional query parameter "limit" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "limit", query, &params.Limit)
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for parameter limit: %w", err).Error())
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
 	}
 
 	// ------------- Optional query parameter "offset" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "offset", query, &params.Offset)
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for parameter offset: %w", err).Error())
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
 	}
 
 	// ------------- Optional query parameter "username" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "username", query, &params.Username)
+	err = runtime.BindQueryParameter("form", true, false, "username", r.URL.Query(), &params.Username)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for parameter username: %w", err).Error())
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "username", Err: err})
+		return
 	}
 
 	// ------------- Optional query parameter "email" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "email", query, &params.Email)
+	err = runtime.BindQueryParameter("form", true, false, "email", r.URL.Query(), &params.Email)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for parameter email: %w", err).Error())
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "email", Err: err})
+		return
 	}
 
-	return siw.Handler.GetUsers(c, params)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsers(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // GetUsersMe operation middleware
-func (siw *ServerInterfaceWrapper) GetUsersMe(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) GetUsersMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
-	return siw.Handler.GetUsersMe(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsersMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // PostUsersMeChangePassword operation middleware
-func (siw *ServerInterfaceWrapper) PostUsersMeChangePassword(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) PostUsersMeChangePassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
-	return siw.Handler.PostUsersMeChangePassword(c)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostUsersMeChangePassword(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
 // GetUsersId operation middleware
-func (siw *ServerInterfaceWrapper) GetUsersId(c *fiber.Ctx) error {
+func (siw *ServerInterfaceWrapper) GetUsersId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 
 	var err error
 
 	// ------------- Path parameter "id" -------------
 	var id int64
 
-	err = runtime.BindStyledParameter("simple", false, "id", c.Params("id"), &id)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, fmt.Errorf("Invalid format for parameter id: %w", err).Error())
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
 	}
 
-	c.Context().SetUserValue(SessionAuthScopes, []string{})
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
-	return siw.Handler.GetUsersId(c, id)
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetUsersId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// FiberServerOptions provides options for the Fiber server.
-type FiberServerOptions struct {
-	BaseURL     string
-	Middlewares []MiddlewareFunc
+type UnescapedCookieParamError struct {
+	ParamName string
+	Err       error
 }
 
-// RegisterHandlers creates http.Handler with routing matching OpenAPI spec.
-func RegisterHandlers(router fiber.Router, si ServerInterface) {
-	RegisterHandlersWithOptions(router, si, FiberServerOptions{})
+func (e *UnescapedCookieParamError) Error() string {
+	return fmt.Sprintf("error unescaping cookie parameter '%s'", e.ParamName)
 }
 
-// RegisterHandlersWithOptions creates http.Handler with additional options
-func RegisterHandlersWithOptions(router fiber.Router, si ServerInterface, options FiberServerOptions) {
+func (e *UnescapedCookieParamError) Unwrap() error {
+	return e.Err
+}
+
+type UnmarshalingParamError struct {
+	ParamName string
+	Err       error
+}
+
+func (e *UnmarshalingParamError) Error() string {
+	return fmt.Sprintf("Error unmarshaling parameter %s as JSON: %s", e.ParamName, e.Err.Error())
+}
+
+func (e *UnmarshalingParamError) Unwrap() error {
+	return e.Err
+}
+
+type RequiredParamError struct {
+	ParamName string
+}
+
+func (e *RequiredParamError) Error() string {
+	return fmt.Sprintf("Query argument %s is required, but not found", e.ParamName)
+}
+
+type RequiredHeaderError struct {
+	ParamName string
+	Err       error
+}
+
+func (e *RequiredHeaderError) Error() string {
+	return fmt.Sprintf("Header parameter %s is required, but not found", e.ParamName)
+}
+
+func (e *RequiredHeaderError) Unwrap() error {
+	return e.Err
+}
+
+type InvalidParamFormatError struct {
+	ParamName string
+	Err       error
+}
+
+func (e *InvalidParamFormatError) Error() string {
+	return fmt.Sprintf("Invalid format for parameter %s: %s", e.ParamName, e.Err.Error())
+}
+
+func (e *InvalidParamFormatError) Unwrap() error {
+	return e.Err
+}
+
+type TooManyValuesForParamError struct {
+	ParamName string
+	Count     int
+}
+
+func (e *TooManyValuesForParamError) Error() string {
+	return fmt.Sprintf("Expected one value for %s, got %d", e.ParamName, e.Count)
+}
+
+// Handler creates http.Handler with routing matching OpenAPI spec.
+func Handler(si ServerInterface) http.Handler {
+	return HandlerWithOptions(si, ChiServerOptions{})
+}
+
+type ChiServerOptions struct {
+	BaseURL          string
+	BaseRouter       chi.Router
+	Middlewares      []MiddlewareFunc
+	ErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error)
+}
+
+// HandlerFromMux creates http.Handler with routing matching OpenAPI spec based on the provided mux.
+func HandlerFromMux(si ServerInterface, r chi.Router) http.Handler {
+	return HandlerWithOptions(si, ChiServerOptions{
+		BaseRouter: r,
+	})
+}
+
+func HandlerFromMuxWithBaseURL(si ServerInterface, r chi.Router, baseURL string) http.Handler {
+	return HandlerWithOptions(si, ChiServerOptions{
+		BaseURL:    baseURL,
+		BaseRouter: r,
+	})
+}
+
+// HandlerWithOptions creates http.Handler with additional options
+func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handler {
+	r := options.BaseRouter
+
+	if r == nil {
+		r = chi.NewRouter()
+	}
+	if options.ErrorHandlerFunc == nil {
+		options.ErrorHandlerFunc = func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		}
+	}
 	wrapper := ServerInterfaceWrapper{
-		Handler: si,
+		Handler:            si,
+		HandlerMiddlewares: options.Middlewares,
+		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
-	for _, m := range options.Middlewares {
-		router.Use(m)
-	}
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/2fa/totp-first-step", wrapper.Post2faTotpFirstStep)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/2fa/totp-second-step", wrapper.Post2faTotpSecondStep)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/login", wrapper.PostLogin)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/login/2fa/totp", wrapper.PostLogin2faTotp)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/logout", wrapper.PostLogout)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/register", wrapper.PostRegister)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users", wrapper.GetUsers)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/users/me/change-password", wrapper.PostUsersMeChangePassword)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/{id}", wrapper.GetUsersId)
+	})
 
-	router.Post(options.BaseURL+"/2fa/totp-first-step", wrapper.Post2faTotpFirstStep)
-
-	router.Post(options.BaseURL+"/2fa/totp-second-step", wrapper.Post2faTotpSecondStep)
-
-	router.Post(options.BaseURL+"/login", wrapper.PostLogin)
-
-	router.Post(options.BaseURL+"/login/2fa/totp", wrapper.PostLogin2faTotp)
-
-	router.Post(options.BaseURL+"/logout", wrapper.PostLogout)
-
-	router.Post(options.BaseURL+"/register", wrapper.PostRegister)
-
-	router.Get(options.BaseURL+"/users", wrapper.GetUsers)
-
-	router.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
-
-	router.Post(options.BaseURL+"/users/me/change-password", wrapper.PostUsersMeChangePassword)
-
-	router.Get(options.BaseURL+"/users/:id", wrapper.GetUsersId)
-
+	return r
 }
 
 type Post2faTotpFirstStepRequestObject struct {
 }
 
 type Post2faTotpFirstStepResponseObject interface {
-	VisitPost2faTotpFirstStepResponse(ctx *fiber.Ctx) error
+	VisitPost2faTotpFirstStepResponse(w http.ResponseWriter) error
 }
 
 type Post2faTotpFirstStep200JSONResponse TOTPFirstStep
 
-func (response Post2faTotpFirstStep200JSONResponse) VisitPost2faTotpFirstStepResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response Post2faTotpFirstStep200JSONResponse) VisitPost2faTotpFirstStepResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type Post2faTotpFirstStep401JSONResponse Error
 
-func (response Post2faTotpFirstStep401JSONResponse) VisitPost2faTotpFirstStepResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response Post2faTotpFirstStep401JSONResponse) VisitPost2faTotpFirstStepResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type Post2faTotpSecondStepRequestObject struct {
@@ -392,7 +653,7 @@ type Post2faTotpSecondStepRequestObject struct {
 }
 
 type Post2faTotpSecondStepResponseObject interface {
-	VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error
+	VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error
 }
 
 type Post2faTotpSecondStep200JSONResponse struct {
@@ -400,29 +661,29 @@ type Post2faTotpSecondStep200JSONResponse struct {
 	User    User `json:"user"`
 }
 
-func (response Post2faTotpSecondStep200JSONResponse) VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response Post2faTotpSecondStep200JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type Post2faTotpSecondStep400JSONResponse Error
 
-func (response Post2faTotpSecondStep400JSONResponse) VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(400)
+func (response Post2faTotpSecondStep400JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type Post2faTotpSecondStep401JSONResponse Error
 
-func (response Post2faTotpSecondStep401JSONResponse) VisitPost2faTotpSecondStepResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response Post2faTotpSecondStep401JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLoginRequestObject struct {
@@ -430,7 +691,7 @@ type PostLoginRequestObject struct {
 }
 
 type PostLoginResponseObject interface {
-	VisitPostLoginResponse(ctx *fiber.Ctx) error
+	VisitPostLoginResponse(w http.ResponseWriter) error
 }
 
 type PostLogin200JSONResponse struct {
@@ -438,29 +699,29 @@ type PostLogin200JSONResponse struct {
 	User    User `json:"user"`
 }
 
-func (response PostLogin200JSONResponse) VisitPostLoginResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response PostLogin200JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLogin400JSONResponse Error
 
-func (response PostLogin400JSONResponse) VisitPostLoginResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(400)
+func (response PostLogin400JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLogin401JSONResponse Error
 
-func (response PostLogin401JSONResponse) VisitPostLoginResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response PostLogin401JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLogin2faTotpRequestObject struct {
@@ -468,7 +729,7 @@ type PostLogin2faTotpRequestObject struct {
 }
 
 type PostLogin2faTotpResponseObject interface {
-	VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error
+	VisitPostLogin2faTotpResponse(w http.ResponseWriter) error
 }
 
 type PostLogin2faTotp200JSONResponse struct {
@@ -476,45 +737,45 @@ type PostLogin2faTotp200JSONResponse struct {
 	User    User `json:"user"`
 }
 
-func (response PostLogin2faTotp200JSONResponse) VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response PostLogin2faTotp200JSONResponse) VisitPostLogin2faTotpResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLogin2faTotp400JSONResponse Error
 
-func (response PostLogin2faTotp400JSONResponse) VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(400)
+func (response PostLogin2faTotp400JSONResponse) VisitPostLogin2faTotpResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLogin2faTotp401JSONResponse Error
 
-func (response PostLogin2faTotp401JSONResponse) VisitPostLogin2faTotpResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response PostLogin2faTotp401JSONResponse) VisitPostLogin2faTotpResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLogoutRequestObject struct {
 }
 
 type PostLogoutResponseObject interface {
-	VisitPostLogoutResponse(ctx *fiber.Ctx) error
+	VisitPostLogoutResponse(w http.ResponseWriter) error
 }
 
 type PostLogout200JSONResponse Success
 
-func (response PostLogout200JSONResponse) VisitPostLogoutResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response PostLogout200JSONResponse) VisitPostLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostRegisterRequestObject struct {
@@ -522,7 +783,7 @@ type PostRegisterRequestObject struct {
 }
 
 type PostRegisterResponseObject interface {
-	VisitPostRegisterResponse(ctx *fiber.Ctx) error
+	VisitPostRegisterResponse(w http.ResponseWriter) error
 }
 
 type PostRegister200JSONResponse struct {
@@ -530,29 +791,29 @@ type PostRegister200JSONResponse struct {
 	User    User `json:"user"`
 }
 
-func (response PostRegister200JSONResponse) VisitPostRegisterResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response PostRegister200JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostRegister400JSONResponse Error
 
-func (response PostRegister400JSONResponse) VisitPostRegisterResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(400)
+func (response PostRegister400JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostRegister409JSONResponse Error
 
-func (response PostRegister409JSONResponse) VisitPostRegisterResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(409)
+func (response PostRegister409JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersRequestObject struct {
@@ -560,32 +821,32 @@ type GetUsersRequestObject struct {
 }
 
 type GetUsersResponseObject interface {
-	VisitGetUsersResponse(ctx *fiber.Ctx) error
+	VisitGetUsersResponse(w http.ResponseWriter) error
 }
 
 type GetUsers200JSONResponse PaginatedUsers
 
-func (response GetUsers200JSONResponse) VisitGetUsersResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response GetUsers200JSONResponse) VisitGetUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsers401JSONResponse Error
 
-func (response GetUsers401JSONResponse) VisitGetUsersResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response GetUsers401JSONResponse) VisitGetUsersResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersMeRequestObject struct {
 }
 
 type GetUsersMeResponseObject interface {
-	VisitGetUsersMeResponse(ctx *fiber.Ctx) error
+	VisitGetUsersMeResponse(w http.ResponseWriter) error
 }
 
 type GetUsersMe200JSONResponse struct {
@@ -593,20 +854,20 @@ type GetUsersMe200JSONResponse struct {
 	User    User `json:"user"`
 }
 
-func (response GetUsersMe200JSONResponse) VisitGetUsersMeResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response GetUsersMe200JSONResponse) VisitGetUsersMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersMe401JSONResponse Error
 
-func (response GetUsersMe401JSONResponse) VisitGetUsersMeResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response GetUsersMe401JSONResponse) VisitGetUsersMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostUsersMeChangePasswordRequestObject struct {
@@ -614,34 +875,34 @@ type PostUsersMeChangePasswordRequestObject struct {
 }
 
 type PostUsersMeChangePasswordResponseObject interface {
-	VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error
+	VisitPostUsersMeChangePasswordResponse(w http.ResponseWriter) error
 }
 
 type PostUsersMeChangePassword200JSONResponse Success
 
-func (response PostUsersMeChangePassword200JSONResponse) VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response PostUsersMeChangePassword200JSONResponse) VisitPostUsersMeChangePasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostUsersMeChangePassword400JSONResponse Error
 
-func (response PostUsersMeChangePassword400JSONResponse) VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(400)
+func (response PostUsersMeChangePassword400JSONResponse) VisitPostUsersMeChangePasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostUsersMeChangePassword401JSONResponse Error
 
-func (response PostUsersMeChangePassword401JSONResponse) VisitPostUsersMeChangePasswordResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response PostUsersMeChangePassword401JSONResponse) VisitPostUsersMeChangePasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersIdRequestObject struct {
@@ -649,34 +910,34 @@ type GetUsersIdRequestObject struct {
 }
 
 type GetUsersIdResponseObject interface {
-	VisitGetUsersIdResponse(ctx *fiber.Ctx) error
+	VisitGetUsersIdResponse(w http.ResponseWriter) error
 }
 
 type GetUsersId200JSONResponse User
 
-func (response GetUsersId200JSONResponse) VisitGetUsersIdResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(200)
+func (response GetUsersId200JSONResponse) VisitGetUsersIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersId401JSONResponse Error
 
-func (response GetUsersId401JSONResponse) VisitGetUsersIdResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(401)
+func (response GetUsersId401JSONResponse) VisitGetUsersIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetUsersId404JSONResponse Error
 
-func (response GetUsersId404JSONResponse) VisitGetUsersIdResponse(ctx *fiber.Ctx) error {
-	ctx.Response().Header.Set("Content-Type", "application/json")
-	ctx.Status(404)
+func (response GetUsersId404JSONResponse) VisitGetUsersIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
-	return ctx.JSON(&response)
+	return json.NewEncoder(w).Encode(response)
 }
 
 // StrictServerInterface represents all server handlers.
@@ -713,301 +974,312 @@ type StrictServerInterface interface {
 	GetUsersId(ctx context.Context, request GetUsersIdRequestObject) (GetUsersIdResponseObject, error)
 }
 
-type StrictHandlerFunc func(ctx *fiber.Ctx, args interface{}) (interface{}, error)
+type StrictHandlerFunc = runtime.StrictHttpHandlerFunc
+type StrictMiddlewareFunc = runtime.StrictHttpMiddlewareFunc
 
-type StrictMiddlewareFunc func(f StrictHandlerFunc, operationID string) StrictHandlerFunc
+type StrictHTTPServerOptions struct {
+	RequestErrorHandlerFunc  func(w http.ResponseWriter, r *http.Request, err error)
+	ResponseErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error)
+}
 
 func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc) ServerInterface {
-	return &strictHandler{ssi: ssi, middlewares: middlewares}
+	return &strictHandler{ssi: ssi, middlewares: middlewares, options: StrictHTTPServerOptions{
+		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		},
+		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		},
+	}}
+}
+
+func NewStrictHandlerWithOptions(ssi StrictServerInterface, middlewares []StrictMiddlewareFunc, options StrictHTTPServerOptions) ServerInterface {
+	return &strictHandler{ssi: ssi, middlewares: middlewares, options: options}
 }
 
 type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
+	options     StrictHTTPServerOptions
 }
 
 // Post2faTotpFirstStep operation middleware
-func (sh *strictHandler) Post2faTotpFirstStep(ctx *fiber.Ctx) error {
+func (sh *strictHandler) Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request) {
 	var request Post2faTotpFirstStepRequestObject
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.Post2faTotpFirstStep(ctx.UserContext(), request.(Post2faTotpFirstStepRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Post2faTotpFirstStep(ctx, request.(Post2faTotpFirstStepRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "Post2faTotpFirstStep")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(Post2faTotpFirstStepResponseObject); ok {
-		if err := validResponse.VisitPost2faTotpFirstStepResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPost2faTotpFirstStepResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // Post2faTotpSecondStep operation middleware
-func (sh *strictHandler) Post2faTotpSecondStep(ctx *fiber.Ctx) error {
+func (sh *strictHandler) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request) {
 	var request Post2faTotpSecondStepRequestObject
 
 	var body Post2faTotpSecondStepJSONRequestBody
-	if err := ctx.BodyParser(&body); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
 	}
 	request.Body = &body
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.Post2faTotpSecondStep(ctx.UserContext(), request.(Post2faTotpSecondStepRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.Post2faTotpSecondStep(ctx, request.(Post2faTotpSecondStepRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "Post2faTotpSecondStep")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(Post2faTotpSecondStepResponseObject); ok {
-		if err := validResponse.VisitPost2faTotpSecondStepResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPost2faTotpSecondStepResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // PostLogin operation middleware
-func (sh *strictHandler) PostLogin(ctx *fiber.Ctx) error {
+func (sh *strictHandler) PostLogin(w http.ResponseWriter, r *http.Request) {
 	var request PostLoginRequestObject
 
 	var body PostLoginJSONRequestBody
-	if err := ctx.BodyParser(&body); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
 	}
 	request.Body = &body
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogin(ctx.UserContext(), request.(PostLoginRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostLogin(ctx, request.(PostLoginRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "PostLogin")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostLoginResponseObject); ok {
-		if err := validResponse.VisitPostLoginResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPostLoginResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // PostLogin2faTotp operation middleware
-func (sh *strictHandler) PostLogin2faTotp(ctx *fiber.Ctx) error {
+func (sh *strictHandler) PostLogin2faTotp(w http.ResponseWriter, r *http.Request) {
 	var request PostLogin2faTotpRequestObject
 
 	var body PostLogin2faTotpJSONRequestBody
-	if err := ctx.BodyParser(&body); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
 	}
 	request.Body = &body
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogin2faTotp(ctx.UserContext(), request.(PostLogin2faTotpRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostLogin2faTotp(ctx, request.(PostLogin2faTotpRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "PostLogin2faTotp")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostLogin2faTotpResponseObject); ok {
-		if err := validResponse.VisitPostLogin2faTotpResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPostLogin2faTotpResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // PostLogout operation middleware
-func (sh *strictHandler) PostLogout(ctx *fiber.Ctx) error {
+func (sh *strictHandler) PostLogout(w http.ResponseWriter, r *http.Request) {
 	var request PostLogoutRequestObject
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogout(ctx.UserContext(), request.(PostLogoutRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostLogout(ctx, request.(PostLogoutRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "PostLogout")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostLogoutResponseObject); ok {
-		if err := validResponse.VisitPostLogoutResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPostLogoutResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // PostRegister operation middleware
-func (sh *strictHandler) PostRegister(ctx *fiber.Ctx) error {
+func (sh *strictHandler) PostRegister(w http.ResponseWriter, r *http.Request) {
 	var request PostRegisterRequestObject
 
 	var body PostRegisterJSONRequestBody
-	if err := ctx.BodyParser(&body); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
 	}
 	request.Body = &body
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.PostRegister(ctx.UserContext(), request.(PostRegisterRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostRegister(ctx, request.(PostRegisterRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "PostRegister")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostRegisterResponseObject); ok {
-		if err := validResponse.VisitPostRegisterResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPostRegisterResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // GetUsers operation middleware
-func (sh *strictHandler) GetUsers(ctx *fiber.Ctx, params GetUsersParams) error {
+func (sh *strictHandler) GetUsers(w http.ResponseWriter, r *http.Request, params GetUsersParams) {
 	var request GetUsersRequestObject
 
 	request.Params = params
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsers(ctx.UserContext(), request.(GetUsersRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsers(ctx, request.(GetUsersRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "GetUsers")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetUsersResponseObject); ok {
-		if err := validResponse.VisitGetUsersResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitGetUsersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // GetUsersMe operation middleware
-func (sh *strictHandler) GetUsersMe(ctx *fiber.Ctx) error {
+func (sh *strictHandler) GetUsersMe(w http.ResponseWriter, r *http.Request) {
 	var request GetUsersMeRequestObject
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersMe(ctx.UserContext(), request.(GetUsersMeRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsersMe(ctx, request.(GetUsersMeRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "GetUsersMe")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetUsersMeResponseObject); ok {
-		if err := validResponse.VisitGetUsersMeResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitGetUsersMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // PostUsersMeChangePassword operation middleware
-func (sh *strictHandler) PostUsersMeChangePassword(ctx *fiber.Ctx) error {
+func (sh *strictHandler) PostUsersMeChangePassword(w http.ResponseWriter, r *http.Request) {
 	var request PostUsersMeChangePasswordRequestObject
 
 	var body PostUsersMeChangePasswordJSONRequestBody
-	if err := ctx.BodyParser(&body); err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
 	}
 	request.Body = &body
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUsersMeChangePassword(ctx.UserContext(), request.(PostUsersMeChangePasswordRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostUsersMeChangePassword(ctx, request.(PostUsersMeChangePasswordRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "PostUsersMeChangePassword")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostUsersMeChangePasswordResponseObject); ok {
-		if err := validResponse.VisitPostUsersMeChangePasswordResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitPostUsersMeChangePasswordResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // GetUsersId operation middleware
-func (sh *strictHandler) GetUsersId(ctx *fiber.Ctx, id int64) error {
+func (sh *strictHandler) GetUsersId(w http.ResponseWriter, r *http.Request, id int64) {
 	var request GetUsersIdRequestObject
 
 	request.Id = id
 
-	handler := func(ctx *fiber.Ctx, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUsersId(ctx.UserContext(), request.(GetUsersIdRequestObject))
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsersId(ctx, request.(GetUsersIdRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
 		handler = middleware(handler, "GetUsersId")
 	}
 
-	response, err := handler(ctx, request)
+	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetUsersIdResponseObject); ok {
-		if err := validResponse.VisitGetUsersIdResponse(ctx); err != nil {
-			return fiber.NewError(fiber.StatusBadRequest, err.Error())
+		if err := validResponse.VisitGetUsersIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
-		return fmt.Errorf("Unexpected response type: %T", response)
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
 	}
-	return nil
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object

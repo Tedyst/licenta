@@ -1,46 +1,40 @@
 package api
 
 import (
-	"runtime"
+	"net/http"
+	"time"
 
-	"github.com/gofiber/contrib/otelfiber"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/pprof"
-	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/spf13/viper"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	v1 "github.com/tedyst/licenta/api/v1"
-	"github.com/tedyst/licenta/telemetry"
-	"go.opentelemetry.io/otel/trace"
+	"github.com/tedyst/licenta/api/v1/handlers"
+	"github.com/tedyst/licenta/api/v1/middleware/options"
+	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
+	db "github.com/tedyst/licenta/db/generated"
 )
 
-func InitializeFiber() *fiber.App {
-	app := fiber.New()
+type ApiConfig struct {
+	Debug  bool
+	Origin string
+}
 
-	telemetry.RegisterPrometheus(app)
-
-	app.Use(otelfiber.Middleware())
-
-	app.Use(recover.New())
-	app.Use(logger.New())
-	if viper.GetBool("debug") {
-		app.Use(pprof.New())
-		runtime.SetMutexProfileFraction(5)
-		runtime.SetBlockProfileRate(5)
+func Initialize(database *db.Queries, sessionStore handlers.SessionStoreType, config ApiConfig) http.Handler {
+	app := chi.NewRouter()
+	app.Use(middleware.RealIP)
+	app.Use(middleware.Logger)
+	app.Use(middleware.Recoverer)
+	app.Use(middleware.CleanPath)
+	app.Use(middleware.GetHead)
+	app.Use(options.HandleOptions(config.Origin))
+	app.Use(requestid.RequestIDMiddleware)
+	if !config.Debug {
+		app.Use(middleware.Timeout(10 * time.Second))
 	}
+	app.Use(sessionStore.Handler)
 
-	app.Use(func(c *fiber.Ctx) error {
-		span := trace.SpanFromContext(c.UserContext())
-		c.Response().Header.Set("X-Trace-Id", span.SpanContext().TraceID().String())
-		return c.Next()
+	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
+		Debug:   config.Debug,
+		BaseURL: "/api/v1",
 	})
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
-	})
-
-	api_v1 := app.Group("/api/v1")
-	v1.RegisterHandlers(api_v1)
-
 	return app
 }
