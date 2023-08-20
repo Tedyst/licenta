@@ -32,6 +32,11 @@ func Initialize(database *db.Queries, sessionStore handlers.SessionStoreType, co
 	}
 	app.Use(sessionStore.Handler)
 
+	app.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte("Method not allowed"))
+	})
+
 	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
 		Debug:   config.Debug,
 		BaseURL: "/api/v1",
