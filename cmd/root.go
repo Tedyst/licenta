@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/cmd/extract"
 	"github.com/tedyst/licenta/cmd/user"
 )
 
@@ -54,7 +55,7 @@ func initConfig(cmd *cobra.Command) {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug mode")
-	rootCmd.PersistentFlags().String("database", "", "Database connection string")
 
 	rootCmd.AddCommand(user.NewUserCmd())
+	rootCmd.AddCommand(extract.NewExtractCmd())
 }

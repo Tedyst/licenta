@@ -13,3 +13,7 @@ var userCmd = &cobra.Command{
 	Short: "Users management",
 	Long:  `Users management.`,
 }
+
+func init() {
+	userCmd.Flags().String("database", "", "Database connection string")
+}
