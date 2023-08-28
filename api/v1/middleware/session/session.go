@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/models"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -20,9 +21,9 @@ var tracer = otel.Tracer("github.com/tedyst/licenta/api/v1/middleware/session")
 const cookieSessionKey = "session"
 
 type sessionData struct {
-	Session        *db.Session
-	User           *db.User
-	Waiting2faUser *db.User
+	Session        *models.Session
+	User           *models.User
+	Waiting2faUser *models.User
 	sessionChanged bool
 }
 type contextSessionKey struct{}
@@ -32,7 +33,7 @@ type config struct {
 }
 
 type sessionStore struct {
-	database *db.Queries
+	database db.Querier
 	config   config
 }
 
@@ -126,14 +127,14 @@ func (store *sessionStore) initializeSession(ctx context.Context, r *http.Reques
 	return r, data, nil
 }
 
-func (store *sessionStore) GetUser(ctx context.Context) *db.User {
+func (store *sessionStore) GetUser(ctx context.Context) *models.User {
 	ctx, span := tracer.Start(ctx, "GetUser")
 	defer span.End()
 
 	return ctx.Value(contextSessionKey{}).(*sessionData).User
 }
 
-func (store *sessionStore) SetUser(ctx context.Context, user *db.User) {
+func (store *sessionStore) SetUser(ctx context.Context, user *models.User) {
 	data := ctx.Value(contextSessionKey{}).(*sessionData)
 	data.User = user
 
@@ -144,7 +145,7 @@ func (store *sessionStore) SetUser(ctx context.Context, user *db.User) {
 	data.sessionChanged = true
 }
 
-func (store *sessionStore) SetWaiting2FA(ctx context.Context, waitingUser *db.User) {
+func (store *sessionStore) SetWaiting2FA(ctx context.Context, waitingUser *models.User) {
 	data := ctx.Value(contextSessionKey{}).(*sessionData)
 	data.Session.Waiting2fa = sql.NullInt64{
 		Int64: waitingUser.ID,
@@ -153,7 +154,7 @@ func (store *sessionStore) SetWaiting2FA(ctx context.Context, waitingUser *db.Us
 	data.sessionChanged = true
 }
 
-func (store *sessionStore) GetWaiting2FA(ctx context.Context) *db.User {
+func (store *sessionStore) GetWaiting2FA(ctx context.Context) *models.User {
 	data := ctx.Value(contextSessionKey{}).(*sessionData)
 	return data.Waiting2faUser
 }
@@ -192,7 +193,7 @@ func (store *sessionStore) ClearSession(ctx context.Context) {
 	data.sessionChanged = true
 }
 
-func New(database *db.Queries, debug bool) *sessionStore {
+func New(database db.Querier, debug bool) *sessionStore {
 	return &sessionStore{
 		database: database,
 		config: config{
