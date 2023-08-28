@@ -5,13 +5,14 @@ import (
 	"net/http"
 
 	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/models"
 )
 
 type SessionStoreType interface {
-	GetUser(ctx context.Context) *db.User
-	SetUser(ctx context.Context, user *db.User)
-	GetWaiting2FA(ctx context.Context) *db.User
-	SetWaiting2FA(ctx context.Context, waitingUser *db.User)
+	GetUser(ctx context.Context) *models.User
+	SetUser(ctx context.Context, user *models.User)
+	GetWaiting2FA(ctx context.Context) *models.User
+	SetWaiting2FA(ctx context.Context, waitingUser *models.User)
 	GetTOTPKey(ctx context.Context) (string, error)
 	SetTOTPKey(ctx context.Context, key string)
 	ClearSession(ctx context.Context)
@@ -20,11 +21,11 @@ type SessionStoreType interface {
 }
 
 type serverHandler struct {
-	Queries      *db.Queries
+	Queries      db.Querier
 	SessionStore SessionStoreType
 }
 
-func NewServerHandler(queries *db.Queries, sessionStore SessionStoreType) *serverHandler {
+func NewServerHandler(queries db.Querier, sessionStore SessionStoreType) *serverHandler {
 	return &serverHandler{
 		Queries:      queries,
 		SessionStore: sessionStore,

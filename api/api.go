@@ -11,6 +11,7 @@ import (
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
 	db "github.com/tedyst/licenta/db/generated"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type ApiConfig struct {
@@ -41,5 +42,5 @@ func Initialize(database *db.Queries, sessionStore handlers.SessionStoreType, co
 		Debug:   config.Debug,
 		BaseURL: "/api/v1",
 	})
-	return app
+	return otelhttp.NewHandler(app, "api")
 }

@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
-	"go.opentelemetry.io/otel/exporters/prometheus"
-	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -16,22 +16,26 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
 
-var Tracer = otel.Tracer("github.com/tedyst/licenta")
-var Meter = otel.Meter("github.com/tedyst/licenta")
+type TelemetryConfig struct {
+	Enabled           bool   `mapstructure:"enabled"`
+	CollectorEndpoint string `mapstructure:"collector_endpoint"`
+}
 
-func initTracer() *sdktrace.TracerProvider {
-	var exporter sdktrace.SpanExporter
-	var err error
-	if !viper.IsSet("telemetry.tracing.jaeger") {
-		exporter, err = stdouttrace.New(stdouttrace.WithPrettyPrint())
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		exporter, err = jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(viper.GetString("telemetry.tracing.jaeger"))))
-		if err != nil {
-			log.Fatal(err)
-		}
+func SetConfigDefaults(prefix string) {
+	viper.SetDefault(prefix+".enabled", false)
+	viper.SetDefault(prefix+".collector_endpoint", "")
+}
+
+func initTracer(config *TelemetryConfig) *sdktrace.TracerProvider {
+	exporter, err := otlptrace.New(
+		context.Background(),
+		otlptracegrpc.NewClient(
+			otlptracegrpc.WithInsecure(),
+			otlptracegrpc.WithEndpoint(config.CollectorEndpoint),
+		),
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -47,32 +51,26 @@ func initTracer() *sdktrace.TracerProvider {
 	return tp
 }
 
-func initMetric() *sdkmetric.MeterProvider {
-	exporter, err := prometheus.New()
+func initMetric(config *TelemetryConfig) *sdkmetric.MeterProvider {
+	exporter, err := otlpmetricgrpc.New(
+		context.Background(),
+		otlpmetricgrpc.WithInsecure(),
+		otlpmetricgrpc.WithEndpoint(config.CollectorEndpoint),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	provider := sdkmetric.NewMeterProvider(sdkmetric.WithReader(exporter))
+	reader := sdkmetric.NewPeriodicReader(exporter)
+	provider := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
 	otel.SetMeterProvider(provider)
 
 	return provider
 }
 
-func InitTelemetry() {
-	if viper.GetBool("telemetry.metrics.enabled") {
-		mp := initMetric()
-		defer func() {
-			if err := mp.Shutdown(context.Background()); err != nil {
-				log.Printf("Error shutting down metric provider: %v", err)
-			}
-		}()
+func InitTelemetry(config *TelemetryConfig) {
+	if !config.Enabled {
+		return
 	}
-	if viper.GetBool("telemetry.tracing.enabled") {
-		tp := initTracer()
-		defer func() {
-			if err := tp.Shutdown(context.Background()); err != nil {
-				log.Printf("Error shutting down tracer provider: %v", err)
-			}
-		}()
-	}
+	initTracer(config)
+	initMetric(config)
 }

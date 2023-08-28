@@ -10,10 +10,12 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	db "github.com/tedyst/licenta/db/generated"
-	"github.com/tedyst/licenta/telemetry"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
+
+var tracer = otel.Tracer("github.com/tedyst/licenta/api/v1/middleware/session")
 
 const cookieSessionKey = "session"
 
@@ -31,8 +33,6 @@ type config struct {
 
 type sessionStore struct {
 	database *db.Queries
-	tracer   *trace.Tracer
-	handler  http.Handler
 	config   config
 }
 
@@ -75,7 +75,7 @@ func (store *sessionStore) getSession(ctx context.Context, data *sessionData, r 
 }
 
 func (store *sessionStore) saveSession(ctx context.Context, data *sessionData) error {
-	ctx, span := telemetry.Tracer.Start(ctx, "SaveSession")
+	ctx, span := tracer.Start(ctx, "SaveSession")
 	defer span.End()
 
 	err := store.database.UpdateSession(ctx, db.UpdateSessionParams{
@@ -102,7 +102,7 @@ func (store *sessionStore) getUser(ctx context.Context, data *sessionData) error
 }
 
 func (store *sessionStore) initializeSession(ctx context.Context, r *http.Request, w http.ResponseWriter) (*http.Request, *sessionData, error) {
-	ctx, span := telemetry.Tracer.Start(ctx, "InitializeSession")
+	ctx, span := tracer.Start(ctx, "InitializeSession")
 	defer span.End()
 
 	r, data := store.initSessionData(ctx, w, r)
@@ -127,7 +127,7 @@ func (store *sessionStore) initializeSession(ctx context.Context, r *http.Reques
 }
 
 func (store *sessionStore) GetUser(ctx context.Context) *db.User {
-	ctx, span := telemetry.Tracer.Start(ctx, "GetUser")
+	ctx, span := tracer.Start(ctx, "GetUser")
 	defer span.End()
 
 	return ctx.Value(contextSessionKey{}).(*sessionData).User
@@ -195,7 +195,6 @@ func (store *sessionStore) ClearSession(ctx context.Context) {
 func New(database *db.Queries, debug bool) *sessionStore {
 	return &sessionStore{
 		database: database,
-		tracer:   &telemetry.Tracer,
 		config: config{
 			debug: debug,
 		},

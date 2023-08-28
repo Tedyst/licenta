@@ -1,0 +1,8 @@
+debug: false
+help: false
+models:
+  user:
+    password_pepper: pepper
+telemetry:
+  collector_endpoint: ""
+  enabled: false

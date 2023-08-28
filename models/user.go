@@ -9,12 +9,16 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.opentelemetry.io/otel"
 
 	"github.com/pquerna/otp/totp"
 	db "github.com/tedyst/licenta/db/generated"
-	"github.com/tedyst/licenta/telemetry"
 	"golang.org/x/crypto/argon2"
 )
+
+var tracer = otel.Tracer("github.com/tedyst/licenta/models")
+
+type User = db.User
 
 var PasswordPepper []byte
 
@@ -38,7 +42,7 @@ type params struct {
 }
 
 func GenerateHash(ctx context.Context, password string) (string, error) {
-	_, span := telemetry.Tracer.Start(ctx, "GenerateHash")
+	_, span := tracer.Start(ctx, "GenerateHash")
 	defer span.End()
 
 	salt, err := generateRandomBytes(argon2SaltLength)
@@ -62,7 +66,7 @@ func SetPassword(ctx context.Context, u *db.User, password string) error {
 }
 
 func VerifyPassword(ctx context.Context, u *db.User, password string) (bool, error) {
-	_, span := telemetry.Tracer.Start(ctx, "VerifyPassword")
+	_, span := tracer.Start(ctx, "VerifyPassword")
 	defer span.End()
 
 	p, salt, hash, err := decodeHash(u.Password)
@@ -125,7 +129,7 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 }
 
 func VerifyTOTP(ctx context.Context, u *db.User, code string) bool {
-	_, span := telemetry.Tracer.Start(ctx, "VerifyTOTP")
+	_, span := tracer.Start(ctx, "VerifyTOTP")
 	defer span.End()
 
 	if !u.TotpSecret.Valid {
@@ -135,7 +139,7 @@ func VerifyTOTP(ctx context.Context, u *db.User, code string) bool {
 }
 
 func GenerateTOTP(ctx context.Context, u *db.User) (string, error) {
-	_, span := telemetry.Tracer.Start(ctx, "GenerateTOTP")
+	_, span := tracer.Start(ctx, "GenerateTOTP")
 	defer span.End()
 
 	if !u.TotpSecret.Valid {
