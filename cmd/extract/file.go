@@ -18,12 +18,12 @@ var extractFileCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		results, err := file.ExtractFromReader(f)
+		results, err := file.ExtractFromReader(args[0], f)
 		if err != nil {
 			panic(err)
 		}
 		for _, result := range results {
-			fmt.Printf("ExtractResult{Name: %s, Line: %s, LineNumber: %d, Match: %s, Severity: %d, Probability: %f, Username: %s, Password: %s}\n", result.Name, result.Line, result.LineNumber, result.Match, result.Severity, result.Probability, result.Username, result.Password)
+			fmt.Printf("%s\n", result.String())
 		}
 	},
 }
