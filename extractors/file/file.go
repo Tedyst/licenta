@@ -14,7 +14,6 @@ import (
 
 type secretType struct {
 	regex          *regexp.Regexp
-	severity       int
 	probability    func(line string, match string) float32
 	name           string
 	postProcessing func(string) (string, error)
@@ -25,7 +24,6 @@ type ExtractResult struct {
 	Line        string
 	LineNumber  int
 	Match       string
-	Severity    int
 	Probability float32
 	Username    string
 	Password    string
@@ -42,10 +40,8 @@ func (e ExtractResult) Hash() string {
 }
 
 func (e ExtractResult) String() string {
-	return fmt.Sprintf("ExtractResult{Name: %s, Line: %s, LineNumber: %d, Match: %s, Severity: %d, Probability: %f, Username: %s, Password: %s, FileName: %s}", e.Name, e.Line, e.LineNumber, e.Match, e.Severity, e.Probability, e.Username, e.Password, e.FileName)
+	return fmt.Sprintf("ExtractResult{Name: %s, Line: %s, LineNumber: %d, Match: %s, Probability: %f, Username: %s, Password: %s, FileName: %s}", e.Name, e.Line, e.LineNumber, e.Match, e.Probability, e.Username, e.Password, e.FileName)
 }
-
-const entropyThreshold = 50
 
 func shannonEntropy(value string) (bits int) {
 	frq := make(map[rune]float64)
@@ -99,6 +95,8 @@ var wordsReduceProbability = []string{
 }
 
 var wordsIncreaseProbability = []string{
+	"database",
+	"db",
 	"postgres",
 	"psql",
 	"mongo",
@@ -108,48 +106,55 @@ var wordsIncreaseProbability = []string{
 	"rabbitmq",
 }
 
-func calculateProbabilityCommon(line string, match string) float32 {
-	entropy := shannonEntropy(match)
-	probability := math.Min(float64(entropy)/float64(entropyThreshold), 1.0)
-	for _, word := range wordsReduceProbability {
-		if strings.Contains(strings.ToLower(match), strings.ToLower(word)) {
-			probability /= 2
+const probabilityDecreaseMultiplier = 0.7
+const probabilityIncreaseMultiplier = 2.0
+const entropyThresholdMidpoint = 40
+const logisticGrowthRate = 0.2
+
+func calculateProbabilityCommonWithMultiplier(multiplier float32) func(string, string) float32 {
+	return func(line string, match string) float32 {
+		entropy := shannonEntropy(match)
+		probability := 1.0 / (1.0 + math.Exp(-logisticGrowthRate*(float64(entropy)-entropyThresholdMidpoint)))
+		for _, word := range wordsReduceProbability {
+			if strings.Contains(strings.ToLower(match), strings.ToLower(word)) {
+				probability *= probabilityDecreaseMultiplier
+			}
 		}
-	}
-	for _, word := range wordsIncreaseProbability {
-		if strings.Contains(strings.ToLower(line), strings.ToLower(word)) {
-			probability *= 2
+		for _, word := range wordsIncreaseProbability {
+			if strings.Contains(strings.ToLower(line), strings.ToLower(word)) {
+				probability *= probabilityIncreaseMultiplier
+			}
 		}
+		return float32(math.Min(float64(probability*float64(multiplier)), 1.0))
 	}
-	return float32(math.Min(float64(probability), 1.0))
 }
 
 var secretTypes = []secretType{
 	{
 		regex:       regexp.MustCompile(`(?i)(_|[a-zA-Z])*(password|passwd|pwd|pass)(_|[a-zA-Z])* *(=|:|:=) *(?P<password>[a-zA-Z_\-\.]+)`),
-		severity:    1,
-		probability: calculateProbabilityCommon,
+		probability: calculateProbabilityCommonWithMultiplier(1),
 		name:        "Generic Password",
 	},
 	{
-		regex:    regexp.MustCompile(`(?i)postgres:\/\/(?P<username>[^:]+)( *)(=|:)( *)(?P<password>[^@]+)@`),
-		severity: 1,
-		name:     "Postgres Connection String",
+		regex: regexp.MustCompile(`(?i)postgres:\/\/(?P<username>[^:]+)( *)(=|:)( *)(?P<password>[^@]+)@`),
+		name:  "Postgres Connection String",
 	},
 	{
-		regex:    regexp.MustCompile(`(?i)mongodb:\/\/(?P<username>[^:]+)( *)(=|:)( *)(?P<password>[^@]+)@`),
-		severity: 1,
-		name:     "MongoDB Connection String",
+		regex:       regexp.MustCompile(`(?i)(?P<username>[a-zA-Z0-9\-\.]+)(=|:)(?P<password>[a-zA-Z0-9\-\.]+)@`),
+		name:        "Generic Connection String",
+		probability: calculateProbabilityCommonWithMultiplier(1),
 	},
 	{
-		regex:    regexp.MustCompile(`(?i)(?P<username>(?:\b|_)([a-zA-Z0-9_]*(?:api|key|token)[a-zA-Z0-9_]*))(=|:)("|')?(?P<password>[a-zA-Z0-9_\-\.]*)(?:\b|_)("|')?`),
-		severity: 1,
-		name:     "Generic Environment Variable",
+		regex: regexp.MustCompile(`(?i)mongodb:\/\/(?P<username>[^:]+)( *)(=|:)( *)(?P<password>[^@]+)@`),
+		name:  "MongoDB Connection String",
+	},
+	{
+		regex: regexp.MustCompile(`(?i)(?P<username>(?:\b|_)([a-zA-Z0-9_]*(?:api|key|token)[a-zA-Z0-9_]*))(=|:)("|')?(?P<password>[a-zA-Z0-9_\-\.]*)(?:\b|_)("|')?`),
+		name:  "Generic Environment Variable",
 	},
 	{
 		regex:       regexp.MustCompile(`(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{4}|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}={2})`),
-		severity:    1,
-		probability: calculateProbabilityCommon,
+		probability: calculateProbabilityCommonWithMultiplier(2),
 		name:        "Generic Base64",
 		postProcessing: func(match string) (string, error) {
 			if len(match) < 7 {
@@ -177,7 +182,6 @@ func ExtractFromLine(fileName string, lineNumber int, line string) []ExtractResu
 				Line:       strings.TrimSpace(line),
 				LineNumber: lineNumber,
 				Match:      match,
-				Severity:   secretType.severity,
 				FileName:   fileName,
 			}
 			if secretType.postProcessing != nil {

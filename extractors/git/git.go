@@ -46,7 +46,7 @@ func extractFromCommitIterator(cIter object.CommitIter, cutoffProbability float3
 			prev = c
 			return nil
 		}
-		commitResults, err := inspectCommit(c, prev, 0.5)
+		commitResults, err := inspectCommit(c, prev, cutoffProbability)
 		if err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func ExtractGit(repoUrl string) error {
 		return err
 	}
 
-	results, err := extractFromCommitIterator(cIter, 0.5)
+	results, err := extractFromCommitIterator(cIter, 0.1)
 	if err != nil {
 		return err
 	}
