@@ -46,11 +46,13 @@ func scanFileWorker(ctx context.Context, wg *sync.WaitGroup, channel chan *chann
 
 		slog.DebugContext(ctx, "scanFile: finished scanning file", "layer", task.layer, "file", task.fileName)
 
-		callbackResult(LayerResult{
-			Layer:    task.layer,
-			FileName: task.fileName,
-			Results:  results,
-		})
+		if len(results) > 0 {
+			callbackResult(LayerResult{
+				Layer:    task.layer,
+				FileName: task.fileName,
+				Results:  results,
+			})
+		}
 	}
 }
 
@@ -64,6 +66,8 @@ func isFileNameIgnored(name string) bool {
 }
 
 func processLayer(ctx context.Context, c chan *channelTask, layer v1.Layer) error {
+	slog.DebugContext(ctx, "processLayer: processing layer", "layer", layer)
+
 	digest, err := layer.Digest()
 	if err != nil {
 		return err
@@ -106,10 +110,14 @@ func processLayer(ctx context.Context, c chan *channelTask, layer v1.Layer) erro
 			content:  content,
 		}
 	}
+
+	slog.DebugContext(ctx, "processLayer: finished processing layer", "layer", layer)
 	return nil
 }
 
 func processImage(ctx context.Context, c chan *channelTask, image v1.Image) error {
+	slog.DebugContext(ctx, "processImage: processing image", "image", image)
+
 	layers, err := image.Layers()
 	if err != nil {
 		return err
@@ -120,6 +128,8 @@ func processImage(ctx context.Context, c chan *channelTask, image v1.Image) erro
 			return err
 		}
 	}
+
+	slog.DebugContext(ctx, "processImage: finished processing image", "image", image)
 	return nil
 }
 
@@ -129,6 +139,8 @@ func ProcessImage(
 	callbackResult func(result LayerResult),
 	opts ...Option,
 ) error {
+	slog.InfoContext(ctx, "ProcessImage: processing image", "image", imageName, "opts", opts)
+
 	o, err := makeOptions(opts...)
 	if err != nil {
 		return err
@@ -161,10 +173,12 @@ func ProcessImage(
 		if err != nil {
 			return err
 		}
-		go processImage(ctx, resultChan, img)
+		processImage(ctx, resultChan, img)
 	}
 
 	close(resultChan)
 	wg.Wait()
+
+	slog.InfoContext(ctx, "ProcessImage: finished processing image", "image", imageName, "opts", opts)
 	return nil
 }

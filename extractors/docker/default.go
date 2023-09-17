@@ -20,6 +20,7 @@ var defaultIgnoreFileNameIncluding = [...]string{
 	"__pycache__",
 	".git",
 	".cache",
+	"etc/ssl/openssl.cnf",
 }
 
 func GetDefaultIgnoreFileNames() []string {

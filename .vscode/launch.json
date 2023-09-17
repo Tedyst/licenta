@@ -38,7 +38,7 @@
             "args": [
                 "extract",
                 "docker",
-                "./..."
+                "ghcr.io/tedyst/spotifyutils"
             ],
             "envFile": "${workspaceFolder}/.env"
         }

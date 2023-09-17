@@ -157,6 +157,10 @@ var passwordsCompletelyIgnore = []string{
 	"author",
 }
 
+var usernamesCompletelyIgnore = []string{
+	"i18nKey",
+}
+
 var wordsIncreaseProbability = []string{
 	"database",
 	"db",

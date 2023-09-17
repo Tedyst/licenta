@@ -46,6 +46,7 @@ func ExtractFromLine(fileName string, lineNumber int, line string) []ExtractResu
 	wordsReduceProbabilityTrie := GetTrie(wordsReduceProbability)
 	wordsIncreaseProbabilityTrie := GetTrie(wordsIncreaseProbability)
 	passwordsCompletelyIgnoreTrie := GetTrie(passwordsCompletelyIgnore)
+	usernamesCompletelyIgnoreTrie := GetTrie(usernamesCompletelyIgnore)
 
 	for _, secretType := range getSecretTypes(wordsIncreaseProbabilityTrie, wordsReduceProbabilityTrie) {
 		for _, match := range secretType.regex.FindAllString(line, 100) {
@@ -92,6 +93,11 @@ func ExtractFromLine(fileName string, lineNumber int, line string) []ExtractResu
 					continue
 				}
 				if passwordsCompletelyIgnoreTrie.Get(strings.ToLower(result.Password)) != nil {
+					continue
+				}
+			}
+			if result.Username != "" {
+				if usernamesCompletelyIgnoreTrie.Get(strings.ToLower(result.Username)) != nil {
 					continue
 				}
 			}
