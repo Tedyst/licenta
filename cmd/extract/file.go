@@ -29,5 +29,5 @@ var extractFileCmd = &cobra.Command{
 }
 
 func init() {
-	extractCmd.AddCommand(extractFileCmd)
+	extractCmd.AddCommand(extractDockerCmd)
 }

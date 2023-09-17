@@ -1,0 +1,170 @@
+package file
+
+import (
+	"bufio"
+	"encoding/base64"
+	"fmt"
+	"math"
+	"regexp"
+	"strings"
+
+	"github.com/dghubble/trie"
+)
+
+const probabilityDecreaseMultiplier = 0.7
+const probabilityIncreaseMultiplier = 2.0
+const entropyThresholdMidpoint = 40
+const logisticGrowthRate = 0.2
+
+func getSecretTypes(increaseProbabilityTrie *trie.PathTrie, reduceProbabilityTrie *trie.PathTrie) []secretType {
+
+	calculateProbabilityCommonWithMultiplier := func(multiplier float32) func(string, string) float32 {
+		return func(line string, match string) float32 {
+			entropy := shannonEntropy(match)
+			probability := 1.0 / (1.0 + math.Exp(-logisticGrowthRate*(float64(entropy)-entropyThresholdMidpoint)))
+
+			scanner := bufio.NewScanner(strings.NewReader(strings.ToLower(match)))
+			scanner.Split(bufio.ScanWords)
+
+			for scanner.Scan() {
+				lower := strings.ToLower(scanner.Text())
+				if reduceProbabilityTrie.Get(lower) != nil {
+					probability *= probabilityDecreaseMultiplier
+				}
+				if increaseProbabilityTrie.Get(lower) != nil {
+					probability *= probabilityIncreaseMultiplier
+				}
+			}
+			return float32(math.Min(float64(probability*float64(multiplier)), 1.0))
+		}
+	}
+
+	return []secretType{
+		{
+			regex:       regexp.MustCompile(`(?i)(_|[a-zA-Z])*(password|passwd|pwd|pass)(_|[a-zA-Z])* *(=|:|:=) *(?P<password>[a-zA-Z_\-\.]+)`),
+			probability: calculateProbabilityCommonWithMultiplier(1),
+			name:        "Generic Password",
+		},
+		{
+			regex: regexp.MustCompile(`(?i)postgres:\/\/(?P<username>[^:]+)( *)(=|:)( *)(?P<password>[^@]+)@`),
+			name:  "Postgres Connection String",
+		},
+		{
+			regex:       regexp.MustCompile(`(?i)(?P<username>[a-zA-Z0-9\-\.]+)(=|:)(?P<password>[a-zA-Z0-9\-\.]+)@`),
+			name:        "Generic Connection String",
+			probability: calculateProbabilityCommonWithMultiplier(1),
+		},
+		{
+			regex: regexp.MustCompile(`(?i)mongodb:\/\/(?P<username>[^:]+)( *)(=|:)( *)(?P<password>[^@]+)@`),
+			name:  "MongoDB Connection String",
+		},
+		{
+			regex: regexp.MustCompile(`(?i)(?P<username>(?:\b|_)([a-zA-Z0-9_]*(?:api|key|token)[a-zA-Z0-9_]*))(=|:)("|')?(?P<password>[a-zA-Z0-9_\-\.]*)(?:\b|_)("|')?`),
+			name:  "Generic Environment Variable",
+		},
+		{
+			regex:       regexp.MustCompile(`(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{4}|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}={2})`),
+			probability: calculateProbabilityCommonWithMultiplier(2),
+			name:        "Generic Base64",
+			postProcessing: func(match string) (string, error) {
+				if len(match) < 7 {
+					return "", fmt.Errorf("too short")
+				}
+				str, err := base64.StdEncoding.DecodeString(match)
+				if err != nil {
+					return "", err
+				}
+				if !isASCII(str) {
+					return "", fmt.Errorf("not ascii")
+				}
+				return string(str), nil
+			},
+		},
+	}
+}
+
+var wordsReduceProbability = []string{
+	"password",
+	"error",
+	"username",
+	"login",
+	"secret",
+	"token",
+	"key",
+	"api",
+	"access",
+	"private",
+	"public",
+	"protected",
+	"admin",
+	"root",
+	"user",
+	"args",
+	"null",
+	"hash",
+	".txt",
+	".cfg",
+}
+
+var passwordsCompletelyIgnore = []string{
+	"password",
+	"string",
+	"request",
+	"value",
+	"example",
+	"lambda",
+	"true",
+	"false",
+	"none",
+	"function",
+	"no",
+	"yes",
+	"amd64",
+	"arm64",
+	"arm",
+	"linux",
+	"darwin",
+	"windows",
+	"amd",
+	"macos",
+	"i386",
+	"android",
+	"ios",
+	"example",
+	"keyid",
+	"kubernetescluster",
+	"runtime",
+	"name",
+	"secret_access_key",
+	"setting",
+	"api_key",
+	"api_secret",
+	"key_id",
+	"key_secret",
+	"always",
+	"1024",
+	"2048",
+	"4096",
+	"token",
+	"hash",
+	"suspend",
+	"caller",
+	"getvalidator",
+	"fields",
+	"hibernate",
+	"poweroff",
+	"reboot",
+	"author",
+}
+
+var wordsIncreaseProbability = []string{
+	"database",
+	"db",
+	"postgres",
+	"psql",
+	"mongo",
+	"mysql",
+	"mariadb",
+	"redis",
+	"rabbitmq",
+}

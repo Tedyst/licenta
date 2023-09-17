@@ -1,0 +1,5 @@
+FROM debian
+
+ADD . /
+
+RUN rm -rf .env
