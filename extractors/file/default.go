@@ -11,17 +11,23 @@ import (
 	"github.com/dghubble/trie"
 )
 
-const probabilityDecreaseMultiplier = 0.7
-const probabilityIncreaseMultiplier = 2.0
-const entropyThresholdMidpoint = 40
-const logisticGrowthRate = 0.2
+const defaultProbabilityDecreaseMultiplier = 0.7
+const defaultProbabilityIncreaseMultiplier = 2.0
+const defaultEntropyThresholdMidpoint = 40
+const defaultLogisticGrowthRate = 0.2
 
-func getSecretTypes(increaseProbabilityTrie *trie.PathTrie, reduceProbabilityTrie *trie.PathTrie) []secretType {
-
-	calculateProbabilityCommonWithMultiplier := func(multiplier float32) func(string, string) float32 {
-		return func(line string, match string) float32 {
+func getSecretTypes(
+	increaseProbabilityTrie *trie.PathTrie,
+	reduceProbabilityTrie *trie.PathTrie,
+	logisticGrowthRate float64,
+	entropyThresholdMidpoint int,
+	probabilityDecreaseMultiplier float64,
+	probabilityIncreaseMultiplier float64,
+) []secretType {
+	calculateProbabilityCommonWithMultiplier := func(multiplier float64) func(string, string) float64 {
+		return func(line string, match string) float64 {
 			entropy := shannonEntropy(match)
-			probability := 1.0 / (1.0 + math.Exp(-logisticGrowthRate*(float64(entropy)-entropyThresholdMidpoint)))
+			probability := 1.0 / (1.0 + math.Exp(-logisticGrowthRate*float64(entropy-entropyThresholdMidpoint)))
 
 			scanner := bufio.NewScanner(strings.NewReader(strings.ToLower(match)))
 			scanner.Split(bufio.ScanWords)
@@ -35,7 +41,7 @@ func getSecretTypes(increaseProbabilityTrie *trie.PathTrie, reduceProbabilityTri
 					probability *= probabilityIncreaseMultiplier
 				}
 			}
-			return float32(math.Min(float64(probability*float64(multiplier)), 1.0))
+			return math.Min(probability*multiplier, 1.0)
 		}
 	}
 
@@ -83,7 +89,7 @@ func getSecretTypes(increaseProbabilityTrie *trie.PathTrie, reduceProbabilityTri
 	}
 }
 
-var wordsReduceProbability = []string{
+var defaultWordsReduceProbability = []string{
 	"password",
 	"error",
 	"username",
@@ -106,7 +112,7 @@ var wordsReduceProbability = []string{
 	".cfg",
 }
 
-var passwordsCompletelyIgnore = []string{
+var defaultPasswordsCompletelyIgnore = []string{
 	"password",
 	"string",
 	"request",
@@ -157,11 +163,11 @@ var passwordsCompletelyIgnore = []string{
 	"author",
 }
 
-var usernamesCompletelyIgnore = []string{
+var defaultUsernamesCompletelyIgnore = []string{
 	"i18nKey",
 }
 
-var wordsIncreaseProbability = []string{
+var defaultWordsIncreaseProbability = []string{
 	"database",
 	"db",
 	"postgres",

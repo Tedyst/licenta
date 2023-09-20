@@ -12,7 +12,7 @@ import (
 
 type secretType struct {
 	regex          *regexp.Regexp
-	probability    func(line string, match string) float32
+	probability    func(line string, match string) float64
 	name           string
 	postProcessing func(string) (string, error)
 }
@@ -22,7 +22,7 @@ type ExtractResult struct {
 	Line        string
 	LineNumber  int
 	Match       string
-	Probability float32
+	Probability float64
 	Username    string
 	Password    string
 	FileName    string
@@ -41,14 +41,28 @@ func (e ExtractResult) String() string {
 	return fmt.Sprintf("ExtractResult{Name: %s, Line: %s, LineNumber: %d, Match: %s, Probability: %f, Username: %s, Password: %s, FileName: %s}", e.Name, e.Line, e.LineNumber, e.Match, e.Probability, e.Username, e.Password, e.FileName)
 }
 
-func ExtractFromLine(fileName string, lineNumber int, line string) []ExtractResult {
-	var results []ExtractResult
-	wordsReduceProbabilityTrie := GetTrie(wordsReduceProbability)
-	wordsIncreaseProbabilityTrie := GetTrie(wordsIncreaseProbability)
-	passwordsCompletelyIgnoreTrie := GetTrie(passwordsCompletelyIgnore)
-	usernamesCompletelyIgnoreTrie := GetTrie(usernamesCompletelyIgnore)
+func ExtractFromLine(fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {
+	o, err := makeOptions(opts...)
+	if err != nil {
+		return nil, err
+	}
 
-	for _, secretType := range getSecretTypes(wordsIncreaseProbabilityTrie, wordsReduceProbabilityTrie) {
+	var results []ExtractResult
+	wordsReduceProbabilityTrie := GetTrie(o.wordsReduceProbability)
+	wordsIncreaseProbabilityTrie := GetTrie(o.wordsIncreaseProbability)
+	passwordsCompletelyIgnoreTrie := GetTrie(o.passwordsCompletelyIgnore)
+	usernamesCompletelyIgnoreTrie := GetTrie(o.usernamesCompletelyIgnore)
+
+	secretTypes := getSecretTypes(
+		wordsReduceProbabilityTrie,
+		wordsIncreaseProbabilityTrie,
+		o.logisticGrowthRate,
+		o.entropyThresholdMidpoint,
+		o.probabilityDecreaseMultiplier,
+		o.probabilityIncreaseMultiplier,
+	)
+
+	for _, secretType := range secretTypes {
 		for _, match := range secretType.regex.FindAllString(line, 100) {
 			result := ExtractResult{
 				Name:       secretType.name,
@@ -105,10 +119,10 @@ func ExtractFromLine(fileName string, lineNumber int, line string) []ExtractResu
 			results = append(results, result)
 		}
 	}
-	return results
+	return results, nil
 }
 
-func ExtractFromReader(fileName string, rd io.Reader) ([]ExtractResult, error) {
+func ExtractFromReader(fileName string, rd io.Reader, opts ...Option) ([]ExtractResult, error) {
 	var results []ExtractResult
 	var lineNumber int
 
@@ -117,7 +131,10 @@ func ExtractFromReader(fileName string, rd io.Reader) ([]ExtractResult, error) {
 		line := scanner.Text()
 		lineNumber++
 
-		extracted := ExtractFromLine(fileName, lineNumber, line)
+		extracted, err := ExtractFromLine(fileName, lineNumber, line, opts...)
+		if err != nil {
+			return nil, err
+		}
 		results = append(results, extracted...)
 	}
 	return results, nil
