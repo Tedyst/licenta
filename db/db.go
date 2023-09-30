@@ -25,6 +25,18 @@ type querierImpl struct {
 }
 
 func (q querierImpl) StartTransaction(ctx context.Context) (TransactionQuerier, error) {
+	if q.tx != nil {
+		newTx, err := q.tx.Begin(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return querierImpl{
+			pool:    q.pool,
+			tx:      newTx,
+			Queries: queries.New(newTx),
+		}, nil
+	}
+
 	tx, err := q.pool.Begin(ctx)
 	if err != nil {
 		return nil, err
