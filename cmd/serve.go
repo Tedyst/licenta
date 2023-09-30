@@ -26,7 +26,7 @@ var serveCmd = &cobra.Command{
 		}
 		viper.WriteConfig()
 		print(cfg.Models.User.PasswordPepper)
-		db := database.InitDatabase()
+		db := database.InitDatabase(viper.GetString("database"))
 		sessionStore := session.New(db, viper.GetBool("debug"))
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:  false,

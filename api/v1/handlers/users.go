@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 )
 
@@ -34,7 +34,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 		offset = *request.Params.Offset
 	}
 
-	users, err := server.Queries.ListUsersPaginated(ctx, db.ListUsersPaginatedParams{
+	users, err := server.Queries.ListUsersPaginated(ctx, queries.ListUsersPaginatedParams{
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -138,7 +138,7 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error setting password")
 	}
 
-	err = server.Queries.UpdateUser(ctx, db.UpdateUserParams{
+	err = server.Queries.UpdateUser(ctx, queries.UpdateUserParams{
 		ID:       user.ID,
 		Password: sql.NullString{Valid: true, String: user.Password},
 	})

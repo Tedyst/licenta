@@ -6,8 +6,10 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/db"
 	database "github.com/tedyst/licenta/db"
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db/queries"
 )
 
 var changepasswordCmd = &cobra.Command{
@@ -17,15 +19,22 @@ var changepasswordCmd = &cobra.Command{
 	licenta changepassword [username or email] [new password]`,
 	Args: cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		database.InitDatabase()
-		user, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
+		var db db.TransactionQuerier
+		db = database.InitDatabase(viper.GetString("database"))
+		db, err := db.StartTransaction(context.Background())
+		if err != nil {
+			log.Panic(err)
+		}
+		defer db.EndTransaction(context.Background(), err)
+
+		user, err := db.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
 			panic(err)
 		}
 		if user == nil {
 			log.Panic("User does not exist.")
 		}
-		err = database.DatabaseQueries.UpdateUser(context.Background(), db.UpdateUserParams{
+		err = db.UpdateUser(context.Background(), queries.UpdateUserParams{
 			ID:       user.ID,
 			Password: sql.NullString{Valid: true, String: args[1]},
 		})

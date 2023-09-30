@@ -1,6 +1,7 @@
 package file
 
 import (
+	"context"
 	"math"
 )
 
@@ -46,7 +47,7 @@ func FilterDuplicateExtractResults(originalResults []ExtractResult) []ExtractRes
 	return filteredResults
 }
 
-func FilterExtractResultsByProbability(originalResults []ExtractResult, probability float32) []ExtractResult {
+func FilterExtractResultsByProbability(ctx context.Context, originalResults []ExtractResult, probability float64) []ExtractResult {
 	var results []ExtractResult
 	for _, result := range originalResults {
 		if result.Probability >= probability {

@@ -2,6 +2,7 @@ package git
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"strings"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
-func inspectCommit(commit *object.Commit, parent *object.Commit, cutoffProbability float32) ([]file.ExtractResult, error) {
+func inspectCommit(ctx context.Context, commit *object.Commit, parent *object.Commit, cutoffProbability float64) ([]file.ExtractResult, error) {
 	patch, err := commit.Patch(parent)
 	if err != nil {
 		return nil, err
@@ -30,15 +31,19 @@ func inspectCommit(commit *object.Commit, parent *object.Commit, cutoffProbabili
 					lineNumber++
 					line := scanner.Text()
 					_, toFile := filePatch.Files()
-					results = append(results, file.ExtractFromLine(toFile.Path(), lineNumber, line)...)
+					fileResults, err := file.ExtractFromLine(ctx, toFile.Path(), lineNumber, line)
+					if err != nil {
+						return nil, err
+					}
+					results = append(results, fileResults...)
 				}
 			}
 		}
 	}
-	return file.FilterExtractResultsByProbability(results, cutoffProbability), nil
+	return file.FilterExtractResultsByProbability(ctx, results, cutoffProbability), nil
 }
 
-func extractFromCommitIterator(cIter object.CommitIter, cutoffProbability float32) ([]file.ExtractResult, error) {
+func extractFromCommitIterator(ctx context.Context, cIter object.CommitIter, cutoffProbability float64) ([]file.ExtractResult, error) {
 	var prev *object.Commit
 	var results []file.ExtractResult
 	err := cIter.ForEach(func(c *object.Commit) error {
@@ -46,7 +51,7 @@ func extractFromCommitIterator(cIter object.CommitIter, cutoffProbability float3
 			prev = c
 			return nil
 		}
-		commitResults, err := inspectCommit(c, prev, cutoffProbability)
+		commitResults, err := inspectCommit(ctx, c, prev, cutoffProbability)
 		if err != nil {
 			return err
 		}
@@ -61,7 +66,7 @@ func extractFromCommitIterator(cIter object.CommitIter, cutoffProbability float3
 	return file.FilterDuplicateExtractResults(results), nil
 }
 
-func ExtractGit(repoUrl string) error {
+func ExtractGit(ctx context.Context, repoUrl string) error {
 	repo, err := gitgo.PlainOpen(repoUrl)
 	if err != nil {
 		return err
@@ -72,7 +77,7 @@ func ExtractGit(repoUrl string) error {
 		return err
 	}
 
-	results, err := extractFromCommitIterator(cIter, 0.1)
+	results, err := extractFromCommitIterator(ctx, cIter, 0.1)
 	if err != nil {
 		return err
 	}
@@ -84,7 +89,7 @@ func ExtractGit(repoUrl string) error {
 	return nil
 }
 
-func ExtractGitFromCommit(repoUrl string, commitHash string, cutoffProbability float32) error {
+func ExtractGitFromCommit(ctx context.Context, repoUrl string, commitHash string, cutoffProbability float64) error {
 	repo, err := gitgo.PlainOpen(repoUrl)
 	if err != nil {
 		return err
@@ -100,7 +105,7 @@ func ExtractGitFromCommit(repoUrl string, commitHash string, cutoffProbability f
 		return err
 	}
 
-	results, err := extractFromCommitIterator(cIter, cutoffProbability)
+	results, err := extractFromCommitIterator(ctx, cIter, cutoffProbability)
 	if err != nil {
 		return err
 	}

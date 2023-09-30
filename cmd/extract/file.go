@@ -1,6 +1,7 @@
 package extract
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -18,7 +19,7 @@ var extractFileCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		results, err := file.ExtractFromReader(args[0], f)
+		results, err := file.ExtractFromReader(context.Background(), args[0], f)
 		if err != nil {
 			panic(err)
 		}

@@ -1,7 +1,5 @@
 package models
 
-import (
-	db "github.com/tedyst/licenta/db/generated"
-)
+import "github.com/tedyst/licenta/db/queries"
 
-type Session = db.Session
+type Session = queries.Session

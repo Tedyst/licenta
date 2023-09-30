@@ -9,7 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
@@ -33,7 +34,7 @@ type config struct {
 }
 
 type sessionStore struct {
-	database db.Querier
+	database db.TransactionQuerier
 	config   config
 }
 
@@ -48,7 +49,7 @@ func (store *sessionStore) initSessionData(ctx context.Context, w http.ResponseW
 }
 
 func (store *sessionStore) createNewSession(ctx context.Context, data *sessionData) error {
-	sess, err := store.database.CreateSession(ctx, db.CreateSessionParams{
+	sess, err := store.database.CreateSession(ctx, queries.CreateSessionParams{
 		ID: uuid.New(),
 	})
 	if err != nil {
@@ -79,7 +80,7 @@ func (store *sessionStore) saveSession(ctx context.Context, data *sessionData) e
 	ctx, span := tracer.Start(ctx, "SaveSession")
 	defer span.End()
 
-	err := store.database.UpdateSession(ctx, db.UpdateSessionParams{
+	err := store.database.UpdateSession(ctx, queries.UpdateSessionParams{
 		ID:      data.Session.ID,
 		UserID:  data.Session.UserID,
 		TotpKey: data.Session.TotpKey,
@@ -193,7 +194,7 @@ func (store *sessionStore) ClearSession(ctx context.Context) {
 	data.sessionChanged = true
 }
 
-func New(database db.Querier, debug bool) *sessionStore {
+func New(database db.TransactionQuerier, debug bool) *sessionStore {
 	return &sessionStore{
 		database: database,
 		config: config{

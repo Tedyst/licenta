@@ -5,8 +5,8 @@ sql:
     schema: "schema.sql"
     gen:
       go:
-        package: "db"
-        out: "generated"
+        package: "queries"
+        out: "queries"
         sql_package: "pgx/v5"
         emit_result_struct_pointers: true
         emit_interface: true

@@ -1,6 +1,7 @@
 package extract
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -13,7 +14,7 @@ var extractGitCmd = &cobra.Command{
 	Long:  `Run the extractor tool for the provided git repo`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		err := git.ExtractGit(args[0])
+		err := git.ExtractGit(context.Background(), args[0])
 		if err != nil {
 			fmt.Println(err)
 		}

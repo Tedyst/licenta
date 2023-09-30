@@ -38,11 +38,11 @@ func scanFileWorker(ctx context.Context, wg *sync.WaitGroup, channel chan *chann
 
 		slog.DebugContext(ctx, "scanFile: scanning file", "layer", task.layer, "file", task.fileName)
 
-		results, err := file.ExtractFromReader(task.fileName, bytes.NewReader(task.content))
+		results, err := file.ExtractFromReader(ctx, task.fileName, bytes.NewReader(task.content), o.fileScannerOptions...)
 		if err != nil {
 			return err
 		}
-		results = file.FilterExtractResultsByProbability(results, o.probability)
+		results = file.FilterExtractResultsByProbability(ctx, results, o.probability)
 
 		slog.DebugContext(ctx, "scanFile: finished scanning file", "layer", task.layer, "file", task.fileName)
 

@@ -2,12 +2,15 @@ package file
 
 import (
 	"bufio"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 type secretType struct {
@@ -41,7 +44,9 @@ func (e ExtractResult) String() string {
 	return fmt.Sprintf("ExtractResult{Name: %s, Line: %s, LineNumber: %d, Match: %s, Probability: %f, Username: %s, Password: %s, FileName: %s}", e.Name, e.Line, e.LineNumber, e.Match, e.Probability, e.Username, e.Password, e.FileName)
 }
 
-func ExtractFromLine(fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {
+func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {
+	slog.DebugContext(ctx, "Extracting from line", "fileName", fileName, "lineNumber", lineNumber, "line", line)
+
 	o, err := makeOptions(opts...)
 	if err != nil {
 		return nil, err
@@ -64,6 +69,7 @@ func ExtractFromLine(fileName string, lineNumber int, line string, opts ...Optio
 
 	for _, secretType := range secretTypes {
 		for _, match := range secretType.regex.FindAllString(line, 100) {
+			slog.DebugContext(ctx, "Found match", "match", match)
 			result := ExtractResult{
 				Name:       secretType.name,
 				Line:       strings.TrimSpace(line),
@@ -104,14 +110,17 @@ func ExtractFromLine(fileName string, lineNumber int, line string, opts ...Optio
 
 			if result.Password != "" {
 				if len(result.Password) < 4 {
+					slog.DebugContext(ctx, "Password too short", "password", result.Password, "fileName", fileName, "lineNumber", lineNumber)
 					continue
 				}
 				if passwordsCompletelyIgnoreTrie.Get(strings.ToLower(result.Password)) != nil {
+					slog.DebugContext(ctx, "Password completely ignored: %s", result.Password, "fileName", fileName, "lineNumber", lineNumber)
 					continue
 				}
 			}
 			if result.Username != "" {
 				if usernamesCompletelyIgnoreTrie.Get(strings.ToLower(result.Username)) != nil {
+					slog.DebugContext(ctx, "Username completely ignored", "username", result.Username, "fileName", fileName, "lineNumber", lineNumber)
 					continue
 				}
 			}
@@ -122,16 +131,18 @@ func ExtractFromLine(fileName string, lineNumber int, line string, opts ...Optio
 	return results, nil
 }
 
-func ExtractFromReader(fileName string, rd io.Reader, opts ...Option) ([]ExtractResult, error) {
+func ExtractFromReader(ctx context.Context, fileName string, rd io.Reader, opts ...Option) ([]ExtractResult, error) {
 	var results []ExtractResult
 	var lineNumber int
+
+	slog.DebugContext(ctx, "Extracting from reader", "fileName", fileName)
 
 	scanner := bufio.NewScanner(rd)
 	for scanner.Scan() {
 		line := scanner.Text()
 		lineNumber++
 
-		extracted, err := ExtractFromLine(fileName, lineNumber, line, opts...)
+		extracted, err := ExtractFromLine(ctx, fileName, lineNumber, line, opts...)
 		if err != nil {
 			return nil, err
 		}

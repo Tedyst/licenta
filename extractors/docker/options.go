@@ -4,15 +4,17 @@ import (
 	"runtime"
 
 	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/tedyst/licenta/extractors/file"
 )
 
 type Option func(*options) error
 
 type options struct {
-	credentials     authn.Authenticator
-	concurrency     int
-	probability     float32
-	ignoreFileNames []string
+	credentials        authn.Authenticator
+	concurrency        int
+	probability        float64
+	ignoreFileNames    []string
+	fileScannerOptions []file.Option
 }
 
 func WithCredentials(creds authn.Authenticator) Option {
@@ -29,7 +31,7 @@ func WithConcurrency(concurrency int) Option {
 	}
 }
 
-func WithProbability(probability float32) Option {
+func WithProbability(probability float64) Option {
 	return func(o *options) error {
 		o.probability = probability
 		return nil
@@ -42,6 +44,13 @@ func WithIgnoreFileNames(useDefault bool, names ...string) Option {
 			o.ignoreFileNames = defaultIgnoreFileNameIncluding[:]
 		}
 		o.ignoreFileNames = append(o.ignoreFileNames, names...)
+		return nil
+	}
+}
+
+func WithFileScannerOptions(opts ...file.Option) Option {
+	return func(o *options) error {
+		o.fileScannerOptions = append(o.fileScannerOptions, opts...)
 		return nil
 	}
 }

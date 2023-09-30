@@ -8,8 +8,10 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/db"
 	database "github.com/tedyst/licenta/db"
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 )
 
@@ -20,8 +22,15 @@ var createadminCmd = &cobra.Command{
 	Long:  `Create an admin user with the provided email and password.`,
 	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
-		database.InitDatabase()
-		_, err := database.DatabaseQueries.GetUserByUsernameOrEmail(context.Background(), args[0])
+		var db db.TransactionQuerier
+		db = database.InitDatabase(viper.GetString("database"))
+		db, err := db.StartTransaction(context.Background())
+		if err != nil {
+			log.Panic(err)
+		}
+		defer db.EndTransaction(context.Background(), err)
+
+		_, err = db.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			log.Panic(err)
 		}
@@ -32,7 +41,7 @@ var createadminCmd = &cobra.Command{
 		if err != nil {
 			log.Panic(err)
 		}
-		user, err := database.DatabaseQueries.CreateUser(context.Background(), db.CreateUserParams{
+		user, err := db.CreateUser(context.Background(), queries.CreateUserParams{
 			Email:    args[0],
 			Password: password,
 			Username: args[2],
@@ -40,7 +49,7 @@ var createadminCmd = &cobra.Command{
 		if err != nil {
 			log.Panic(err)
 		}
-		err = database.DatabaseQueries.UpdateUser(context.Background(), db.UpdateUserParams{
+		err = db.UpdateUser(context.Background(), queries.UpdateUserParams{
 			ID:    user.ID,
 			Admin: sql.NullBool{Valid: true, Bool: true},
 		})

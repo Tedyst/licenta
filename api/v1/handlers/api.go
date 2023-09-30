@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/models"
 )
 
@@ -21,11 +21,11 @@ type SessionStoreType interface {
 }
 
 type serverHandler struct {
-	Queries      db.Querier
+	Queries      db.TransactionQuerier
 	SessionStore SessionStoreType
 }
 
-func NewServerHandler(queries db.Querier, sessionStore SessionStoreType) *serverHandler {
+func NewServerHandler(queries db.TransactionQuerier, sessionStore SessionStoreType) *serverHandler {
 	return &serverHandler{
 		Queries:      queries,
 		SessionStore: sessionStore,

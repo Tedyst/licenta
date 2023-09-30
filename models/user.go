@@ -12,13 +12,13 @@ import (
 	"go.opentelemetry.io/otel"
 
 	"github.com/pquerna/otp/totp"
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db/queries"
 	"golang.org/x/crypto/argon2"
 )
 
 var tracer = otel.Tracer("github.com/tedyst/licenta/models")
 
-type User = db.User
+type User = queries.User
 
 var PasswordPepper []byte
 
@@ -57,7 +57,7 @@ func GenerateHash(ctx context.Context, password string) (string, error) {
 	return encodedHash, nil
 }
 
-func SetPassword(ctx context.Context, u *db.User, password string) error {
+func SetPassword(ctx context.Context, u *User, password string) error {
 	p, err := GenerateHash(ctx, password)
 	if err != nil {
 		u.Password = p
@@ -65,7 +65,7 @@ func SetPassword(ctx context.Context, u *db.User, password string) error {
 	return err
 }
 
-func VerifyPassword(ctx context.Context, u *db.User, password string) (bool, error) {
+func VerifyPassword(ctx context.Context, u *queries.User, password string) (bool, error) {
 	_, span := tracer.Start(ctx, "VerifyPassword")
 	defer span.End()
 
@@ -128,7 +128,7 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-func VerifyTOTP(ctx context.Context, u *db.User, code string) bool {
+func VerifyTOTP(ctx context.Context, u *User, code string) bool {
 	_, span := tracer.Start(ctx, "VerifyTOTP")
 	defer span.End()
 
@@ -138,7 +138,7 @@ func VerifyTOTP(ctx context.Context, u *db.User, code string) bool {
 	return totp.Validate(code, u.TotpSecret.String)
 }
 
-func GenerateTOTP(ctx context.Context, u *db.User) (string, error) {
+func GenerateTOTP(ctx context.Context, u *User) (string, error) {
 	_, span := tracer.Start(ctx, "GenerateTOTP")
 	defer span.End()
 
@@ -152,10 +152,10 @@ func GenerateTOTP(ctx context.Context, u *db.User) (string, error) {
 	return key.Secret(), nil
 }
 
-func Requires2FA(ctx context.Context, u *db.User) bool {
+func Requires2FA(ctx context.Context, u *User) bool {
 	return u.TotpSecret.Valid
 }
 
-func Verify2FA(ctx context.Context, u *db.User, code string) bool {
+func Verify2FA(ctx context.Context, u *User, code string) bool {
 	return VerifyTOTP(ctx, u, code)
 }

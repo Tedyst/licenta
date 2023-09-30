@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
-	db "github.com/tedyst/licenta/db/generated"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 )
 
@@ -77,7 +77,7 @@ func (server *serverHandler) PostRegister(ctx context.Context, request generated
 		}, nil
 	}
 
-	user, err := server.Queries.CreateUser(ctx, db.CreateUserParams{
+	user, err := server.Queries.CreateUser(ctx, queries.CreateUserParams{
 		Username: request.Body.Username,
 		Email:    request.Body.Email,
 	})
@@ -90,7 +90,7 @@ func (server *serverHandler) PostRegister(ctx context.Context, request generated
 		return nil, errors.Wrap(err, "PostRegister: error setting password")
 	}
 
-	err = server.Queries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+	err = server.Queries.UpdateUserPassword(ctx, queries.UpdateUserPasswordParams{
 		ID:       user.ID,
 		Password: user.Password,
 	})
