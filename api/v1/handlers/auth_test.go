@@ -13,13 +13,14 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func TestLogin200(t *testing.T) {
+func TestPostLogin(t *testing.T) {
 	var tests = []struct {
-		user       queries.User
-		username   string
-		password   string
-		totp       *string
-		statusCode int
+		user            queries.User
+		username        string
+		password        string
+		totp            *string
+		statusCode      int
+		invalidPassword bool
 	}{
 		{
 			user: queries.User{
@@ -33,10 +34,24 @@ func TestLogin200(t *testing.T) {
 			totp:       nil,
 			statusCode: 200,
 		},
+		{
+			user: queries.User{
+				ID:       1,
+				Username: "test",
+				Email:    "asd@asd.com",
+				Password: "asd",
+			},
+			username:        "test",
+			password:        "asd",
+			totp:            nil,
+			statusCode:      400,
+			invalidPassword: true,
+		},
 	}
-	t.Parallel()
 	for _, test := range tests {
+		test := test
 		t.Run("", func(t *testing.T) {
+			t.Parallel()
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
@@ -51,13 +66,15 @@ func TestLogin200(t *testing.T) {
 			newUser := test.user
 			newUser.Password = hash
 
-			querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(&newUser, nil)
+			if !test.invalidPassword {
+				querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(&newUser, nil)
 
-			sessionStore.EXPECT().SetUser(gomock.Any(), gomock.Any()).Do(func(ctx context.Context, user *models.User) {
-				if user != &newUser {
-					t.Errorf("expected user %v, got %v", newUser, user)
-				}
-			})
+				sessionStore.EXPECT().SetUser(gomock.Any(), gomock.Any()).Do(func(ctx context.Context, user *models.User) {
+					if user != &newUser {
+						t.Errorf("expected user %v, got %v", newUser, user)
+					}
+				})
+			}
 
 			resp, err := server.PostLogin(context.Background(), generated.PostLoginRequestObject{
 				Body: &generated.LoginUser{

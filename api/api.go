@@ -7,9 +7,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	v1 "github.com/tedyst/licenta/api/v1"
-	"github.com/tedyst/licenta/api/v1/handlers"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
+	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/db"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -19,7 +19,7 @@ type ApiConfig struct {
 	Origin string
 }
 
-func Initialize(database db.TransactionQuerier, sessionStore handlers.SessionStoreType, config ApiConfig) http.Handler {
+func Initialize(database db.TransactionQuerier, sessionStore session.SessionStore, config ApiConfig) http.Handler {
 	app := chi.NewRouter()
 	app.Use(middleware.RealIP)
 	app.Use(middleware.Logger)

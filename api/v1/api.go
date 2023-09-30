@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/api/v1/handlers"
+	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/db"
 )
 
@@ -15,7 +16,7 @@ type ApiV1Config struct {
 	BaseURL string
 }
 
-func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore handlers.SessionStoreType, config ApiV1Config) http.Handler {
+func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore session.SessionStore, config ApiV1Config) http.Handler {
 	api := generated.NewStrictHandlerWithOptions(handlers.NewServerHandler(database, sessionStore), nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			var message = "Invalid request"
