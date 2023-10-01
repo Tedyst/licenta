@@ -2,8 +2,12 @@ package handlers_test
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"testing"
+	"time"
 
+	"github.com/pquerna/otp/totp"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/api/v1/handlers"
 	sessionmock "github.com/tedyst/licenta/api/v1/middleware/session/mock"
@@ -13,39 +17,109 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+func generateTotpSecret(t *testing.T) string {
+	secret, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "test",
+		AccountName: "test",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return secret.Secret()
+}
+
+func generateTotpCode(t *testing.T, secret string, tim time.Time) *string {
+	code, err := totp.GenerateCode(secret, tim)
+	if err != nil {
+		t.Fail()
+	}
+	return &code
+}
+
 func TestPostLogin(t *testing.T) {
 	var tests = []struct {
-		user            queries.User
-		username        string
-		password        string
-		totp            *string
-		statusCode      int
-		invalidPassword bool
+		user                *queries.User
+		username            string
+		password            string
+		statusCode          int
+		shouldGetUser       bool
+		shouldSetSession    bool
+		shouldSetWaiting2FA bool
 	}{
 		{
-			user: queries.User{
+			user: &queries.User{
 				ID:       1,
 				Username: "test",
 				Email:    "asd@asd.com",
 				Password: "asd123123",
 			},
-			username:   "test",
-			password:   "asd123123",
-			totp:       nil,
-			statusCode: 200,
+			username:         "test",
+			password:         "asd123123",
+			statusCode:       200,
+			shouldGetUser:    true,
+			shouldSetSession: true,
 		},
 		{
-			user: queries.User{
+			user: &queries.User{
+				ID:       1,
+				Username: "test",
+				Email:    "asd@asd.com",
+				Password: "asd123123",
+			},
+			username:         "asd@asd.com",
+			password:         "asd123123",
+			statusCode:       200,
+			shouldGetUser:    true,
+			shouldSetSession: true,
+		},
+		{
+			user:             nil,
+			username:         "asd@asd.com",
+			password:         "asd123123",
+			statusCode:       401,
+			shouldGetUser:    true,
+			shouldSetSession: false,
+		},
+		{
+			user: &queries.User{
+				ID:         1,
+				Username:   "test",
+				Email:      "asd@asd.com",
+				Password:   "asd123123",
+				TotpSecret: sql.NullString{String: "asd", Valid: true},
+			},
+			username:            "test",
+			password:            "asd123123",
+			statusCode:          401,
+			shouldGetUser:       true,
+			shouldSetSession:    false,
+			shouldSetWaiting2FA: true,
+		},
+		{
+			user: &queries.User{
+				ID:       1,
+				Username: "test",
+				Email:    "asd@asd.com",
+				Password: "asd123123",
+			},
+			username:         "test",
+			password:         "asd123124",
+			statusCode:       401,
+			shouldSetSession: false,
+			shouldGetUser:    true,
+		},
+		{
+			user: &queries.User{
 				ID:       1,
 				Username: "test",
 				Email:    "asd@asd.com",
 				Password: "asd",
 			},
-			username:        "test",
-			password:        "asd",
-			totp:            nil,
-			statusCode:      400,
-			invalidPassword: true,
+			username:         "test",
+			password:         "asd",
+			statusCode:       400,
+			shouldGetUser:    false,
+			shouldSetSession: false,
 		},
 	}
 	for _, test := range tests {
@@ -59,18 +133,37 @@ func TestPostLogin(t *testing.T) {
 			sessionStore := sessionmock.NewMockSessionStore(ctrl)
 			server := handlers.NewServerHandler(querier, sessionStore)
 
-			hash, err := models.GenerateHash(context.Background(), test.user.Password)
-			if err != nil {
-				t.Fatal(err)
+			newUser := &queries.User{}
+			if test.user != nil {
+				*newUser = *test.user
+
+				hash, err := models.GenerateHash(context.Background(), test.user.Password)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				newUser.Password = hash
 			}
-			newUser := test.user
-			newUser.Password = hash
 
-			if !test.invalidPassword {
-				querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(&newUser, nil)
+			if test.shouldGetUser {
+				if test.user != nil {
+					querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(newUser, nil)
+				} else {
+					querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(nil, errors.New("user not found"))
+				}
+			}
 
+			if test.shouldSetSession {
 				sessionStore.EXPECT().SetUser(gomock.Any(), gomock.Any()).Do(func(ctx context.Context, user *models.User) {
-					if user != &newUser {
+					if user != newUser {
+						t.Errorf("expected user %v, got %v", newUser, user)
+					}
+				})
+			}
+
+			if test.shouldSetWaiting2FA {
+				sessionStore.EXPECT().SetWaiting2FA(gomock.Any(), gomock.Any()).Do(func(ctx context.Context, user *models.User) {
+					if user != newUser {
 						t.Errorf("expected user %v, got %v", newUser, user)
 					}
 				})
@@ -80,7 +173,6 @@ func TestPostLogin(t *testing.T) {
 				Body: &generated.LoginUser{
 					Username: test.username,
 					Password: test.password,
-					TotpCode: test.totp,
 				},
 			})
 			if err != nil {
