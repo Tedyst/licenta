@@ -1,8 +1,0 @@
-DATABASE=postgres://postgres:postgres@localhost:1001/postgres
-PASSWORD_PEPPER=pepper
-DEBUG=false
-JAEGER_ENDPOINT=http://172.17.0.2:14268/api/traces
-SENDGRID_API_KEY=asdasdasdwefqgergahsgdyd23g78r48fb3f62h38d7bvsodc8734fb234hf8
-
-DB_PASSWORD=asdasda
-BASE64_ENCODED_DB_PASSWORD="YXNkYXNkYQ=="

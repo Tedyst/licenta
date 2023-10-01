@@ -1,4 +1,0 @@
-# github.com/tedyst/licenta/extractors/file
-extractors/file/file.go:47:2: wordsIncreaseProbabilityTrie declared and not used
-extractors/file/file.go:48:2: passwordsCompletelyIgnoreTrie declared and not used
-extractors/file/file.go:50:29: undefined: secretTypes

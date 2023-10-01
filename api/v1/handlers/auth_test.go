@@ -210,3 +210,29 @@ func TestPostLogin(t *testing.T) {
 		})
 	}
 }
+
+func TestPostLogout(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	querier := dbmock.NewMockTransactionQuerier(ctrl)
+	sessionStore := sessionmock.NewMockSessionStore(ctrl)
+	server := handlers.NewServerHandler(querier, sessionStore)
+
+	sessionStore.EXPECT().ClearSession(gomock.Any())
+
+	resp, err := server.PostLogout(context.Background(), generated.PostLogoutRequestObject{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, ok := resp.(generated.PostLogout200JSONResponse)
+	if !ok {
+		t.Fatalf("expected 200 response, got %T", resp)
+	}
+
+	if !resp.(generated.PostLogout200JSONResponse).Success {
+		t.Errorf("expected success, got %v", resp.(generated.PostLogout200JSONResponse).Success)
+	}
+}
