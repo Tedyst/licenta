@@ -11,12 +11,15 @@ import (
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/tasks"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type ApiConfig struct {
 	Debug  bool
 	Origin string
+
+	TaskRunner tasks.TaskRunner
 }
 
 func Initialize(database db.TransactionQuerier, sessionStore session.SessionStore, config ApiConfig) http.Handler {

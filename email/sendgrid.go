@@ -1,8 +1,11 @@
 package email
 
 import (
+	"context"
+
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"golang.org/x/exp/slog"
 )
 
 type sendGridEmailSender struct {
@@ -13,6 +16,8 @@ type sendGridEmailSender struct {
 }
 
 func NewSendGridEmailSender(apiKey, senderName, sender string) EmailSender {
+	slog.Info("Using sendgrid email sender")
+
 	return &sendGridEmailSender{
 		client:     sendgrid.NewSendClient(apiKey),
 		senderName: senderName,
@@ -20,7 +25,7 @@ func NewSendGridEmailSender(apiKey, senderName, sender string) EmailSender {
 	}
 }
 
-func (s *sendGridEmailSender) SendMultipartEmail(address string, subject string, html string, text string) error {
+func (s *sendGridEmailSender) SendMultipartEmail(ctx context.Context, address string, subject string, html string, text string) error {
 	from := mail.NewEmail(s.senderName, s.sender)
 
 	to := mail.NewEmail("", address)

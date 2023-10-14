@@ -1,5 +1,7 @@
 package email
 
+import "context"
+
 type EmailSender interface {
-	SendMultipartEmail(address string, subject string, html string, text string) error
+	SendMultipartEmail(ctx context.Context, address string, subject string, html string, text string) error
 }
