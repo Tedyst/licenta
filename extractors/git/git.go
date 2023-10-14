@@ -10,6 +10,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/format/diff"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/tedyst/licenta/extractors/file"
 )
 
@@ -66,12 +68,7 @@ func extractFromCommitIterator(ctx context.Context, cIter object.CommitIter, cut
 	return file.FilterDuplicateExtractResults(results), nil
 }
 
-func ExtractGit(ctx context.Context, repoUrl string) error {
-	repo, err := gitgo.PlainOpen(repoUrl)
-	if err != nil {
-		return err
-	}
-
+func ExtractGit(ctx context.Context, repo *gitgo.Repository) error {
 	cIter, err := repo.Log(&gitgo.LogOptions{})
 	if err != nil {
 		return err
@@ -89,13 +86,8 @@ func ExtractGit(ctx context.Context, repoUrl string) error {
 	return nil
 }
 
-func ExtractGitFromCommit(ctx context.Context, repoUrl string, commitHash string, cutoffProbability float64) error {
-	repo, err := gitgo.PlainOpen(repoUrl)
-	if err != nil {
-		return err
-	}
-
-	_, err = repo.CommitObject(plumbing.NewHash(commitHash))
+func ExtractGitFromCommit(ctx context.Context, repo *gitgo.Repository, commitHash string, cutoffProbability float64) error {
+	_, err := repo.CommitObject(plumbing.NewHash(commitHash))
 	if err != nil {
 		return err
 	}
@@ -115,4 +107,11 @@ func ExtractGitFromCommit(ctx context.Context, repoUrl string, commitHash string
 	}
 
 	return nil
+}
+
+func PullGitRepository(ctx context.Context, repoUrl string, maxDepth int, auth transport.AuthMethod) (*gitgo.Repository, error) {
+	return gitgo.CloneContext(ctx, memory.NewStorage(), nil, &gitgo.CloneOptions{
+		Auth:  auth,
+		Depth: maxDepth,
+	})
 }

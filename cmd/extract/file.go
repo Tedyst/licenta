@@ -30,5 +30,5 @@ var extractFileCmd = &cobra.Command{
 }
 
 func init() {
-	extractCmd.AddCommand(extractDockerCmd)
+	extractCmd.AddCommand(extractFileCmd)
 }

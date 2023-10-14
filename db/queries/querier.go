@@ -31,4 +31,4 @@ type Querier interface {
 	UpdateUserTOTPSecret(ctx context.Context, arg UpdateUserTOTPSecretParams) error
 }
 
-var _ Querier = (*Queries)(nil)
+54 Querier = (*Queries)(nil)
