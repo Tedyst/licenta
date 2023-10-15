@@ -25,4 +25,5 @@ type ScanResult interface {
 
 type User interface {
 	VerifyPassword(string) (bool, error)
+	IsPrivileged() (bool, error)
 }

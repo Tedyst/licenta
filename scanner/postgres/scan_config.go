@@ -120,11 +120,11 @@ var scanConfigLines = map[string]struct {
 		},
 	},
 	"password_encryption": {
-		value: func(s string) bool { return s == "off" },
+		value: func(s string) bool { return s == "off" || s == "md5" },
 		diagnostic: postgresScanResult{
 			severity: scanner.SEVERITY_HIGH,
-			message:  "password_encryption is off.",
-			detail:   "password_encryption is off. This may allow privilege escalation.",
+			message:  "password_encryption is off or set to md5",
+			detail:   "password_encryption is off or set to md5. This may allow privilege escalation.",
 		},
 	},
 	"syncronous_commit": {

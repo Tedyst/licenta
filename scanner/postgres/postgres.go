@@ -13,6 +13,9 @@ type postgresScanner struct {
 	db *pgx.Conn
 }
 
+var _ scanner.Scanner = (*postgresScanner)(nil)
+var _ scanner.ScanResult = (*postgresScanResult)(nil)
+
 type postgresScanResult struct {
 	severity scanner.Severity
 	message  string
@@ -59,11 +62,3 @@ func (sc *postgresScanner) CheckPermissions(ctx context.Context) error {
 
 	return nil
 }
-
-func (sc *postgresScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {
-	rows, err := sc.db.Query(ctx, "SELECT rolsuper, rolname, rolpassword FROM pg_catalog.pg_authid WHERE rolcanlogin=true;")
-
-}
-
-var _ scanner.Scanner = (*postgresScanner)(nil)
-var _ scanner.ScanResult = (*postgresScanResult)(nil)
