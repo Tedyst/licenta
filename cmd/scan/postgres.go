@@ -2,51 +2,46 @@ package scan
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/scanner/postgres"
 	"golang.org/x/exp/slog"
 )
 
 var scanPostgresCmd = &cobra.Command{
-	Use:   "postgres",
+	Use:   "postgres [connection string]",
 	Short: "Run the extractor tool for the provided file",
 	Long:  `Run the extractor tool for the provided file`,
-	Run: func(cmd *cobra.Command, args []string) {
-		connString := viper.GetString("connection-string")
-
-		fmt.Println("Scanning postgres...")
-
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		conn, err := pgx.Connect(ctx, connString)
+		conn, err := pgx.Connect(ctx, args[0])
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		scanner, err := postgres.NewScanner(context.Background(), conn)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		err = scanner.Ping(ctx)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		slog.Info("Connection established")
 
 		err = scanner.CheckPermissions(ctx)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		slog.Info("Permissions checked")
 
 		results, err := scanner.ScanConfig(ctx)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		slog.Info("Config scanned")
 
@@ -56,19 +51,18 @@ var scanPostgresCmd = &cobra.Command{
 
 		users, err := scanner.GetUsers(ctx)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		slog.Info("Users scanned")
 
 		for _, user := range users {
 			slog.Info("User: %s", "user", user)
 		}
+
+		return nil
 	},
 }
 
 func init() {
-	scanPostgresCmd.Flags().String("connection-string", "", "Connection string to the postgres database")
-	scanPostgresCmd.MarkFlagRequired("connection-string")
-
 	scanCmd.AddCommand(scanPostgresCmd)
 }
