@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
-	"github.com/tedyst/licenta/config"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
 	"github.com/tedyst/licenta/tasks/local"
@@ -19,14 +18,7 @@ var serveCmd = &cobra.Command{
 	Long:  `Run the server.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		viper.SetConfigFile("config.yaml")
-		config.SetConfigDefaults("")
 		viper.ReadInConfig()
-		var cfg = config.Config{}
-		err := viper.Unmarshal(&cfg)
-		if err != nil {
-			panic(err)
-		}
-		viper.WriteConfig()
 
 		db := database.InitDatabase(viper.GetString("database"))
 		sessionStore := session.New(db, viper.GetBool("debug"))
@@ -42,7 +34,7 @@ var serveCmd = &cobra.Command{
 		})
 
 		print("Listening on port " + viper.GetString("port") + "\n")
-		err = http.ListenAndServe(":"+viper.GetString("port"), app)
+		err := http.ListenAndServe(":"+viper.GetString("port"), app)
 		if err != nil {
 			panic(err)
 		}

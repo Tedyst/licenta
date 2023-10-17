@@ -161,6 +161,7 @@ var defaultPasswordsCompletelyIgnore = []string{
 	"poweroff",
 	"reboot",
 	"author",
+	"sql.NullString",
 }
 
 var defaultUsernamesCompletelyIgnore = []string{

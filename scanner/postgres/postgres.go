@@ -22,10 +22,6 @@ type postgresScanResult struct {
 	detail   string
 }
 
-func (result *postgresScanResult) String() string {
-	return result.message
-}
-
 func (result *postgresScanResult) Severity() scanner.Severity {
 	return result.severity
 }
@@ -39,26 +35,49 @@ func (sc *postgresScanner) Ping(ctx context.Context) error {
 }
 
 func (sc *postgresScanner) CheckPermissions(ctx context.Context) error {
-	_, err := sc.db.Query(ctx, "SELECT * FROM information_schema.role_table_grants;")
+	row, err := sc.db.Query(ctx, "SELECT * FROM information_schema.role_table_grants;")
 	if err != nil {
 		return errors.Wrap(err, "could not see table information_schema.role_table_grants")
 	}
-	_, err = sc.db.Query(ctx, "SELECT * FROM pg_catalog.pg_role;")
+	row.Close()
+	row, err = sc.db.Query(ctx, "SELECT * FROM pg_catalog.pg_roles;")
 	if err != nil {
-		return errors.Wrap(err, "could not see table pg_catalog.pg_role")
+		return errors.Wrap(err, "could not see table pg_catalog.pg_roles")
 	}
-	_, err = sc.db.Query(ctx, "SELECT * FROM pg_catalog.pg_user;")
+	row.Close()
+	row, err = sc.db.Query(ctx, "SELECT * FROM pg_catalog.pg_user;")
 	if err != nil {
 		return errors.Wrap(err, "could not see table pg_catalog.pg_user")
 	}
-	_, err = sc.db.Query(ctx, "SELECT * FROM pg_settings;")
+	row.Close()
+	row, err = sc.db.Query(ctx, "SELECT * FROM pg_settings;")
 	if err != nil {
 		return errors.Wrap(err, "could not see table pg_settings")
 	}
-	_, err = sc.db.Query(ctx, "SELECT * FROM pg_file_settings;")
+	row.Close()
+	row, err = sc.db.Query(ctx, "SELECT * FROM pg_file_settings;")
 	if err != nil {
 		return errors.Wrap(err, "could not see table pg_file_settings")
 	}
+	row.Close()
 
 	return nil
+}
+
+func NewScanner(ctx context.Context, db *pgx.Conn) (scanner.Scanner, error) {
+	sc := &postgresScanner{
+		db: db,
+	}
+
+	err := db.Ping(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not ping database")
+	}
+
+	err = sc.CheckPermissions(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not check permissions")
+	}
+
+	return sc, nil
 }

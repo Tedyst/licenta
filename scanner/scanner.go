@@ -18,7 +18,6 @@ type Scanner interface {
 }
 
 type ScanResult interface {
-	String() string
 	Severity() Severity
 	Detail() string
 }

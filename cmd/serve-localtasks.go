@@ -14,9 +14,9 @@ import (
 )
 
 var serveLocalTasksCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Run the server",
-	Long:  `Run the server.`,
+	Use:   "servelocaltasks",
+	Short: "Run the server with local tasks",
+	Long:  `Run the server with local tasks.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		viper.SetConfigFile("config.yaml")
 		viper.ReadInConfig()
@@ -52,20 +52,20 @@ var serveLocalTasksCmd = &cobra.Command{
 }
 
 func init() {
-	serveCmd.Flags().String("email.sendgrid", "", "Sendgrid API Key")
+	serveLocalTasksCmd.Flags().String("email.sendgrid", "", "Sendgrid API Key")
 
-	serveCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
-	serveCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
+	serveLocalTasksCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
+	serveLocalTasksCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
 
-	serveCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
+	serveLocalTasksCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
 
 	// serveCmd.Flags().Bool("telemetry.metrics.enabled", false, "Enable metrics")
 	// serveCmd.Flags().Bool("telemetry.tracing.enabled", false, "Enable tracing")
 	// serveCmd.Flags().String("telemetry.tracing.jaeger", "", "Jaeger URL")
 
-	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
+	serveLocalTasksCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
-	serveCmd.Flags().String("database", "", "Database connection string")
+	serveLocalTasksCmd.Flags().String("database", "", "Database connection string")
 
-	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(serveLocalTasksCmd)
 }
