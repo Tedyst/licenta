@@ -6,6 +6,7 @@ package queries
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -14,21 +15,25 @@ type Querier interface {
 	CountUsers(ctx context.Context) (int64, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error)
+	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	DeleteSession(ctx context.Context, id uuid.UUID) error
+	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetSession(ctx context.Context, id uuid.UUID) (*Session, error)
+	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
-	GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID) (*GetUserAndSessionBySessionIDRow, error)
 	GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error)
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error
+	InvalidateTOTPSecretForUser(ctx context.Context, userID int64) error
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, error)
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
-	UpdateUserTOTPSecret(ctx context.Context, arg UpdateUserTOTPSecretParams) error
+	ValidateTOTPSecretForUser(ctx context.Context, userID int64) error
 }
 
 var _ Querier = (*Queries)(nil)

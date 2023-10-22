@@ -47,6 +47,9 @@ type LoginUser struct {
 	// Password The password for login in clear text
 	Password string `json:"password" validate:"min=8,printascii"`
 
+	// Totp The TOTP code
+	Totp *string `json:"totp,omitempty" validate:"numeric,len=6"`
+
 	// Username The user name for login
 	Username string `json:"username" validate:"printascii,min=3,max=20"`
 }
@@ -145,9 +148,6 @@ type Post2faTotpSecondStepJSONRequestBody = TOTPSecondStep
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = LoginUser
 
-// PostLogin2faTotpJSONRequestBody defines body for PostLogin2faTotp for application/json ContentType.
-type PostLogin2faTotpJSONRequestBody = TOTPLogin
-
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = RegisterUser
 
@@ -165,9 +165,6 @@ type ServerInterface interface {
 	// Logs user into the system
 	// (POST /login)
 	PostLogin(w http.ResponseWriter, r *http.Request)
-	// Logs user into the system
-	// (POST /login/2fa/totp)
-	PostLogin2faTotp(w http.ResponseWriter, r *http.Request)
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(w http.ResponseWriter, r *http.Request)
@@ -207,12 +204,6 @@ func (_ Unimplemented) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Requ
 // Logs user into the system
 // (POST /login)
 func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Logs user into the system
-// (POST /login/2fa/totp)
-func (_ Unimplemented) PostLogin2faTotp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -301,21 +292,6 @@ func (siw *ServerInterfaceWrapper) PostLogin(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostLogin(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// PostLogin2faTotp operation middleware
-func (siw *ServerInterfaceWrapper) PostLogin2faTotp(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostLogin2faTotp(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -596,9 +572,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/login", wrapper.PostLogin)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/login/2fa/totp", wrapper.PostLogin2faTotp)
-	})
-	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/logout", wrapper.PostLogout)
 	})
 	r.Group(func(r chi.Router) {
@@ -655,7 +628,6 @@ type Post2faTotpSecondStepResponseObject interface {
 
 type Post2faTotpSecondStep200JSONResponse struct {
 	Success bool `json:"success"`
-	User    User `json:"user"`
 }
 
 func (response Post2faTotpSecondStep200JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
@@ -715,44 +687,6 @@ func (response PostLogin400JSONResponse) VisitPostLoginResponse(w http.ResponseW
 type PostLogin401JSONResponse Error
 
 func (response PostLogin401JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLogin2faTotpRequestObject struct {
-	Body *PostLogin2faTotpJSONRequestBody
-}
-
-type PostLogin2faTotpResponseObject interface {
-	VisitPostLogin2faTotpResponse(w http.ResponseWriter) error
-}
-
-type PostLogin2faTotp200JSONResponse struct {
-	Success bool `json:"success"`
-	User    User `json:"user"`
-}
-
-func (response PostLogin2faTotp200JSONResponse) VisitPostLogin2faTotpResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLogin2faTotp400JSONResponse Error
-
-func (response PostLogin2faTotp400JSONResponse) VisitPostLogin2faTotpResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLogin2faTotp401JSONResponse Error
-
-func (response PostLogin2faTotp401JSONResponse) VisitPostLogin2faTotpResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
@@ -948,9 +882,6 @@ type StrictServerInterface interface {
 	// Logs user into the system
 	// (POST /login)
 	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
-	// Logs user into the system
-	// (POST /login/2fa/totp)
-	PostLogin2faTotp(ctx context.Context, request PostLogin2faTotpRequestObject) (PostLogin2faTotpResponseObject, error)
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
@@ -1079,37 +1010,6 @@ func (sh *strictHandler) PostLogin(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostLoginResponseObject); ok {
 		if err := validResponse.VisitPostLoginResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
-	}
-}
-
-// PostLogin2faTotp operation middleware
-func (sh *strictHandler) PostLogin2faTotp(w http.ResponseWriter, r *http.Request) {
-	var request PostLogin2faTotpRequestObject
-
-	var body PostLogin2faTotpJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogin2faTotp(ctx, request.(PostLogin2faTotpRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostLogin2faTotp")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostLogin2faTotpResponseObject); ok {
-		if err := validResponse.VisitPostLogin2faTotpResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1282,34 +1182,34 @@ func (sh *strictHandler) GetUsersId(w http.ResponseWriter, r *http.Request, id i
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xaW2/buBL+KwTPeZQtxUmLcwwUaLbpFt7NtkGdPgVBwUgjiV2JVEkqjjfwf18Mdbfk",
-	"yzZx00UD5CH2UMOPM99cNPQ99WWaSQHCaDq9p9qPIWX23zcxExFcMK0XUgXnMoogmAmUZEpmoAwHu07A",
-	"4nNWrsLPAWhf8cxwKeiUXsZABCxIvcKhcMfSLAE6pelSwKIlMcsMv9ZGcRFRh96NJMv4yJcBRCBGcGcU",
-	"GxkW2X1vWcIDZqweLl79z2FJFjORp3S1cqhMgh2oZBJsQnUISCuHKviacwUBnV518TldI16vHPpWKan6",
-	"xk5BaxZB/0R2PanE67hXDtW574PWw7YohUQbZnLdtkbIEg21uhspE2CCrp+m2bfaBs9wLiMuPmkYOMd2",
-	"11RSEkpFEtRCuCB+AkwRA3fmUO7KFBeGaZ9ze8JcgxIshWGQKCUoblB2cH2RsfgcSHgAqgaPgwCPnZTd",
-	"vZp4fTbVSB3aYdEFi7hgBoKPoPPE9P3gy1zYr2vcRzVcLgxEoJA8Ao0+ve+zKlNwy2WuB4XKbmpl3ECK",
-	"/6xq7UwptuwRqcBTbthS3yi7rjXImy/gG9o+JpLN7seS5ENIp1f39L8KQjql/3GbROeWWc5dN8/KWbfP",
-	"wBG2arRsHzrkGmZ0zkeIuDaghiMEUsaTYeZZEZEhMSUNO7zDL16XH8e+TB/AvwIDwv8x47WT8Z88Wis0",
-	"3xCrTmlqpMW8SdRdRnxjBjcq353A67Q9EF2XHy4vfuVKm7mBrA/LSJN91uArMMPQ8HlSLmib/HR+Vv/1",
-	"K9YawPYum0DaerMBIHpvCzwrboE7mhyfvHi5Fyj76CZIc/ClCLYY7lFw7c9RkaeguO8kIF697HNz+4Ee",
-	"JVH1qkSI1Hq/MXCtuIjcTRnvNxmLIc082JILZmcduzo0lCplpqh7L0/oUBlM2DakKN0O9EwOtmZZLMUG",
-	"nVZERJ7egNplyAMlwHWOcExXrSRWZS7sMcHPFTfLOVbDMmmB1lyK09zEtogiHF/KPzk+WqCt1jQ7s4z/",
-	"DsuCnlyEsuhUhGG+aTEOlxlg6Wu9YFEEasxlo3NefEdOL2bkEhhWwVzhQ7ExmZ66buuhlbNmr1OirVnw",
-	"aerQhPsgtLVrqf00Y34MZDL2enoXi8WYWfFYqsgtn9Xu+ezN2/fzt6PJ2BvHJk1slwAq1R/COahb7sMg",
-	"ONeucdE23CTtk12Cxnx6C0oXqI/G3thDtTIDwTJOp/TYfoWFxsTWHe4kZC5G+cjG1UhXmUlqa1oMbIZW",
-	"mAV0Si+kNpOQXUqTNQXAtmKZxEPhExPPq9wDRSvJsizhvtXiftFSNO+Vu7qnbqWx7u86pixTYZ6QGime",
-	"+MQ7ejQQxZvXwOafBMtNLBX/CwIbFTpPU6aWdEotaILGrILUZm9cD8KUOEimpC2yDi0y81UdMEX4NM7R",
-	"tmzs751WmSmCFbT5RQbLR/VMa5MB67xRgJ10kWfKmtFOHNiGrB7InY390Hp3UySo/Zr1DZ1QqaJfB/8J",
-	"K73Ds3ImbHknIYckIDrHHZCfTx8UBV8eHhVJ3dZtDIPzspwdgvrNFGPg+HVlNbJ+8TFy/Mz878j8G/T2",
-	"0/G9Iuv06rrN/nMZ6YIayAjLfr3UBtIW0VFVm+R1AdiD7WXmP2C+L4LqmfTPpD8g6WVudpId1xyw66wG",
-	"Lnu7etU7sswN8XOlQBiMiAgCwkVhiNbLTd8AqhwBbjdBNSg8UKx35pDPnd2/orP7/3cIenQ3SxSwYEng",
-	"jmujt8Z+QRNNmL3vq4YUfc7n1Yw+ggG+vwNTDPHxpVWxFIxdfTV4r1iPRexsHsuRApMrDDY7aPiag1o2",
-	"M4GEpxyp2xgmgJDZe5EjrzsAOp5Qh6bsjqd5ilLPoSkX5af+aGjlDN4whqEGsz++Yv0wwEF8FSJvX0TV",
-	"2AahhDwpcsoQlNZ8pwHTmwttnvnt0l+McLYpvz5gxl+7Lxog//wHHTS8A0NYkpC8jJEqvoqM1sSXW4wB",
-	"t4bYH0B/tqz99M4b7hK2e9L17U8xRu1LuM3dQunb7s83DtQ6bPiNyBO+Mzxqo/dz9fRNJbdebW51ZfgN",
-	"tL3nwWpnCpoF+9T52Vn76qMso4rDLVTVJWMmbooLD3q0aleanRc9B609m7rsH6ji4KYn36nBFNKQUOZi",
-	"KFdab98si6u6daJ1O9G1i6ara/ShBnVbsap7SZNInyWx1Gb6wvM8l2Wcrq5XfwcAAP//hXF15Q0nAAA=",
+	"H4sIAAAAAAAC/+RZYW/bvBH+KwS3j7KlOHmLzUCBZk1XeMvaoE4/BUHBSCeJHUWqJBXHC/zfh6MkS7Jk",
+	"O03iJi8K5EMsUseHd8/dc6TuaaiyXEmQ1tDpPTVhChlz/75PmUzgghmzUDo6V0kC0UziSK5VDtpycPMk",
+	"LL7l1Sz8HYEJNc8tV5JO6WUKRMKCrGd4FO5YlgugU5otJSxaI3aZ42NjNZcJ9ejdSLGcj0IVQQJyBHdW",
+	"s5FliVv3lgkeMevscPn2bx4TecpkkdHVyqNKRHtQKRFtQ3UISCuPavhRcA0RnV518XldJ16vPPpBa6X7",
+	"zs7AGJZAf0duPqmHN3GvPGqKMARjhn1RDRJjmS1M2xsxEwbW5m6UEsAk3dxNs269DO7hXCVcfjUwsI/d",
+	"oalHSaw0EWiFcElCAUwTC3f2UOHKNZeWmZBzt0OrbD4M8PLz5QVBo20kR5Pjkz/ePB6DLDLQPPQEyLdv",
+	"HIDCgJYsg2EQOEpwuHFTxzHfVSq/RQqe4JbGIR566NjL2N3bSdCn8xqpRzs0vmAJl8xC9AVMIWyfCKEq",
+	"pHvcuHENl0sLCWhkr8SoT+/7tM413HJVmMFB7RZ1Y9xChv+s1taZ1mzZY3KJp1qwZb4xdr22oG6+Q2hp",
+	"e5vIdrceE+JzTKdX9/SvGmI6pX/xm0rrV2XW33TPytv0z8AWdlp06Ta0yQ3MGJwvkHBjQQ+nKGSMi2Hm",
+	"uSGiYmIrGnZ4hw/eVT/HocqewL8SA8J/nQWjIzkvnq01mkfkqle5Gmkxb5Siy4hHSojVxX4FWevGQHZh",
+	"tf0n18bOLeR9WFimvxkINdgd1bqa0Hb56fxs/deXzA2A7VW2gXSCtwWgU4uniskgKPfqNkhzCJWMdjju",
+	"WXA9XuR+akPPUqh6KhEjtT5tTVw3XGbutor3L5XKIcs82lELZmcdv3o0VjpjttS9Nyd0SAYF24UUR3cD",
+	"PVODvWGeKrnFphsisshuQO9z5IEK4CZHOJarVhGrKxc2uRAWmtvlHNWwKlpgDFfytLCpE1GEEyr1X46v",
+	"lmjrOc3KLOf/hmVJTy5jVXYq0rLQthiH0yyw7J1ZsCQBPeaqsTkvn5HTixm5BIYqWGh8KbU2N1Pfb720",
+	"8jb8dUqMcwu+TT0qeAjSOL9W1k9zFqZAJuOgZ3exWIyZGx4rnfjVu8Y/n73/8Gn+YTQZB+PUZsJ1CaAz",
+	"8zmeg77lIQyC890cH33DrWjv7BIM1tNb0KZEfTQOxgGaVTlIlnM6pcfuEQqNTV04/EnMfMzykcurkakr",
+	"kzLOtZjYDL0wi+iUXihjJzG7VDZvBMC1YrnCTeEbkyCowwNlK8nyXPDQWfG/GyWbg+2+7qmrNC783cBU",
+	"MhUXgqyR4o5PgqNnA1Ee/QYW/ypZYVOl+f8gcllhiixjekmn1IEm6Mw6SV31xvkgbYWD5Fo5kfVoWZmv",
+	"1glTpk8THONk4+HRaclMmaxg7D9UtHzWyLQWGfDOew3YSZd1ptKMduHANmT1RO5s7Yce3d38DMWCw1Ns",
+	"Jp1Wk5iDiIgpcAUk28szvAz+0yku1j3aVk6fV9p0CB43dyID21/LpFXrU4xV45ejcamzDztzbqF8ZeJP",
+	"w/wbjPbL8b0m6/Tqus3+c5WYkhrICMd+szQWshbR0VRDclXYvSzHOQdU0/og+eBQr3pbVoUlYaE1SIsZ",
+	"kUCEB3vniFbT1neArq42drugvgA5UK537ldeu2L9hqk+JHJ//wVJj+FmQgOLlgTuuLFmZ+6XNDGEuQ8p",
+	"9eGrz/mivntMYIDvH8GWl5PYjGuWgXWzrwY/2KyPe+7OEeVIgy00Jps7QP0oQC+bs47gGUfqNo6JIGbu",
+	"vvco6B5sjyfUoxm741mR4Wjg0YzL6lf/yLvyBj/dxLEB+3B85fxhgIP4akTBQxHVx1GEEnNR1pQhKK1z",
+	"awOmd97dfpexz355NN1l/PqAFX/jHnyA/PNXeoD6CJYwIUhR5UidX2VFa/LLL683dqbYf4D+blX75YM3",
+	"3CXsjqQfum/co/bHhe3dQhXb7nfxA7UOWz6+v+CZ4Vkbvd+rp2+U3EW1+Vql4kfQ9p5Hq70laBY9ROdn",
+	"Z+0r3UpGNYdbqNUlZzZtxIVHPVq1lWbvBfZBtWdbl/2KFAcXPflFDaZUlsSqkEO10kX7Zll+gtgkWrcT",
+	"3bhAv7rGGBrQtzWrupfPQoVMpMrY6R9BEPgs53R1vfp/AAAA//+f/rl9ZiQAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

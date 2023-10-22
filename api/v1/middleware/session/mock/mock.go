@@ -76,41 +76,40 @@ func (c *SessionStoreClearSessionCall) DoAndReturn(f func(context.Context)) *Ses
 	return c
 }
 
-// GetTOTPKey mocks base method.
-func (m *MockSessionStore) GetTOTPKey(ctx context.Context) (string, error) {
+// GetScope mocks base method.
+func (m *MockSessionStore) GetScope(ctx context.Context) []string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTOTPKey", ctx)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "GetScope", ctx)
+	ret0, _ := ret[0].([]string)
+	return ret0
 }
 
-// GetTOTPKey indicates an expected call of GetTOTPKey.
-func (mr *MockSessionStoreMockRecorder) GetTOTPKey(ctx any) *SessionStoreGetTOTPKeyCall {
+// GetScope indicates an expected call of GetScope.
+func (mr *MockSessionStoreMockRecorder) GetScope(ctx any) *SessionStoreGetScopeCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTOTPKey", reflect.TypeOf((*MockSessionStore)(nil).GetTOTPKey), ctx)
-	return &SessionStoreGetTOTPKeyCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScope", reflect.TypeOf((*MockSessionStore)(nil).GetScope), ctx)
+	return &SessionStoreGetScopeCall{Call: call}
 }
 
-// SessionStoreGetTOTPKeyCall wrap *gomock.Call
-type SessionStoreGetTOTPKeyCall struct {
+// SessionStoreGetScopeCall wrap *gomock.Call
+type SessionStoreGetScopeCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *SessionStoreGetTOTPKeyCall) Return(arg0 string, arg1 error) *SessionStoreGetTOTPKeyCall {
-	c.Call = c.Call.Return(arg0, arg1)
+func (c *SessionStoreGetScopeCall) Return(arg0 []string) *SessionStoreGetScopeCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *SessionStoreGetTOTPKeyCall) Do(f func(context.Context) (string, error)) *SessionStoreGetTOTPKeyCall {
+func (c *SessionStoreGetScopeCall) Do(f func(context.Context) []string) *SessionStoreGetScopeCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *SessionStoreGetTOTPKeyCall) DoAndReturn(f func(context.Context) (string, error)) *SessionStoreGetTOTPKeyCall {
+func (c *SessionStoreGetScopeCall) DoAndReturn(f func(context.Context) []string) *SessionStoreGetScopeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -153,44 +152,6 @@ func (c *SessionStoreGetUserCall) DoAndReturn(f func(context.Context) *models.Us
 	return c
 }
 
-// GetWaiting2FA mocks base method.
-func (m *MockSessionStore) GetWaiting2FA(ctx context.Context) *models.User {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWaiting2FA", ctx)
-	ret0, _ := ret[0].(*models.User)
-	return ret0
-}
-
-// GetWaiting2FA indicates an expected call of GetWaiting2FA.
-func (mr *MockSessionStoreMockRecorder) GetWaiting2FA(ctx any) *SessionStoreGetWaiting2FACall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWaiting2FA", reflect.TypeOf((*MockSessionStore)(nil).GetWaiting2FA), ctx)
-	return &SessionStoreGetWaiting2FACall{Call: call}
-}
-
-// SessionStoreGetWaiting2FACall wrap *gomock.Call
-type SessionStoreGetWaiting2FACall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *SessionStoreGetWaiting2FACall) Return(arg0 *models.User) *SessionStoreGetWaiting2FACall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *SessionStoreGetWaiting2FACall) Do(f func(context.Context) *models.User) *SessionStoreGetWaiting2FACall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *SessionStoreGetWaiting2FACall) DoAndReturn(f func(context.Context) *models.User) *SessionStoreGetWaiting2FACall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // Handler mocks base method.
 func (m *MockSessionStore) Handler(next http.Handler) http.Handler {
 	m.ctrl.T.Helper()
@@ -229,38 +190,38 @@ func (c *SessionStoreHandlerCall) DoAndReturn(f func(http.Handler) http.Handler)
 	return c
 }
 
-// SetTOTPKey mocks base method.
-func (m *MockSessionStore) SetTOTPKey(ctx context.Context, key string) {
+// SetScope mocks base method.
+func (m *MockSessionStore) SetScope(ctx context.Context, scope []string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetTOTPKey", ctx, key)
+	m.ctrl.Call(m, "SetScope", ctx, scope)
 }
 
-// SetTOTPKey indicates an expected call of SetTOTPKey.
-func (mr *MockSessionStoreMockRecorder) SetTOTPKey(ctx, key any) *SessionStoreSetTOTPKeyCall {
+// SetScope indicates an expected call of SetScope.
+func (mr *MockSessionStoreMockRecorder) SetScope(ctx, scope any) *SessionStoreSetScopeCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTOTPKey", reflect.TypeOf((*MockSessionStore)(nil).SetTOTPKey), ctx, key)
-	return &SessionStoreSetTOTPKeyCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetScope", reflect.TypeOf((*MockSessionStore)(nil).SetScope), ctx, scope)
+	return &SessionStoreSetScopeCall{Call: call}
 }
 
-// SessionStoreSetTOTPKeyCall wrap *gomock.Call
-type SessionStoreSetTOTPKeyCall struct {
+// SessionStoreSetScopeCall wrap *gomock.Call
+type SessionStoreSetScopeCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *SessionStoreSetTOTPKeyCall) Return() *SessionStoreSetTOTPKeyCall {
+func (c *SessionStoreSetScopeCall) Return() *SessionStoreSetScopeCall {
 	c.Call = c.Call.Return()
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *SessionStoreSetTOTPKeyCall) Do(f func(context.Context, string)) *SessionStoreSetTOTPKeyCall {
+func (c *SessionStoreSetScopeCall) Do(f func(context.Context, []string)) *SessionStoreSetScopeCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *SessionStoreSetTOTPKeyCall) DoAndReturn(f func(context.Context, string)) *SessionStoreSetTOTPKeyCall {
+func (c *SessionStoreSetScopeCall) DoAndReturn(f func(context.Context, []string)) *SessionStoreSetScopeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -297,42 +258,6 @@ func (c *SessionStoreSetUserCall) Do(f func(context.Context, *models.User)) *Ses
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *SessionStoreSetUserCall) DoAndReturn(f func(context.Context, *models.User)) *SessionStoreSetUserCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SetWaiting2FA mocks base method.
-func (m *MockSessionStore) SetWaiting2FA(ctx context.Context, waitingUser *models.User) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetWaiting2FA", ctx, waitingUser)
-}
-
-// SetWaiting2FA indicates an expected call of SetWaiting2FA.
-func (mr *MockSessionStoreMockRecorder) SetWaiting2FA(ctx, waitingUser any) *SessionStoreSetWaiting2FACall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetWaiting2FA", reflect.TypeOf((*MockSessionStore)(nil).SetWaiting2FA), ctx, waitingUser)
-	return &SessionStoreSetWaiting2FACall{Call: call}
-}
-
-// SessionStoreSetWaiting2FACall wrap *gomock.Call
-type SessionStoreSetWaiting2FACall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *SessionStoreSetWaiting2FACall) Return() *SessionStoreSetWaiting2FACall {
-	c.Call = c.Call.Return()
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *SessionStoreSetWaiting2FACall) Do(f func(context.Context, *models.User)) *SessionStoreSetWaiting2FACall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *SessionStoreSetWaiting2FACall) DoAndReturn(f func(context.Context, *models.User)) *SessionStoreSetWaiting2FACall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 
+	scopes "github.com/SonicRoshan/scope"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -39,13 +41,18 @@ func (server *serverHandler) PostLogin(ctx context.Context, request generated.Po
 		}, nil
 	}
 
-	if models.Requires2FA(ctx, user) {
-		server.SessionStore.SetWaiting2FA(ctx, user)
-
-		return generated.PostLogin401JSONResponse{
-			Success: false,
-			Message: TwoFactorRequired,
-		}, nil
+	totpSecretToken, err := server.Queries.GetTOTPSecretForUser(ctx, user.ID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "PostLogin: error getting totp secret for user")
+	}
+	if totpSecretToken != nil {
+		res := models.VerifyTOTP(ctx, totpSecretToken, *request.Body.Totp)
+		if !res {
+			return generated.PostLogin401JSONResponse{
+				Message: ErrInvalidTOTP,
+				Success: false,
+			}, nil
+		}
 	}
 
 	server.SessionStore.SetUser(ctx, user)
@@ -119,16 +126,26 @@ func (server *serverHandler) Post2faTotpFirstStep(ctx context.Context, request g
 			Success: false,
 		}, nil
 	}
+	if !scopes.ScopeInAllowed("user", server.SessionStore.GetScope(ctx)) {
+		return generated.Post2faTotpFirstStep401JSONResponse{
+			Message: Unauthorized,
+			Success: false,
+		}, nil
+	}
 
-	key, err := models.GenerateTOTP(ctx, user)
+	key, err := models.GenerateTOTPSecret(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "Post2faTotpFirstStep: error generating totp key")
 	}
 
-	server.SessionStore.SetTOTPKey(ctx, key)
+	totpSecret, err := server.Queries.CreateTOTPSecretForUser(ctx, queries.CreateTOTPSecretForUserParams{
+		UserID:     user.ID,
+		TotpSecret: key,
+		Valid:      false,
+	})
 
 	return generated.Post2faTotpFirstStep200JSONResponse{
-		TotpSecret: key,
+		TotpSecret: totpSecret.TotpSecret,
 	}, nil
 }
 
@@ -140,69 +157,44 @@ func (server *serverHandler) Post2faTotpSecondStep(ctx context.Context, request 
 			Success: false,
 		}, nil
 	}
-
-	user := server.SessionStore.GetWaiting2FA(ctx)
+	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
 		return generated.Post2faTotpSecondStep401JSONResponse{
 			Message: Unauthorized,
 			Success: false,
 		}, nil
 	}
-
-	ok := models.Verify2FA(ctx, user, request.Body.TotpCode)
-	if !ok {
+	if !scopes.ScopeInAllowed("user", server.SessionStore.GetScope(ctx)) {
 		return generated.Post2faTotpSecondStep401JSONResponse{
-			Message: InvalidCredentials,
+			Message: Unauthorized,
 			Success: false,
 		}, nil
 	}
 
-	server.SessionStore.SetUser(ctx, user)
+	totpSecret, err := server.Queries.GetInvalidTOTPSecretForUser(ctx, user.ID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "Post2faTotpSecondStep: error getting invalid totp secret for user")
+	}
 
-	return generated.Post2faTotpSecondStep200JSONResponse{
-		Success: true,
-		User: generated.User{
-			Id:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-		},
-	}, nil
-}
-
-func (server *serverHandler) PostLogin2faTotp(ctx context.Context, request generated.PostLogin2faTotpRequestObject) (generated.PostLogin2faTotpResponseObject, error) {
-	err := valid.Struct(request)
-	if err != nil {
-		return generated.PostLogin2faTotp400JSONResponse{
-			Message: err.Error(),
+	if totpSecret == nil {
+		return generated.Post2faTotpSecondStep401JSONResponse{
+			Message: ErrNotTryingToSetupTOTP,
 			Success: false,
 		}, nil
 	}
 
-	user := server.SessionStore.GetWaiting2FA(ctx)
-	if user == nil {
-		traceError(ctx, errors.Wrap(err, "PostLogin2faTotp: error getting user"))
-		return generated.PostLogin2faTotp401JSONResponse{
-			Message: InvalidCredentials,
-			Success: false,
+	if models.VerifyTOTP(ctx, totpSecret, request.Body.TotpCode) {
+		err = server.Queries.ValidateTOTPSecretForUser(ctx, user.ID)
+		if err != nil {
+			return nil, errors.Wrap(err, "Post2faTotpSecondStep: error updating totp secret for user")
+		}
+		return generated.Post2faTotpSecondStep200JSONResponse{
+			Success: true,
 		}, nil
 	}
 
-	ok := models.VerifyTOTP(ctx, user, request.Body.TotpCode)
-	if !ok {
-		return generated.PostLogin2faTotp401JSONResponse{
-			Message: InvalidCredentials,
-			Success: false,
-		}, nil
-	}
-
-	server.SessionStore.SetUser(ctx, user)
-
-	return generated.PostLogin2faTotp200JSONResponse{
-		Success: true,
-		User: generated.User{
-			Id:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-		},
+	return generated.Post2faTotpSecondStep401JSONResponse{
+		Message: ErrInvalidTOTP,
+		Success: false,
 	}, nil
 }

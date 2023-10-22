@@ -62,8 +62,7 @@ UPDATE
 SET
   username = coalesce(sqlc.narg(username), username),
   PASSWORD = coalesce(sqlc.narg(PASSWORD), PASSWORD),
-  email = coalesce(sqlc.narg(email), email),
-  admin = coalesce(sqlc.narg(admin), admin)
+  email = coalesce(sqlc.narg(email), email)
 WHERE
   id = sqlc.arg(id);
 
@@ -77,42 +76,11 @@ WHERE
   OR email = $1
 LIMIT 1;
 
--- name: UpdateUserTOTPSecret :exec
-UPDATE
-  users
-SET
-  totp_secret = $2
-WHERE
-  id = $1;
-
 -- name: UpdateUserPassword :exec
 UPDATE
   users
 SET
   PASSWORD = $2
-WHERE
-  id = $1;
-
--- name: CreateResetPasswordToken :one
-INSERT INTO reset_password_tokens(id, user_id)
-  VALUES ($1, $2)
-RETURNING
-  *;
-
--- name: GetResetPasswordToken :one
-SELECT
-  *
-FROM
-  reset_password_tokens
-WHERE
-  id = $1
-LIMIT 1;
-
--- name: InvalidateResetPasswordToken :exec
-UPDATE
-  reset_password_tokens
-SET
-  valid = FALSE
 WHERE
   id = $1;
 

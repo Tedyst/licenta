@@ -17,17 +17,16 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
+//go:generate mockgen -source=session.go -package mock -typed -destination mock/mock.go
+
 var tracer = otel.Tracer("github.com/tedyst/licenta/api/v1/middleware/session")
 
 type SessionStore interface {
 	GetUser(ctx context.Context) *models.User
 	SetUser(ctx context.Context, user *models.User)
-	GetWaiting2FA(ctx context.Context) *models.User
-	SetWaiting2FA(ctx context.Context, waitingUser *models.User)
-	GetTOTPKey(ctx context.Context) (string, error)
-	SetTOTPKey(ctx context.Context, key string)
 	ClearSession(ctx context.Context)
-
+	GetScope(ctx context.Context) []string
+	SetScope(ctx context.Context, scope []string)
 	Handler(next http.Handler) http.Handler
 }
 
@@ -93,9 +92,9 @@ func (store *sessionStore) saveSession(ctx context.Context, data *sessionData) e
 	defer span.End()
 
 	err := store.database.UpdateSession(ctx, queries.UpdateSessionParams{
-		ID:      data.Session.ID,
-		UserID:  data.Session.UserID,
-		TotpKey: data.Session.TotpKey,
+		ID:     data.Session.ID,
+		UserID: data.Session.UserID,
+		Scope:  data.Session.Scope,
 	})
 	if err != nil {
 		return errors.Wrap(err, "SaveSession: error updating session")
@@ -140,70 +139,80 @@ func (store *sessionStore) initializeSession(ctx context.Context, r *http.Reques
 	return r, data, nil
 }
 
+func (store *sessionStore) getSessionData(ctx context.Context) (*sessionData, error) {
+	data := ctx.Value(contextSessionKey{})
+	if data == nil {
+		return nil, errors.New("getSessionData: no session data")
+	}
+	switch data.(type) {
+	case *sessionData:
+		return data.(*sessionData), nil
+	default:
+		return nil, errors.New("getSessionData: invalid session data")
+	}
+}
+
 func (store *sessionStore) GetUser(ctx context.Context) *models.User {
 	ctx, span := tracer.Start(ctx, "GetUser")
 	defer span.End()
 
-	return ctx.Value(contextSessionKey{}).(*sessionData).User
+	data, err := store.getSessionData(ctx)
+	if err != nil {
+		return nil
+	}
+	return data.User
 }
 
 func (store *sessionStore) SetUser(ctx context.Context, user *models.User) {
-	data := ctx.Value(contextSessionKey{}).(*sessionData)
+	data, err := store.getSessionData(ctx)
+	if err != nil {
+		return
+	}
+	data.sessionChanged = true
 	data.User = user
+
+	if user == nil {
+		data.Session.UserID = sql.NullInt64{
+			Int64: 0,
+			Valid: false,
+		}
+		return
+	}
 
 	data.Session.UserID = sql.NullInt64{
 		Int64: user.ID,
 		Valid: true,
 	}
-	data.sessionChanged = true
-}
-
-func (store *sessionStore) SetWaiting2FA(ctx context.Context, waitingUser *models.User) {
-	data := ctx.Value(contextSessionKey{}).(*sessionData)
-	data.Session.Waiting2fa = sql.NullInt64{
-		Int64: waitingUser.ID,
-		Valid: true,
-	}
-	data.sessionChanged = true
-}
-
-func (store *sessionStore) GetWaiting2FA(ctx context.Context) *models.User {
-	data := ctx.Value(contextSessionKey{}).(*sessionData)
-	return data.Waiting2faUser
-}
-
-func (store *sessionStore) SetTOTPKey(ctx context.Context, key string) {
-	data := ctx.Value(contextSessionKey{}).(*sessionData)
-	data.Session.TotpKey = sql.NullString{
-		String: key,
-		Valid:  true,
-	}
-	data.sessionChanged = true
-}
-
-func (store *sessionStore) GetTOTPKey(ctx context.Context) (string, error) {
-	data := ctx.Value(contextSessionKey{}).(*sessionData)
-	if !data.Session.TotpKey.Valid {
-		return "", errors.New("GetTOTPKey: no totp key")
-	}
-	return data.Session.TotpKey.String, nil
 }
 
 func (store *sessionStore) ClearSession(ctx context.Context) {
-	data := ctx.Value(contextSessionKey{}).(*sessionData)
+	data, err := store.getSessionData(ctx)
+	if err != nil {
+		return
+	}
 	data.Session.UserID = sql.NullInt64{
 		Int64: 0,
 		Valid: false,
 	}
-	data.Session.Waiting2fa = sql.NullInt64{
-		Int64: 0,
-		Valid: false,
+	data.User = nil
+	data.sessionChanged = true
+}
+
+func (store *sessionStore) GetScope(ctx context.Context) []string {
+	data, err := store.getSessionData(ctx)
+	if err != nil {
+		return nil
 	}
-	data.Session.TotpKey = sql.NullString{
-		String: "",
-		Valid:  false,
+	return data.Session.Scope
+}
+
+func (store *sessionStore) SetScope(ctx context.Context, scope []string) {
+	data, err := store.getSessionData(ctx)
+	if err != nil {
+		return
 	}
 	data.sessionChanged = true
+	data.Session.Scope = scope
 }
 
 func New(database db.TransactionQuerier, debug bool) *sessionStore {
@@ -215,30 +224,41 @@ func New(database db.TransactionQuerier, debug bool) *sessionStore {
 	}
 }
 
+func (store *sessionStore) showError(w http.ResponseWriter, r *http.Request, err error) {
+	tracer := trace.SpanFromContext(r.Context())
+	tracer.RecordError(err)
+	tracer.SetStatus(codes.Error, err.Error())
+	w.WriteHeader(http.StatusInternalServerError)
+	if store.config.debug {
+		data, err := json.Marshal(generated.Error{
+			Success: false,
+			Message: err.Error(),
+		})
+		if err != nil {
+			w.Write([]byte(`{"success":false,"message":"Internal server error"}`))
+			return
+		}
+		w.Write([]byte(data))
+	} else {
+		w.Write([]byte(`{"success":false,"message":"Internal server error"}`))
+	}
+}
+
 func (store *sessionStore) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r, data, err := store.initializeSession(r.Context(), r, w)
 		if err != nil {
-			tracer := trace.SpanFromContext(r.Context())
-			tracer.RecordError(err)
-			tracer.SetStatus(codes.Error, err.Error())
-
-			var message = "Internal server error"
-			if store.config.debug {
-				message = err.Error()
-			}
-
-			data, err := json.Marshal(generated.Error{
-				Success: false,
-				Message: message,
-			})
-			if err != nil {
-				panic(err)
-			}
-			w.Write(data)
+			store.showError(w, r, err)
 			return
 		}
 		next.ServeHTTP(w, r)
+		if data.sessionChanged {
+			err := store.saveSession(r.Context(), data)
+			if err != nil {
+				store.showError(w, r, err)
+				return
+			}
+		}
 		http.SetCookie(w, &http.Cookie{
 			Name:     cookieSessionKey,
 			Value:    data.Session.ID.String(),

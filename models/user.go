@@ -19,6 +19,7 @@ import (
 var tracer = otel.Tracer("github.com/tedyst/licenta/models")
 
 type User = queries.User
+type TotpSecretToken = queries.TotpSecretToken
 
 var PasswordPepper []byte
 
@@ -128,34 +129,23 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-func VerifyTOTP(ctx context.Context, u *User, code string) bool {
+func VerifyTOTP(ctx context.Context, totpSecret *TotpSecretToken, code string) bool {
 	_, span := tracer.Start(ctx, "VerifyTOTP")
 	defer span.End()
 
-	if !u.TotpSecret.Valid {
-		return false
+	if !totpSecret.Valid {
+		return true
 	}
-	return totp.Validate(code, u.TotpSecret.String)
+	return totp.Validate(code, totpSecret.TotpSecret)
 }
 
-func GenerateTOTP(ctx context.Context, u *User) (string, error) {
+func GenerateTOTPSecret(ctx context.Context) (string, error) {
 	_, span := tracer.Start(ctx, "GenerateTOTP")
 	defer span.End()
 
-	if !u.TotpSecret.Valid {
-		return "", errors.New("user does not have 2fa enabled")
-	}
 	key, err := totp.Generate(totp.GenerateOpts{})
 	if err != nil {
 		return "", errors.Wrap(err, "error generating totp key")
 	}
 	return key.Secret(), nil
-}
-
-func Requires2FA(ctx context.Context, u *User) bool {
-	return u.TotpSecret.Valid
-}
-
-func Verify2FA(ctx context.Context, u *User, code string) bool {
-	return VerifyTOTP(ctx, u, code)
 }

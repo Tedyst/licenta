@@ -54,46 +54,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
       security: []
-  /login/2fa/totp:
-    post:
-      summary: Logs user into the system
-      tags:
-        - auth
-      requestBody:
-        description: The user to login into.
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TOTPLogin'
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                required:
-                  - success
-                  - user
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  user:
-                    $ref: '#/components/schemas/User'
-        "400":
-          description: Invalid body
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-      security: []
   /logout:
     post:
       summary: Logs out current logged in user session
@@ -185,12 +145,9 @@ paths:
                 type: object
                 required:
                   - success
-                  - user
                 properties:
                   success:
                     type: boolean
-                  user:
-                    $ref: '#/components/schemas/User'
         "400":
           description: Invalid field supplied
           content:
@@ -361,6 +318,12 @@ components:
           example: mypassword
           x-oapi-codegen-extra-tags:
             validate: "min=8,printascii"
+        totp:
+          type: string
+          description: The TOTP code
+          example: 123456
+          x-oapi-codegen-extra-tags:
+            validate: "numeric,len=6"
     RegisterUser:
       required:
         - username

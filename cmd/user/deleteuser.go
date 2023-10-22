@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"
-	database "github.com/tedyst/licenta/db"
 )
 
 var deleteCmd = &cobra.Command{
@@ -20,22 +19,22 @@ var deleteCmd = &cobra.Command{
 	licenta deleteuser [username or email]`,
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var db db.TransactionQuerier
-		db = database.InitDatabase(viper.GetString("database"))
-		db, err := db.StartTransaction(context.Background())
+		var database db.TransactionQuerier
+		database = db.InitDatabase(viper.GetString("database"))
+		database, err := database.StartTransaction(context.Background())
 		if err != nil {
 			log.Panic(err)
 		}
-		defer db.EndTransaction(context.Background(), err)
+		defer database.EndTransaction(context.Background(), err)
 
-		user, err := db.GetUserByUsernameOrEmail(context.Background(), args[0])
+		user, err := database.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				log.Fatal("User does not exist.")
 			}
 			log.Panic(err)
 		}
-		err = db.DeleteUser(context.Background(), user.ID)
+		err = database.DeleteUser(context.Background(), user.ID)
 		if err != nil {
 			log.Panic(err)
 		}

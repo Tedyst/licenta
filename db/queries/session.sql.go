@@ -13,28 +13,25 @@ import (
 )
 
 const createSession = `-- name: CreateSession :one
-INSERT INTO sessions (
-  id, user_id, totp_key
-) VALUES (
-  $1, $2, $3
-)
-RETURNING id, user_id, totp_key, waiting_2fa, created_at
+INSERT INTO sessions(id, user_id, scope)
+  VALUES ($1, $2, $3)
+RETURNING
+  id, user_id, scope, created_at
 `
 
 type CreateSessionParams struct {
-	ID      uuid.UUID
-	UserID  sql.NullInt64
-	TotpKey sql.NullString
+	ID     uuid.UUID
+	UserID sql.NullInt64
+	Scope  []string
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error) {
-	row := q.db.QueryRow(ctx, createSession, arg.ID, arg.UserID, arg.TotpKey)
+	row := q.db.QueryRow(ctx, createSession, arg.ID, arg.UserID, arg.Scope)
 	var i Session
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.TotpKey,
-		&i.Waiting2fa,
+		&i.Scope,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -50,9 +47,24 @@ func (q *Queries) DeleteSession(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteSessionsByUserID = `-- name: DeleteSessionsByUserID :exec
+DELETE FROM sessions
+WHERE user_id = $1
+`
+
+func (q *Queries) DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error {
+	_, err := q.db.Exec(ctx, deleteSessionsByUserID, userID)
+	return err
+}
+
 const getSession = `-- name: GetSession :one
-SELECT id, user_id, totp_key, waiting_2fa, created_at FROM sessions
-WHERE id = $1 LIMIT 1
+SELECT
+  id, user_id, scope, created_at
+FROM
+  sessions
+WHERE
+  id = $1
+LIMIT 1
 `
 
 func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*Session, error) {
@@ -61,57 +73,29 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*Session, error
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.TotpKey,
-		&i.Waiting2fa,
+		&i.Scope,
 		&i.CreatedAt,
 	)
 	return &i, err
 }
 
-const getUserAndSessionBySessionID = `-- name: GetUserAndSessionBySessionID :one
-SELECT users.id, users.username, users.password, users.email, users.admin, users.totp_secret, sessions.id, sessions.user_id, sessions.totp_key, sessions.waiting_2fa, sessions.created_at FROM sessions
-LEFT JOIN users ON sessions.user_id = users.id
-WHERE sessions.id = $1 LIMIT 1
-`
-
-type GetUserAndSessionBySessionIDRow struct {
-	User    User
-	Session Session
-}
-
-func (q *Queries) GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID) (*GetUserAndSessionBySessionIDRow, error) {
-	row := q.db.QueryRow(ctx, getUserAndSessionBySessionID, id)
-	var i GetUserAndSessionBySessionIDRow
-	err := row.Scan(
-		&i.User.ID,
-		&i.User.Username,
-		&i.User.Password,
-		&i.User.Email,
-		&i.User.Admin,
-		&i.User.TotpSecret,
-		&i.Session.ID,
-		&i.Session.UserID,
-		&i.Session.TotpKey,
-		&i.Session.Waiting2fa,
-		&i.Session.CreatedAt,
-	)
-	return &i, err
-}
-
 const updateSession = `-- name: UpdateSession :exec
-UPDATE sessions SET
-    user_id = $2,
-    totp_key = $3
-WHERE id = $1
+UPDATE
+  sessions
+SET
+  user_id = coalesce($2, user_id),
+  scope = coalesce($3, scope)
+WHERE
+  id = $1
 `
 
 type UpdateSessionParams struct {
-	ID      uuid.UUID
-	UserID  sql.NullInt64
-	TotpKey sql.NullString
+	ID     uuid.UUID
+	UserID sql.NullInt64
+	Scope  []string
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {
-	_, err := q.db.Exec(ctx, updateSession, arg.ID, arg.UserID, arg.TotpKey)
+	_, err := q.db.Exec(ctx, updateSession, arg.ID, arg.UserID, arg.Scope)
 	return err
 }

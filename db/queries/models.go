@@ -19,18 +19,23 @@ type ResetPasswordToken struct {
 }
 
 type Session struct {
-	ID         uuid.UUID
-	UserID     sql.NullInt64
-	TotpKey    sql.NullString
-	Waiting2fa sql.NullInt64
+	ID        uuid.UUID
+	UserID    sql.NullInt64
+	Scope     []string
+	CreatedAt pgtype.Timestamptz
+}
+
+type TotpSecretToken struct {
+	ID         int64
+	UserID     int64
+	Valid      bool
+	TotpSecret string
 	CreatedAt  pgtype.Timestamptz
 }
 
 type User struct {
-	ID         int64
-	Username   string
-	Password   string
-	Email      string
-	Admin      bool
-	TotpSecret sql.NullString
+	ID       int64
+	Username string
+	Password string
+	Email    string
 }

@@ -8,8 +8,6 @@ package queries
 import (
 	"context"
 	"database/sql"
-
-	"github.com/google/uuid"
 )
 
 const countUsers = `-- name: CountUsers :one
@@ -26,35 +24,11 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 	return count, err
 }
 
-const createResetPasswordToken = `-- name: CreateResetPasswordToken :one
-INSERT INTO reset_password_tokens(id, user_id)
-  VALUES ($1, $2)
-RETURNING
-  id, user_id, valid, created_at
-`
-
-type CreateResetPasswordTokenParams struct {
-	ID     uuid.UUID
-	UserID sql.NullInt64
-}
-
-func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error) {
-	row := q.db.QueryRow(ctx, createResetPasswordToken, arg.ID, arg.UserID)
-	var i ResetPasswordToken
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Valid,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, PASSWORD, email)
   VALUES ($1, $2, $3)
 RETURNING
-  id, username, password, email, admin, totp_secret
+  id, username, password, email
 `
 
 type CreateUserParams struct {
@@ -71,8 +45,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, 
 		&i.Username,
 		&i.Password,
 		&i.Email,
-		&i.Admin,
-		&i.TotpSecret,
 	)
 	return &i, err
 }
@@ -87,31 +59,9 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
-const getResetPasswordToken = `-- name: GetResetPasswordToken :one
-SELECT
-  id, user_id, valid, created_at
-FROM
-  reset_password_tokens
-WHERE
-  id = $1
-LIMIT 1
-`
-
-func (q *Queries) GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error) {
-	row := q.db.QueryRow(ctx, getResetPasswordToken, id)
-	var i ResetPasswordToken
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Valid,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
 const getUser = `-- name: GetUser :one
 SELECT
-  id, username, password, email, admin, totp_secret
+  id, username, password, email
 FROM
   users
 WHERE
@@ -127,15 +77,13 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 		&i.Username,
 		&i.Password,
 		&i.Email,
-		&i.Admin,
-		&i.TotpSecret,
 	)
 	return &i, err
 }
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
 SELECT
-  id, username, password, email, admin, totp_secret
+  id, username, password, email
 FROM
   users
 WHERE
@@ -152,29 +100,13 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string)
 		&i.Username,
 		&i.Password,
 		&i.Email,
-		&i.Admin,
-		&i.TotpSecret,
 	)
 	return &i, err
 }
 
-const invalidateResetPasswordToken = `-- name: InvalidateResetPasswordToken :exec
-UPDATE
-  reset_password_tokens
-SET
-  valid = FALSE
-WHERE
-  id = $1
-`
-
-func (q *Queries) InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, invalidateResetPasswordToken, id)
-	return err
-}
-
 const listUsers = `-- name: ListUsers :many
 SELECT
-  id, username, password, email, admin, totp_secret
+  id, username, password, email
 FROM
   users
 WHERE
@@ -217,8 +149,6 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 			&i.Username,
 			&i.Password,
 			&i.Email,
-			&i.Admin,
-			&i.TotpSecret,
 		); err != nil {
 			return nil, err
 		}
@@ -232,7 +162,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 
 const listUsersPaginated = `-- name: ListUsersPaginated :many
 SELECT
-  id, username, password, email, admin, totp_secret
+  id, username, password, email
 FROM
   users
 ORDER BY
@@ -259,8 +189,6 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 			&i.Username,
 			&i.Password,
 			&i.Email,
-			&i.Admin,
-			&i.TotpSecret,
 		); err != nil {
 			return nil, err
 		}
@@ -278,17 +206,15 @@ UPDATE
 SET
   username = coalesce($1, username),
   PASSWORD = coalesce($2, PASSWORD),
-  email = coalesce($3, email),
-  admin = coalesce($4, admin)
+  email = coalesce($3, email)
 WHERE
-  id = $5
+  id = $4
 `
 
 type UpdateUserParams struct {
 	Username sql.NullString
 	Password sql.NullString
 	Email    sql.NullString
-	Admin    sql.NullBool
 	ID       int64
 }
 
@@ -297,7 +223,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.Username,
 		arg.Password,
 		arg.Email,
-		arg.Admin,
 		arg.ID,
 	)
 	return err
@@ -319,24 +244,5 @@ type UpdateUserPasswordParams struct {
 
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
 	_, err := q.db.Exec(ctx, updateUserPassword, arg.ID, arg.Password)
-	return err
-}
-
-const updateUserTOTPSecret = `-- name: UpdateUserTOTPSecret :exec
-UPDATE
-  users
-SET
-  totp_secret = $2
-WHERE
-  id = $1
-`
-
-type UpdateUserTOTPSecretParams struct {
-	ID         int64
-	TotpSecret sql.NullString
-}
-
-func (q *Queries) UpdateUserTOTPSecret(ctx context.Context, arg UpdateUserTOTPSecretParams) error {
-	_, err := q.db.Exec(ctx, updateUserTOTPSecret, arg.ID, arg.TotpSecret)
 	return err
 }

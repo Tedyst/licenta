@@ -10,6 +10,7 @@ package mock
 
 import (
 	context "context"
+	sql "database/sql"
 	reflect "reflect"
 
 	uuid "github.com/google/uuid"
@@ -158,6 +159,45 @@ func (c *TransactionQuerierCreateSessionCall) DoAndReturn(f func(context.Context
 	return c
 }
 
+// CreateTOTPSecretForUser mocks base method.
+func (m *MockTransactionQuerier) CreateTOTPSecretForUser(ctx context.Context, arg queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTOTPSecretForUser", ctx, arg)
+	ret0, _ := ret[0].(*queries.TotpSecretToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTOTPSecretForUser indicates an expected call of CreateTOTPSecretForUser.
+func (mr *MockTransactionQuerierMockRecorder) CreateTOTPSecretForUser(ctx, arg any) *TransactionQuerierCreateTOTPSecretForUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateTOTPSecretForUser), ctx, arg)
+	return &TransactionQuerierCreateTOTPSecretForUserCall{Call: call}
+}
+
+// TransactionQuerierCreateTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierCreateTOTPSecretForUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *TransactionQuerierCreateTOTPSecretForUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateTOTPSecretForUserCall) Do(f func(context.Context, queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error)) *TransactionQuerierCreateTOTPSecretForUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error)) *TransactionQuerierCreateTOTPSecretForUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateUser mocks base method.
 func (m *MockTransactionQuerier) CreateUser(ctx context.Context, arg queries.CreateUserParams) (*queries.User, error) {
 	m.ctrl.T.Helper()
@@ -235,6 +275,44 @@ func (c *TransactionQuerierDeleteSessionCall) DoAndReturn(f func(context.Context
 	return c
 }
 
+// DeleteSessionsByUserID mocks base method.
+func (m *MockTransactionQuerier) DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSessionsByUserID", ctx, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSessionsByUserID indicates an expected call of DeleteSessionsByUserID.
+func (mr *MockTransactionQuerierMockRecorder) DeleteSessionsByUserID(ctx, userID any) *TransactionQuerierDeleteSessionsByUserIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSessionsByUserID", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteSessionsByUserID), ctx, userID)
+	return &TransactionQuerierDeleteSessionsByUserIDCall{Call: call}
+}
+
+// TransactionQuerierDeleteSessionsByUserIDCall wrap *gomock.Call
+type TransactionQuerierDeleteSessionsByUserIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierDeleteSessionsByUserIDCall) Return(arg0 error) *TransactionQuerierDeleteSessionsByUserIDCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierDeleteSessionsByUserIDCall) Do(f func(context.Context, sql.NullInt64) error) *TransactionQuerierDeleteSessionsByUserIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierDeleteSessionsByUserIDCall) DoAndReturn(f func(context.Context, sql.NullInt64) error) *TransactionQuerierDeleteSessionsByUserIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteUser mocks base method.
 func (m *MockTransactionQuerier) DeleteUser(ctx context.Context, id int64) error {
 	m.ctrl.T.Helper()
@@ -307,6 +385,45 @@ func (c *TransactionQuerierEndTransactionCall) Do(f func(context.Context, error)
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetInvalidTOTPSecretForUser mocks base method.
+func (m *MockTransactionQuerier) GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*queries.TotpSecretToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInvalidTOTPSecretForUser", ctx, userID)
+	ret0, _ := ret[0].(*queries.TotpSecretToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetInvalidTOTPSecretForUser indicates an expected call of GetInvalidTOTPSecretForUser.
+func (mr *MockTransactionQuerierMockRecorder) GetInvalidTOTPSecretForUser(ctx, userID any) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInvalidTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetInvalidTOTPSecretForUser), ctx, userID)
+	return &TransactionQuerierGetInvalidTOTPSecretForUserCall{Call: call}
+}
+
+// TransactionQuerierGetInvalidTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierGetInvalidTOTPSecretForUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) Do(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -389,6 +506,45 @@ func (c *TransactionQuerierGetSessionCall) DoAndReturn(f func(context.Context, u
 	return c
 }
 
+// GetTOTPSecretForUser mocks base method.
+func (m *MockTransactionQuerier) GetTOTPSecretForUser(ctx context.Context, userID int64) (*queries.TotpSecretToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTOTPSecretForUser", ctx, userID)
+	ret0, _ := ret[0].(*queries.TotpSecretToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTOTPSecretForUser indicates an expected call of GetTOTPSecretForUser.
+func (mr *MockTransactionQuerierMockRecorder) GetTOTPSecretForUser(ctx, userID any) *TransactionQuerierGetTOTPSecretForUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetTOTPSecretForUser), ctx, userID)
+	return &TransactionQuerierGetTOTPSecretForUserCall{Call: call}
+}
+
+// TransactionQuerierGetTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierGetTOTPSecretForUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *TransactionQuerierGetTOTPSecretForUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetTOTPSecretForUserCall) Do(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetTOTPSecretForUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetTOTPSecretForUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetUser mocks base method.
 func (m *MockTransactionQuerier) GetUser(ctx context.Context, id int64) (*queries.User, error) {
 	m.ctrl.T.Helper()
@@ -424,45 +580,6 @@ func (c *TransactionQuerierGetUserCall) Do(f func(context.Context, int64) (*quer
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetUserCall) DoAndReturn(f func(context.Context, int64) (*queries.User, error)) *TransactionQuerierGetUserCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// GetUserAndSessionBySessionID mocks base method.
-func (m *MockTransactionQuerier) GetUserAndSessionBySessionID(ctx context.Context, id uuid.UUID) (*queries.GetUserAndSessionBySessionIDRow, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserAndSessionBySessionID", ctx, id)
-	ret0, _ := ret[0].(*queries.GetUserAndSessionBySessionIDRow)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserAndSessionBySessionID indicates an expected call of GetUserAndSessionBySessionID.
-func (mr *MockTransactionQuerierMockRecorder) GetUserAndSessionBySessionID(ctx, id any) *TransactionQuerierGetUserAndSessionBySessionIDCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAndSessionBySessionID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserAndSessionBySessionID), ctx, id)
-	return &TransactionQuerierGetUserAndSessionBySessionIDCall{Call: call}
-}
-
-// TransactionQuerierGetUserAndSessionBySessionIDCall wrap *gomock.Call
-type TransactionQuerierGetUserAndSessionBySessionIDCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierGetUserAndSessionBySessionIDCall) Return(arg0 *queries.GetUserAndSessionBySessionIDRow, arg1 error) *TransactionQuerierGetUserAndSessionBySessionIDCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierGetUserAndSessionBySessionIDCall) Do(f func(context.Context, uuid.UUID) (*queries.GetUserAndSessionBySessionIDRow, error)) *TransactionQuerierGetUserAndSessionBySessionIDCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierGetUserAndSessionBySessionIDCall) DoAndReturn(f func(context.Context, uuid.UUID) (*queries.GetUserAndSessionBySessionIDRow, error)) *TransactionQuerierGetUserAndSessionBySessionIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -540,6 +657,44 @@ func (c *TransactionQuerierInvalidateResetPasswordTokenCall) Do(f func(context.C
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierInvalidateResetPasswordTokenCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *TransactionQuerierInvalidateResetPasswordTokenCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// InvalidateTOTPSecretForUser mocks base method.
+func (m *MockTransactionQuerier) InvalidateTOTPSecretForUser(ctx context.Context, userID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InvalidateTOTPSecretForUser", ctx, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InvalidateTOTPSecretForUser indicates an expected call of InvalidateTOTPSecretForUser.
+func (mr *MockTransactionQuerierMockRecorder) InvalidateTOTPSecretForUser(ctx, userID any) *TransactionQuerierInvalidateTOTPSecretForUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InvalidateTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).InvalidateTOTPSecretForUser), ctx, userID)
+	return &TransactionQuerierInvalidateTOTPSecretForUserCall{Call: call}
+}
+
+// TransactionQuerierInvalidateTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierInvalidateTOTPSecretForUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) Return(arg0 error) *TransactionQuerierInvalidateTOTPSecretForUserCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) Do(f func(context.Context, int64) error) *TransactionQuerierInvalidateTOTPSecretForUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) error) *TransactionQuerierInvalidateTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -775,40 +930,40 @@ func (c *TransactionQuerierUpdateUserPasswordCall) DoAndReturn(f func(context.Co
 	return c
 }
 
-// UpdateUserTOTPSecret mocks base method.
-func (m *MockTransactionQuerier) UpdateUserTOTPSecret(ctx context.Context, arg queries.UpdateUserTOTPSecretParams) error {
+// ValidateTOTPSecretForUser mocks base method.
+func (m *MockTransactionQuerier) ValidateTOTPSecretForUser(ctx context.Context, userID int64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserTOTPSecret", ctx, arg)
+	ret := m.ctrl.Call(m, "ValidateTOTPSecretForUser", ctx, userID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateUserTOTPSecret indicates an expected call of UpdateUserTOTPSecret.
-func (mr *MockTransactionQuerierMockRecorder) UpdateUserTOTPSecret(ctx, arg any) *TransactionQuerierUpdateUserTOTPSecretCall {
+// ValidateTOTPSecretForUser indicates an expected call of ValidateTOTPSecretForUser.
+func (mr *MockTransactionQuerierMockRecorder) ValidateTOTPSecretForUser(ctx, userID any) *TransactionQuerierValidateTOTPSecretForUserCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserTOTPSecret", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateUserTOTPSecret), ctx, arg)
-	return &TransactionQuerierUpdateUserTOTPSecretCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).ValidateTOTPSecretForUser), ctx, userID)
+	return &TransactionQuerierValidateTOTPSecretForUserCall{Call: call}
 }
 
-// TransactionQuerierUpdateUserTOTPSecretCall wrap *gomock.Call
-type TransactionQuerierUpdateUserTOTPSecretCall struct {
+// TransactionQuerierValidateTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierValidateTOTPSecretForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierUpdateUserTOTPSecretCall) Return(arg0 error) *TransactionQuerierUpdateUserTOTPSecretCall {
+func (c *TransactionQuerierValidateTOTPSecretForUserCall) Return(arg0 error) *TransactionQuerierValidateTOTPSecretForUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierUpdateUserTOTPSecretCall) Do(f func(context.Context, queries.UpdateUserTOTPSecretParams) error) *TransactionQuerierUpdateUserTOTPSecretCall {
+func (c *TransactionQuerierValidateTOTPSecretForUserCall) Do(f func(context.Context, int64) error) *TransactionQuerierValidateTOTPSecretForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierUpdateUserTOTPSecretCall) DoAndReturn(f func(context.Context, queries.UpdateUserTOTPSecretParams) error) *TransactionQuerierUpdateUserTOTPSecretCall {
+func (c *TransactionQuerierValidateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) error) *TransactionQuerierValidateTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

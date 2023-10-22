@@ -2,7 +2,6 @@ package handlers_test
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"testing"
 	"time"
@@ -82,11 +81,10 @@ func TestPostLogin(t *testing.T) {
 		},
 		{
 			user: &queries.User{
-				ID:         1,
-				Username:   "test",
-				Email:      "asd@asd.com",
-				Password:   "asd123123",
-				TotpSecret: sql.NullString{String: "asd", Valid: true},
+				ID:       1,
+				Username: "test",
+				Email:    "asd@asd.com",
+				Password: "asd123123",
 			},
 			username:            "test",
 			password:            "asd123123",
@@ -155,14 +153,6 @@ func TestPostLogin(t *testing.T) {
 
 			if test.shouldSetSession {
 				sessionStore.EXPECT().SetUser(gomock.Any(), gomock.Any()).Do(func(ctx context.Context, user *models.User) {
-					if user != newUser {
-						t.Errorf("expected user %v, got %v", newUser, user)
-					}
-				})
-			}
-
-			if test.shouldSetWaiting2FA {
-				sessionStore.EXPECT().SetWaiting2FA(gomock.Any(), gomock.Any()).Do(func(ctx context.Context, user *models.User) {
 					if user != newUser {
 						t.Errorf("expected user %v, got %v", newUser, user)
 					}
