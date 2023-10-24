@@ -11,6 +11,35 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Organization struct {
+	ID        int64
+	Name      string
+	CreatedAt pgtype.Timestamptz
+}
+
+type OrganizationMember struct {
+	ID             int64
+	OrganizationID int64
+	UserID         int64
+	Role           int32
+	CreatedAt      pgtype.Timestamptz
+}
+
+type Project struct {
+	ID             int64
+	Name           string
+	OrganizationID int64
+	CreatedAt      pgtype.Timestamptz
+}
+
+type ProjectMember struct {
+	ID        int64
+	ProjectID int64
+	UserID    int64
+	Role      int16
+	CreatedAt pgtype.Timestamptz
+}
+
 type ResetPasswordToken struct {
 	ID        uuid.UUID
 	UserID    sql.NullInt64
@@ -34,8 +63,9 @@ type TotpSecretToken struct {
 }
 
 type User struct {
-	ID       int64
-	Username string
-	Password string
-	Email    string
+	ID        int64
+	Username  string
+	Password  string
+	Email     string
+	CreatedAt pgtype.Timestamptz
 }

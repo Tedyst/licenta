@@ -21,6 +21,16 @@ type Querier interface {
 	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
 	DeleteUser(ctx context.Context, id int64) error
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
+	GetOrganizationByName(ctx context.Context, name string) (*Organization, error)
+	GetOrganizationMembers(ctx context.Context, organizationID int64) ([]*OrganizationMember, error)
+	GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error)
+	GetOrganizationUser(ctx context.Context, arg GetOrganizationUserParams) (*OrganizationMember, error)
+	GetOrganizationsByUser(ctx context.Context, userID int64) ([]*Organization, error)
+	GetProjectByOrganizationAndName(ctx context.Context, arg GetProjectByOrganizationAndNameParams) (*Project, error)
+	GetProjectMembers(ctx context.Context, projectID int64) ([]*ProjectMember, error)
+	GetProjectPermissionsForUser(ctx context.Context, arg GetProjectPermissionsForUserParams) (int16, error)
+	GetProjectUser(ctx context.Context, arg GetProjectUserParams) (*ProjectMember, error)
+	GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetSession(ctx context.Context, id uuid.UUID) (*Session, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
