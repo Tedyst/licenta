@@ -323,7 +323,7 @@ components:
           description: The TOTP code
           example: 123456
           x-oapi-codegen-extra-tags:
-            validate: "numeric,len=6"
+            validate: "omitempty,numeric,len=6"
     RegisterUser:
       required:
         - username

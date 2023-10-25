@@ -61,9 +61,10 @@ func GenerateHash(ctx context.Context, password string) (string, error) {
 func SetPassword(ctx context.Context, u *User, password string) error {
 	p, err := GenerateHash(ctx, password)
 	if err != nil {
-		u.Password = p
+		return err
 	}
-	return err
+	u.Password = p
+	return nil
 }
 
 func VerifyPassword(ctx context.Context, u *queries.User, password string) (bool, error) {

@@ -146,6 +146,7 @@ func TestPostLogin(t *testing.T) {
 			if test.shouldGetUser {
 				if test.user != nil {
 					querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(newUser, nil)
+					querier.EXPECT().GetTOTPSecretForUser(gomock.Any(), test.user.ID).Return(nil, nil)
 				} else {
 					querier.EXPECT().GetUserByUsernameOrEmail(gomock.Any(), test.username).Return(nil, errors.New("user not found"))
 				}
