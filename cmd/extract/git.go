@@ -19,6 +19,7 @@ var extractGitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var repo *gitgo.Repository
 		var err error
+
 		if strings.HasPrefix(args[0], "https://") || strings.HasPrefix(args[0], "http://") || strings.HasPrefix(args[0], "git://") || strings.HasPrefix(args[0], "ssh://") {
 			repo, err = git.PullGitRepository(context.Background(), args[0], 0, nil)
 			if err != nil {

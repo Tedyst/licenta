@@ -81,6 +81,84 @@ func (c *TransactionQuerierCountUsersCall) DoAndReturn(f func(context.Context) (
 	return c
 }
 
+// CreateDockerImageForProject mocks base method.
+func (m *MockTransactionQuerier) CreateDockerImageForProject(ctx context.Context, arg queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDockerImageForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.ProjectDockerImage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDockerImageForProject indicates an expected call of CreateDockerImageForProject.
+func (mr *MockTransactionQuerierMockRecorder) CreateDockerImageForProject(ctx, arg any) *TransactionQuerierCreateDockerImageForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDockerImageForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateDockerImageForProject), ctx, arg)
+	return &TransactionQuerierCreateDockerImageForProjectCall{Call: call}
+}
+
+// TransactionQuerierCreateDockerImageForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateDockerImageForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateDockerImageForProjectCall) Return(arg0 *queries.ProjectDockerImage, arg1 error) *TransactionQuerierCreateDockerImageForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateDockerImageForProjectCall) Do(f func(context.Context, queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error)) *TransactionQuerierCreateDockerImageForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateDockerImageForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error)) *TransactionQuerierCreateDockerImageForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateGitRepositoryForProject mocks base method.
+func (m *MockTransactionQuerier) CreateGitRepositoryForProject(ctx context.Context, arg queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateGitRepositoryForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.ProjectGitRepository)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateGitRepositoryForProject indicates an expected call of CreateGitRepositoryForProject.
+func (mr *MockTransactionQuerierMockRecorder) CreateGitRepositoryForProject(ctx, arg any) *TransactionQuerierCreateGitRepositoryForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitRepositoryForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitRepositoryForProject), ctx, arg)
+	return &TransactionQuerierCreateGitRepositoryForProjectCall{Call: call}
+}
+
+// TransactionQuerierCreateGitRepositoryForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateGitRepositoryForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateGitRepositoryForProjectCall) Return(arg0 *queries.ProjectGitRepository, arg1 error) *TransactionQuerierCreateGitRepositoryForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateGitRepositoryForProjectCall) Do(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *TransactionQuerierCreateGitRepositoryForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *TransactionQuerierCreateGitRepositoryForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateResetPasswordToken mocks base method.
 func (m *MockTransactionQuerier) CreateResetPasswordToken(ctx context.Context, arg queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error) {
 	m.ctrl.T.Helper()
@@ -237,6 +315,82 @@ func (c *TransactionQuerierCreateUserCall) DoAndReturn(f func(context.Context, q
 	return c
 }
 
+// DeleteDockerImageForProject mocks base method.
+func (m *MockTransactionQuerier) DeleteDockerImageForProject(ctx context.Context, arg queries.DeleteDockerImageForProjectParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteDockerImageForProject", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteDockerImageForProject indicates an expected call of DeleteDockerImageForProject.
+func (mr *MockTransactionQuerierMockRecorder) DeleteDockerImageForProject(ctx, arg any) *TransactionQuerierDeleteDockerImageForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDockerImageForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteDockerImageForProject), ctx, arg)
+	return &TransactionQuerierDeleteDockerImageForProjectCall{Call: call}
+}
+
+// TransactionQuerierDeleteDockerImageForProjectCall wrap *gomock.Call
+type TransactionQuerierDeleteDockerImageForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierDeleteDockerImageForProjectCall) Return(arg0 error) *TransactionQuerierDeleteDockerImageForProjectCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierDeleteDockerImageForProjectCall) Do(f func(context.Context, queries.DeleteDockerImageForProjectParams) error) *TransactionQuerierDeleteDockerImageForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierDeleteDockerImageForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteDockerImageForProjectParams) error) *TransactionQuerierDeleteDockerImageForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// DeleteGitRepositoryForProject mocks base method.
+func (m *MockTransactionQuerier) DeleteGitRepositoryForProject(ctx context.Context, arg queries.DeleteGitRepositoryForProjectParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteGitRepositoryForProject", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteGitRepositoryForProject indicates an expected call of DeleteGitRepositoryForProject.
+func (mr *MockTransactionQuerierMockRecorder) DeleteGitRepositoryForProject(ctx, arg any) *TransactionQuerierDeleteGitRepositoryForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGitRepositoryForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteGitRepositoryForProject), ctx, arg)
+	return &TransactionQuerierDeleteGitRepositoryForProjectCall{Call: call}
+}
+
+// TransactionQuerierDeleteGitRepositoryForProjectCall wrap *gomock.Call
+type TransactionQuerierDeleteGitRepositoryForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) Return(arg0 error) *TransactionQuerierDeleteGitRepositoryForProjectCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) Do(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *TransactionQuerierDeleteGitRepositoryForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *TransactionQuerierDeleteGitRepositoryForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteSession mocks base method.
 func (m *MockTransactionQuerier) DeleteSession(ctx context.Context, id uuid.UUID) error {
 	m.ctrl.T.Helper()
@@ -385,6 +539,162 @@ func (c *TransactionQuerierEndTransactionCall) Do(f func(context.Context, error)
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetDockerImagesForProject mocks base method.
+func (m *MockTransactionQuerier) GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*queries.ProjectDockerImage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDockerImagesForProject", ctx, projectID)
+	ret0, _ := ret[0].([]*queries.ProjectDockerImage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDockerImagesForProject indicates an expected call of GetDockerImagesForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetDockerImagesForProject(ctx, projectID any) *TransactionQuerierGetDockerImagesForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDockerImagesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetDockerImagesForProject), ctx, projectID)
+	return &TransactionQuerierGetDockerImagesForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetDockerImagesForProjectCall wrap *gomock.Call
+type TransactionQuerierGetDockerImagesForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetDockerImagesForProjectCall) Return(arg0 []*queries.ProjectDockerImage, arg1 error) *TransactionQuerierGetDockerImagesForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetDockerImagesForProjectCall) Do(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *TransactionQuerierGetDockerImagesForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetDockerImagesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *TransactionQuerierGetDockerImagesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetDockerScannedLayersForProject mocks base method.
+func (m *MockTransactionQuerier) GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDockerScannedLayersForProject", ctx, projectID)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDockerScannedLayersForProject indicates an expected call of GetDockerScannedLayersForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetDockerScannedLayersForProject(ctx, projectID any) *TransactionQuerierGetDockerScannedLayersForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDockerScannedLayersForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetDockerScannedLayersForProject), ctx, projectID)
+	return &TransactionQuerierGetDockerScannedLayersForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetDockerScannedLayersForProjectCall wrap *gomock.Call
+type TransactionQuerierGetDockerScannedLayersForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetDockerScannedLayersForProjectCall) Return(arg0 []string, arg1 error) *TransactionQuerierGetDockerScannedLayersForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetDockerScannedLayersForProjectCall) Do(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetDockerScannedLayersForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetDockerScannedLayersForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetDockerScannedLayersForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetGitRepositoriesForProject mocks base method.
+func (m *MockTransactionQuerier) GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*queries.ProjectGitRepository, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetGitRepositoriesForProject", ctx, projectID)
+	ret0, _ := ret[0].([]*queries.ProjectGitRepository)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetGitRepositoriesForProject indicates an expected call of GetGitRepositoriesForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetGitRepositoriesForProject(ctx, projectID any) *TransactionQuerierGetGitRepositoriesForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitRepositoriesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitRepositoriesForProject), ctx, projectID)
+	return &TransactionQuerierGetGitRepositoriesForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetGitRepositoriesForProjectCall wrap *gomock.Call
+type TransactionQuerierGetGitRepositoriesForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetGitRepositoriesForProjectCall) Return(arg0 []*queries.ProjectGitRepository, arg1 error) *TransactionQuerierGetGitRepositoriesForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetGitRepositoriesForProjectCall) Do(f func(context.Context, int64) ([]*queries.ProjectGitRepository, error)) *TransactionQuerierGetGitRepositoriesForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetGitRepositoriesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectGitRepository, error)) *TransactionQuerierGetGitRepositoriesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetGitScannedCommitsForProject mocks base method.
+func (m *MockTransactionQuerier) GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetGitScannedCommitsForProject", ctx, projectID)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetGitScannedCommitsForProject indicates an expected call of GetGitScannedCommitsForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetGitScannedCommitsForProject(ctx, projectID any) *TransactionQuerierGetGitScannedCommitsForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitScannedCommitsForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitScannedCommitsForProject), ctx, projectID)
+	return &TransactionQuerierGetGitScannedCommitsForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetGitScannedCommitsForProjectCall wrap *gomock.Call
+type TransactionQuerierGetGitScannedCommitsForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) Return(arg0 []string, arg1 error) *TransactionQuerierGetGitScannedCommitsForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) Do(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

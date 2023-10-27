@@ -2,6 +2,7 @@ package docker
 
 import (
 	"runtime"
+	"time"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/tedyst/licenta/extractors/file"
@@ -15,6 +16,15 @@ type options struct {
 	probability        float64
 	ignoreFileNames    []string
 	fileScannerOptions []file.Option
+	timeout            time.Duration
+	skipLayer          func(layer string) bool
+}
+
+func WithSkipLayer(f func(layer string) bool) Option {
+	return func(o *options) error {
+		o.skipLayer = f
+		return nil
+	}
 }
 
 func WithCredentials(creds authn.Authenticator) Option {
@@ -59,6 +69,7 @@ func makeOptions(opts ...Option) (*options, error) {
 	o := &options{
 		concurrency: runtime.NumCPU(),
 		probability: 0.7,
+		timeout:     time.Hour,
 	}
 	for _, opt := range opts {
 		if err := opt(o); err != nil {

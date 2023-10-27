@@ -15,6 +15,11 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
+type gitResult struct {
+	CommitHash string
+	Results    []file.ExtractResult
+}
+
 func inspectCommit(ctx context.Context, commit *object.Commit, parent *object.Commit, cutoffProbability float64) ([]file.ExtractResult, error) {
 	patch, err := commit.Patch(parent)
 	if err != nil {

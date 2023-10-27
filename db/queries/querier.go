@@ -13,13 +13,21 @@ import (
 
 type Querier interface {
 	CountUsers(ctx context.Context) (int64, error)
+	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
+	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*ProjectGitRepository, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
+	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
+	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*ProjectDockerImage, error)
+	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
+	GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*ProjectGitRepository, error)
+	GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error)
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetOrganizationByName(ctx context.Context, name string) (*Organization, error)
 	GetOrganizationMembers(ctx context.Context, organizationID int64) ([]*OrganizationMember, error)

@@ -32,6 +32,47 @@ type Project struct {
 	CreatedAt      pgtype.Timestamptz
 }
 
+type ProjectDockerImage struct {
+	ID          int64
+	ProjectID   int64
+	DockerImage string
+	Username    sql.NullString
+	Password    sql.NullString
+	CreatedAt   pgtype.Timestamptz
+}
+
+type ProjectDockerScannedLayer struct {
+	ID        int64
+	ProjectID int64
+	LayerHash string
+	ScannedAt pgtype.Timestamptz
+}
+
+type ProjectGitRepository struct {
+	ID            int64
+	ProjectID     int64
+	GitRepository string
+	Username      sql.NullString
+	Password      sql.NullString
+	PrivateKey    sql.NullString
+	CreatedAt     pgtype.Timestamptz
+}
+
+type ProjectGitResult struct {
+	ID        int64
+	ProjectID int64
+	Commit    int64
+	Result    []byte
+	CreatedAt pgtype.Timestamptz
+}
+
+type ProjectGitScannedCommit struct {
+	ID         int64
+	ProjectID  int64
+	CommitHash string
+	ScannedAt  pgtype.Timestamptz
+}
+
 type ProjectMember struct {
 	ID        int64
 	ProjectID int64

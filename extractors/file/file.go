@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/pkg/errors"
 	"golang.org/x/exp/slog"
 )
 
@@ -45,8 +46,6 @@ func (e ExtractResult) String() string {
 }
 
 func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {
-	slog.DebugContext(ctx, "Extracting from line", "fileName", fileName, "lineNumber", lineNumber, "line", line)
-
 	o, err := makeOptions(opts...)
 	if err != nil {
 		return nil, err
@@ -69,7 +68,6 @@ func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line 
 
 	for _, secretType := range secretTypes {
 		for _, match := range secretType.regex.FindAllString(line, 100) {
-			slog.DebugContext(ctx, "Found match", "match", match)
 			result := ExtractResult{
 				Name:       secretType.name,
 				Line:       strings.TrimSpace(line),
@@ -126,6 +124,11 @@ func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line 
 			}
 
 			results = append(results, result)
+			select {
+			case <-ctx.Done():
+				return nil, errors.Wrap(ctx.Err(), "ExtractFromLine")
+			default:
+			}
 		}
 	}
 	return results, nil
@@ -147,6 +150,11 @@ func ExtractFromReader(ctx context.Context, fileName string, rd io.Reader, opts 
 			return nil, err
 		}
 		results = append(results, extracted...)
+		select {
+		case <-ctx.Done():
+			return nil, errors.Wrap(ctx.Err(), "ExtractFromReader")
+		default:
+		}
 	}
 	return results, nil
 }

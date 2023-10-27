@@ -45,15 +45,60 @@ CREATE TABLE organization_members(
 CREATE TABLE projects(
   id bigserial PRIMARY KEY,
   name text NOT NULL,
-  organization_id bigint REFERENCES organizations(id) NOT NULL,
+  organization_id bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE INDEX projects_organization_id_idx ON projects(organization_id);
+
+CREATE INDEX projects_name_orgianization_id_idx ON projects(name, organization_id);
+
 CREATE TABLE project_members(
   id bigserial PRIMARY KEY,
-  project_id bigint REFERENCES projects(id) NOT NULL,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   user_id bigint REFERENCES users(id) NOT NULL,
   role smallint NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE project_git_repositories(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  git_repository text NOT NULL,
+  username text,
+  password text,
+  private_key text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE project_git_scanned_commits(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  commit_hash text NOT NULL UNIQUE,
+  scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE project_git_results(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  commit bigint REFERENCES project_git_scanned_commits(id) NOT NULL,
+  result jsonb NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE project_docker_images(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  docker_image text NOT NULL,
+  username text,
+  password text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE project_docker_scanned_layers(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  layer_hash text NOT NULL UNIQUE,
+  scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

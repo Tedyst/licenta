@@ -28,7 +28,7 @@ type LayerResult struct {
 	Results  []file.ExtractResult
 }
 
-func scanFileWorker(ctx context.Context, wg *sync.WaitGroup, channel chan *channelTask, callbackResult func(result LayerResult), o *options) error {
+func scanFileWorker(ctx context.Context, cancelFunc context.CancelFunc, wg *sync.WaitGroup, channel chan *channelTask, callbackResult func(result LayerResult), o *options) error {
 	for {
 		task, ok := <-channel
 		if !ok || task == nil || task.content == nil {
@@ -40,7 +40,8 @@ func scanFileWorker(ctx context.Context, wg *sync.WaitGroup, channel chan *chann
 
 		results, err := file.ExtractFromReader(ctx, task.fileName, bytes.NewReader(task.content), o.fileScannerOptions...)
 		if err != nil {
-			return err
+			cancelFunc()
+			return errors.Wrap(err, "scanFileWorker: cannot extract from reader")
 		}
 		results = file.FilterExtractResultsByProbability(ctx, results, o.probability)
 
@@ -52,6 +53,12 @@ func scanFileWorker(ctx context.Context, wg *sync.WaitGroup, channel chan *chann
 				FileName: task.fileName,
 				Results:  results,
 			})
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.Wrap(ctx.Err(), "scanFile")
+		default:
 		}
 	}
 }
@@ -70,11 +77,11 @@ func processLayer(ctx context.Context, c chan *channelTask, layer v1.Layer) erro
 
 	digest, err := layer.Digest()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "processLayer: cannot get digest for layer")
 	}
 	reader, err := layer.Uncompressed()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "processLayer: cannot get layer reader")
 	}
 	tarReader := tar.NewReader(reader)
 
@@ -115,17 +122,31 @@ func processLayer(ctx context.Context, c chan *channelTask, layer v1.Layer) erro
 	return nil
 }
 
-func processImage(ctx context.Context, c chan *channelTask, image v1.Image) error {
+func processImage(ctx context.Context, c chan *channelTask, image v1.Image, opt *options) error {
 	slog.DebugContext(ctx, "processImage: processing image", "image", image)
 
 	layers, err := image.Layers()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "processImage: cannot get layers for image")
 	}
 	for _, layer := range layers {
+		digest, err := layer.Digest()
+		if err != nil {
+			return errors.Wrap(err, "processImage: cannot get digest")
+		}
+		if opt.skipLayer != nil && opt.skipLayer(digest.String()) {
+			slog.DebugContext(ctx, "processImage: skipping layer", "layer", digest)
+			continue
+		}
 		err = processLayer(ctx, c, layer)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "processImage: cannot process layer")
+		}
+
+		select {
+		case <-ctx.Done():
+			return errors.Wrap(ctx.Err(), "processImage: context deadline exceeded")
+		default:
 		}
 	}
 
@@ -143,21 +164,26 @@ func ProcessImage(
 
 	o, err := makeOptions(opts...)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "ProcessImage: cannot make options")
 	}
+
+	ctx, cancelCtx := context.WithTimeout(ctx, o.timeout)
 
 	ref, err := name.ParseReference(imageName)
 	if err != nil {
-		return err
+		cancelCtx()
+		return errors.Wrap(err, "ProcessImage: cannot parse reference")
 	}
 
 	index, err := remote.Index(ref, remote.WithAuth(o.credentials), remote.WithContext(ctx))
 	if err != nil {
-		return err
+		cancelCtx()
+		return errors.Wrap(err, "ProcessImage: cannot get index for image")
 	}
 	indexManifest, err := index.IndexManifest()
 	if err != nil {
-		return err
+		cancelCtx()
+		return errors.Wrap(err, "ProcessImage: cannot get index manifest for image")
 	}
 
 	resultChan := make(chan *channelTask, o.concurrency)
@@ -165,19 +191,21 @@ func ProcessImage(
 	wg.Add(o.concurrency)
 
 	for i := 0; i < o.concurrency; i++ {
-		go scanFileWorker(ctx, &wg, resultChan, callbackResult, o)
+		go scanFileWorker(ctx, cancelCtx, &wg, resultChan, callbackResult, o)
 	}
 
 	for _, manifest := range indexManifest.Manifests {
 		img, err := index.Image(manifest.Digest)
 		if err != nil {
-			return err
+			cancelCtx()
+			return errors.Wrap(err, "ProcessImage: cannot get image from digest")
 		}
-		processImage(ctx, resultChan, img)
+		processImage(ctx, resultChan, img, o)
 	}
 
 	close(resultChan)
 	wg.Wait()
+	cancelCtx()
 
 	slog.InfoContext(ctx, "ProcessImage: finished processing image", "image", imageName, "opts", opts)
 	return nil

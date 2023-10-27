@@ -30,6 +30,7 @@ var extractDockerCmd = &cobra.Command{
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 		}
+		fmt.Printf("done")
 	},
 }
 
