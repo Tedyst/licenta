@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"github.com/exaring/otelpgx"
@@ -50,9 +51,9 @@ func (q querierImpl) StartTransaction(ctx context.Context) (TransactionQuerier, 
 
 func (q querierImpl) EndTransaction(ctx context.Context, err error) error {
 	if err != nil {
-		return q.tx.Rollback(ctx)
+		return errors.Join(err, q.tx.Rollback(ctx))
 	}
-	return q.tx.Commit(ctx)
+	return errors.Join(err, q.tx.Commit(ctx))
 }
 
 func NewQuerier(pool *pgxpool.Pool) *querierImpl {

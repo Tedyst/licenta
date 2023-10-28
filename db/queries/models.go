@@ -33,11 +33,35 @@ type Project struct {
 }
 
 type ProjectDockerImage struct {
+	ID                                  int64
+	ProjectID                           int64
+	DockerImage                         string
+	Username                            sql.NullString
+	Password                            sql.NullString
+	MinProbability                      sql.NullFloat64
+	UseDefaultWordsReduceProbability    bool
+	UseDefaultWordsIncreaseProbability  bool
+	UseDefaultPasswordsCompletelyIgnore bool
+	UseDefaultUsernamesCompletelyIgnore bool
+	ProbailityDecreaseMultiplier        sql.NullFloat64
+	ProbabilityIncreaseMultiplier       sql.NullFloat64
+	EntropyThreshold                    sql.NullInt32
+	LogisticGrowthRate                  sql.NullFloat64
+	CreatedAt                           pgtype.Timestamptz
+}
+
+type ProjectDockerLayerResult struct {
 	ID          int64
 	ProjectID   int64
-	DockerImage string
+	Layer       int64
+	Name        string
+	Line        string
+	LineNumber  int32
+	Match       string
+	Probability float64
 	Username    sql.NullString
 	Password    sql.NullString
+	Filename    string
 	CreatedAt   pgtype.Timestamptz
 }
 

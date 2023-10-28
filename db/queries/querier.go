@@ -14,6 +14,8 @@ import (
 type Querier interface {
 	CountUsers(ctx context.Context) (int64, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
+	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
+	CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*ProjectDockerScannedLayer, error)
 	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*ProjectGitRepository, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error)

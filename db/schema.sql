@@ -92,6 +92,15 @@ CREATE TABLE project_docker_images(
   docker_image text NOT NULL,
   username text,
   password text,
+  min_probability float,
+  use_default_words_reduce_probability boolean DEFAULT TRUE NOT NULL,
+  use_default_words_increase_probability boolean DEFAULT TRUE NOT NULL,
+  use_default_passwords_completely_ignore boolean DEFAULT TRUE NOT NULL,
+  use_default_usernames_completely_ignore boolean DEFAULT TRUE NOT NULL,
+  probaility_decrease_multiplier float,
+  probability_increase_multiplier float,
+  entropy_threshold integer,
+  logistic_growth_rate float,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -100,5 +109,20 @@ CREATE TABLE project_docker_scanned_layers(
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   layer_hash text NOT NULL UNIQUE,
   scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE project_docker_layer_results(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  layer bigint REFERENCES project_docker_scanned_layers(id) ON DELETE CASCADE NOT NULL,
+  name text NOT NULL,
+  line text NOT NULL,
+  line_number integer NOT NULL,
+  match text NOT NULL,
+  probability float NOT NULL,
+  username text,
+  password text,
+  filename text NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

@@ -28,7 +28,7 @@ type LayerResult struct {
 	Results  []file.ExtractResult
 }
 
-func scanFileWorker(ctx context.Context, cancelFunc context.CancelFunc, wg *sync.WaitGroup, channel chan *channelTask, callbackResult func(result LayerResult), o *options) error {
+func scanFileWorker(ctx context.Context, cancelFunc context.CancelFunc, wg *sync.WaitGroup, channel chan *channelTask, callbackResult func(result LayerResult) error, o *options) error {
 	for {
 		task, ok := <-channel
 		if !ok || task == nil || task.content == nil {
@@ -48,11 +48,15 @@ func scanFileWorker(ctx context.Context, cancelFunc context.CancelFunc, wg *sync
 		slog.DebugContext(ctx, "scanFile: finished scanning file", "layer", task.layer, "file", task.fileName)
 
 		if len(results) > 0 {
-			callbackResult(LayerResult{
+			err := callbackResult(LayerResult{
 				Layer:    task.layer,
 				FileName: task.fileName,
 				Results:  results,
 			})
+			if err != nil {
+				cancelFunc()
+				return errors.Wrap(err, "scanFileWorker: cannot callback result")
+			}
 		}
 
 		select {
@@ -157,7 +161,7 @@ func processImage(ctx context.Context, c chan *channelTask, image v1.Image, opt 
 func ProcessImage(
 	ctx context.Context,
 	imageName string,
-	callbackResult func(result LayerResult),
+	callbackResult func(result LayerResult) error,
 	opts ...Option,
 ) error {
 	slog.InfoContext(ctx, "ProcessImage: processing image", "image", imageName, "opts", opts)

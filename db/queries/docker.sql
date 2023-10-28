@@ -6,6 +6,12 @@ FROM
 WHERE
     project_id = $1;
 
+-- name: CreateDockerScannedLayerForProject :one
+INSERT INTO project_docker_scanned_layers(project_id, layer_hash)
+    VALUES ($1, $2)
+RETURNING
+    *;
+
 -- name: GetDockerImagesForProject :many
 SELECT
     *
@@ -24,4 +30,8 @@ RETURNING
 DELETE FROM project_docker_images
 WHERE project_id = $1
     AND docker_image = $2;
+
+-- name: CreateDockerLayerResultsForProject :copyfrom
+INSERT INTO project_docker_layer_results(project_id, layer, name, line, line_number, MATCH, probability, username, PASSWORD, filename)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 

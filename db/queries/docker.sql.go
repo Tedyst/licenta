@@ -14,7 +14,7 @@ const createDockerImageForProject = `-- name: CreateDockerImageForProject :one
 INSERT INTO project_docker_images(project_id, docker_image, username, PASSWORD)
     VALUES ($1, $2, $3, $4)
 RETURNING
-    id, project_id, docker_image, username, password, created_at
+    id, project_id, docker_image, username, password, min_probability, use_default_words_reduce_probability, use_default_words_increase_probability, use_default_passwords_completely_ignore, use_default_usernames_completely_ignore, probaility_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
 `
 
 type CreateDockerImageForProjectParams struct {
@@ -38,7 +38,53 @@ func (q *Queries) CreateDockerImageForProject(ctx context.Context, arg CreateDoc
 		&i.DockerImage,
 		&i.Username,
 		&i.Password,
+		&i.MinProbability,
+		&i.UseDefaultWordsReduceProbability,
+		&i.UseDefaultWordsIncreaseProbability,
+		&i.UseDefaultPasswordsCompletelyIgnore,
+		&i.UseDefaultUsernamesCompletelyIgnore,
+		&i.ProbailityDecreaseMultiplier,
+		&i.ProbabilityIncreaseMultiplier,
+		&i.EntropyThreshold,
+		&i.LogisticGrowthRate,
 		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+type CreateDockerLayerResultsForProjectParams struct {
+	ProjectID   int64
+	Layer       int64
+	Name        string
+	Line        string
+	LineNumber  int32
+	Match       string
+	Probability float64
+	Username    sql.NullString
+	Password    sql.NullString
+	Filename    string
+}
+
+const createDockerScannedLayerForProject = `-- name: CreateDockerScannedLayerForProject :one
+INSERT INTO project_docker_scanned_layers(project_id, layer_hash)
+    VALUES ($1, $2)
+RETURNING
+    id, project_id, layer_hash, scanned_at
+`
+
+type CreateDockerScannedLayerForProjectParams struct {
+	ProjectID int64
+	LayerHash string
+}
+
+func (q *Queries) CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*ProjectDockerScannedLayer, error) {
+	row := q.db.QueryRow(ctx, createDockerScannedLayerForProject, arg.ProjectID, arg.LayerHash)
+	var i ProjectDockerScannedLayer
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.LayerHash,
+		&i.ScannedAt,
 	)
 	return &i, err
 }
@@ -61,7 +107,7 @@ func (q *Queries) DeleteDockerImageForProject(ctx context.Context, arg DeleteDoc
 
 const getDockerImagesForProject = `-- name: GetDockerImagesForProject :many
 SELECT
-    id, project_id, docker_image, username, password, created_at
+    id, project_id, docker_image, username, password, min_probability, use_default_words_reduce_probability, use_default_words_increase_probability, use_default_passwords_completely_ignore, use_default_usernames_completely_ignore, probaility_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
 FROM
     project_docker_images
 WHERE
@@ -83,6 +129,15 @@ func (q *Queries) GetDockerImagesForProject(ctx context.Context, projectID int64
 			&i.DockerImage,
 			&i.Username,
 			&i.Password,
+			&i.MinProbability,
+			&i.UseDefaultWordsReduceProbability,
+			&i.UseDefaultWordsIncreaseProbability,
+			&i.UseDefaultPasswordsCompletelyIgnore,
+			&i.UseDefaultUsernamesCompletelyIgnore,
+			&i.ProbailityDecreaseMultiplier,
+			&i.ProbabilityIncreaseMultiplier,
+			&i.EntropyThreshold,
+			&i.LogisticGrowthRate,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
