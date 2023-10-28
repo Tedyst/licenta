@@ -3,6 +3,7 @@ package local
 import (
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
+	"github.com/tedyst/licenta/tasks"
 )
 
 type localRunner struct {
@@ -16,3 +17,5 @@ func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.Transa
 		queries:     queries,
 	}
 }
+
+var _ tasks.TaskRunner = (*localRunner)(nil)
