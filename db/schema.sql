@@ -104,6 +104,16 @@ CREATE TABLE project_docker_images(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE project_docker_layer_scans(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  docker_image bigint REFERENCES project_docker_images(id) ON DELETE CASCADE NOT NULL,
+  finished boolean NOT NULL DEFAULT FALSE,
+  scanned_layers integer NOT NULL DEFAULT 0,
+  layers_to_scan integer NOT NULL DEFAULT 0,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 CREATE TABLE project_docker_scanned_layers(
   id bigserial PRIMARY KEY,
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,

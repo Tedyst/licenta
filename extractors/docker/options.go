@@ -1,28 +1,35 @@
 package docker
 
 import (
-	"runtime"
 	"time"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/tedyst/licenta/extractors/file"
+	"golang.org/x/exp/slog"
 )
 
 type Option func(*options) error
 
 type options struct {
 	credentials        authn.Authenticator
-	concurrency        int
 	probability        float64
 	ignoreFileNames    []string
 	fileScannerOptions []file.Option
 	timeout            time.Duration
-	skipLayer          func(layer string) bool
+	skipLayerFunc      func(layer string) bool
+	callbackResult     func(scanner *DockerScan, result *LayerResult) error
+}
+
+func WithCallbackResult(f func(scanner *DockerScan, result *LayerResult) error) Option {
+	return func(o *options) error {
+		o.callbackResult = f
+		return nil
+	}
 }
 
 func WithSkipLayer(f func(layer string) bool) Option {
 	return func(o *options) error {
-		o.skipLayer = f
+		o.skipLayerFunc = f
 		return nil
 	}
 }
@@ -30,13 +37,6 @@ func WithSkipLayer(f func(layer string) bool) Option {
 func WithCredentials(creds authn.Authenticator) Option {
 	return func(o *options) error {
 		o.credentials = creds
-		return nil
-	}
-}
-
-func WithConcurrency(concurrency int) Option {
-	return func(o *options) error {
-		o.concurrency = concurrency
 		return nil
 	}
 }
@@ -67,9 +67,12 @@ func WithFileScannerOptions(opts ...file.Option) Option {
 
 func makeOptions(opts ...Option) (*options, error) {
 	o := &options{
-		concurrency: runtime.NumCPU(),
 		probability: 0.7,
 		timeout:     time.Hour,
+		callbackResult: func(scanner *DockerScan, result *LayerResult) error {
+			slog.Info("ProcessLayers: layer result", "layer", result.Layer, "result", result)
+			return nil
+		},
 	}
 	for _, opt := range opts {
 		if err := opt(o); err != nil {

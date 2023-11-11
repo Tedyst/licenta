@@ -38,7 +38,9 @@
             "args": [
                 "extract",
                 "docker",
-                "ghcr.io/tedyst/spotifyutils"
+                "cloudmatix-base:dev",
+                // "ubuntu",
+                "--local"
             ],
             "envFile": "${workspaceFolder}/.env"
         }

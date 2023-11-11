@@ -159,6 +159,45 @@ func (c *TransactionQuerierCreateDockerLayerResultsForProjectCall) DoAndReturn(f
 	return c
 }
 
+// CreateDockerLayerScanForProject mocks base method.
+func (m *MockTransactionQuerier) CreateDockerLayerScanForProject(ctx context.Context, arg queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDockerLayerScanForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.ProjectDockerLayerScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDockerLayerScanForProject indicates an expected call of CreateDockerLayerScanForProject.
+func (mr *MockTransactionQuerierMockRecorder) CreateDockerLayerScanForProject(ctx, arg any) *TransactionQuerierCreateDockerLayerScanForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDockerLayerScanForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateDockerLayerScanForProject), ctx, arg)
+	return &TransactionQuerierCreateDockerLayerScanForProjectCall{Call: call}
+}
+
+// TransactionQuerierCreateDockerLayerScanForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateDockerLayerScanForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *TransactionQuerierCreateDockerLayerScanForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateDockerLayerScanForProjectCall) Do(f func(context.Context, queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierCreateDockerLayerScanForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierCreateDockerLayerScanForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateDockerScannedLayerForProject mocks base method.
 func (m *MockTransactionQuerier) CreateDockerScannedLayerForProject(ctx context.Context, arg queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error) {
 	m.ctrl.T.Helper()
@@ -656,6 +695,45 @@ func (c *TransactionQuerierGetDockerImagesForProjectCall) Do(f func(context.Cont
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetDockerImagesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *TransactionQuerierGetDockerImagesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetDockerLayerScanForProject mocks base method.
+func (m *MockTransactionQuerier) GetDockerLayerScanForProject(ctx context.Context, arg queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetDockerLayerScanForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.ProjectDockerLayerScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetDockerLayerScanForProject indicates an expected call of GetDockerLayerScanForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetDockerLayerScanForProject(ctx, arg any) *TransactionQuerierGetDockerLayerScanForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDockerLayerScanForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetDockerLayerScanForProject), ctx, arg)
+	return &TransactionQuerierGetDockerLayerScanForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetDockerLayerScanForProjectCall wrap *gomock.Call
+type TransactionQuerierGetDockerLayerScanForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *TransactionQuerierGetDockerLayerScanForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetDockerLayerScanForProjectCall) Do(f func(context.Context, queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierGetDockerLayerScanForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierGetDockerLayerScanForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1590,6 +1668,45 @@ func (c *TransactionQuerierStartTransactionCall) Do(f func(context.Context) (db.
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierStartTransactionCall) DoAndReturn(f func(context.Context) (db.TransactionQuerier, error)) *TransactionQuerierStartTransactionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateDockerLayerScanForProject mocks base method.
+func (m *MockTransactionQuerier) UpdateDockerLayerScanForProject(ctx context.Context, arg queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateDockerLayerScanForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.ProjectDockerLayerScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateDockerLayerScanForProject indicates an expected call of UpdateDockerLayerScanForProject.
+func (mr *MockTransactionQuerierMockRecorder) UpdateDockerLayerScanForProject(ctx, arg any) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDockerLayerScanForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateDockerLayerScanForProject), ctx, arg)
+	return &TransactionQuerierUpdateDockerLayerScanForProjectCall{Call: call}
+}
+
+// TransactionQuerierUpdateDockerLayerScanForProjectCall wrap *gomock.Call
+type TransactionQuerierUpdateDockerLayerScanForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) Do(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -122,6 +122,8 @@ func (r *localRunner) ScanDockerRepository(ctx context.Context, image *models.Pr
 			return ok && value
 		}))
 	}
+	print(resultCallback)
 
-	return docker.ProcessImage(ctx, image.DockerImage, resultCallback, options...)
+	return nil
+	// return docker.ProcessImage(ctx, image.DockerImage, resultCallback, options...)
 }

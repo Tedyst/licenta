@@ -29,13 +29,13 @@ var serveLocalTasksCmd = &cobra.Command{
 			taskRunner = local.NewLocalRunner(viper.GetBool("debug"), email.NewConsoleEmailSender(
 				viper.GetString("email.senderName"),
 				viper.GetString("email.sender"),
-			))
+			), db)
 		} else {
 			taskRunner = local.NewLocalRunner(viper.GetBool("debug"), email.NewSendGridEmailSender(
 				viper.GetString("email.sendgrid"),
 				viper.GetString("email.senderName"),
 				viper.GetString("email.sender"),
-			))
+			), db)
 		}
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:      viper.GetBool("debug"),

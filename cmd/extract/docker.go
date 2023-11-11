@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/go-containerregistry/pkg/name"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/google/go-containerregistry/pkg/v1/daemon"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/extractors/docker"
 	"golang.org/x/exp/slog"
 )
@@ -21,12 +25,48 @@ var extractDockerCmd = &cobra.Command{
 		slog.SetDefault(slog.New(h))
 		programLevel.Set(slog.LevelDebug)
 
-		callbackFunc := func(result docker.LayerResult) {
-			for _, res := range result.Results {
-				fmt.Printf("%s:%s:%s\n", result.Layer, result.FileName, res.String())
+		callbackFunc := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
+			// slog.Info("ASD", "scanner", scanner, "result", result)
+			return nil
+		}
+		ctx := context.Background()
+		scanner, err := docker.NewScanner(ctx, args[0], docker.WithCallbackResult(callbackFunc))
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+		}
+		var layers []v1.Layer
+		if viper.GetBool("local") {
+			ref, err := name.ParseReference(args[0])
+			if err != nil {
+				fmt.Printf("%+v\n", err)
+			}
+			asd, err := daemon.Image(ref)
+			if err != nil {
+				fmt.Printf("%+v\n", err)
+			}
+			layers, err = asd.Layers()
+			if err != nil {
+				fmt.Printf("%+v\n", err)
+			}
+		} else {
+			layers, err = scanner.FindLayers(ctx)
+			if err != nil {
+				fmt.Printf("%+v\n", err)
 			}
 		}
-		err := docker.ProcessImage(context.Background(), args[0], callbackFunc)
+
+		// ctx, cancelCtx := context.WithTimeout(ctx, time.Second*10)
+		// defer cancelCtx()
+		digests := ""
+		for _, layer := range layers {
+			asd, err := layer.Digest()
+			if err != nil {
+				fmt.Printf("%+v\n", err)
+			}
+			digests += asd.String() + "\n"
+		}
+
+		err = scanner.ProcessLayers(ctx, layers)
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 		}
@@ -35,5 +75,7 @@ var extractDockerCmd = &cobra.Command{
 }
 
 func init() {
+	extractDockerCmd.Flags().Bool("local", false, "Use local Docker daemon for loading images")
+
 	extractCmd.AddCommand(extractDockerCmd)
 }

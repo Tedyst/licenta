@@ -35,3 +35,30 @@ WHERE project_id = $1
 INSERT INTO project_docker_layer_results(project_id, layer, name, line, line_number, MATCH, probability, username, PASSWORD, filename)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 
+-- name: CreateDockerLayerScanForProject :one
+INSERT INTO project_docker_layer_scans(project_id, docker_image, layers_to_scan)
+    VALUES ($1, $2, $3)
+RETURNING
+    *;
+
+-- name: UpdateDockerLayerScanForProject :one
+UPDATE
+    project_docker_layer_scans
+SET
+    finished = $3,
+    scanned_layers = $4
+WHERE
+    project_id = $1
+    AND docker_image = $2
+RETURNING
+    *;
+
+-- name: GetDockerLayerScanForProject :one
+SELECT
+    *
+FROM
+    project_docker_layer_scans
+WHERE
+    project_id = $1
+    AND docker_image = $2;
+

@@ -65,6 +65,16 @@ type ProjectDockerLayerResult struct {
 	CreatedAt   pgtype.Timestamptz
 }
 
+type ProjectDockerLayerScan struct {
+	ID            int64
+	ProjectID     int64
+	DockerImage   int64
+	Finished      bool
+	ScannedLayers int32
+	LayersToScan  int32
+	CreatedAt     pgtype.Timestamptz
+}
+
 type ProjectDockerScannedLayer struct {
 	ID        int64
 	ProjectID int64

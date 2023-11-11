@@ -26,7 +26,7 @@ var serveCmd = &cobra.Command{
 		taskRunner := local.NewLocalRunner(true, email.NewConsoleEmailSender(
 			viper.GetString("email.senderName"),
 			viper.GetString("email.sender"),
-		))
+		), db)
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:      viper.GetBool("debug"),
 			Origin:     viper.GetString("baseurl"),

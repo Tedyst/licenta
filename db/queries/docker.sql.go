@@ -65,6 +65,34 @@ type CreateDockerLayerResultsForProjectParams struct {
 	Filename    string
 }
 
+const createDockerLayerScanForProject = `-- name: CreateDockerLayerScanForProject :one
+INSERT INTO project_docker_layer_scans(project_id, docker_image, layers_to_scan)
+    VALUES ($1, $2, $3)
+RETURNING
+    id, project_id, docker_image, finished, scanned_layers, layers_to_scan, created_at
+`
+
+type CreateDockerLayerScanForProjectParams struct {
+	ProjectID    int64
+	DockerImage  int64
+	LayersToScan int32
+}
+
+func (q *Queries) CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error) {
+	row := q.db.QueryRow(ctx, createDockerLayerScanForProject, arg.ProjectID, arg.DockerImage, arg.LayersToScan)
+	var i ProjectDockerLayerScan
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.DockerImage,
+		&i.Finished,
+		&i.ScannedLayers,
+		&i.LayersToScan,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const createDockerScannedLayerForProject = `-- name: CreateDockerScannedLayerForProject :one
 INSERT INTO project_docker_scanned_layers(project_id, layer_hash)
     VALUES ($1, $2)
@@ -150,6 +178,36 @@ func (q *Queries) GetDockerImagesForProject(ctx context.Context, projectID int64
 	return items, nil
 }
 
+const getDockerLayerScanForProject = `-- name: GetDockerLayerScanForProject :one
+SELECT
+    id, project_id, docker_image, finished, scanned_layers, layers_to_scan, created_at
+FROM
+    project_docker_layer_scans
+WHERE
+    project_id = $1
+    AND docker_image = $2
+`
+
+type GetDockerLayerScanForProjectParams struct {
+	ProjectID   int64
+	DockerImage int64
+}
+
+func (q *Queries) GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error) {
+	row := q.db.QueryRow(ctx, getDockerLayerScanForProject, arg.ProjectID, arg.DockerImage)
+	var i ProjectDockerLayerScan
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.DockerImage,
+		&i.Finished,
+		&i.ScannedLayers,
+		&i.LayersToScan,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getDockerScannedLayersForProject = `-- name: GetDockerScannedLayersForProject :many
 SELECT
     layer_hash
@@ -177,4 +235,44 @@ func (q *Queries) GetDockerScannedLayersForProject(ctx context.Context, projectI
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateDockerLayerScanForProject = `-- name: UpdateDockerLayerScanForProject :one
+UPDATE
+    project_docker_layer_scans
+SET
+    finished = $3,
+    scanned_layers = $4
+WHERE
+    project_id = $1
+    AND docker_image = $2
+RETURNING
+    id, project_id, docker_image, finished, scanned_layers, layers_to_scan, created_at
+`
+
+type UpdateDockerLayerScanForProjectParams struct {
+	ProjectID     int64
+	DockerImage   int64
+	Finished      bool
+	ScannedLayers int32
+}
+
+func (q *Queries) UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error) {
+	row := q.db.QueryRow(ctx, updateDockerLayerScanForProject,
+		arg.ProjectID,
+		arg.DockerImage,
+		arg.Finished,
+		arg.ScannedLayers,
+	)
+	var i ProjectDockerLayerScan
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.DockerImage,
+		&i.Finished,
+		&i.ScannedLayers,
+		&i.LayersToScan,
+		&i.CreatedAt,
+	)
+	return &i, err
 }
