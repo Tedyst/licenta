@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/djherbis/buffer"
-	"github.com/djherbis/nio"
+	"github.com/djherbis/nio/v3"
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
@@ -58,8 +58,13 @@ func isFileNameIgnored(name string) bool {
 	return false
 }
 
-func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reader, digest string) error {
+func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reader, layer v1.Layer) error {
 	wg := &sync.WaitGroup{}
+
+	digest, err := layer.Digest()
+	if err != nil {
+		return errors.Wrap(err, "processLayer: cannot get digest for layer")
+	}
 
 	for {
 		header, err := archive.Next()
@@ -85,7 +90,7 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 		go func() {
 			defer wg.Done()
 			defer r.Close()
-			err := scanner.scanFile(ctx, r, *header, digest)
+			err := scanner.scanFile(ctx, r, *header, digest.String())
 			if err != nil {
 				scanner.errorChannel <- err
 			}
@@ -116,6 +121,7 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 	case <-ctx.Done():
 		return errors.Wrap(ctx.Err(), "scanTarArchive: context is done")
 	case <-waitChan:
+		scanner.scannedLayers = append(scanner.scannedLayers, layer)
 		slog.InfoContext(ctx, "scanTarArchive: finished processing archive", "digest", digest)
 	}
 	return nil
@@ -124,10 +130,6 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) error {
 	slog.DebugContext(ctx, "processLayer: processing layer", "layer", layer)
 
-	digest, err := layer.Digest()
-	if err != nil {
-		return errors.Wrap(err, "processLayer: cannot get digest for layer")
-	}
 	reader, err := layer.Uncompressed()
 	if err != nil {
 		return errors.Wrap(err, "processLayer: cannot get layer reader")
@@ -135,7 +137,7 @@ func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) err
 	defer reader.Close()
 
 	tarReader := tar.NewReader(reader)
-	return scanner.scanTarArchive(ctx, *tarReader, digest.String())
+	return scanner.scanTarArchive(ctx, *tarReader, layer)
 }
 
 func NewScanner(ctx context.Context, imageName string, opts ...Option) (*DockerScan, error) {

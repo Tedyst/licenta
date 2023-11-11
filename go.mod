@@ -8,6 +8,8 @@ require (
 	github.com/SonicRoshan/scope v0.0.0-20210525134824-9bbd38664a7f
 	github.com/deepmap/oapi-codegen v1.16.2
 	github.com/dghubble/trie v0.0.0-20230729160116-2bc358f28a8b
+	github.com/djherbis/buffer v1.2.0
+	github.com/djherbis/nio/v3 v3.0.1
 	github.com/exaring/otelpgx v0.5.2
 	github.com/getkin/kin-openapi v0.120.0
 	github.com/go-chi/chi/v5 v5.0.10
@@ -68,8 +70,6 @@ require (
 	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.5.0 // indirect
-	github.com/djherbis/buffer v1.2.0 // indirect
-	github.com/djherbis/nio v2.0.3+incompatible // indirect
 	github.com/docker/cli v24.0.7+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v24.0.7+incompatible // indirect
