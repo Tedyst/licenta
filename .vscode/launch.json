@@ -37,10 +37,10 @@
             "program": ".",
             "args": [
                 "extract",
-                "docker",
-                "cloudmatix-base:dev",
+                "git",
+                ".",
                 // "ubuntu",
-                "--local"
+                // "--local"
             ],
             "envFile": "${workspaceFolder}/.env"
         }

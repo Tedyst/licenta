@@ -117,10 +117,10 @@ func (r *localRunner) ScanDockerRepository(ctx context.Context, image *models.Pr
 			scnannedMap[layer] = true
 		}
 
-		options = append(options, docker.WithSkipLayer(func(layer string) bool {
-			value, ok := scnannedMap[layer]
-			return ok && value
-		}))
+		// options = append(options, docker.WithSkipLayer(func(layer string) bool {
+		// 	value, ok := scnannedMap[layer]
+		// 	return ok && value
+		// }))
 	}
 	print(resultCallback)
 

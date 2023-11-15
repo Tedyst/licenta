@@ -16,20 +16,12 @@ type options struct {
 	ignoreFileNames    []string
 	fileScannerOptions []file.Option
 	timeout            time.Duration
-	skipLayerFunc      func(layer string) bool
 	callbackResult     func(scanner *DockerScan, result *LayerResult) error
 }
 
 func WithCallbackResult(f func(scanner *DockerScan, result *LayerResult) error) Option {
 	return func(o *options) error {
 		o.callbackResult = f
-		return nil
-	}
-}
-
-func WithSkipLayer(f func(layer string) bool) Option {
-	return func(o *options) error {
-		o.skipLayerFunc = f
 		return nil
 	}
 }
@@ -73,6 +65,7 @@ func makeOptions(opts ...Option) (*options, error) {
 			slog.Info("ProcessLayers: layer result", "layer", result.Layer, "result", result)
 			return nil
 		},
+		ignoreFileNames: defaultIgnoreFileNameIncluding[:],
 	}
 	for _, opt := range opts {
 		if err := opt(o); err != nil {

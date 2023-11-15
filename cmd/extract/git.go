@@ -19,9 +19,10 @@ var extractGitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var repo *gitgo.Repository
 		var err error
+		var scanner *git.GitScan
 
 		if strings.HasPrefix(args[0], "https://") || strings.HasPrefix(args[0], "http://") || strings.HasPrefix(args[0], "git://") || strings.HasPrefix(args[0], "ssh://") {
-			repo, err = git.PullGitRepository(context.Background(), args[0], 0, nil)
+			scanner, err = git.New(args[0])
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -31,16 +32,21 @@ var extractGitCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
+			scanner, err = git.NewFromRepo(repo)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 		if repo == nil {
 			log.Fatal("Invalid git repo")
 		}
 		fmt.Println("Extracting from git repo...")
 
-		err = git.ExtractGit(context.Background(), repo)
+		err = scanner.Scan(context.Background())
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
+		log.Println("Done")
 	},
 }
 
