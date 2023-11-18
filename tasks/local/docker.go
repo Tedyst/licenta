@@ -4,10 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
+	"sync"
 
 	"github.com/pkg/errors"
 
 	"github.com/google/go-containerregistry/pkg/authn"
+	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/docker"
 	"github.com/tedyst/licenta/extractors/file"
@@ -27,7 +29,22 @@ func (r *localRunner) ScanDockerRepository(ctx context.Context, image *models.Pr
 		err = querier.EndTransaction(ctx, err)
 	}()
 
-	resultCallback := func(result docker.LayerResult) error {
+	scannnedMap := map[string]bool{}
+	mutex := sync.Mutex{}
+
+	resultCallback := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
+		mutex.Lock()
+		defer mutex.Unlock()
+		finished := false
+		if len(scannnedMap) == len(scanner.ScannedLayers()) {
+			finished = true
+		}
+		querier.UpdateDockerLayerScanForProject(ctx, queries.UpdateDockerLayerScanForProjectParams{
+			ProjectID:     image.ProjectID,
+			DockerImage:   image.ID,
+			ScannedLayers: int32(len(scanner.ScannedLayers())),
+			Finished:      finished,
+		})
 		scannedLayer, err := querier.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
 			ProjectID: image.ProjectID,
 			LayerHash: result.Layer,
@@ -63,6 +80,7 @@ func (r *localRunner) ScanDockerRepository(ctx context.Context, image *models.Pr
 	}
 
 	options := []docker.Option{}
+	options = append(options, docker.WithCallbackResult(resultCallback))
 	if image.Username.Valid && image.Password.Valid {
 		auth := authn.Basic{
 			Username: image.Username.String,
@@ -111,19 +129,35 @@ func (r *localRunner) ScanDockerRepository(ctx context.Context, image *models.Pr
 		return err
 	}
 
-	if len(scannedLayers) > 0 {
-		scnannedMap := map[string]bool{}
-		for _, layer := range scannedLayers {
-			scnannedMap[layer] = true
-		}
-
-		// options = append(options, docker.WithSkipLayer(func(layer string) bool {
-		// 	value, ok := scnannedMap[layer]
-		// 	return ok && value
-		// }))
+	for _, layer := range scannedLayers {
+		scannnedMap[layer] = true
 	}
-	print(resultCallback)
+
+	scanner, err := docker.NewScanner(ctx, image.DockerImage, options...)
+	if err != nil {
+		return err
+	}
+
+	layers, err := scanner.FindLayers(ctx)
+	if err != nil {
+		return err
+	}
+
+	var scanLayers []v1.Layer
+	for _, layer := range layers {
+		digest, err := layer.Digest()
+		if err != nil {
+			return err
+		}
+		if _, ok := scannnedMap[digest.String()]; !ok {
+			scanLayers = append(scanLayers, layer)
+		}
+	}
+
+	err = scanner.ProcessLayers(ctx, scanLayers)
+	if err != nil {
+		return err
+	}
 
 	return nil
-	// return docker.ProcessImage(ctx, image.DockerImage, resultCallback, options...)
 }
