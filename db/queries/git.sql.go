@@ -8,7 +8,32 @@ package queries
 import (
 	"context"
 	"database/sql"
+	"strings"
 )
+
+const createGitCommitForProject = `-- name: CreateGitCommitForProject :one
+INSERT INTO project_git_scanned_commits(project_id, commit_hash)
+    VALUES ($1, $2)
+RETURNING
+    id, project_id, commit_hash, created_at
+`
+
+type CreateGitCommitForProjectParams struct {
+	ProjectID  int64
+	CommitHash string
+}
+
+func (q *Queries) CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*ProjectGitScannedCommit, error) {
+	row := q.db.QueryRow(ctx, createGitCommitForProject, arg.ProjectID, arg.CommitHash)
+	var i ProjectGitScannedCommit
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.CommitHash,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
 
 const createGitRepositoryForProject = `-- name: CreateGitRepositoryForProject :one
 INSERT INTO project_git_repositories(project_id, git_repository, username, PASSWORD)
@@ -42,6 +67,19 @@ func (q *Queries) CreateGitRepositoryForProject(ctx context.Context, arg CreateG
 		&i.CreatedAt,
 	)
 	return &i, err
+}
+
+type CreateGitResultForCommitParams struct {
+	ProjectID   int64
+	Commit      int64
+	Name        string
+	Line        string
+	LineNumber  int32
+	Match       string
+	Probability float64
+	Username    sql.NullString
+	Password    sql.NullString
+	Filename    string
 }
 
 const deleteGitRepositoryForProject = `-- name: DeleteGitRepositoryForProject :exec
@@ -108,6 +146,41 @@ WHERE
 
 func (q *Queries) GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error) {
 	rows, err := q.db.Query(ctx, getGitScannedCommitsForProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var commit_hash string
+		if err := rows.Scan(&commit_hash); err != nil {
+			return nil, err
+		}
+		items = append(items, commit_hash)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGitScannedCommitsForProjectBatch = `-- name: GetGitScannedCommitsForProjectBatch :many
+SELECT
+    commit_hash
+FROM
+    project_git_scanned_commits
+WHERE
+    project_id = $1
+    AND commit_hash IN ($2)
+`
+
+type GetGitScannedCommitsForProjectBatchParams struct {
+	ProjectID    int64
+	CommitHashes []string
+}
+
+func (q *Queries) GetGitScannedCommitsForProjectBatch(ctx context.Context, arg GetGitScannedCommitsForProjectBatchParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, getGitScannedCommitsForProjectBatch, arg.ProjectID, arg.CommitHashes)
 	if err != nil {
 		return nil, err
 	}

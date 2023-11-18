@@ -75,14 +75,21 @@ CREATE TABLE project_git_scanned_commits(
   id bigserial PRIMARY KEY,
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   commit_hash text NOT NULL UNIQUE,
-  scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE project_git_results(
   id bigserial PRIMARY KEY,
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   commit bigint REFERENCES project_git_scanned_commits(id) NOT NULL,
-  result jsonb NOT NULL,
+  name text NOT NULL,
+  line text NOT NULL,
+  line_number integer NOT NULL,
+  match text NOT NULL,
+  probability float NOT NULL,
+  username text,
+  password text,
+  filename text NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

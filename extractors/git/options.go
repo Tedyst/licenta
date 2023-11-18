@@ -16,7 +16,6 @@ type options struct {
 	probability        float64
 	ignoreFileNames    []string
 	fileScannerOptions []file.Option
-	branch             string
 	skipCommitFunc     func(batch []BatchItem) ([]BatchItem, error)
 	callbackResult     func(scanner *GitScan, result *GitResult) error
 }
@@ -52,16 +51,16 @@ func WithFileScannerOptions(opts ...file.Option) Option {
 	}
 }
 
-func WithBranch(branch string) Option {
+func WithSkipCommitFunc(f func(batch []BatchItem) ([]BatchItem, error)) Option {
 	return func(o *options) error {
-		o.branch = branch
+		o.skipCommitFunc = f
 		return nil
 	}
 }
 
-func WithSkipCommitFunc(f func(batch []BatchItem) ([]BatchItem, error)) Option {
+func WithCallbackResult(f func(scanner *GitScan, result *GitResult) error) Option {
 	return func(o *options) error {
-		o.skipCommitFunc = f
+		o.callbackResult = f
 		return nil
 	}
 }
@@ -70,7 +69,6 @@ func makeOptions(opts ...Option) (*options, error) {
 	options := &options{
 		probability:     defaultProbability,
 		ignoreFileNames: defaultIgnoreFileNameIncluding[:],
-		branch:          "master",
 		callbackResult: func(scanner *GitScan, result *GitResult) error {
 			slog.Info("ProcessGit: git result", "result", result, "scanner", scanner)
 			return nil

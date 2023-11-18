@@ -237,6 +237,45 @@ func (c *TransactionQuerierCreateDockerScannedLayerForProjectCall) DoAndReturn(f
 	return c
 }
 
+// CreateGitCommitForProject mocks base method.
+func (m *MockTransactionQuerier) CreateGitCommitForProject(ctx context.Context, arg queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateGitCommitForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.ProjectGitScannedCommit)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateGitCommitForProject indicates an expected call of CreateGitCommitForProject.
+func (mr *MockTransactionQuerierMockRecorder) CreateGitCommitForProject(ctx, arg any) *TransactionQuerierCreateGitCommitForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitCommitForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitCommitForProject), ctx, arg)
+	return &TransactionQuerierCreateGitCommitForProjectCall{Call: call}
+}
+
+// TransactionQuerierCreateGitCommitForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateGitCommitForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateGitCommitForProjectCall) Return(arg0 *queries.ProjectGitScannedCommit, arg1 error) *TransactionQuerierCreateGitCommitForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateGitCommitForProjectCall) Do(f func(context.Context, queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)) *TransactionQuerierCreateGitCommitForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateGitCommitForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)) *TransactionQuerierCreateGitCommitForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateGitRepositoryForProject mocks base method.
 func (m *MockTransactionQuerier) CreateGitRepositoryForProject(ctx context.Context, arg queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error) {
 	m.ctrl.T.Helper()
@@ -272,6 +311,45 @@ func (c *TransactionQuerierCreateGitRepositoryForProjectCall) Do(f func(context.
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierCreateGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *TransactionQuerierCreateGitRepositoryForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateGitResultForCommit mocks base method.
+func (m *MockTransactionQuerier) CreateGitResultForCommit(ctx context.Context, arg []queries.CreateGitResultForCommitParams) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateGitResultForCommit", ctx, arg)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateGitResultForCommit indicates an expected call of CreateGitResultForCommit.
+func (mr *MockTransactionQuerierMockRecorder) CreateGitResultForCommit(ctx, arg any) *TransactionQuerierCreateGitResultForCommitCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitResultForCommit", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitResultForCommit), ctx, arg)
+	return &TransactionQuerierCreateGitResultForCommitCall{Call: call}
+}
+
+// TransactionQuerierCreateGitResultForCommitCall wrap *gomock.Call
+type TransactionQuerierCreateGitResultForCommitCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateGitResultForCommitCall) Return(arg0 int64, arg1 error) *TransactionQuerierCreateGitResultForCommitCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateGitResultForCommitCall) Do(f func(context.Context, []queries.CreateGitResultForCommitParams) (int64, error)) *TransactionQuerierCreateGitResultForCommitCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateGitResultForCommitCall) DoAndReturn(f func(context.Context, []queries.CreateGitResultForCommitParams) (int64, error)) *TransactionQuerierCreateGitResultForCommitCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -851,6 +929,45 @@ func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) Do(f func(context
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetGitScannedCommitsForProjectBatch mocks base method.
+func (m *MockTransactionQuerier) GetGitScannedCommitsForProjectBatch(ctx context.Context, arg queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetGitScannedCommitsForProjectBatch", ctx, arg)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetGitScannedCommitsForProjectBatch indicates an expected call of GetGitScannedCommitsForProjectBatch.
+func (mr *MockTransactionQuerierMockRecorder) GetGitScannedCommitsForProjectBatch(ctx, arg any) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitScannedCommitsForProjectBatch", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitScannedCommitsForProjectBatch), ctx, arg)
+	return &TransactionQuerierGetGitScannedCommitsForProjectBatchCall{Call: call}
+}
+
+// TransactionQuerierGetGitScannedCommitsForProjectBatchCall wrap *gomock.Call
+type TransactionQuerierGetGitScannedCommitsForProjectBatchCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetGitScannedCommitsForProjectBatchCall) Return(arg0 []string, arg1 error) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetGitScannedCommitsForProjectBatchCall) Do(f func(context.Context, queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetGitScannedCommitsForProjectBatchCall) DoAndReturn(f func(context.Context, queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -49,3 +49,44 @@ func (r iteratorForCreateDockerLayerResultsForProject) Err() error {
 func (q *Queries) CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error) {
 	return q.db.CopyFrom(ctx, []string{"project_docker_layer_results"}, []string{"project_id", "layer", "name", "line", "line_number", "match", "probability", "username", "password", "filename"}, &iteratorForCreateDockerLayerResultsForProject{rows: arg})
 }
+
+// iteratorForCreateGitResultForCommit implements pgx.CopyFromSource.
+type iteratorForCreateGitResultForCommit struct {
+	rows                 []CreateGitResultForCommitParams
+	skippedFirstNextCall bool
+}
+
+func (r *iteratorForCreateGitResultForCommit) Next() bool {
+	if len(r.rows) == 0 {
+		return false
+	}
+	if !r.skippedFirstNextCall {
+		r.skippedFirstNextCall = true
+		return true
+	}
+	r.rows = r.rows[1:]
+	return len(r.rows) > 0
+}
+
+func (r iteratorForCreateGitResultForCommit) Values() ([]interface{}, error) {
+	return []interface{}{
+		r.rows[0].ProjectID,
+		r.rows[0].Commit,
+		r.rows[0].Name,
+		r.rows[0].Line,
+		r.rows[0].LineNumber,
+		r.rows[0].Match,
+		r.rows[0].Probability,
+		r.rows[0].Username,
+		r.rows[0].Password,
+		r.rows[0].Filename,
+	}, nil
+}
+
+func (r iteratorForCreateGitResultForCommit) Err() error {
+	return nil
+}
+
+func (q *Queries) CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error) {
+	return q.db.CopyFrom(ctx, []string{"project_git_results"}, []string{"project_id", "commit", "name", "line", "line_number", "match", "probability", "username", "password", "filename"}, &iteratorForCreateGitResultForCommit{rows: arg})
+}

@@ -77,6 +77,44 @@ func (c *TaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context,
 	return c
 }
 
+// ScanGitRepository mocks base method.
+func (m *MockTaskRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScanGitRepository indicates an expected call of ScanGitRepository.
+func (mr *MockTaskRunnerMockRecorder) ScanGitRepository(ctx, repo any) *TaskRunnerScanGitRepositoryCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanGitRepository), ctx, repo)
+	return &TaskRunnerScanGitRepositoryCall{Call: call}
+}
+
+// TaskRunnerScanGitRepositoryCall wrap *gomock.Call
+type TaskRunnerScanGitRepositoryCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TaskRunnerScanGitRepositoryCall) Return(arg0 error) *TaskRunnerScanGitRepositoryCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *models.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // SendResetEmail mocks base method.
 func (m *MockTaskRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) {
 	m.ctrl.T.Helper()
@@ -229,6 +267,67 @@ func (c *DockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *DockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockGitTasksRunner is a mock of GitTasksRunner interface.
+type MockGitTasksRunner struct {
+	ctrl     *gomock.Controller
+	recorder *MockGitTasksRunnerMockRecorder
+}
+
+// MockGitTasksRunnerMockRecorder is the mock recorder for MockGitTasksRunner.
+type MockGitTasksRunnerMockRecorder struct {
+	mock *MockGitTasksRunner
+}
+
+// NewMockGitTasksRunner creates a new mock instance.
+func NewMockGitTasksRunner(ctrl *gomock.Controller) *MockGitTasksRunner {
+	mock := &MockGitTasksRunner{ctrl: ctrl}
+	mock.recorder = &MockGitTasksRunnerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockGitTasksRunner) EXPECT() *MockGitTasksRunnerMockRecorder {
+	return m.recorder
+}
+
+// ScanGitRepository mocks base method.
+func (m *MockGitTasksRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScanGitRepository indicates an expected call of ScanGitRepository.
+func (mr *MockGitTasksRunnerMockRecorder) ScanGitRepository(ctx, repo any) *GitTasksRunnerScanGitRepositoryCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockGitTasksRunner)(nil).ScanGitRepository), ctx, repo)
+	return &GitTasksRunnerScanGitRepositoryCall{Call: call}
+}
+
+// GitTasksRunnerScanGitRepositoryCall wrap *gomock.Call
+type GitTasksRunnerScanGitRepositoryCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *GitTasksRunnerScanGitRepositoryCall) Return(arg0 error) *GitTasksRunnerScanGitRepositoryCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *GitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *models.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *GitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

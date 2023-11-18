@@ -9,6 +9,7 @@ import (
 type TaskRunner interface {
 	EmailTasksRunner
 	DockerTasksRunner
+	GitTasksRunner
 }
 
 type EmailTasksRunner interface {
@@ -17,4 +18,8 @@ type EmailTasksRunner interface {
 
 type DockerTasksRunner interface {
 	ScanDockerRepository(ctx context.Context, image *models.ProjectDockerImage) error
+}
+
+type GitTasksRunner interface {
+	ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error
 }

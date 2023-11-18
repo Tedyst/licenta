@@ -93,18 +93,25 @@ type ProjectGitRepository struct {
 }
 
 type ProjectGitResult struct {
-	ID        int64
-	ProjectID int64
-	Commit    int64
-	Result    []byte
-	CreatedAt pgtype.Timestamptz
+	ID          int64
+	ProjectID   int64
+	Commit      int64
+	Name        string
+	Line        string
+	LineNumber  int32
+	Match       string
+	Probability float64
+	Username    sql.NullString
+	Password    sql.NullString
+	Filename    string
+	CreatedAt   pgtype.Timestamptz
 }
 
 type ProjectGitScannedCommit struct {
 	ID         int64
 	ProjectID  int64
 	CommitHash string
-	ScannedAt  pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
 }
 
 type ProjectMember struct {
