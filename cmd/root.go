@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/cmd/extract"
+	"github.com/tedyst/licenta/cmd/nvd"
 	"github.com/tedyst/licenta/cmd/scan"
 	"github.com/tedyst/licenta/cmd/user"
 )
@@ -60,4 +61,5 @@ func init() {
 	rootCmd.AddCommand(user.NewUserCmd())
 	rootCmd.AddCommand(extract.NewExtractCmd())
 	rootCmd.AddCommand(scan.NewScanCmd())
+	rootCmd.AddCommand(nvd.NewNvdCmd())
 }

@@ -8,7 +8,6 @@ package queries
 import (
 	"context"
 	"database/sql"
-	"strings"
 )
 
 const createGitCommitForProject = `-- name: CreateGitCommitForProject :one
