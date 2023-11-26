@@ -12,30 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCveCpe = `-- name: CreateCveCpe :one
-INSERT INTO nvd_cve_cpes(cve_id, cpe_id)
-    VALUES ($1, $2)
-RETURNING
-    id, cve_id, cpe_id, created_at
-`
-
-type CreateCveCpeParams struct {
-	CveID int64
-	CpeID int64
-}
-
-func (q *Queries) CreateCveCpe(ctx context.Context, arg CreateCveCpeParams) (*NvdCveCpe, error) {
-	row := q.db.QueryRow(ctx, createCveCpe, arg.CveID, arg.CpeID)
-	var i NvdCveCpe
-	err := row.Scan(
-		&i.ID,
-		&i.CveID,
-		&i.CpeID,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
 const createNvdCPE = `-- name: CreateNvdCPE :one
 INSERT INTO nvd_cpes(cpe, database_type, version, last_modified)
     VALUES ($1, $2, $3, $4)

@@ -11,6 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DefaultBruteforcePassword struct {
+	ID       int64
+	Password string
+}
+
 type NvdCfe struct {
 	ID           int64
 	CveID        string

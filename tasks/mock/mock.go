@@ -13,6 +13,7 @@ import (
 	reflect "reflect"
 
 	models "github.com/tedyst/licenta/models"
+	nvd "github.com/tedyst/licenta/nvd"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -115,10 +116,126 @@ func (c *TaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *m
 	return c
 }
 
-// SendResetEmail mocks base method.
-func (m *MockTaskRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) {
+// SendCVEMailsToAllProjectMembers mocks base method.
+func (m *MockTaskRunner) SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SendResetEmail", ctx, address, subject, html, text)
+	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjectMembers", ctx, projectID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendCVEMailsToAllProjectMembers indicates an expected call of SendCVEMailsToAllProjectMembers.
+func (mr *MockTaskRunnerMockRecorder) SendCVEMailsToAllProjectMembers(ctx, projectID any) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjectMembers", reflect.TypeOf((*MockTaskRunner)(nil).SendCVEMailsToAllProjectMembers), ctx, projectID)
+	return &TaskRunnerSendCVEMailsToAllProjectMembersCall{Call: call}
+}
+
+// TaskRunnerSendCVEMailsToAllProjectMembersCall wrap *gomock.Call
+type TaskRunnerSendCVEMailsToAllProjectMembersCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TaskRunnerSendCVEMailsToAllProjectMembersCall) Return(arg0 error) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TaskRunnerSendCVEMailsToAllProjectMembersCall) Do(f func(context.Context, int64) error) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TaskRunnerSendCVEMailsToAllProjectMembersCall) DoAndReturn(f func(context.Context, int64) error) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SendCVEMailsToAllProjects mocks base method.
+func (m *MockTaskRunner) SendCVEMailsToAllProjects(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjects", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendCVEMailsToAllProjects indicates an expected call of SendCVEMailsToAllProjects.
+func (mr *MockTaskRunnerMockRecorder) SendCVEMailsToAllProjects(ctx any) *TaskRunnerSendCVEMailsToAllProjectsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjects", reflect.TypeOf((*MockTaskRunner)(nil).SendCVEMailsToAllProjects), ctx)
+	return &TaskRunnerSendCVEMailsToAllProjectsCall{Call: call}
+}
+
+// TaskRunnerSendCVEMailsToAllProjectsCall wrap *gomock.Call
+type TaskRunnerSendCVEMailsToAllProjectsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TaskRunnerSendCVEMailsToAllProjectsCall) Return(arg0 error) *TaskRunnerSendCVEMailsToAllProjectsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TaskRunnerSendCVEMailsToAllProjectsCall) Do(f func(context.Context) error) *TaskRunnerSendCVEMailsToAllProjectsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TaskRunnerSendCVEMailsToAllProjectsCall) DoAndReturn(f func(context.Context) error) *TaskRunnerSendCVEMailsToAllProjectsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SendCVEVulnerabilityEmail mocks base method.
+func (m *MockTaskRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *models.Project) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendCVEVulnerabilityEmail", ctx, project)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendCVEVulnerabilityEmail indicates an expected call of SendCVEVulnerabilityEmail.
+func (mr *MockTaskRunnerMockRecorder) SendCVEVulnerabilityEmail(ctx, project any) *TaskRunnerSendCVEVulnerabilityEmailCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEVulnerabilityEmail", reflect.TypeOf((*MockTaskRunner)(nil).SendCVEVulnerabilityEmail), ctx, project)
+	return &TaskRunnerSendCVEVulnerabilityEmailCall{Call: call}
+}
+
+// TaskRunnerSendCVEVulnerabilityEmailCall wrap *gomock.Call
+type TaskRunnerSendCVEVulnerabilityEmailCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Return(arg0 error) *TaskRunnerSendCVEVulnerabilityEmailCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *models.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TaskRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *models.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SendResetEmail mocks base method.
+func (m *MockTaskRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendResetEmail", ctx, address, subject, html, text)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // SendResetEmail indicates an expected call of SendResetEmail.
@@ -134,19 +251,57 @@ type TaskRunnerSendResetEmailCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerSendResetEmailCall) Return() *TaskRunnerSendResetEmailCall {
-	c.Call = c.Call.Return()
+func (c *TaskRunnerSendResetEmailCall) Return(arg0 error) *TaskRunnerSendResetEmailCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerSendResetEmailCall) Do(f func(context.Context, string, string, string, string)) *TaskRunnerSendResetEmailCall {
+func (c *TaskRunnerSendResetEmailCall) Do(f func(context.Context, string, string, string, string) error) *TaskRunnerSendResetEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerSendResetEmailCall) DoAndReturn(f func(context.Context, string, string, string, string)) *TaskRunnerSendResetEmailCall {
+func (c *TaskRunnerSendResetEmailCall) DoAndReturn(f func(context.Context, string, string, string, string) error) *TaskRunnerSendResetEmailCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateNVDVulnerabilitiesForProduct mocks base method.
+func (m *MockTaskRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNVDVulnerabilitiesForProduct", ctx, product)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateNVDVulnerabilitiesForProduct indicates an expected call of UpdateNVDVulnerabilitiesForProduct.
+func (mr *MockTaskRunnerMockRecorder) UpdateNVDVulnerabilitiesForProduct(ctx, product any) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNVDVulnerabilitiesForProduct", reflect.TypeOf((*MockTaskRunner)(nil).UpdateNVDVulnerabilitiesForProduct), ctx, product)
+	return &TaskRunnerUpdateNVDVulnerabilitiesForProductCall{Call: call}
+}
+
+// TaskRunnerUpdateNVDVulnerabilitiesForProductCall wrap *gomock.Call
+type TaskRunnerUpdateNVDVulnerabilitiesForProductCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TaskRunnerUpdateNVDVulnerabilitiesForProductCall) Return(arg0 error) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TaskRunnerUpdateNVDVulnerabilitiesForProductCall) Do(f func(context.Context, nvd.Product) error) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TaskRunnerUpdateNVDVulnerabilitiesForProductCall) DoAndReturn(f func(context.Context, nvd.Product) error) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -174,10 +329,50 @@ func (m *MockEmailTasksRunner) EXPECT() *MockEmailTasksRunnerMockRecorder {
 	return m.recorder
 }
 
-// SendResetEmail mocks base method.
-func (m *MockEmailTasksRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) {
+// SendCVEVulnerabilityEmail mocks base method.
+func (m *MockEmailTasksRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *models.Project) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SendResetEmail", ctx, address, subject, html, text)
+	ret := m.ctrl.Call(m, "SendCVEVulnerabilityEmail", ctx, project)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendCVEVulnerabilityEmail indicates an expected call of SendCVEVulnerabilityEmail.
+func (mr *MockEmailTasksRunnerMockRecorder) SendCVEVulnerabilityEmail(ctx, project any) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEVulnerabilityEmail", reflect.TypeOf((*MockEmailTasksRunner)(nil).SendCVEVulnerabilityEmail), ctx, project)
+	return &EmailTasksRunnerSendCVEVulnerabilityEmailCall{Call: call}
+}
+
+// EmailTasksRunnerSendCVEVulnerabilityEmailCall wrap *gomock.Call
+type EmailTasksRunnerSendCVEVulnerabilityEmailCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Return(arg0 error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *models.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *models.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SendResetEmail mocks base method.
+func (m *MockEmailTasksRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendResetEmail", ctx, address, subject, html, text)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // SendResetEmail indicates an expected call of SendResetEmail.
@@ -193,19 +388,19 @@ type EmailTasksRunnerSendResetEmailCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *EmailTasksRunnerSendResetEmailCall) Return() *EmailTasksRunnerSendResetEmailCall {
-	c.Call = c.Call.Return()
+func (c *EmailTasksRunnerSendResetEmailCall) Return(arg0 error) *EmailTasksRunnerSendResetEmailCall {
+	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *EmailTasksRunnerSendResetEmailCall) Do(f func(context.Context, string, string, string, string)) *EmailTasksRunnerSendResetEmailCall {
+func (c *EmailTasksRunnerSendResetEmailCall) Do(f func(context.Context, string, string, string, string) error) *EmailTasksRunnerSendResetEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *EmailTasksRunnerSendResetEmailCall) DoAndReturn(f func(context.Context, string, string, string, string)) *EmailTasksRunnerSendResetEmailCall {
+func (c *EmailTasksRunnerSendResetEmailCall) DoAndReturn(f func(context.Context, string, string, string, string) error) *EmailTasksRunnerSendResetEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -328,6 +523,143 @@ func (c *GitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *models
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *GitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockVulnerabilityTasksRunner is a mock of VulnerabilityTasksRunner interface.
+type MockVulnerabilityTasksRunner struct {
+	ctrl     *gomock.Controller
+	recorder *MockVulnerabilityTasksRunnerMockRecorder
+}
+
+// MockVulnerabilityTasksRunnerMockRecorder is the mock recorder for MockVulnerabilityTasksRunner.
+type MockVulnerabilityTasksRunnerMockRecorder struct {
+	mock *MockVulnerabilityTasksRunner
+}
+
+// NewMockVulnerabilityTasksRunner creates a new mock instance.
+func NewMockVulnerabilityTasksRunner(ctrl *gomock.Controller) *MockVulnerabilityTasksRunner {
+	mock := &MockVulnerabilityTasksRunner{ctrl: ctrl}
+	mock.recorder = &MockVulnerabilityTasksRunnerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockVulnerabilityTasksRunner) EXPECT() *MockVulnerabilityTasksRunnerMockRecorder {
+	return m.recorder
+}
+
+// SendCVEMailsToAllProjectMembers mocks base method.
+func (m *MockVulnerabilityTasksRunner) SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjectMembers", ctx, projectID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendCVEMailsToAllProjectMembers indicates an expected call of SendCVEMailsToAllProjectMembers.
+func (mr *MockVulnerabilityTasksRunnerMockRecorder) SendCVEMailsToAllProjectMembers(ctx, projectID any) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjectMembers", reflect.TypeOf((*MockVulnerabilityTasksRunner)(nil).SendCVEMailsToAllProjectMembers), ctx, projectID)
+	return &VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall{Call: call}
+}
+
+// VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall wrap *gomock.Call
+type VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall) Return(arg0 error) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall) Do(f func(context.Context, int64) error) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall) DoAndReturn(f func(context.Context, int64) error) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectMembersCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SendCVEMailsToAllProjects mocks base method.
+func (m *MockVulnerabilityTasksRunner) SendCVEMailsToAllProjects(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjects", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendCVEMailsToAllProjects indicates an expected call of SendCVEMailsToAllProjects.
+func (mr *MockVulnerabilityTasksRunnerMockRecorder) SendCVEMailsToAllProjects(ctx any) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjects", reflect.TypeOf((*MockVulnerabilityTasksRunner)(nil).SendCVEMailsToAllProjects), ctx)
+	return &VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall{Call: call}
+}
+
+// VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall wrap *gomock.Call
+type VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall) Return(arg0 error) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall) Do(f func(context.Context) error) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall) DoAndReturn(f func(context.Context) error) *VulnerabilityTasksRunnerSendCVEMailsToAllProjectsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateNVDVulnerabilitiesForProduct mocks base method.
+func (m *MockVulnerabilityTasksRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNVDVulnerabilitiesForProduct", ctx, product)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateNVDVulnerabilitiesForProduct indicates an expected call of UpdateNVDVulnerabilitiesForProduct.
+func (mr *MockVulnerabilityTasksRunnerMockRecorder) UpdateNVDVulnerabilitiesForProduct(ctx, product any) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNVDVulnerabilitiesForProduct", reflect.TypeOf((*MockVulnerabilityTasksRunner)(nil).UpdateNVDVulnerabilitiesForProduct), ctx, product)
+	return &VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall{Call: call}
+}
+
+// VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall wrap *gomock.Call
+type VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) Return(arg0 error) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) Do(f func(context.Context, nvd.Product) error) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) DoAndReturn(f func(context.Context, nvd.Product) error) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

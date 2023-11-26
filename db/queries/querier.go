@@ -13,7 +13,6 @@ import (
 
 type Querier interface {
 	CountUsers(ctx context.Context) (int64, error)
-	CreateCveCpe(ctx context.Context, arg CreateCveCpeParams) (*NvdCveCpe, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
 	CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
@@ -60,6 +59,7 @@ type Querier interface {
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error)
+	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error
 	InvalidateTOTPSecretForUser(ctx context.Context, userID int64) error
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, error)

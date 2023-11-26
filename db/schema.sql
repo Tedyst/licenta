@@ -169,3 +169,8 @@ CREATE TABLE nvd_cve_cpes(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE default_bruteforce_passwords(
+  id bigserial PRIMARY KEY,
+  password text NOT NULL UNIQUE
+);
+

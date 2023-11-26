@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/cmd/bruteforce"
 	"github.com/tedyst/licenta/cmd/extract"
 	"github.com/tedyst/licenta/cmd/nvd"
 	"github.com/tedyst/licenta/cmd/scan"
@@ -62,4 +63,5 @@ func init() {
 	rootCmd.AddCommand(extract.NewExtractCmd())
 	rootCmd.AddCommand(scan.NewScanCmd())
 	rootCmd.AddCommand(nvd.NewNvdCmd())
+	rootCmd.AddCommand(bruteforce.NewBruteforceCmd())
 }

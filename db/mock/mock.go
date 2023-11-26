@@ -81,45 +81,6 @@ func (c *TransactionQuerierCountUsersCall) DoAndReturn(f func(context.Context) (
 	return c
 }
 
-// CreateCveCpe mocks base method.
-func (m *MockTransactionQuerier) CreateCveCpe(ctx context.Context, arg queries.CreateCveCpeParams) (*queries.NvdCveCpe, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateCveCpe", ctx, arg)
-	ret0, _ := ret[0].(*queries.NvdCveCpe)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateCveCpe indicates an expected call of CreateCveCpe.
-func (mr *MockTransactionQuerierMockRecorder) CreateCveCpe(ctx, arg any) *TransactionQuerierCreateCveCpeCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCveCpe", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateCveCpe), ctx, arg)
-	return &TransactionQuerierCreateCveCpeCall{Call: call}
-}
-
-// TransactionQuerierCreateCveCpeCall wrap *gomock.Call
-type TransactionQuerierCreateCveCpeCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierCreateCveCpeCall) Return(arg0 *queries.NvdCveCpe, arg1 error) *TransactionQuerierCreateCveCpeCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierCreateCveCpeCall) Do(f func(context.Context, queries.CreateCveCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateCveCpeCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierCreateCveCpeCall) DoAndReturn(f func(context.Context, queries.CreateCveCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateCveCpeCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // CreateDockerImageForProject mocks base method.
 func (m *MockTransactionQuerier) CreateDockerImageForProject(ctx context.Context, arg queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error) {
 	m.ctrl.T.Helper()
@@ -1943,6 +1904,44 @@ func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Do(f func(context.Conte
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(context.Context, string) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// InsertBruteforcePasswords mocks base method.
+func (m *MockTransactionQuerier) InsertBruteforcePasswords(ctx context.Context, passwords []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertBruteforcePasswords", ctx, passwords)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertBruteforcePasswords indicates an expected call of InsertBruteforcePasswords.
+func (mr *MockTransactionQuerierMockRecorder) InsertBruteforcePasswords(ctx, passwords any) *TransactionQuerierInsertBruteforcePasswordsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertBruteforcePasswords", reflect.TypeOf((*MockTransactionQuerier)(nil).InsertBruteforcePasswords), ctx, passwords)
+	return &TransactionQuerierInsertBruteforcePasswordsCall{Call: call}
+}
+
+// TransactionQuerierInsertBruteforcePasswordsCall wrap *gomock.Call
+type TransactionQuerierInsertBruteforcePasswordsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierInsertBruteforcePasswordsCall) Return(arg0 error) *TransactionQuerierInsertBruteforcePasswordsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierInsertBruteforcePasswordsCall) Do(f func(context.Context, []string) error) *TransactionQuerierInsertBruteforcePasswordsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierInsertBruteforcePasswordsCall) DoAndReturn(f func(context.Context, []string) error) *TransactionQuerierInsertBruteforcePasswordsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
