@@ -1,5 +1,7 @@
 package nvd
 
+import "time"
+
 type NvdCpeAPIResult struct {
 	ResultsPerPage int64                  `json:"resultsPerPage"`
 	StartIndex     int64                  `json:"startIndex"`
@@ -22,6 +24,10 @@ type NvdCpeCpe struct {
 	Created      string        `json:"created"`
 	Titles       []NvdCpeTitle `json:"titles"`
 	Refs         []NvdCpeRef   `json:"refs"`
+}
+
+func (c *NvdCpeCpe) LastModifiedDate() (time.Time, error) {
+	return time.Parse("2006-01-02T15:04:05.000", c.LastModified)
 }
 
 type NvdCpeRef struct {

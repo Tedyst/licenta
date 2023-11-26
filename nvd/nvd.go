@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -11,11 +12,16 @@ import (
 )
 
 const baseNvdCpeUrl = "https://services.nvd.nist.gov/rest/json/cpes/2.0"
+const baseNvdCveUrl = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+
 const baseNvdCpeCpeMatchStringQuery = "cpeMatchString"
+const baseNvdCpeCpeNameQuery = "cpeName"
 
 const postgresqlCpe = "cpe:2.3:a:postgresql:postgresql"
 
 var semverRegex = regexp.MustCompile(`(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?`)
+
+var ErrRateLimit error = errors.New("request rate limit exceeded")
 
 type Product int
 
@@ -24,6 +30,10 @@ const (
 )
 
 func DownloadCpe(ctx context.Context, product Product) (io.ReadCloser, error) {
+	return DownloadCpeNext(ctx, product, 0)
+}
+
+func DownloadCpeNext(ctx context.Context, product Product, startIndex int64) (io.ReadCloser, error) {
 	u, err := url.Parse(baseNvdCpeUrl)
 	if err != nil {
 		return nil, err
@@ -36,11 +46,43 @@ func DownloadCpe(ctx context.Context, product Product) (io.ReadCloser, error) {
 	default:
 		return nil, errors.New("Product does not exist")
 	}
+	q.Set("startIndex", fmt.Sprint(startIndex))
 	u.RawQuery = q.Encode()
 
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode == 429 {
+		return nil, ErrRateLimit
+	}
+
+	return resp.Body, err
+}
+
+func DownloadCVEs(ctx context.Context, product Product, cpe string) (io.ReadCloser, error) {
+	return DownloadCVEsNext(ctx, product, cpe, 0)
+}
+
+func DownloadCVEsNext(ctx context.Context, product Product, cpe string, startIndex int64) (io.ReadCloser, error) {
+	u, err := url.Parse(baseNvdCveUrl)
+	if err != nil {
+		return nil, err
+	}
+	u.Scheme = "https"
+	q := u.Query()
+	q.Set(baseNvdCpeCpeNameQuery, cpe)
+	q.Set("startIndex", fmt.Sprint(startIndex))
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode == 429 {
+		return nil, ErrRateLimit
 	}
 
 	return resp.Body, err
