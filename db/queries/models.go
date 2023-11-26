@@ -11,6 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type NvdCfe struct {
+	ID           int64
+	CveID        string
+	Description  string
+	Published    pgtype.Timestamptz
+	LastModified pgtype.Timestamptz
+	Score        float64
+	CreatedAt    pgtype.Timestamptz
+}
+
+type NvdCpe struct {
+	ID           int64
+	Cpe          string
+	DatabaseType int32
+	Version      string
+	LastModified pgtype.Timestamptz
+	CreatedAt    pgtype.Timestamptz
+}
+
+type NvdCveCpe struct {
+	ID        int64
+	CveID     int64
+	CpeID     int64
+	CreatedAt pgtype.Timestamptz
+}
+
 type Organization struct {
 	ID        int64
 	Name      string

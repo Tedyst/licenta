@@ -20,6 +20,9 @@ type Querier interface {
 	CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*ProjectGitScannedCommit, error)
 	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*ProjectGitRepository, error)
 	CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error)
+	CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error)
+	CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error)
+	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
@@ -36,6 +39,8 @@ type Querier interface {
 	GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error)
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, arg GetGitScannedCommitsForProjectBatchParams) ([]string, error)
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
+	GetNvdCPEsByDBType(ctx context.Context, databaseType int32) ([]*NvdCpe, error)
+	GetNvdCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
 	GetOrganizationByName(ctx context.Context, name string) (*Organization, error)
 	GetOrganizationMembers(ctx context.Context, organizationID int64) ([]*OrganizationMember, error)
 	GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error)
@@ -56,6 +61,7 @@ type Querier interface {
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, error)
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
+	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error

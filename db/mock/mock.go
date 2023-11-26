@@ -354,6 +354,123 @@ func (c *TransactionQuerierCreateGitResultForCommitCall) DoAndReturn(f func(cont
 	return c
 }
 
+// CreateNvdCPE mocks base method.
+func (m *MockTransactionQuerier) CreateNvdCPE(ctx context.Context, arg queries.CreateNvdCPEParams) (*queries.NvdCpe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateNvdCPE", ctx, arg)
+	ret0, _ := ret[0].(*queries.NvdCpe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNvdCPE indicates an expected call of CreateNvdCPE.
+func (mr *MockTransactionQuerierMockRecorder) CreateNvdCPE(ctx, arg any) *TransactionQuerierCreateNvdCPECall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNvdCPE", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateNvdCPE), ctx, arg)
+	return &TransactionQuerierCreateNvdCPECall{Call: call}
+}
+
+// TransactionQuerierCreateNvdCPECall wrap *gomock.Call
+type TransactionQuerierCreateNvdCPECall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateNvdCPECall) Return(arg0 *queries.NvdCpe, arg1 error) *TransactionQuerierCreateNvdCPECall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateNvdCPECall) Do(f func(context.Context, queries.CreateNvdCPEParams) (*queries.NvdCpe, error)) *TransactionQuerierCreateNvdCPECall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateNvdCPECall) DoAndReturn(f func(context.Context, queries.CreateNvdCPEParams) (*queries.NvdCpe, error)) *TransactionQuerierCreateNvdCPECall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateNvdCve mocks base method.
+func (m *MockTransactionQuerier) CreateNvdCve(ctx context.Context, arg queries.CreateNvdCveParams) (*queries.NvdCfe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateNvdCve", ctx, arg)
+	ret0, _ := ret[0].(*queries.NvdCfe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNvdCve indicates an expected call of CreateNvdCve.
+func (mr *MockTransactionQuerierMockRecorder) CreateNvdCve(ctx, arg any) *TransactionQuerierCreateNvdCveCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNvdCve", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateNvdCve), ctx, arg)
+	return &TransactionQuerierCreateNvdCveCall{Call: call}
+}
+
+// TransactionQuerierCreateNvdCveCall wrap *gomock.Call
+type TransactionQuerierCreateNvdCveCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateNvdCveCall) Return(arg0 *queries.NvdCfe, arg1 error) *TransactionQuerierCreateNvdCveCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateNvdCveCall) Do(f func(context.Context, queries.CreateNvdCveParams) (*queries.NvdCfe, error)) *TransactionQuerierCreateNvdCveCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateNvdCveCall) DoAndReturn(f func(context.Context, queries.CreateNvdCveParams) (*queries.NvdCfe, error)) *TransactionQuerierCreateNvdCveCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateNvdCveCPE mocks base method.
+func (m *MockTransactionQuerier) CreateNvdCveCPE(ctx context.Context, arg queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateNvdCveCPE", ctx, arg)
+	ret0, _ := ret[0].(*queries.NvdCveCpe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateNvdCveCPE indicates an expected call of CreateNvdCveCPE.
+func (mr *MockTransactionQuerierMockRecorder) CreateNvdCveCPE(ctx, arg any) *TransactionQuerierCreateNvdCveCPECall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNvdCveCPE", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateNvdCveCPE), ctx, arg)
+	return &TransactionQuerierCreateNvdCveCPECall{Call: call}
+}
+
+// TransactionQuerierCreateNvdCveCPECall wrap *gomock.Call
+type TransactionQuerierCreateNvdCveCPECall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateNvdCveCPECall) Return(arg0 *queries.NvdCveCpe, arg1 error) *TransactionQuerierCreateNvdCveCPECall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateNvdCveCPECall) Do(f func(context.Context, queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateNvdCveCPECall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateNvdCveCPECall) DoAndReturn(f func(context.Context, queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateNvdCveCPECall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateResetPasswordToken mocks base method.
 func (m *MockTransactionQuerier) CreateResetPasswordToken(ctx context.Context, arg queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error) {
 	m.ctrl.T.Helper()
@@ -1007,6 +1124,84 @@ func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) Do(f func(context.Co
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetNvdCPEsByDBType mocks base method.
+func (m *MockTransactionQuerier) GetNvdCPEsByDBType(ctx context.Context, databaseType int32) ([]*queries.NvdCpe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNvdCPEsByDBType", ctx, databaseType)
+	ret0, _ := ret[0].([]*queries.NvdCpe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNvdCPEsByDBType indicates an expected call of GetNvdCPEsByDBType.
+func (mr *MockTransactionQuerierMockRecorder) GetNvdCPEsByDBType(ctx, databaseType any) *TransactionQuerierGetNvdCPEsByDBTypeCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNvdCPEsByDBType", reflect.TypeOf((*MockTransactionQuerier)(nil).GetNvdCPEsByDBType), ctx, databaseType)
+	return &TransactionQuerierGetNvdCPEsByDBTypeCall{Call: call}
+}
+
+// TransactionQuerierGetNvdCPEsByDBTypeCall wrap *gomock.Call
+type TransactionQuerierGetNvdCPEsByDBTypeCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetNvdCPEsByDBTypeCall) Return(arg0 []*queries.NvdCpe, arg1 error) *TransactionQuerierGetNvdCPEsByDBTypeCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetNvdCPEsByDBTypeCall) Do(f func(context.Context, int32) ([]*queries.NvdCpe, error)) *TransactionQuerierGetNvdCPEsByDBTypeCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetNvdCPEsByDBTypeCall) DoAndReturn(f func(context.Context, int32) ([]*queries.NvdCpe, error)) *TransactionQuerierGetNvdCPEsByDBTypeCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetNvdCveByCveID mocks base method.
+func (m *MockTransactionQuerier) GetNvdCveByCveID(ctx context.Context, cveID string) (*queries.NvdCfe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNvdCveByCveID", ctx, cveID)
+	ret0, _ := ret[0].(*queries.NvdCfe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetNvdCveByCveID indicates an expected call of GetNvdCveByCveID.
+func (mr *MockTransactionQuerierMockRecorder) GetNvdCveByCveID(ctx, cveID any) *TransactionQuerierGetNvdCveByCveIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNvdCveByCveID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetNvdCveByCveID), ctx, cveID)
+	return &TransactionQuerierGetNvdCveByCveIDCall{Call: call}
+}
+
+// TransactionQuerierGetNvdCveByCveIDCall wrap *gomock.Call
+type TransactionQuerierGetNvdCveByCveIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetNvdCveByCveIDCall) Return(arg0 *queries.NvdCfe, arg1 error) *TransactionQuerierGetNvdCveByCveIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetNvdCveByCveIDCall) Do(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetNvdCveByCveIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetNvdCveByCveIDCall) DoAndReturn(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetNvdCveByCveIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1824,6 +2019,44 @@ func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) Do(f func(contex
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateNvdCPE mocks base method.
+func (m *MockTransactionQuerier) UpdateNvdCPE(ctx context.Context, arg queries.UpdateNvdCPEParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateNvdCPE", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateNvdCPE indicates an expected call of UpdateNvdCPE.
+func (mr *MockTransactionQuerierMockRecorder) UpdateNvdCPE(ctx, arg any) *TransactionQuerierUpdateNvdCPECall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNvdCPE", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateNvdCPE), ctx, arg)
+	return &TransactionQuerierUpdateNvdCPECall{Call: call}
+}
+
+// TransactionQuerierUpdateNvdCPECall wrap *gomock.Call
+type TransactionQuerierUpdateNvdCPECall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierUpdateNvdCPECall) Return(arg0 error) *TransactionQuerierUpdateNvdCPECall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierUpdateNvdCPECall) Do(f func(context.Context, queries.UpdateNvdCPEParams) error) *TransactionQuerierUpdateNvdCPECall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierUpdateNvdCPECall) DoAndReturn(f func(context.Context, queries.UpdateNvdCPEParams) error) *TransactionQuerierUpdateNvdCPECall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

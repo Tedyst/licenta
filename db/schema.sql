@@ -143,3 +143,29 @@ CREATE TABLE project_docker_layer_results(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE nvd_cpes(
+  id bigserial PRIMARY KEY,
+  cpe text NOT NULL UNIQUE,
+  database_type int NOT NULL,
+  version text NOT NULL,
+  last_modified timestamp with time zone NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE nvd_cves(
+  id bigserial PRIMARY KEY,
+  cve_id text NOT NULL UNIQUE,
+  description text NOT NULL,
+  published timestamp with time zone NOT NULL,
+  last_modified timestamp with time zone NOT NULL,
+  score float NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE nvd_cve_cpes(
+  id bigserial PRIMARY KEY,
+  cve_id bigint REFERENCES nvd_cves(id) ON DELETE CASCADE NOT NULL,
+  cpe_id bigint REFERENCES nvd_cpes(id) ON DELETE CASCADE NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
