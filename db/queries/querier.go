@@ -13,6 +13,7 @@ import (
 
 type Querier interface {
 	CountUsers(ctx context.Context) (int64, error)
+	CreateCveCpe(ctx context.Context, arg CreateCveCpeParams) (*NvdCveCpe, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
 	CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
@@ -32,6 +33,9 @@ type Querier interface {
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error)
+	GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
+	GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error)
 	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*ProjectDockerImage, error)
 	GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)

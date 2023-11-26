@@ -170,7 +170,7 @@ FROM
     project_git_scanned_commits
 WHERE
     project_id = $1
-    AND commit_hash IN ($2)
+    AND commit_hash = ANY ($2::string[])
 `
 
 type GetGitScannedCommitsForProjectBatchParams struct {

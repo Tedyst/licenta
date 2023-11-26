@@ -41,3 +41,30 @@ FROM
 WHERE
     cve_id = $1;
 
+-- name: GetCPEByProductAndVersion :one
+SELECT
+    *
+FROM
+    nvd_cpes
+WHERE
+    database_type = $1
+    AND version = $2
+LIMIT 1;
+
+-- name: GetCveByCveID :one
+SELECT
+    *
+FROM
+    nvd_cves
+WHERE
+    cve_id = $1;
+
+-- name: GetCveCpeByCveAndCpe :one
+SELECT
+    *
+FROM
+    nvd_cve_cpes
+WHERE
+    cve_id = $1
+    AND cpe_id = $2;
+

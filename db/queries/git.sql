@@ -38,7 +38,7 @@ FROM
     project_git_scanned_commits
 WHERE
     project_id = $1
-    AND commit_hash IN (sqlc.slice(commit_hashes));
+    AND commit_hash = ANY (sqlc.arg(commit_hashes)::string[]);
 
 -- name: CreateGitResultForCommit :copyfrom
 INSERT INTO project_git_results(project_id,

@@ -81,6 +81,45 @@ func (c *TransactionQuerierCountUsersCall) DoAndReturn(f func(context.Context) (
 	return c
 }
 
+// CreateCveCpe mocks base method.
+func (m *MockTransactionQuerier) CreateCveCpe(ctx context.Context, arg queries.CreateCveCpeParams) (*queries.NvdCveCpe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCveCpe", ctx, arg)
+	ret0, _ := ret[0].(*queries.NvdCveCpe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCveCpe indicates an expected call of CreateCveCpe.
+func (mr *MockTransactionQuerierMockRecorder) CreateCveCpe(ctx, arg any) *TransactionQuerierCreateCveCpeCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCveCpe", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateCveCpe), ctx, arg)
+	return &TransactionQuerierCreateCveCpeCall{Call: call}
+}
+
+// TransactionQuerierCreateCveCpeCall wrap *gomock.Call
+type TransactionQuerierCreateCveCpeCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateCveCpeCall) Return(arg0 *queries.NvdCveCpe, arg1 error) *TransactionQuerierCreateCveCpeCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateCveCpeCall) Do(f func(context.Context, queries.CreateCveCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateCveCpeCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateCveCpeCall) DoAndReturn(f func(context.Context, queries.CreateCveCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateCveCpeCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateDockerImageForProject mocks base method.
 func (m *MockTransactionQuerier) CreateDockerImageForProject(ctx context.Context, arg queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error) {
 	m.ctrl.T.Helper()
@@ -851,6 +890,123 @@ func (c *TransactionQuerierEndTransactionCall) Do(f func(context.Context, error)
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetCPEByProductAndVersion mocks base method.
+func (m *MockTransactionQuerier) GetCPEByProductAndVersion(ctx context.Context, arg queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCPEByProductAndVersion", ctx, arg)
+	ret0, _ := ret[0].(*queries.NvdCpe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCPEByProductAndVersion indicates an expected call of GetCPEByProductAndVersion.
+func (mr *MockTransactionQuerierMockRecorder) GetCPEByProductAndVersion(ctx, arg any) *TransactionQuerierGetCPEByProductAndVersionCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCPEByProductAndVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCPEByProductAndVersion), ctx, arg)
+	return &TransactionQuerierGetCPEByProductAndVersionCall{Call: call}
+}
+
+// TransactionQuerierGetCPEByProductAndVersionCall wrap *gomock.Call
+type TransactionQuerierGetCPEByProductAndVersionCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetCPEByProductAndVersionCall) Return(arg0 *queries.NvdCpe, arg1 error) *TransactionQuerierGetCPEByProductAndVersionCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetCPEByProductAndVersionCall) Do(f func(context.Context, queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error)) *TransactionQuerierGetCPEByProductAndVersionCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetCPEByProductAndVersionCall) DoAndReturn(f func(context.Context, queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error)) *TransactionQuerierGetCPEByProductAndVersionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetCveByCveID mocks base method.
+func (m *MockTransactionQuerier) GetCveByCveID(ctx context.Context, cveID string) (*queries.NvdCfe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCveByCveID", ctx, cveID)
+	ret0, _ := ret[0].(*queries.NvdCfe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCveByCveID indicates an expected call of GetCveByCveID.
+func (mr *MockTransactionQuerierMockRecorder) GetCveByCveID(ctx, cveID any) *TransactionQuerierGetCveByCveIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCveByCveID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCveByCveID), ctx, cveID)
+	return &TransactionQuerierGetCveByCveIDCall{Call: call}
+}
+
+// TransactionQuerierGetCveByCveIDCall wrap *gomock.Call
+type TransactionQuerierGetCveByCveIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetCveByCveIDCall) Return(arg0 *queries.NvdCfe, arg1 error) *TransactionQuerierGetCveByCveIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetCveByCveIDCall) Do(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetCveByCveIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetCveByCveIDCall) DoAndReturn(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetCveByCveIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetCveCpeByCveAndCpe mocks base method.
+func (m *MockTransactionQuerier) GetCveCpeByCveAndCpe(ctx context.Context, arg queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCveCpeByCveAndCpe", ctx, arg)
+	ret0, _ := ret[0].(*queries.NvdCveCpe)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCveCpeByCveAndCpe indicates an expected call of GetCveCpeByCveAndCpe.
+func (mr *MockTransactionQuerierMockRecorder) GetCveCpeByCveAndCpe(ctx, arg any) *TransactionQuerierGetCveCpeByCveAndCpeCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCveCpeByCveAndCpe", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCveCpeByCveAndCpe), ctx, arg)
+	return &TransactionQuerierGetCveCpeByCveAndCpeCall{Call: call}
+}
+
+// TransactionQuerierGetCveCpeByCveAndCpeCall wrap *gomock.Call
+type TransactionQuerierGetCveCpeByCveAndCpeCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetCveCpeByCveAndCpeCall) Return(arg0 *queries.NvdCveCpe, arg1 error) *TransactionQuerierGetCveCpeByCveAndCpeCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetCveCpeByCveAndCpeCall) Do(f func(context.Context, queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierGetCveCpeByCveAndCpeCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetCveCpeByCveAndCpeCall) DoAndReturn(f func(context.Context, queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierGetCveCpeByCveAndCpeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

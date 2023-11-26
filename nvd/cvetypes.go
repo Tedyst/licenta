@@ -1,5 +1,10 @@
 package nvd
 
+import (
+	"errors"
+	"time"
+)
+
 type NvdCveAPIResult struct {
 	ResultsPerPage  int64                 `json:"resultsPerPage"`
 	StartIndex      int64                 `json:"startIndex"`
@@ -27,6 +32,39 @@ type NvdCveCve struct {
 	References       []NvdCveReference     `json:"references"`
 	VendorComments   []NvdCveVendorComment `json:"vendorComments"`
 	EvaluatorComment *string               `json:"evaluatorComment,omitempty"`
+}
+
+func (c *NvdCveCve) PubslihedDate() (time.Time, error) {
+	return time.Parse("2006-01-02T15:04:05.000", c.Published)
+}
+
+func (c *NvdCveCve) LastModifiedDate() (time.Time, error) {
+	return time.Parse("2006-01-02T15:04:05.000", c.LastModified)
+}
+
+func (c *NvdCveCve) Score() (float64, error) {
+	value := 0.0
+	for _, metric := range c.Metrics.CvssMetricV31 {
+		if metric.CvssData.BaseScore > value {
+			value = metric.CvssData.BaseScore
+		}
+	}
+	for _, metric := range c.Metrics.CvssMetricV30 {
+		if metric.CvssData.BaseScore > value {
+			value = metric.CvssData.BaseScore
+		}
+	}
+	for _, metric := range c.Metrics.CvssMetricV2 {
+		if metric.CvssData.BaseScore > value {
+			value = metric.CvssData.BaseScore
+		}
+	}
+
+	if value == 0.0 {
+		return 0.0, errors.New("no score found")
+	}
+
+	return value, nil
 }
 
 type NvdCveConfiguration struct {

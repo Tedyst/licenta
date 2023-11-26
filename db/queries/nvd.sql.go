@@ -12,6 +12,30 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createCveCpe = `-- name: CreateCveCpe :one
+INSERT INTO nvd_cve_cpes(cve_id, cpe_id)
+    VALUES ($1, $2)
+RETURNING
+    id, cve_id, cpe_id, created_at
+`
+
+type CreateCveCpeParams struct {
+	CveID int64
+	CpeID int64
+}
+
+func (q *Queries) CreateCveCpe(ctx context.Context, arg CreateCveCpeParams) (*NvdCveCpe, error) {
+	row := q.db.QueryRow(ctx, createCveCpe, arg.CveID, arg.CpeID)
+	var i NvdCveCpe
+	err := row.Scan(
+		&i.ID,
+		&i.CveID,
+		&i.CpeID,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const createNvdCPE = `-- name: CreateNvdCPE :one
 INSERT INTO nvd_cpes(cpe, database_type, version, last_modified)
     VALUES ($1, $2, $3, $4)
@@ -95,6 +119,87 @@ type CreateNvdCveCPEParams struct {
 
 func (q *Queries) CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error) {
 	row := q.db.QueryRow(ctx, createNvdCveCPE, arg.CveID, arg.CpeID)
+	var i NvdCveCpe
+	err := row.Scan(
+		&i.ID,
+		&i.CveID,
+		&i.CpeID,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getCPEByProductAndVersion = `-- name: GetCPEByProductAndVersion :one
+SELECT
+    id, cpe, database_type, version, last_modified, created_at
+FROM
+    nvd_cpes
+WHERE
+    database_type = $1
+    AND version = $2
+LIMIT 1
+`
+
+type GetCPEByProductAndVersionParams struct {
+	DatabaseType int32
+	Version      string
+}
+
+func (q *Queries) GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error) {
+	row := q.db.QueryRow(ctx, getCPEByProductAndVersion, arg.DatabaseType, arg.Version)
+	var i NvdCpe
+	err := row.Scan(
+		&i.ID,
+		&i.Cpe,
+		&i.DatabaseType,
+		&i.Version,
+		&i.LastModified,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getCveByCveID = `-- name: GetCveByCveID :one
+SELECT
+    id, cve_id, description, published, last_modified, score, created_at
+FROM
+    nvd_cves
+WHERE
+    cve_id = $1
+`
+
+func (q *Queries) GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error) {
+	row := q.db.QueryRow(ctx, getCveByCveID, cveID)
+	var i NvdCfe
+	err := row.Scan(
+		&i.ID,
+		&i.CveID,
+		&i.Description,
+		&i.Published,
+		&i.LastModified,
+		&i.Score,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getCveCpeByCveAndCpe = `-- name: GetCveCpeByCveAndCpe :one
+SELECT
+    id, cve_id, cpe_id, created_at
+FROM
+    nvd_cve_cpes
+WHERE
+    cve_id = $1
+    AND cpe_id = $2
+`
+
+type GetCveCpeByCveAndCpeParams struct {
+	CveID int64
+	CpeID int64
+}
+
+func (q *Queries) GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error) {
+	row := q.db.QueryRow(ctx, getCveCpeByCveAndCpe, arg.CveID, arg.CpeID)
 	var i NvdCveCpe
 	err := row.Scan(
 		&i.ID,
