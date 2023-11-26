@@ -855,6 +855,44 @@ func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Contex
 	return c
 }
 
+// GetBruteforcePasswords mocks base method.
+func (m *MockTransactionQuerier) GetBruteforcePasswords(ctx context.Context, startID []int64) *queries.GetBruteforcePasswordsBatchResults {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBruteforcePasswords", ctx, startID)
+	ret0, _ := ret[0].(*queries.GetBruteforcePasswordsBatchResults)
+	return ret0
+}
+
+// GetBruteforcePasswords indicates an expected call of GetBruteforcePasswords.
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswords(ctx, startID any) *TransactionQuerierGetBruteforcePasswordsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswords", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswords), ctx, startID)
+	return &TransactionQuerierGetBruteforcePasswordsCall{Call: call}
+}
+
+// TransactionQuerierGetBruteforcePasswordsCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetBruteforcePasswordsCall) Return(arg0 *queries.GetBruteforcePasswordsBatchResults) *TransactionQuerierGetBruteforcePasswordsCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetBruteforcePasswordsCall) Do(f func(context.Context, []int64) *queries.GetBruteforcePasswordsBatchResults) *TransactionQuerierGetBruteforcePasswordsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetBruteforcePasswordsCall) DoAndReturn(f func(context.Context, []int64) *queries.GetBruteforcePasswordsBatchResults) *TransactionQuerierGetBruteforcePasswordsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetCPEByProductAndVersion mocks base method.
 func (m *MockTransactionQuerier) GetCPEByProductAndVersion(ctx context.Context, arg queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error) {
 	m.ctrl.T.Helper()

@@ -63,6 +63,14 @@ func NewQuerier(pool *pgxpool.Pool) *querierImpl {
 	}
 }
 
+func (q *querierImpl) GetRawTx() pgx.Tx {
+	return q.tx
+}
+
+func (q *querierImpl) GetRawPool() *pgxpool.Pool {
+	return q.pool
+}
+
 func InitDatabase(uri string) *querierImpl {
 	cfg, err := pgxpool.ParseConfig(uri)
 	if err != nil {

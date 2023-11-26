@@ -37,8 +37,5 @@ var rockyouCmd = &cobra.Command{
 }
 
 func init() {
-	rockyouCmd.PersistentFlags().String("database", "", "Database connection string")
-	rockyouCmd.MarkPersistentFlagRequired("database")
-
 	bruteforceCmd.AddCommand(rockyouCmd)
 }

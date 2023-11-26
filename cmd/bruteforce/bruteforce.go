@@ -13,3 +13,8 @@ var bruteforceCmd = &cobra.Command{
 	Short: "Bruteforce passwords management",
 	Long:  `Bruteforce passwords management.`,
 }
+
+func init() {
+	bruteforceCmd.PersistentFlags().String("database", "", "Database connection string")
+	bruteforceCmd.MarkPersistentFlagRequired("database")
+}
