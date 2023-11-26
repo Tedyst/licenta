@@ -160,6 +160,16 @@ func (r *localRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.
 	return nil
 }
 
+func (r *localRunner) SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error {
+	// TODO
+	return nil
+}
+
+func (r *localRunner) SendCVEMailsToAllProjects(ctx context.Context) error {
+	// TODO
+	return nil
+}
+
 func (r *localRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) (err error) {
 	database, err := r.queries.StartTransaction(ctx)
 	if err != nil {
