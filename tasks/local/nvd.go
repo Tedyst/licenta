@@ -23,6 +23,10 @@ func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, d
 		if err != nil {
 			continue
 		}
+		t, err := result.Cpe.LastModifiedDate()
+		if err != nil {
+			return err
+		}
 
 		found := false
 		for _, dbCpe := range dbCpes {
@@ -43,11 +47,6 @@ func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, d
 			if err != nil {
 				return err
 			}
-		}
-
-		t, err := result.Cpe.LastModifiedDate()
-		if err != nil {
-			return err
 		}
 
 		if !cpe.LastModified.Time.Equal(t) {
