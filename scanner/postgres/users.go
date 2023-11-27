@@ -88,6 +88,16 @@ func (u *postgresUser) VerifyPassword(password string) (bool, error) {
 	return password == u.password, nil
 }
 
+func (u *postgresUser) GetRawPassword() (string, bool, error) {
+	if strings.HasPrefix(u.password, "SCRAM-SHA-256") {
+		return "", false, nil
+	}
+	if strings.HasPrefix(u.password, "md5") {
+		return "", false, nil
+	}
+	return u.password, true, nil
+}
+
 func (u *postgresUser) IsPrivileged() (bool, error) {
 	return u.super, nil
 }

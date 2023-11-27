@@ -33,7 +33,7 @@ var scanConfigLines = map[string]struct {
 	"listen_addresses": {
 		value: func(s string) bool { return s != "localhost" },
 		diagnostic: postgresScanResult{
-			severity: scanner.SEVERITY_HIGH,
+			severity: scanner.SEVERITY_MEDIUM,
 			message:  "listen_addresses is not localhost.",
 			detail:   "listen_addresses is not localhost. This may allow other users to connect to your database.",
 		},
