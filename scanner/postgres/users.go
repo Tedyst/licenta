@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/scanner"
@@ -22,7 +23,21 @@ type postgresUser struct {
 
 var _ scanner.User = (*postgresUser)(nil)
 
+func isASCII(s string) bool {
+	for _, c := range s {
+		if !unicode.IsGraphic(c) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (u *postgresUser) verifyPasswordSCRAMSHA256(password string) (bool, error) {
+	if !isASCII(password) {
+		return false, nil
+	}
+
 	parts := strings.Split(u.password, "$")
 	if len(parts) != 3 {
 		return false, errors.New("invalid hash format")
@@ -100,6 +115,14 @@ func (u *postgresUser) GetRawPassword() (string, bool, error) {
 
 func (u *postgresUser) IsPrivileged() (bool, error) {
 	return u.super, nil
+}
+
+func (u *postgresUser) HasPassword() (bool, error) {
+	return true, nil
+}
+
+func (u *postgresUser) GetUsername() (string, error) {
+	return u.name, nil
 }
 
 func (sc *postgresScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {

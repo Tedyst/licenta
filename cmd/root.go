@@ -47,8 +47,6 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 }
 
 func initConfig(cmd *cobra.Command) {
-	cmd.MarkFlagRequired("database")
-
 	v := viper.New()
 	v.SetEnvPrefix("")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

@@ -1,6 +1,8 @@
 package scanner
 
-import "context"
+import (
+	"context"
+)
 
 type Severity = int
 
@@ -23,6 +25,8 @@ type ScanResult interface {
 }
 
 type User interface {
+	GetUsername() (string, error)
+	HasPassword() (bool, error)
 	VerifyPassword(string) (bool, error)
 	GetRawPassword() (string, bool, error)
 	IsPrivileged() (bool, error)

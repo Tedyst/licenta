@@ -16,6 +16,7 @@ type TransactionQuerier interface {
 
 	StartTransaction(ctx context.Context) (TransactionQuerier, error)
 	EndTransaction(ctx context.Context, err error) error
+	GetRawPool() *pgxpool.Pool
 }
 
 type querierImpl struct {
@@ -63,11 +64,11 @@ func NewQuerier(pool *pgxpool.Pool) *querierImpl {
 	}
 }
 
-func (q *querierImpl) GetRawTx() pgx.Tx {
+func (q querierImpl) GetRawTx() pgx.Tx {
 	return q.tx
 }
 
-func (q *querierImpl) GetRawPool() *pgxpool.Pool {
+func (q querierImpl) GetRawPool() *pgxpool.Pool {
 	return q.pool
 }
 
