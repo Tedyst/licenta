@@ -23,6 +23,9 @@ type Querier interface {
 	CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error)
 	CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error)
 	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
+	CreatePostgresScan(ctx context.Context, postgresDatabaseID int64) (*PostgresScan, error)
+	CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error)
+	CreatePostgresScanResult(ctx context.Context, arg CreatePostgresScanResultParams) (*PostgresScanResult, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
@@ -49,6 +52,9 @@ type Querier interface {
 	GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error)
 	GetOrganizationUser(ctx context.Context, arg GetOrganizationUserParams) (*OrganizationMember, error)
 	GetOrganizationsByUser(ctx context.Context, userID int64) ([]*Organization, error)
+	GetPostgresDatabase(ctx context.Context, id int64) (*PostgresDatabase, error)
+	GetPostgresScan(ctx context.Context, id int64) (*PostgresScan, error)
+	GetPostgresScanResults(ctx context.Context, postgresScanID int64) ([]*PostgresScanResult, error)
 	GetProjectByOrganizationAndName(ctx context.Context, arg GetProjectByOrganizationAndNameParams) (*Project, error)
 	GetProjectMembers(ctx context.Context, projectID int64) ([]*ProjectMember, error)
 	GetProjectPermissionsForUser(ctx context.Context, arg GetProjectPermissionsForUserParams) (int16, error)
@@ -66,6 +72,8 @@ type Querier interface {
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
+	UpdatePostgresScanBruteforceResult(ctx context.Context, arg UpdatePostgresScanBruteforceResultParams) error
+	UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error

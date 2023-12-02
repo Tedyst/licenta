@@ -12,6 +12,17 @@ services:
     env_file:
       - .env
 
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "5002:8080"
+    networks:
+      - licenta-network
+    volumes:
+      - ./api/v1/spec.yaml:/swagger.json:ro
+    environment:
+      - SWAGGER_JSON=/swagger.json
+
   db:
     image: postgres:latest
     ports:

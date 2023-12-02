@@ -174,3 +174,40 @@ CREATE TABLE default_bruteforce_passwords(
   password text NOT NULL UNIQUE
 );
 
+CREATE TABLE postgres_databases(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  host text NOT NULL,
+  port integer NOT NULL,
+  database_name text NOT NULL,
+  username text NOT NULL,
+  password text NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE postgres_scan(
+  id bigserial PRIMARY KEY,
+  postgres_database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE,
+  status integer NOT NULL,
+  error text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE postgres_scan_results(
+  id bigserial PRIMARY KEY,
+  postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,
+  severity integer NOT NULL,
+  message text NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE postgres_scan_bruteforce_results(
+  id bigserial PRIMARY KEY,
+  postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,
+  username text NOT NULL,
+  password text,
+  total integer NOT NULL,
+  tried integer NOT NULL,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+

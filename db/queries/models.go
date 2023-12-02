@@ -56,6 +56,43 @@ type OrganizationMember struct {
 	CreatedAt      pgtype.Timestamptz
 }
 
+type PostgresDatabase struct {
+	ID           int64
+	ProjectID    int64
+	Host         string
+	Port         int32
+	DatabaseName string
+	Username     string
+	Password     string
+	CreatedAt    pgtype.Timestamptz
+}
+
+type PostgresScan struct {
+	ID                 int64
+	PostgresDatabaseID int64
+	Status             int32
+	Error              sql.NullString
+	CreatedAt          pgtype.Timestamptz
+}
+
+type PostgresScanBruteforceResult struct {
+	ID             int64
+	PostgresScanID int64
+	Username       string
+	Password       sql.NullString
+	Total          int32
+	Tried          int32
+	CreatedAt      pgtype.Timestamptz
+}
+
+type PostgresScanResult struct {
+	ID             int64
+	PostgresScanID int64
+	Severity       int32
+	Message        string
+	CreatedAt      pgtype.Timestamptz
+}
+
 type Project struct {
 	ID             int64
 	Name           string
