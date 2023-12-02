@@ -973,6 +973,45 @@ func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Contex
 	return c
 }
 
+// GetBruteforcedPasswordByHashAndUsername mocks base method.
+func (m *MockTransactionQuerier) GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBruteforcedPasswordByHashAndUsername", ctx, arg)
+	ret0, _ := ret[0].(*queries.BruteforcedPassword)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBruteforcedPasswordByHashAndUsername indicates an expected call of GetBruteforcedPasswordByHashAndUsername.
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcedPasswordByHashAndUsername(ctx, arg any) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcedPasswordByHashAndUsername", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcedPasswordByHashAndUsername), ctx, arg)
+	return &TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall{Call: call}
+}
+
+// TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) Return(arg0 *queries.BruteforcedPassword, arg1 error) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) Do(f func(context.Context, queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error)) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) DoAndReturn(f func(context.Context, queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error)) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetCPEByProductAndVersion mocks base method.
 func (m *MockTransactionQuerier) GetCPEByProductAndVersion(ctx context.Context, arg queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error) {
 	m.ctrl.T.Helper()
@@ -2215,6 +2254,44 @@ func (c *TransactionQuerierInsertBruteforcePasswordsCall) Do(f func(context.Cont
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierInsertBruteforcePasswordsCall) DoAndReturn(f func(context.Context, []string) error) *TransactionQuerierInsertBruteforcePasswordsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// InsertBruteforcedPassword mocks base method.
+func (m *MockTransactionQuerier) InsertBruteforcedPassword(ctx context.Context, arg queries.InsertBruteforcedPasswordParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertBruteforcedPassword", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertBruteforcedPassword indicates an expected call of InsertBruteforcedPassword.
+func (mr *MockTransactionQuerierMockRecorder) InsertBruteforcedPassword(ctx, arg any) *TransactionQuerierInsertBruteforcedPasswordCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertBruteforcedPassword", reflect.TypeOf((*MockTransactionQuerier)(nil).InsertBruteforcedPassword), ctx, arg)
+	return &TransactionQuerierInsertBruteforcedPasswordCall{Call: call}
+}
+
+// TransactionQuerierInsertBruteforcedPasswordCall wrap *gomock.Call
+type TransactionQuerierInsertBruteforcedPasswordCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierInsertBruteforcedPasswordCall) Return(arg0 error) *TransactionQuerierInsertBruteforcedPasswordCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierInsertBruteforcedPasswordCall) Do(f func(context.Context, queries.InsertBruteforcedPasswordParams) error) *TransactionQuerierInsertBruteforcedPasswordCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierInsertBruteforcedPasswordCall) DoAndReturn(f func(context.Context, queries.InsertBruteforcedPasswordParams) error) *TransactionQuerierInsertBruteforcedPasswordCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

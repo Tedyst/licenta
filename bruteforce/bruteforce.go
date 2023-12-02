@@ -2,11 +2,14 @@ package bruteforce
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/scanner"
 	"golang.org/x/sync/semaphore"
 )
@@ -79,11 +82,34 @@ func BruteforcePasswordAllUsers(ctx context.Context, sc scanner.Scanner, databas
 		if err != nil {
 			return nil, err
 		}
+		username, err := user.GetUsername()
+		if err != nil {
+			return nil, err
+		}
+		hashed, err := user.GetHashedPassword()
+		if err != nil {
+			return nil, err
+		}
+
+		u, exists := status[user]
+		if !exists {
+			return nil, errors.New("user not found in status")
+		}
+
+		err = database.InsertBruteforcedPassword(ctx, queries.InsertBruteforcedPasswordParams{
+			Username: username,
+			Password: sql.NullString{String: pass, Valid: pass != ""},
+			Hash:     hashed,
+			LastBruteforceID: sql.NullInt64{
+				Int64: int64(u.Total),
+				Valid: true,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+
 		if ok {
-			username, err := user.GetUsername()
-			if err != nil {
-				return nil, err
-			}
 			results = append(results, &bruteforceResult{
 				user:     username,
 				password: pass,
@@ -134,7 +160,41 @@ func bruteforcePasswordsUser(
 		return p, false, nil
 	}
 
-	rows, err := database.GetRawPool().Query(ctx, "SELECT password FROM default_bruteforce_passwords ORDER BY id ASC")
+	hash, err := u.GetHashedPassword()
+	if err != nil {
+		return "", false, err
+	}
+	username, err := u.GetUsername()
+	if err != nil {
+		return "", false, err
+	}
+
+	var startBruteforceID int64 = 0
+
+	if hash != "" {
+		alreadySolved, err := database.GetBruteforcedPasswordByHashAndUsername(ctx, queries.GetBruteforcedPasswordByHashAndUsernameParams{
+			Hash:     hash,
+			Username: username,
+		})
+		if err != nil && err != pgx.ErrNoRows {
+			return "", false, err
+		}
+		if alreadySolved != nil && alreadySolved.Password.Valid {
+			statusLock.Lock()
+			defer statusLock.Unlock()
+			if entry, ok := status[u]; ok {
+				entry.Tried = entry.Total
+				entry.FoundPassword = alreadySolved.Password.String
+				status[u] = entry
+			}
+			return alreadySolved.Password.String, true, nil
+		}
+		if alreadySolved != nil {
+			startBruteforceID = alreadySolved.ID
+		}
+	}
+
+	rows, err := database.GetRawPool().Query(ctx, "SELECT password FROM default_bruteforce_passwords WHERE id >= $1 ORDER BY id DESC", startBruteforceID)
 	if err != nil {
 		return "", false, err
 	}
@@ -143,10 +203,9 @@ func bruteforcePasswordsUser(
 	ticker := time.NewTicker(1 * time.Second)
 	errorChan := make(chan error, 1)
 	resultChan := make(chan string, 1)
-	cancelCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
 
 	sm := semaphore.NewWeighted(10)
+	wg := sync.WaitGroup{}
 
 	for rows.Next() {
 		if rows.Err() != nil {
@@ -158,14 +217,15 @@ func bruteforcePasswordsUser(
 			return "", false, err
 		}
 
-		sm.Acquire(cancelCtx, 1)
+		sm.Acquire(ctx, 1)
+		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			defer sm.Release(1)
 
 			ok, err := u.VerifyPassword(password)
 			if err != nil {
 				errorChan <- err
-				cancel()
 			}
 
 			statusLock.Lock()
@@ -173,12 +233,11 @@ func bruteforcePasswordsUser(
 
 			if ok {
 				if entry, ok := status[u]; ok {
-					entry.Tried = entry.Total
 					entry.FoundPassword = password
 					status[u] = entry
 				}
 				resultChan <- password
-				cancel()
+				return
 			}
 
 			if entry, ok := status[u]; ok {
@@ -191,17 +250,31 @@ func bruteforcePasswordsUser(
 		case <-ticker.C:
 			statusFunc(status)
 		case err := <-errorChan:
-			statusFunc(status)
 			return "", false, err
 		case pass := <-resultChan:
-			statusFunc(status)
 			return pass, true, nil
-		case <-cancelCtx.Done():
-			statusFunc(status)
-			return "", false, nil
 		default:
 		}
 	}
+
+	wg.Wait()
+
+	statusLock.Lock()
+	defer statusLock.Unlock()
+
+	if entry, ok := status[u]; ok {
+		entry.Tried = entry.Total
+		status[u] = entry
+	}
+
+	select {
+	case err := <-errorChan:
+		return "", false, err
+	case pass := <-resultChan:
+		return pass, true, nil
+	default:
+	}
+	statusFunc(status)
 
 	return "", false, err
 }

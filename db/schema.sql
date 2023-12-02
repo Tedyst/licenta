@@ -212,3 +212,12 @@ CREATE TABLE postgres_scan_bruteforce_results(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE bruteforced_passwords(
+  id bigserial PRIMARY KEY,
+  hash text NOT NULL,
+  username text NOT NULL,
+  password text,
+  last_bruteforce_id bigint,
+  UNIQUE (hash, username)
+);
+

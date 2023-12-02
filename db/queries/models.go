@@ -11,6 +11,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BruteforcedPassword struct {
+	ID               int64
+	Hash             string
+	Username         string
+	Password         sql.NullString
+	LastBruteforceID sql.NullInt64
+}
+
 type DefaultBruteforcePassword struct {
 	ID       int64
 	Password string

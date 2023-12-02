@@ -30,4 +30,5 @@ type User interface {
 	VerifyPassword(string) (bool, error)
 	GetRawPassword() (string, bool, error)
 	IsPrivileged() (bool, error)
+	GetHashedPassword() (string, error)
 }

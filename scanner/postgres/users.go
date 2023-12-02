@@ -125,6 +125,10 @@ func (u *postgresUser) GetUsername() (string, error) {
 	return u.name, nil
 }
 
+func (u *postgresUser) GetHashedPassword() (string, error) {
+	return u.password, nil
+}
+
 func (sc *postgresScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {
 	rows, err := sc.db.Query(ctx, "SELECT rolsuper, rolname, rolpassword FROM pg_catalog.pg_authid WHERE rolcanlogin=true;")
 	if err != nil {

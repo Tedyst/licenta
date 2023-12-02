@@ -92,6 +92,16 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 		return notifyError(errors.Wrap(err, "could not get users"))
 	}
 
+	return errors.Wrap(runner.bruteforcePostgres(ctx, scan, sc, notifyError, insertResults), "could not bruteforce passwords")
+}
+
+func (runner *localRunner) bruteforcePostgres(
+	ctx context.Context,
+	scan *models.PostgresScan,
+	sc scanner.Scanner,
+	notifyError func(error) error,
+	insertResults func([]scanner.ScanResult) error,
+) error {
 	bruteforceResults := map[scanner.User]int64{}
 	notifyBruteforceStatus := func(status map[scanner.User]bruteforce.BruteforceUserStatus) error {
 		for user, entry := range status {

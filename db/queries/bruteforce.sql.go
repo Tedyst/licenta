@@ -7,7 +7,37 @@ package queries
 
 import (
 	"context"
+	"database/sql"
 )
+
+const getBruteforcedPasswordByHashAndUsername = `-- name: GetBruteforcedPasswordByHashAndUsername :one
+SELECT
+    id, hash, username, password, last_bruteforce_id
+FROM
+    bruteforced_passwords
+WHERE
+    hash = $1
+    AND username = $2
+LIMIT 1
+`
+
+type GetBruteforcedPasswordByHashAndUsernameParams struct {
+	Hash     string
+	Username string
+}
+
+func (q *Queries) GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg GetBruteforcedPasswordByHashAndUsernameParams) (*BruteforcedPassword, error) {
+	row := q.db.QueryRow(ctx, getBruteforcedPasswordByHashAndUsername, arg.Hash, arg.Username)
+	var i BruteforcedPassword
+	err := row.Scan(
+		&i.ID,
+		&i.Hash,
+		&i.Username,
+		&i.Password,
+		&i.LastBruteforceID,
+	)
+	return &i, err
+}
 
 const insertBruteforcePasswords = `-- name: InsertBruteforcePasswords :exec
 INSERT INTO default_bruteforce_passwords(PASSWORD)
@@ -18,5 +48,29 @@ ON CONFLICT
 
 func (q *Queries) InsertBruteforcePasswords(ctx context.Context, passwords []string) error {
 	_, err := q.db.Exec(ctx, insertBruteforcePasswords, passwords)
+	return err
+}
+
+const insertBruteforcedPassword = `-- name: InsertBruteforcedPassword :exec
+INSERT INTO bruteforced_passwords(hash, username, PASSWORD, last_bruteforce_id)
+    VALUES ($1, $2, $3, $4)
+ON CONFLICT
+    DO NOTHING
+`
+
+type InsertBruteforcedPasswordParams struct {
+	Hash             string
+	Username         string
+	Password         sql.NullString
+	LastBruteforceID sql.NullInt64
+}
+
+func (q *Queries) InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error {
+	_, err := q.db.Exec(ctx, insertBruteforcedPassword,
+		arg.Hash,
+		arg.Username,
+		arg.Password,
+		arg.LastBruteforceID,
+	)
 	return err
 }
