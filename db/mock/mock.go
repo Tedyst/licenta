@@ -473,18 +473,18 @@ func (c *TransactionQuerierCreateNvdCveCPECall) DoAndReturn(f func(context.Conte
 }
 
 // CreatePostgresScan mocks base method.
-func (m *MockTransactionQuerier) CreatePostgresScan(ctx context.Context, postgresDatabaseID int64) (*queries.PostgresScan, error) {
+func (m *MockTransactionQuerier) CreatePostgresScan(ctx context.Context, arg queries.CreatePostgresScanParams) (*queries.PostgresScan, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreatePostgresScan", ctx, postgresDatabaseID)
+	ret := m.ctrl.Call(m, "CreatePostgresScan", ctx, arg)
 	ret0, _ := ret[0].(*queries.PostgresScan)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreatePostgresScan indicates an expected call of CreatePostgresScan.
-func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScan(ctx, postgresDatabaseID any) *TransactionQuerierCreatePostgresScanCall {
+func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScan(ctx, arg any) *TransactionQuerierCreatePostgresScanCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostgresScan", reflect.TypeOf((*MockTransactionQuerier)(nil).CreatePostgresScan), ctx, postgresDatabaseID)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostgresScan", reflect.TypeOf((*MockTransactionQuerier)(nil).CreatePostgresScan), ctx, arg)
 	return &TransactionQuerierCreatePostgresScanCall{Call: call}
 }
 
@@ -500,13 +500,13 @@ func (c *TransactionQuerierCreatePostgresScanCall) Return(arg0 *queries.Postgres
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierCreatePostgresScanCall) Do(f func(context.Context, int64) (*queries.PostgresScan, error)) *TransactionQuerierCreatePostgresScanCall {
+func (c *TransactionQuerierCreatePostgresScanCall) Do(f func(context.Context, queries.CreatePostgresScanParams) (*queries.PostgresScan, error)) *TransactionQuerierCreatePostgresScanCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierCreatePostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.PostgresScan, error)) *TransactionQuerierCreatePostgresScanCall {
+func (c *TransactionQuerierCreatePostgresScanCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanParams) (*queries.PostgresScan, error)) *TransactionQuerierCreatePostgresScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

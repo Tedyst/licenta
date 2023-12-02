@@ -23,7 +23,7 @@ type Querier interface {
 	CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error)
 	CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error)
 	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
-	CreatePostgresScan(ctx context.Context, postgresDatabaseID int64) (*PostgresScan, error)
+	CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error)
 	CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error)
 	CreatePostgresScanResult(ctx context.Context, arg CreatePostgresScanResultParams) (*PostgresScanResult, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)

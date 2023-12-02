@@ -1,6 +1,6 @@
 -- name: CreatePostgresScan :one
-INSERT INTO postgres_scan(postgres_database_id)
-    VALUES ($1)
+INSERT INTO postgres_scan(postgres_database_id, status)
+    VALUES ($1, $2)
 RETURNING
     *;
 
@@ -15,7 +15,8 @@ UPDATE
     postgres_scan
 SET
     status = $2,
-    error = $3
+    error = $3,
+    ended_at = $4
 WHERE
     id = $1;
 
@@ -44,8 +45,8 @@ WHERE
     id = $1;
 
 -- name: CreatePostgresScanBruteforceResult :one
-INSERT INTO postgres_scan_bruteforce_results(postgres_scan_id, username, PASSWORD, tried)
-    VALUES ($1, $2, $3, $4)
+INSERT INTO postgres_scan_bruteforce_results(postgres_scan_id, username, PASSWORD, tried, total)
+    VALUES ($1, $2, $3, $4, $5)
 RETURNING
     *;
 

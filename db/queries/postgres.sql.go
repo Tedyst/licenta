@@ -8,17 +8,24 @@ package queries
 import (
 	"context"
 	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPostgresScan = `-- name: CreatePostgresScan :one
-INSERT INTO postgres_scan(postgres_database_id)
-    VALUES ($1)
+INSERT INTO postgres_scan(postgres_database_id, status)
+    VALUES ($1, $2)
 RETURNING
-    id, postgres_database_id, status, error, created_at
+    id, postgres_database_id, status, error, created_at, ended_at
 `
 
-func (q *Queries) CreatePostgresScan(ctx context.Context, postgresDatabaseID int64) (*PostgresScan, error) {
-	row := q.db.QueryRow(ctx, createPostgresScan, postgresDatabaseID)
+type CreatePostgresScanParams struct {
+	PostgresDatabaseID int64
+	Status             int32
+}
+
+func (q *Queries) CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error) {
+	row := q.db.QueryRow(ctx, createPostgresScan, arg.PostgresDatabaseID, arg.Status)
 	var i PostgresScan
 	err := row.Scan(
 		&i.ID,
@@ -26,13 +33,14 @@ func (q *Queries) CreatePostgresScan(ctx context.Context, postgresDatabaseID int
 		&i.Status,
 		&i.Error,
 		&i.CreatedAt,
+		&i.EndedAt,
 	)
 	return &i, err
 }
 
 const createPostgresScanBruteforceResult = `-- name: CreatePostgresScanBruteforceResult :one
-INSERT INTO postgres_scan_bruteforce_results(postgres_scan_id, username, PASSWORD, tried)
-    VALUES ($1, $2, $3, $4)
+INSERT INTO postgres_scan_bruteforce_results(postgres_scan_id, username, PASSWORD, tried, total)
+    VALUES ($1, $2, $3, $4, $5)
 RETURNING
     id, postgres_scan_id, username, password, total, tried, created_at
 `
@@ -42,6 +50,7 @@ type CreatePostgresScanBruteforceResultParams struct {
 	Username       string
 	Password       sql.NullString
 	Tried          int32
+	Total          int32
 }
 
 func (q *Queries) CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error) {
@@ -50,6 +59,7 @@ func (q *Queries) CreatePostgresScanBruteforceResult(ctx context.Context, arg Cr
 		arg.Username,
 		arg.Password,
 		arg.Tried,
+		arg.Total,
 	)
 	var i PostgresScanBruteforceResult
 	err := row.Scan(
@@ -117,7 +127,7 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*PostgresD
 
 const getPostgresScan = `-- name: GetPostgresScan :one
 SELECT
-    id, postgres_database_id, status, error, created_at
+    id, postgres_database_id, status, error, created_at, ended_at
 FROM
     postgres_scan
 WHERE
@@ -133,6 +143,7 @@ func (q *Queries) GetPostgresScan(ctx context.Context, id int64) (*PostgresScan,
 		&i.Status,
 		&i.Error,
 		&i.CreatedAt,
+		&i.EndedAt,
 	)
 	return &i, err
 }
@@ -205,18 +216,25 @@ UPDATE
     postgres_scan
 SET
     status = $2,
-    error = $3
+    error = $3,
+    ended_at = $4
 WHERE
     id = $1
 `
 
 type UpdatePostgresScanStatusParams struct {
-	ID     int64
-	Status int32
-	Error  sql.NullString
+	ID      int64
+	Status  int32
+	Error   sql.NullString
+	EndedAt pgtype.Timestamptz
 }
 
 func (q *Queries) UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error {
-	_, err := q.db.Exec(ctx, updatePostgresScanStatus, arg.ID, arg.Status, arg.Error)
+	_, err := q.db.Exec(ctx, updatePostgresScanStatus,
+		arg.ID,
+		arg.Status,
+		arg.Error,
+		arg.EndedAt,
+	)
 	return err
 }

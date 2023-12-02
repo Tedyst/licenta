@@ -190,7 +190,8 @@ CREATE TABLE postgres_scan(
   postgres_database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE,
   status integer NOT NULL,
   error text,
-  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  ended_at timestamp with time zone
 );
 
 CREATE TABLE postgres_scan_results(

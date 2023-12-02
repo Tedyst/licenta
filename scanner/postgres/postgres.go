@@ -69,15 +69,5 @@ func NewScanner(ctx context.Context, db *pgx.Conn) (scanner.Scanner, error) {
 		db: db,
 	}
 
-	err := db.Ping(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not ping database")
-	}
-
-	err = sc.CheckPermissions(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not check permissions")
-	}
-
 	return sc, nil
 }

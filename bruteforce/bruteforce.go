@@ -2,11 +2,13 @@ package bruteforce
 
 import (
 	"context"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/scanner"
+	"golang.org/x/sync/semaphore"
 )
 
 type bruteforceResult struct {
@@ -33,7 +35,7 @@ type BruteforceUserStatus struct {
 type StatusFunc = func(map[scanner.User]BruteforceUserStatus) error
 type innerStatusFunc = *BruteforceUserStatus
 
-func BruteforcePasswordAllUsers(ctx context.Context, sc scanner.Scanner, database db.TransactionQuerier, statusFunc StatusFunc) ([]scanner.ScanResult, error) {
+func BruteforcePasswordAllUsers(ctx context.Context, sc scanner.Scanner, database db.TransactionQuerier, origStatusFunc StatusFunc) ([]scanner.ScanResult, error) {
 	results := []scanner.ScanResult{}
 
 	users, err := sc.GetUsers(ctx)
@@ -49,11 +51,18 @@ func BruteforcePasswordAllUsers(ctx context.Context, sc scanner.Scanner, databas
 	}
 
 	status := map[scanner.User]BruteforceUserStatus{}
+	statusLock := sync.Mutex{}
 	for _, user := range users {
 		status[user] = BruteforceUserStatus{
 			Total: count,
 			Tried: 0,
 		}
+	}
+
+	statusFunc := func(status map[scanner.User]BruteforceUserStatus) error {
+		statusLock.Lock()
+		defer statusLock.Unlock()
+		return origStatusFunc(status)
 	}
 
 	err = statusFunc(status)
@@ -62,7 +71,7 @@ func BruteforcePasswordAllUsers(ctx context.Context, sc scanner.Scanner, databas
 	}
 
 	for _, user := range users {
-		pass, ok, err := bruteforcePasswordsUser(ctx, user, database, status, statusFunc)
+		pass, ok, err := bruteforcePasswordsUser(ctx, user, database, status, statusFunc, &statusLock)
 		if err != nil {
 			return nil, err
 		}
@@ -91,13 +100,8 @@ func bruteforcePasswordsUser(
 	database db.TransactionQuerier,
 	status map[scanner.User]BruteforceUserStatus,
 	statusFunc StatusFunc,
+	statusLock *sync.Mutex,
 ) (string, bool, error) {
-	rows, err := database.GetRawPool().Query(ctx, "SELECT password FROM default_bruteforce_passwords")
-	if err != nil {
-		return "", false, err
-	}
-	defer rows.Close()
-
 	pass, hasrpw, err := u.GetRawPassword()
 	if err != nil {
 		return "", false, err
@@ -113,6 +117,8 @@ func bruteforcePasswordsUser(
 		if err != nil && err != pgx.ErrNoRows {
 			return "", false, err
 		}
+		statusLock.Lock()
+		defer statusLock.Unlock()
 		if err == nil {
 			if entry, ok := status[u]; ok {
 				entry.Tried = entry.Total
@@ -128,7 +134,19 @@ func bruteforcePasswordsUser(
 		return p, false, nil
 	}
 
+	rows, err := database.GetRawPool().Query(ctx, "SELECT password FROM default_bruteforce_passwords ORDER BY id ASC")
+	if err != nil {
+		return "", false, err
+	}
+	defer rows.Close()
+
 	ticker := time.NewTicker(1 * time.Second)
+	errorChan := make(chan error, 1)
+	resultChan := make(chan string, 1)
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	sm := semaphore.NewWeighted(10)
 
 	for rows.Next() {
 		if rows.Err() != nil {
@@ -140,27 +158,47 @@ func bruteforcePasswordsUser(
 			return "", false, err
 		}
 
-		ok, err := u.VerifyPassword(password)
-		if err != nil {
-			return "", false, err
-		}
-		if ok {
+		sm.Acquire(cancelCtx, 1)
+		go func() {
+			defer sm.Release(1)
+
+			ok, err := u.VerifyPassword(password)
+			if err != nil {
+				errorChan <- err
+				cancel()
+			}
+
+			statusLock.Lock()
+			defer statusLock.Unlock()
+
+			if ok {
+				if entry, ok := status[u]; ok {
+					entry.Tried = entry.Total
+					entry.FoundPassword = password
+					status[u] = entry
+				}
+				resultChan <- password
+				cancel()
+			}
+
 			if entry, ok := status[u]; ok {
-				entry.Tried = entry.Total
-				entry.FoundPassword = password
+				entry.Tried += 1
 				status[u] = entry
 			}
-			return password, true, err
-		}
-
-		if entry, ok := status[u]; ok {
-			entry.Tried += 1
-			status[u] = entry
-		}
+		}()
 
 		select {
 		case <-ticker.C:
 			statusFunc(status)
+		case err := <-errorChan:
+			statusFunc(status)
+			return "", false, err
+		case pass := <-resultChan:
+			statusFunc(status)
+			return pass, true, nil
+		case <-cancelCtx.Done():
+			statusFunc(status)
+			return "", false, nil
 		default:
 		}
 	}

@@ -3,10 +3,13 @@ package local
 import (
 	"context"
 	"database/sql"
-	"errors"
+	errs "errors"
 	"fmt"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -23,12 +26,12 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 		ID:     scan.ID,
 		Status: models.SCAN_RUNNING,
 	}); err != nil {
-		return err
+		return errors.Wrap(err, "could not update scan status")
 	}
 
 	db, err := runner.queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not get database")
 	}
 
 	notifyError := func(err error) error {
@@ -36,8 +39,12 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 			ID:     scan.ID,
 			Status: models.SCAN_FINISHED,
 			Error:  sql.NullString{String: err.Error(), Valid: true},
+			EndedAt: pgtype.Timestamptz{
+				Time:  time.Now(),
+				Valid: true,
+			},
 		}); err2 != nil {
-			return errors.Join(err, err2)
+			return errs.Join(err, errors.Wrap(err2, "could not update scan status"))
 		}
 		return err
 	}
@@ -49,7 +56,7 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 				Severity:       int32(result.Severity()),
 				Message:        result.Detail(),
 			}); err != nil {
-				return err
+				return errors.Wrap(err, "could not insert scan result")
 			}
 		}
 		return nil
@@ -57,32 +64,32 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 
 	conn, err := pgx.Connect(ctx, getPostgresConnectString(db))
 	if err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
 	defer conn.Close(ctx)
 
 	sc, err := postgres.NewScanner(ctx, conn)
 	if err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not create scanner"))
 	}
 
 	if err := sc.Ping(ctx); err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not ping database"))
 	}
 
 	if err := sc.CheckPermissions(ctx); err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not check permissions"))
 	}
 
 	results, err := sc.ScanConfig(ctx)
 	if err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not scan config"))
 	}
 	insertResults(results)
 
 	_, err = sc.GetUsers(ctx)
 	if err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not get users"))
 	}
 
 	bruteforceResults := map[scanner.User]int64{}
@@ -91,26 +98,27 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 			if _, ok := bruteforceResults[user]; !ok {
 				username, err := user.GetUsername()
 				if err != nil {
-					return err
+					return errors.Wrap(err, "could not get username")
 				}
 				bfuser, err := runner.queries.CreatePostgresScanBruteforceResult(ctx, queries.CreatePostgresScanBruteforceResultParams{
 					PostgresScanID: scan.ID,
 					Username:       username,
 					Password:       sql.NullString{String: entry.FoundPassword, Valid: entry.FoundPassword != ""},
 					Tried:          int32(entry.Tried),
+					Total:          int32(entry.Total),
 				})
 				if err != nil {
-					return err
+					return errors.Wrap(err, "could not insert bruteforce result")
 				}
 				bruteforceResults[user] = bfuser.ID
 			} else {
 				if err := runner.queries.UpdatePostgresScanBruteforceResult(ctx, queries.UpdatePostgresScanBruteforceResultParams{
 					ID:       bruteforceResults[user],
-					Password: sql.NullString{String: entry.FoundPassword, Valid: true},
+					Password: sql.NullString{String: entry.FoundPassword, Valid: entry.FoundPassword != ""},
 					Tried:    int32(entry.Tried),
 					Total:    int32(entry.Total),
 				}); err != nil {
-					return err
+					return errors.Wrap(err, "could not update bruteforce result")
 				}
 			}
 		}
@@ -119,18 +127,22 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 
 	bruteforceResult, err := bruteforce.BruteforcePasswordAllUsers(ctx, sc, runner.queries, notifyBruteforceStatus)
 	if err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not bruteforce"))
 	}
 
 	if err := insertResults(bruteforceResult); err != nil {
-		return notifyError(err)
+		return notifyError(errors.Wrap(err, "could not insert bruteforce results"))
 	}
 
 	if err := runner.queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
 		ID:     scan.ID,
 		Status: models.SCAN_FINISHED,
+		EndedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		},
 	}); err != nil {
-		return err
+		return errors.Wrap(err, "could not update scan status")
 	}
 
 	return nil

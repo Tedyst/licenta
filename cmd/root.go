@@ -12,6 +12,7 @@ import (
 	"github.com/tedyst/licenta/cmd/extract"
 	"github.com/tedyst/licenta/cmd/nvd"
 	"github.com/tedyst/licenta/cmd/scan"
+	"github.com/tedyst/licenta/cmd/tasks"
 	"github.com/tedyst/licenta/cmd/user"
 )
 
@@ -62,4 +63,5 @@ func init() {
 	rootCmd.AddCommand(scan.NewScanCmd())
 	rootCmd.AddCommand(nvd.NewNvdCmd())
 	rootCmd.AddCommand(bruteforce.NewBruteforceCmd())
+	rootCmd.AddCommand(tasks.GetTasksCmd())
 }

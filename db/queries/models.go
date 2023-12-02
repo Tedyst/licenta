@@ -73,6 +73,7 @@ type PostgresScan struct {
 	Status             int32
 	Error              sql.NullString
 	CreatedAt          pgtype.Timestamptz
+	EndedAt            pgtype.Timestamptz
 }
 
 type PostgresScanBruteforceResult struct {
