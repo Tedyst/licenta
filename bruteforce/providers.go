@@ -38,7 +38,7 @@ func (d *databasePasswordProvider) GetCount() (int, error) {
 
 func (d *databasePasswordProvider) GetSpecificPassword(password string) (int64, bool, error) {
 	var id int64
-	err := d.database.GetRawPool().QueryRow(d.context, "select subq.id from (select id from default_bruteforce_passwords where password = $1 union select -1 from project_docker_layer_results where project_id = $2 and password = $1 UNION SELECT -1 FROM project_git_results WHERE project_id = $2 AND password = $1) as subq limit 1;", password, d.projectID).Scan(&id)
+	err := d.database.GetRawPool().QueryRow(d.context, "select subq.id from (select id from default_bruteforce_passwords where password = $1 union all select -1 from project_docker_layer_results where project_id = $2 and password = $1 UNION all SELECT -1 FROM project_git_results WHERE project_id = $2 AND password = $1) as subq limit 1;", password, d.projectID).Scan(&id)
 	if err == pgx.ErrNoRows {
 		return -1, false, nil
 	}
@@ -70,7 +70,7 @@ func (d *databasePasswordProvider) Current() (int64, string, error) {
 }
 
 func (d *databasePasswordProvider) Start(index int64) error {
-	rows, err := d.database.GetRawPool().Query(context.Background(), "SELECT id, password FROM default_bruteforce_passwords WHERE id > $1 UNION SELECT -1, password FROM project_docker_layer_results WHERE project_id = $2 UNION SELECT -1, password FROM project_git_results WHERE project_id = $2 ORDER BY id ASC", index, d.projectID)
+	rows, err := d.database.GetRawPool().Query(context.Background(), "SELECT id, password FROM default_bruteforce_passwords WHERE id > $1 UNION all SELECT -1, password FROM project_docker_layer_results WHERE project_id = $2 UNION all SELECT -1, password FROM project_git_results WHERE project_id = $2 ORDER BY id ASC", index, d.projectID)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (d *databasePasswordProvider) GetPasswordByHash(username, hash string) (str
 
 func NewDatabasePasswordProvider(ctx context.Context, database db.TransactionQuerier, projectID int64) (*databasePasswordProvider, error) {
 	count := 0
-	err := database.GetRawPool().QueryRow(ctx, "select SUM(count) from (SELECT COUNT(*) FROM default_bruteforce_passwords union select COUNT(*) from project_docker_layer_results where project_id = $1 UNION SELECT COUNT(*) FROM project_git_results WHERE project_id = $1) as count;", projectID).Scan(&count)
+	err := database.GetRawPool().QueryRow(ctx, "select SUM(count) from (SELECT COUNT(*) FROM default_bruteforce_passwords union all select COUNT(*) from project_docker_layer_results where project_id = $1 UNION all SELECT COUNT(*) FROM project_git_results WHERE project_id = $1) as count;", projectID).Scan(&count)
 	if err != nil {
 		return nil, err
 	}
