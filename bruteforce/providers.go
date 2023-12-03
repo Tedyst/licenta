@@ -11,7 +11,7 @@ import (
 
 type PasswordProvider interface {
 	GetCount() (int, error)
-	GetSpecificPassword(password string) (bool, error)
+	GetSpecificPassword(password string) (int64, bool, error)
 	Next() bool
 	Error() error
 	Current() (int64, string, error)
@@ -34,10 +34,13 @@ func (d *databasePasswordProvider) GetCount() (int, error) {
 	return d.count, nil
 }
 
-func (d *databasePasswordProvider) GetSpecificPassword(password string) (bool, error) {
-	var exists bool
-	err := d.database.GetRawPool().QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM default_bruteforce_passwords WHERE password = $1)", password).Scan(&exists)
-	return exists, err
+func (d *databasePasswordProvider) GetSpecificPassword(password string) (int64, bool, error) {
+	var id int64
+	err := d.database.GetRawPool().QueryRow(d.context, "SELECT id FROM default_bruteforce_passwords WHERE password = $1", password).Scan(&id)
+	if err == pgx.ErrNoRows {
+		return -1, false, nil
+	}
+	return id, true, err
 }
 
 func (d *databasePasswordProvider) Next() bool {
@@ -142,13 +145,13 @@ func (p *passwordListIterator) GetCount() (int, error) {
 	return len(p.passwords), nil
 }
 
-func (p *passwordListIterator) GetSpecificPassword(password string) (bool, error) {
-	for _, pass := range p.passwords {
+func (p *passwordListIterator) GetSpecificPassword(password string) (int64, bool, error) {
+	for i, pass := range p.passwords {
 		if pass == password {
-			return true, nil
+			return int64(i), true, nil
 		}
 	}
-	return false, nil
+	return 0, false, nil
 }
 
 func (p *passwordListIterator) Next() bool {

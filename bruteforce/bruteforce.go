@@ -115,22 +115,20 @@ func (br *bruteforcer) BruteforcePasswordAllUsers(ctx context.Context) ([]scanne
 			return nil, err
 		}
 
-		if pass != "" {
-			username, err := user.GetUsername()
-			if err != nil {
-				return nil, err
-			}
-			br.results = append(br.results, &bruteforceResult{
-				user:     username,
-				password: pass,
-			})
+		username, err := user.GetUsername()
+		if err != nil {
+			return nil, err
 		}
+		br.results = append(br.results, &bruteforceResult{
+			user:     username,
+			password: pass,
+		})
 	}
 
 	return br.results, nil
 }
 
-func (br *bruteforcer) markStatusAsSolved(ctx context.Context, user scanner.User, password string) error {
+func (br *bruteforcer) markStatusAsSolved(ctx context.Context, user scanner.User, password string, internalID int64) error {
 	br.statusLock.Lock()
 	defer br.statusLock.Unlock()
 	entry, ok := br.status[user]
@@ -139,6 +137,7 @@ func (br *bruteforcer) markStatusAsSolved(ctx context.Context, user scanner.User
 	}
 	entry.Tried = entry.Total
 	entry.FoundPassword = password
+	entry.MaximumInternalID = internalID
 	br.status[user] = entry
 	return nil
 }
@@ -171,19 +170,31 @@ func (br *bruteforcer) markStatusAsUnsolved(ctx context.Context, user scanner.Us
 	return nil
 }
 
+func (br *bruteforcer) setMaximumInternalID(ctx context.Context, user scanner.User, internalID int64) error {
+	br.statusLock.Lock()
+	defer br.statusLock.Unlock()
+	entry, ok := br.status[user]
+	if !ok {
+		return errors.New("user not found")
+	}
+	entry.MaximumInternalID = internalID
+	br.status[user] = entry
+	return nil
+}
+
 func (br *bruteforcer) tryPlaintextPassword(ctx context.Context, user scanner.User) (string, error) {
 	pass, hasrpw, err := user.GetRawPassword()
 	if err != nil {
 		return "", err
 	}
 	if hasrpw {
-		exists, err := br.passwordProvider.GetSpecificPassword(pass)
+		internalID, exists, err := br.passwordProvider.GetSpecificPassword(pass)
 		if err != nil {
 			return "", err
 		}
 
 		if exists {
-			err = br.markStatusAsSolved(ctx, user, pass)
+			err = br.markStatusAsSolved(ctx, user, pass, internalID)
 			if err != nil {
 				return "", err
 			}
@@ -224,7 +235,7 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 			return "", err
 		}
 		if alreadySolved != "" {
-			err = br.markStatusAsSolved(ctx, u, alreadySolved)
+			err = br.markStatusAsSolved(ctx, u, alreadySolved, lastID)
 			if err != nil {
 				return "", err
 			}
@@ -234,6 +245,8 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 		startBruteforceID = lastID
 	}
 
+	br.setMaximumInternalID(ctx, u, startBruteforceID)
+
 	err = br.passwordProvider.Start(startBruteforceID)
 	if err != nil {
 		return "", err
@@ -242,12 +255,13 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 
 	ticker := time.NewTicker(1 * time.Second)
 	errorChan := make(chan error, 1)
-	resultChan := make(chan string, 1)
+	resultChan := make(chan struct {
+		password   string
+		internalID int64
+	}, 1)
 
 	sm := semaphore.NewWeighted(10)
 	wg := sync.WaitGroup{}
-
-	var maximumID int64 = 0
 
 	for br.passwordProvider.Next() {
 		if err := br.passwordProvider.Error(); err != nil {
@@ -256,9 +270,6 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 		internalID, pass, err := br.passwordProvider.Current()
 		if err != nil {
 			return "", err
-		}
-		if internalID > maximumID {
-			maximumID = internalID
 		}
 
 		sm.Acquire(ctx, 1)
@@ -273,8 +284,11 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 			}
 
 			if ok {
-				br.markStatusAsSolved(ctx, u, pass)
-				resultChan <- pass
+				br.markStatusAsSolved(ctx, u, pass, internalID)
+				resultChan <- struct {
+					password   string
+					internalID int64
+				}{pass, internalID}
 				return
 			}
 
@@ -287,7 +301,7 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 		case err := <-errorChan:
 			return "", err
 		case pass := <-resultChan:
-			return pass, nil
+			return pass.password, nil
 		default:
 		}
 	}
@@ -297,16 +311,17 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 
 	wg.Wait()
 
-	br.markStatusAsUnsolved(ctx, u)
+	defer br.updateStatus()
 
 	select {
 	case err := <-errorChan:
+		br.markStatusAsUnsolved(ctx, u)
 		return "", err
 	case pass := <-resultChan:
-		return pass, nil
+		br.markStatusAsSolved(ctx, u, pass.password, pass.internalID)
+		return pass.password, nil
 	default:
+		br.markStatusAsUnsolved(ctx, u)
+		return "", err
 	}
-	br.updateStatus()
-
-	return "", err
 }

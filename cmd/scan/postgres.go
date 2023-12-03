@@ -57,11 +57,12 @@ var scanPostgresCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		slog.Info("Users scanned")
 
 		for _, user := range users {
 			slog.Info("User: %s", "user", user)
 		}
+
+		slog.Info("Users scanned")
 
 		if viper.GetString("database") != "" {
 			database := db.InitDatabase(viper.GetString("database"))
@@ -73,8 +74,7 @@ var scanPostgresCmd = &cobra.Command{
 
 			bruteforcer := bruteforce.NewBruteforcer(passProvider, sc, func(m map[scanner.User]bruteforce.BruteforceUserStatus) error {
 				for user, entry := range m {
-					slog.Info("User: %s", "user", user)
-					slog.Info("Entry: %s", "entry", entry)
+					slog.Info("Received update from function", "user", user, "entry", entry)
 				}
 				return nil
 			})
@@ -83,7 +83,9 @@ var scanPostgresCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			slog.Info("asd", "result", result, "err", err)
+			for _, result := range result {
+				slog.Info("Bruteforced passwords", "result", result)
+			}
 		}
 
 		return nil
