@@ -135,7 +135,12 @@ func (runner *localRunner) bruteforcePostgres(
 		return nil
 	}
 
-	passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, runner.queries)
+	database, err := runner.queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not get database"))
+	}
+
+	passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, runner.queries, database.ProjectID)
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not create password provider"))
 	}

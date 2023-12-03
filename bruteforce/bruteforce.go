@@ -210,6 +210,8 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 	ctx context.Context,
 	u scanner.User,
 ) (string, error) {
+	defer br.updateStatus()
+
 	pass, err := br.tryPlaintextPassword(ctx, u)
 	if err != nil {
 		return "", err
@@ -310,8 +312,6 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 	}
 
 	wg.Wait()
-
-	defer br.updateStatus()
 
 	select {
 	case err := <-errorChan:

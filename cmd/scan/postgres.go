@@ -66,7 +66,7 @@ var scanPostgresCmd = &cobra.Command{
 
 		if viper.GetString("database") != "" {
 			database := db.InitDatabase(viper.GetString("database"))
-			passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, database)
+			passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, database, -1)
 			if err != nil {
 				return err
 			}
