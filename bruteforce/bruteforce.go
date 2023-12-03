@@ -2,14 +2,10 @@ package bruteforce
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"sync"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/tedyst/licenta/db"
-	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/scanner"
 	"golang.org/x/sync/semaphore"
 )
@@ -30,175 +26,219 @@ func (b *bruteforceResult) Detail() string {
 var _ scanner.ScanResult = (*bruteforceResult)(nil)
 
 type BruteforceUserStatus struct {
-	Total         int
-	Tried         int
-	FoundPassword string
+	Total             int
+	Tried             int
+	FoundPassword     string
+	MaximumInternalID int64
 }
 
 type StatusFunc = func(map[scanner.User]BruteforceUserStatus) error
-type innerStatusFunc = *BruteforceUserStatus
 
-func BruteforcePasswordAllUsers(ctx context.Context, sc scanner.Scanner, database db.TransactionQuerier, origStatusFunc StatusFunc) ([]scanner.ScanResult, error) {
-	results := []scanner.ScanResult{}
+type bruteforcer struct {
+	passwordProvider PasswordProvider
+	scanner          scanner.Scanner
+	updateStatus     func() error
 
-	users, err := sc.GetUsers(ctx)
+	status     map[scanner.User]BruteforceUserStatus
+	statusLock sync.Mutex
+
+	users []scanner.User
+
+	results []scanner.ScanResult
+}
+
+func NewBruteforcer(passwordProvider PasswordProvider, sc scanner.Scanner, statusFunc StatusFunc) *bruteforcer {
+	br := &bruteforcer{
+		passwordProvider: passwordProvider,
+		scanner:          sc,
+		status:           map[scanner.User]BruteforceUserStatus{},
+		statusLock:       sync.Mutex{},
+	}
+	br.updateStatus = func() error {
+		br.statusLock.Lock()
+		defer br.statusLock.Unlock()
+		return statusFunc(br.status)
+	}
+	return br
+}
+
+func (br *bruteforcer) initialize(ctx context.Context) error {
+	count, err := br.passwordProvider.GetCount()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	count := 0
-
-	row := database.GetRawPool().QueryRow(ctx, "SELECT COUNT(*) FROM default_bruteforce_passwords")
-	if err := row.Scan(&count); err != nil {
-		return nil, err
+	users, err := br.scanner.GetUsers(ctx)
+	if err != nil {
+		return err
 	}
+	br.users = users
 
-	status := map[scanner.User]BruteforceUserStatus{}
-	statusLock := sync.Mutex{}
+	br.statusLock.Lock()
 	for _, user := range users {
-		status[user] = BruteforceUserStatus{
+		br.status[user] = BruteforceUserStatus{
 			Total: count,
 			Tried: 0,
 		}
 	}
+	br.statusLock.Unlock()
 
-	statusFunc := func(status map[scanner.User]BruteforceUserStatus) error {
-		statusLock.Lock()
-		defer statusLock.Unlock()
-		return origStatusFunc(status)
+	return br.updateStatus()
+}
+
+func (br *bruteforcer) savePasswordHash(ctx context.Context, user scanner.User, password string) error {
+	username, err := user.GetUsername()
+	if err != nil {
+		return err
 	}
+	hash, err := user.GetHashedPassword()
+	if err != nil {
+		return err
+	}
+	return br.passwordProvider.SavePasswordHash(username, hash, password, br.status[user].MaximumInternalID)
+}
 
-	err = statusFunc(status)
+func (br *bruteforcer) BruteforcePasswordAllUsers(ctx context.Context) ([]scanner.ScanResult, error) {
+	err := br.initialize(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, user := range users {
-		pass, ok, err := bruteforcePasswordsUser(ctx, user, database, status, statusFunc, &statusLock)
-		if err != nil {
-			return nil, err
-		}
-		err = statusFunc(status)
-		if err != nil {
-			return nil, err
-		}
-		username, err := user.GetUsername()
-		if err != nil {
-			return nil, err
-		}
-		hashed, err := user.GetHashedPassword()
+	for _, user := range br.users {
+		pass, err := br.bruteforcePasswordsUser(ctx, user)
 		if err != nil {
 			return nil, err
 		}
 
-		u, exists := status[user]
-		if !exists {
-			return nil, errors.New("user not found in status")
-		}
-
-		err = database.InsertBruteforcedPassword(ctx, queries.InsertBruteforcedPasswordParams{
-			Username: username,
-			Password: sql.NullString{String: pass, Valid: pass != ""},
-			Hash:     hashed,
-			LastBruteforceID: sql.NullInt64{
-				Int64: int64(u.Total),
-				Valid: true,
-			},
-		})
+		err = br.savePasswordHash(ctx, user, pass)
 		if err != nil {
 			return nil, err
 		}
 
-		if ok {
-			results = append(results, &bruteforceResult{
+		if pass != "" {
+			username, err := user.GetUsername()
+			if err != nil {
+				return nil, err
+			}
+			br.results = append(br.results, &bruteforceResult{
 				user:     username,
 				password: pass,
 			})
 		}
 	}
 
-	return results, nil
+	return br.results, nil
 }
 
-func bruteforcePasswordsUser(
-	ctx context.Context,
-	u scanner.User,
-	database db.TransactionQuerier,
-	status map[scanner.User]BruteforceUserStatus,
-	statusFunc StatusFunc,
-	statusLock *sync.Mutex,
-) (string, bool, error) {
-	pass, hasrpw, err := u.GetRawPassword()
+func (br *bruteforcer) markStatusAsSolved(ctx context.Context, user scanner.User, password string) error {
+	br.statusLock.Lock()
+	defer br.statusLock.Unlock()
+	entry, ok := br.status[user]
+	if !ok {
+		return errors.New("user not found")
+	}
+	entry.Tried = entry.Total
+	entry.FoundPassword = password
+	br.status[user] = entry
+	return nil
+}
+
+func (br *bruteforcer) markIncreaseTried(ctx context.Context, user scanner.User, internalID int64) error {
+	br.statusLock.Lock()
+	defer br.statusLock.Unlock()
+	entry, ok := br.status[user]
+	if !ok {
+		return errors.New("user not found")
+	}
+	entry.Tried += 1
+	if internalID > entry.MaximumInternalID {
+		entry.MaximumInternalID = internalID
+	}
+	br.status[user] = entry
+	return nil
+}
+
+func (br *bruteforcer) markStatusAsUnsolved(ctx context.Context, user scanner.User) error {
+	br.statusLock.Lock()
+	defer br.statusLock.Unlock()
+	entry, ok := br.status[user]
+	if !ok {
+		return errors.New("user not found")
+	}
+	entry.FoundPassword = ""
+	entry.Tried = entry.Total
+	br.status[user] = entry
+	return nil
+}
+
+func (br *bruteforcer) tryPlaintextPassword(ctx context.Context, user scanner.User) (string, error) {
+	pass, hasrpw, err := user.GetRawPassword()
 	if err != nil {
-		return "", false, err
+		return "", err
 	}
 	if hasrpw {
-		q, err := database.GetRawPool().Query(ctx, "SELECT password FROM default_bruteforce_passwords WHERE password = ?", pass)
+		exists, err := br.passwordProvider.GetSpecificPassword(pass)
 		if err != nil {
-			return "", false, err
+			return "", err
 		}
-		defer q.Close()
-		p := ""
-		err = q.Scan(p)
-		if err != nil && err != pgx.ErrNoRows {
-			return "", false, err
-		}
-		statusLock.Lock()
-		defer statusLock.Unlock()
-		if err == nil {
-			if entry, ok := status[u]; ok {
-				entry.Tried = entry.Total
-				entry.FoundPassword = p
-				status[u] = entry
+
+		if exists {
+			err = br.markStatusAsSolved(ctx, user, pass)
+			if err != nil {
+				return "", err
 			}
-			return p, true, nil
 		}
-		if entry, ok := status[u]; ok {
-			entry.Tried = entry.Total
-			status[u] = entry
-		}
-		return p, false, nil
+
+		return pass, nil
+	}
+
+	return "", nil
+}
+
+func (br *bruteforcer) bruteforcePasswordsUser(
+	ctx context.Context,
+	u scanner.User,
+) (string, error) {
+	pass, err := br.tryPlaintextPassword(ctx, u)
+	if err != nil {
+		return "", err
+	}
+	if pass != "" {
+		return pass, nil
 	}
 
 	hash, err := u.GetHashedPassword()
 	if err != nil {
-		return "", false, err
+		return "", err
 	}
 	username, err := u.GetUsername()
 	if err != nil {
-		return "", false, err
+		return "", err
 	}
 
 	var startBruteforceID int64 = 0
 
 	if hash != "" {
-		alreadySolved, err := database.GetBruteforcedPasswordByHashAndUsername(ctx, queries.GetBruteforcedPasswordByHashAndUsernameParams{
-			Hash:     hash,
-			Username: username,
-		})
-		if err != nil && err != pgx.ErrNoRows {
-			return "", false, err
+		alreadySolved, lastID, err := br.passwordProvider.GetPasswordByHash(username, hash)
+		if err != nil {
+			return "", err
 		}
-		if alreadySolved != nil && alreadySolved.Password.Valid {
-			statusLock.Lock()
-			defer statusLock.Unlock()
-			if entry, ok := status[u]; ok {
-				entry.Tried = entry.Total
-				entry.FoundPassword = alreadySolved.Password.String
-				status[u] = entry
+		if alreadySolved != "" {
+			err = br.markStatusAsSolved(ctx, u, alreadySolved)
+			if err != nil {
+				return "", err
 			}
-			return alreadySolved.Password.String, true, nil
+			return alreadySolved, nil
 		}
-		if alreadySolved != nil {
-			startBruteforceID = alreadySolved.ID
-		}
+
+		startBruteforceID = lastID
 	}
 
-	rows, err := database.GetRawPool().Query(ctx, "SELECT password FROM default_bruteforce_passwords WHERE id >= $1 ORDER BY id DESC", startBruteforceID)
+	err = br.passwordProvider.Start(startBruteforceID)
 	if err != nil {
-		return "", false, err
+		return "", err
 	}
-	defer rows.Close()
+	defer br.passwordProvider.Close()
 
 	ticker := time.NewTicker(1 * time.Second)
 	errorChan := make(chan error, 1)
@@ -207,14 +247,18 @@ func bruteforcePasswordsUser(
 	sm := semaphore.NewWeighted(10)
 	wg := sync.WaitGroup{}
 
-	for rows.Next() {
-		if rows.Err() != nil {
-			return "", false, rows.Err()
+	var maximumID int64 = 0
+
+	for br.passwordProvider.Next() {
+		if err := br.passwordProvider.Error(); err != nil {
+			return "", err
 		}
-		var password string
-		err = rows.Scan(&password)
+		internalID, pass, err := br.passwordProvider.Current()
 		if err != nil {
-			return "", false, err
+			return "", err
+		}
+		if internalID > maximumID {
+			maximumID = internalID
 		}
 
 		sm.Acquire(ctx, 1)
@@ -223,58 +267,46 @@ func bruteforcePasswordsUser(
 			defer wg.Done()
 			defer sm.Release(1)
 
-			ok, err := u.VerifyPassword(password)
+			ok, err := u.VerifyPassword(pass)
 			if err != nil {
 				errorChan <- err
 			}
 
-			statusLock.Lock()
-			defer statusLock.Unlock()
-
 			if ok {
-				if entry, ok := status[u]; ok {
-					entry.FoundPassword = password
-					status[u] = entry
-				}
-				resultChan <- password
+				br.markStatusAsSolved(ctx, u, pass)
+				resultChan <- pass
 				return
 			}
 
-			if entry, ok := status[u]; ok {
-				entry.Tried += 1
-				status[u] = entry
-			}
+			br.markIncreaseTried(ctx, u, internalID)
 		}()
 
 		select {
 		case <-ticker.C:
-			statusFunc(status)
+			br.updateStatus()
 		case err := <-errorChan:
-			return "", false, err
+			return "", err
 		case pass := <-resultChan:
-			return pass, true, nil
+			return pass, nil
 		default:
 		}
+	}
+	if err := br.passwordProvider.Error(); err != nil {
+		return "", err
 	}
 
 	wg.Wait()
 
-	statusLock.Lock()
-	defer statusLock.Unlock()
-
-	if entry, ok := status[u]; ok {
-		entry.Tried = entry.Total
-		status[u] = entry
-	}
+	br.markStatusAsUnsolved(ctx, u)
 
 	select {
 	case err := <-errorChan:
-		return "", false, err
+		return "", err
 	case pass := <-resultChan:
-		return pass, true, nil
+		return pass, nil
 	default:
 	}
-	statusFunc(status)
+	br.updateStatus()
 
-	return "", false, err
+	return "", err
 }

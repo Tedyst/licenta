@@ -65,10 +65,24 @@ var scanPostgresCmd = &cobra.Command{
 
 		if viper.GetString("database") != "" {
 			database := db.InitDatabase(viper.GetString("database"))
-			result, err := bruteforce.BruteforcePasswordAllUsers(cmd.Context(), sc, database, func(m map[scanner.User]bruteforce.BruteforceUserStatus) error {
-				slog.Info("Received update from bruteforce", "update", m)
+			passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, database)
+			if err != nil {
+				return err
+			}
+			defer passProvider.Close()
+
+			bruteforcer := bruteforce.NewBruteforcer(passProvider, sc, func(m map[scanner.User]bruteforce.BruteforceUserStatus) error {
+				for user, entry := range m {
+					slog.Info("User: %s", "user", user)
+					slog.Info("Entry: %s", "entry", entry)
+				}
 				return nil
 			})
+
+			result, err := bruteforcer.BruteforcePasswordAllUsers(ctx)
+			if err != nil {
+				return err
+			}
 			slog.Info("asd", "result", result, "err", err)
 		}
 

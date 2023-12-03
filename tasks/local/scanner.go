@@ -135,11 +135,18 @@ func (runner *localRunner) bruteforcePostgres(
 		return nil
 	}
 
-	bruteforceResult, err := bruteforce.BruteforcePasswordAllUsers(ctx, sc, runner.queries, notifyBruteforceStatus)
+	passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, runner.queries)
 	if err != nil {
-		return notifyError(errors.Wrap(err, "could not bruteforce"))
+		return notifyError(errors.Wrap(err, "could not create password provider"))
 	}
+	defer passProvider.Close()
 
+	bruteforcer := bruteforce.NewBruteforcer(passProvider, sc, notifyBruteforceStatus)
+
+	bruteforceResult, err := bruteforcer.BruteforcePasswordAllUsers(ctx)
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not bruteforce passwords"))
+	}
 	if err := insertResults(bruteforceResult); err != nil {
 		return notifyError(errors.Wrap(err, "could not insert bruteforce results"))
 	}

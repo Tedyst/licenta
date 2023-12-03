@@ -1,0 +1,159 @@
+package bruteforce
+
+import (
+	"context"
+	"database/sql"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
+)
+
+type PasswordProvider interface {
+	GetCount() (int, error)
+	GetSpecificPassword(password string) (bool, error)
+	Next() bool
+	Error() error
+	Current() (int64, string, error)
+	Start(index int64) error
+	Close()
+
+	SavePasswordHash(username, hash, password string, maxInternalID int64) error
+	GetPasswordByHash(username, hash string) (string, int64, error)
+}
+
+type databasePasswordProvider struct {
+	count    int
+	rows     pgx.Rows
+	database db.TransactionQuerier
+
+	context context.Context
+}
+
+func (d *databasePasswordProvider) GetCount() (int, error) {
+	return d.count, nil
+}
+
+func (d *databasePasswordProvider) GetSpecificPassword(password string) (bool, error) {
+	var exists bool
+	err := d.database.GetRawPool().QueryRow(context.Background(), "SELECT EXISTS(SELECT 1 FROM default_bruteforce_passwords WHERE password = $1)", password).Scan(&exists)
+	return exists, err
+}
+
+func (d *databasePasswordProvider) Next() bool {
+	if d.rows == nil {
+		return false
+	}
+	return d.rows.Next()
+}
+
+func (d *databasePasswordProvider) Error() error {
+	if d.rows == nil {
+		return nil
+	}
+	return d.rows.Err()
+}
+
+func (d *databasePasswordProvider) Current() (int64, string, error) {
+	if d.rows == nil {
+		return -1, "", nil
+	}
+	var password string
+	var id int64
+	err := d.rows.Scan(&id, &password)
+	return id, password, err
+}
+
+func (d *databasePasswordProvider) Start(index int64) error {
+	rows, err := d.database.GetRawPool().Query(context.Background(), "SELECT id, password FROM default_bruteforce_passwords WHERE id > $1 ORDER BY id ASC", index)
+	if err != nil {
+		return err
+	}
+	d.rows = rows
+	return nil
+}
+
+func (d *databasePasswordProvider) Close() {
+	if d.rows == nil {
+		return
+	}
+	d.rows.Close()
+}
+
+func (d *databasePasswordProvider) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
+	return d.database.InsertBruteforcedPassword(d.context, queries.InsertBruteforcedPasswordParams{
+		Username: username,
+		Hash:     hash,
+		Password: sql.NullString{String: password, Valid: password != ""},
+		LastBruteforceID: sql.NullInt64{
+			Int64: maxInternalID,
+			Valid: true,
+		},
+	})
+}
+
+func (d *databasePasswordProvider) GetPasswordByHash(username, hash string) (string, int64, error) {
+	p, err := d.database.GetBruteforcedPasswordByHashAndUsername(d.context, queries.GetBruteforcedPasswordByHashAndUsernameParams{
+		Username: username,
+		Hash:     hash,
+	})
+	if err == pgx.ErrNoRows {
+		return "", 0, nil
+	}
+	return p.Password.String, p.LastBruteforceID.Int64, err
+}
+
+func NewDatabasePasswordProvider(ctx context.Context, database db.TransactionQuerier) (*databasePasswordProvider, error) {
+	count := 0
+	err := database.GetRawPool().QueryRow(ctx, "SELECT COUNT(*) FROM default_bruteforce_passwords").Scan(&count)
+	if err != nil {
+		return nil, err
+	}
+
+	return &databasePasswordProvider{
+		count:    count,
+		database: database,
+		context:  ctx,
+	}, nil
+}
+
+var _ PasswordProvider = (*databasePasswordProvider)(nil)
+
+type passwordListIterator struct {
+	passwords []string
+	index     int
+}
+
+func NewPasswordListIterator(passwords []string) *passwordListIterator {
+	return &passwordListIterator{
+		passwords: passwords,
+		index:     0,
+	}
+}
+
+func (p *passwordListIterator) GetCount() (int, error) {
+	return len(p.passwords), nil
+}
+
+func (p *passwordListIterator) Next() (bool, error) {
+	if p.index >= len(p.passwords) {
+		return false, nil
+	}
+	p.index++
+	return true, nil
+}
+
+func (p *passwordListIterator) Current() (string, error) {
+	return p.passwords[p.index-1], nil
+}
+
+func (p *passwordListIterator) GetSpecificPassword(password string) (bool, error) {
+	for _, pass := range p.passwords {
+		if pass == password {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// var _ PasswordProvider = (*passwordListIterator)(nil)
