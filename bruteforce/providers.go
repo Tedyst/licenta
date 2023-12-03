@@ -131,24 +131,24 @@ type passwordHashes struct {
 	password string
 }
 
-type passwordListIterator struct {
+type passwordListProvider struct {
 	passwordHashes []passwordHashes
 	passwords      []string
 	index          int
 }
 
-func NewPasswordListIterator(passwords []string) *passwordListIterator {
-	return &passwordListIterator{
+func NewPasswordListIterator(passwords []string) *passwordListProvider {
+	return &passwordListProvider{
 		passwords: passwords,
 		index:     0,
 	}
 }
 
-func (p *passwordListIterator) GetCount() (int, error) {
+func (p *passwordListProvider) GetCount() (int, error) {
 	return len(p.passwords), nil
 }
 
-func (p *passwordListIterator) GetSpecificPassword(password string) (int64, bool, error) {
+func (p *passwordListProvider) GetSpecificPassword(password string) (int64, bool, error) {
 	for i, pass := range p.passwords {
 		if pass == password {
 			return int64(i), true, nil
@@ -157,7 +157,7 @@ func (p *passwordListIterator) GetSpecificPassword(password string) (int64, bool
 	return 0, false, nil
 }
 
-func (p *passwordListIterator) Next() bool {
+func (p *passwordListProvider) Next() bool {
 	if p.index >= len(p.passwords) {
 		return false
 	}
@@ -165,15 +165,15 @@ func (p *passwordListIterator) Next() bool {
 	return true
 }
 
-func (p *passwordListIterator) Error() error {
+func (p *passwordListProvider) Error() error {
 	return nil
 }
 
-func (p *passwordListIterator) Current() (int64, string, error) {
+func (p *passwordListProvider) Current() (int64, string, error) {
 	return int64(p.index - 1), p.passwords[p.index-1], nil
 }
 
-func (p *passwordListIterator) Start(index int64) error {
+func (p *passwordListProvider) Start(index int64) error {
 	if index < 0 || index >= int64(len(p.passwords)) {
 		return nil
 	}
@@ -181,11 +181,11 @@ func (p *passwordListIterator) Start(index int64) error {
 	return nil
 }
 
-func (p *passwordListIterator) Close() {
+func (p *passwordListProvider) Close() {
 
 }
 
-func (p *passwordListIterator) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
+func (p *passwordListProvider) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
 	p.passwordHashes = append(p.passwordHashes, passwordHashes{
 		hash:     hash,
 		username: username,
@@ -194,7 +194,7 @@ func (p *passwordListIterator) SavePasswordHash(username, hash, password string,
 	return nil
 }
 
-func (p *passwordListIterator) GetPasswordByHash(username, hash string) (string, int64, error) {
+func (p *passwordListProvider) GetPasswordByHash(username, hash string) (string, int64, error) {
 	for _, h := range p.passwordHashes {
 		if h.hash == hash && h.username == username {
 			return h.password, 0, nil
@@ -203,4 +203,4 @@ func (p *passwordListIterator) GetPasswordByHash(username, hash string) (string,
 	return "", 0, nil
 }
 
-var _ PasswordProvider = (*passwordListIterator)(nil)
+var _ PasswordProvider = (*passwordListProvider)(nil)
