@@ -119,9 +119,16 @@ func NewDatabasePasswordProvider(ctx context.Context, database db.TransactionQue
 
 var _ PasswordProvider = (*databasePasswordProvider)(nil)
 
+type passwordHashes struct {
+	hash     string
+	username string
+	password string
+}
+
 type passwordListIterator struct {
-	passwords []string
-	index     int
+	passwordHashes []passwordHashes
+	passwords      []string
+	index          int
 }
 
 func NewPasswordListIterator(passwords []string) *passwordListIterator {
@@ -135,18 +142,6 @@ func (p *passwordListIterator) GetCount() (int, error) {
 	return len(p.passwords), nil
 }
 
-func (p *passwordListIterator) Next() (bool, error) {
-	if p.index >= len(p.passwords) {
-		return false, nil
-	}
-	p.index++
-	return true, nil
-}
-
-func (p *passwordListIterator) Current() (string, error) {
-	return p.passwords[p.index-1], nil
-}
-
 func (p *passwordListIterator) GetSpecificPassword(password string) (bool, error) {
 	for _, pass := range p.passwords {
 		if pass == password {
@@ -156,4 +151,50 @@ func (p *passwordListIterator) GetSpecificPassword(password string) (bool, error
 	return false, nil
 }
 
-// var _ PasswordProvider = (*passwordListIterator)(nil)
+func (p *passwordListIterator) Next() bool {
+	if p.index >= len(p.passwords) {
+		return false
+	}
+	p.index++
+	return true
+}
+
+func (p *passwordListIterator) Error() error {
+	return nil
+}
+
+func (p *passwordListIterator) Current() (int64, string, error) {
+	return int64(p.index - 1), p.passwords[p.index-1], nil
+}
+
+func (p *passwordListIterator) Start(index int64) error {
+	if index < 0 || index >= int64(len(p.passwords)) {
+		return nil
+	}
+	p.index = int(index)
+	return nil
+}
+
+func (p *passwordListIterator) Close() {
+
+}
+
+func (p *passwordListIterator) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
+	p.passwordHashes = append(p.passwordHashes, passwordHashes{
+		hash:     hash,
+		username: username,
+		password: password,
+	})
+	return nil
+}
+
+func (p *passwordListIterator) GetPasswordByHash(username, hash string) (string, int64, error) {
+	for _, h := range p.passwordHashes {
+		if h.hash == hash && h.username == username {
+			return h.password, 0, nil
+		}
+	}
+	return "", 0, nil
+}
+
+var _ PasswordProvider = (*passwordListIterator)(nil)
