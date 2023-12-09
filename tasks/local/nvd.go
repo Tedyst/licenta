@@ -27,6 +27,9 @@ func NewNVDRunner(queries db.TransactionQuerier) *nvdRunner {
 }
 
 func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCpeAPIResult, dbCpes []*queries.NvdCpe) error {
+	ctx, span := tracer.Start(ctx, "importCpesInDB")
+	defer span.End()
+
 	for _, result := range result.Products {
 		var cpe *models.NvdCPE
 
@@ -83,6 +86,9 @@ func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 }
 
 func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCveAPIResult, cpe *models.NvdCPE) error {
+	ctx, span := tracer.Start(ctx, "importCVEsInDB")
+	defer span.End()
+
 	for _, result := range result.Vulnerabilities {
 		var cve *models.NvdCVE
 		cve, err := database.GetCveByCveID(ctx, result.Cve.ID)
@@ -139,6 +145,9 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 }
 
 func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.TransactionQuerier, product nvd.Product, cpe *queries.NvdCpe) error {
+	ctx, span := tracer.Start(ctx, "updateCVEsForSpecificCPE")
+	defer span.End()
+
 	var startIndex int64 = 0
 
 	for {
@@ -179,6 +188,9 @@ func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.Tr
 }
 
 func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) (err error) {
+	ctx, span := tracer.Start(ctx, "UpdateNVDVulnerabilitiesForProduct")
+	defer span.End()
+
 	database, err := r.queries.StartTransaction(ctx)
 	if err != nil {
 		return err

@@ -39,6 +39,7 @@
                 "tasks",
                 "updatenvd",
                 "postgres",
+                "-d",
                 // "ubuntu",
                 // "--local"
             ],

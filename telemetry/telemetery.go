@@ -2,13 +2,13 @@ package telemetry
 
 import (
 	"context"
-	"log"
 
-	"github.com/spf13/viper"
+	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -16,26 +16,24 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
 
-type TelemetryConfig struct {
-	Enabled           bool   `mapstructure:"enabled"`
-	CollectorEndpoint string `mapstructure:"collector_endpoint"`
-}
-
-func SetConfigDefaults(prefix string) {
-	viper.SetDefault(prefix+".enabled", false)
-	viper.SetDefault(prefix+".collector_endpoint", "")
-}
-
-func initTracer(config *TelemetryConfig) *sdktrace.TracerProvider {
-	exporter, err := otlptrace.New(
-		context.Background(),
-		otlptracegrpc.NewClient(
-			otlptracegrpc.WithInsecure(),
-			otlptracegrpc.WithEndpoint(config.CollectorEndpoint),
-		),
-	)
+func initTracer(collectorEndpoint string) error {
+	var err error
+	var exporter sdktrace.SpanExporter
+	if collectorEndpoint == "" {
+		exporter, err = stdouttrace.New(
+			stdouttrace.WithPrettyPrint(),
+		)
+	} else {
+		exporter, err = otlptrace.New(
+			context.Background(),
+			otlptracegrpc.NewClient(
+				otlptracegrpc.WithInsecure(),
+				otlptracegrpc.WithEndpoint(collectorEndpoint),
+			),
+		)
+	}
 	if err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "failed to create trace exporter")
 	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -48,29 +46,34 @@ func initTracer(config *TelemetryConfig) *sdktrace.TracerProvider {
 	)
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	return tp
+	return nil
 }
 
-func initMetric(config *TelemetryConfig) *sdkmetric.MeterProvider {
+func initMetric(collectorEndpoint string) error {
+	if collectorEndpoint == "" {
+		return nil
+	}
 	exporter, err := otlpmetricgrpc.New(
 		context.Background(),
 		otlpmetricgrpc.WithInsecure(),
-		otlpmetricgrpc.WithEndpoint(config.CollectorEndpoint),
+		otlpmetricgrpc.WithEndpoint(collectorEndpoint),
 	)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	reader := sdkmetric.NewPeriodicReader(exporter)
 	provider := sdkmetric.NewMeterProvider(sdkmetric.WithReader(reader))
 	otel.SetMeterProvider(provider)
 
-	return provider
+	return nil
 }
 
-func InitTelemetry(config *TelemetryConfig) {
-	if !config.Enabled {
-		return
+func InitTelemetry(collectorEndpoint string) error {
+	if err := initTracer(collectorEndpoint); err != nil {
+		return errors.Wrap(err, "failed to init tracer")
 	}
-	initTracer(config)
-	initMetric(config)
+	if err := initMetric(collectorEndpoint); err != nil {
+		return errors.Wrap(err, "failed to init metric")
+	}
+	return nil
 }

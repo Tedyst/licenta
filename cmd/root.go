@@ -15,6 +15,8 @@ import (
 	"github.com/tedyst/licenta/cmd/scan"
 	"github.com/tedyst/licenta/cmd/tasks"
 	"github.com/tedyst/licenta/cmd/user"
+	"github.com/tedyst/licenta/telemetry"
+	"github.com/ttys3/slogx"
 )
 
 var rootCmd = &cobra.Command{
@@ -26,11 +28,19 @@ var rootCmd = &cobra.Command{
 		if err := viper.BindPFlags(cmd.Flags()); err != nil {
 			panic(err)
 		}
+		level := "info"
 		if viper.GetBool("debug") {
-			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-				Level: slog.LevelDebug,
-			})))
+			level = "debug"
 		}
+		handler := slogx.New(slogx.WithTracing(), slogx.WithLevel(level), slogx.WithFullSource(), slogx.WithFormat("text"))
+		slog.SetDefault(handler)
+
+		if viper.GetBool("telemetry") {
+			if err := telemetry.InitTelemetry(viper.GetString("telemetry-collector-endpoint")); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	},
 }
@@ -63,6 +73,8 @@ func initConfig(cmd *cobra.Command) {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug mode")
+	rootCmd.PersistentFlags().Bool("telemetry", true, "Enable telemetry")
+	rootCmd.PersistentFlags().String("telemetry-collector-endpoint", "", "Telemetry collector endpoint")
 
 	rootCmd.AddCommand(user.NewUserCmd())
 	rootCmd.AddCommand(extract.NewExtractCmd())
