@@ -50,7 +50,15 @@ var scanPostgresCmd = &cobra.Command{
 		slog.Info("Config scanned")
 
 		for _, result := range results {
-			slog.Info("Config result: %s", "config", result)
+			switch result.Severity() {
+			case scanner.SEVERITY_HIGH:
+				slog.ErrorCtx(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
+			case scanner.SEVERITY_MEDIUM:
+				slog.WarnCtx(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
+			case scanner.SEVERITY_WARNING:
+				slog.WarnCtx(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
+			default:
+			}
 		}
 
 		users, err := sc.GetUsers(ctx)
@@ -74,7 +82,7 @@ var scanPostgresCmd = &cobra.Command{
 
 			bruteforcer := bruteforce.NewBruteforcer(passProvider, sc, func(m map[scanner.User]bruteforce.BruteforceUserStatus) error {
 				for user, entry := range m {
-					slog.Info("Received update from function", "user", user, "entry", entry)
+					slog.InfoContext(cmd.Context(), "Received update from function", "user", user, "entry", entry)
 				}
 				return nil
 			})

@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/cmd/bruteforce"
 	"github.com/tedyst/licenta/cmd/extract"
+	"github.com/tedyst/licenta/cmd/migrate"
 	"github.com/tedyst/licenta/cmd/nvd"
 	"github.com/tedyst/licenta/cmd/scan"
 	"github.com/tedyst/licenta/cmd/tasks"
@@ -26,13 +27,13 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		initConfig(cmd)
 		if err := viper.BindPFlags(cmd.Flags()); err != nil {
-			panic(err)
+			return err
 		}
 		level := "info"
 		if viper.GetBool("debug") {
 			level = "debug"
 		}
-		handler := slogx.New(slogx.WithTracing(), slogx.WithLevel(level), slogx.WithFullSource(), slogx.WithFormat("text"))
+		handler := slogx.New(slogx.WithTracing(), slogx.WithLevel(level), slogx.WithFullSource(), slogx.WithFormat("cli"))
 		slog.SetDefault(handler)
 
 		if viper.GetBool("telemetry") {
@@ -82,4 +83,5 @@ func init() {
 	rootCmd.AddCommand(nvd.NewNvdCmd())
 	rootCmd.AddCommand(bruteforce.NewBruteforceCmd())
 	rootCmd.AddCommand(tasks.GetTasksCmd())
+	rootCmd.AddCommand(migrate.NewMigrateCmd())
 }

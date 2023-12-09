@@ -6,12 +6,18 @@ CREATE TABLE users(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE INDEX users_username_idx ON users(username);
+
+CREATE INDEX users_email_idx ON users(email);
+
 CREATE TABLE sessions(
   id uuid PRIMARY KEY,
   user_id bigint REFERENCES users(id),
   scope text[] NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX sessions_user_id_idx ON sessions(user_id);
 
 CREATE TABLE reset_password_tokens(
   id uuid PRIMARY KEY,
@@ -34,6 +40,8 @@ CREATE TABLE organizations(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE INDEX organizations_name_idx ON organizations(name);
+
 CREATE TABLE organization_members(
   id bigserial PRIMARY KEY,
   organization_id bigint REFERENCES organizations(id) NOT NULL,
@@ -41,6 +49,8 @@ CREATE TABLE organization_members(
   role integer NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
+
+CREATE INDEX organization_members_organization_id_idx ON organization_members(organization_id);
 
 CREATE TABLE projects(
   id bigserial PRIMARY KEY,
@@ -152,6 +162,8 @@ CREATE TABLE nvd_cpes(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE INDEX nvd_cpes_database_version_idx ON nvd_cpes(database_type, version);
+
 CREATE TABLE nvd_cves(
   id bigserial PRIMARY KEY,
   cve_id text NOT NULL UNIQUE,
@@ -165,9 +177,12 @@ CREATE TABLE nvd_cves(
 CREATE TABLE nvd_cve_cpes(
   id bigserial PRIMARY KEY,
   cve_id bigint REFERENCES nvd_cves(id) ON DELETE CASCADE NOT NULL,
-  cpe_id bigint REFERENCES nvd_cpes(id) ON DELETE CASCADE NOT NULL,
-  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+  cpe_id bigint REFERENCES nvd_cpes(id) ON DELETE CASCADE NOT NULL
 );
+
+CREATE INDEX nvd_cve_cpes_cve_id_idx ON nvd_cve_cpes(cve_id);
+
+CREATE INDEX nvd_cve_cpes_cpe_id_idx ON nvd_cve_cpes(cpe_id);
 
 CREATE TABLE default_bruteforce_passwords(
   id bigserial PRIMARY KEY,
