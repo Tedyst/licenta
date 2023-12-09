@@ -73,7 +73,7 @@ func initConfig(cmd *cobra.Command) {
 
 func init() {
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug mode")
-	rootCmd.PersistentFlags().Bool("telemetry", true, "Enable telemetry")
+	rootCmd.PersistentFlags().Bool("telemetry", false, "Enable telemetry")
 	rootCmd.PersistentFlags().String("telemetry-collector-endpoint", "", "Telemetry collector endpoint")
 
 	rootCmd.AddCommand(user.NewUserCmd())
