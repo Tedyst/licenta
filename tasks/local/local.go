@@ -7,14 +7,31 @@ import (
 )
 
 type localRunner struct {
-	emailSender email.EmailSender
-	queries     db.TransactionQuerier
+	scannerRunner
+	nvdRunner
+	gitRunner
+	emailRunner
+	dockerRunner
 }
 
 func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier) *localRunner {
 	return &localRunner{
-		emailSender: emailSender,
-		queries:     queries,
+		scannerRunner: scannerRunner{
+			queries: queries,
+		},
+		nvdRunner: nvdRunner{
+			queries: queries,
+		},
+		gitRunner: gitRunner{
+			queries: queries,
+		},
+		emailRunner: emailRunner{
+			queries:     queries,
+			emailSender: emailSender,
+		},
+		dockerRunner: dockerRunner{
+			queries: queries,
+		},
 	}
 }
 

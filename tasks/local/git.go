@@ -7,12 +7,23 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/pkg/errors"
+	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/git"
 	"github.com/tedyst/licenta/models"
 )
 
-func (r *localRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
+type gitRunner struct {
+	queries db.TransactionQuerier
+}
+
+func NewGitRunner(queries db.TransactionQuerier) *gitRunner {
+	return &gitRunner{
+		queries: queries,
+	}
+}
+
+func (r *gitRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
 	if repo == nil {
 		return errors.New("repo is nil")
 	}

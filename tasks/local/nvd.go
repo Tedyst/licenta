@@ -16,7 +16,17 @@ import (
 	"github.com/tedyst/licenta/nvd"
 )
 
-func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCpeAPIResult, dbCpes []*queries.NvdCpe) error {
+type nvdRunner struct {
+	queries db.TransactionQuerier
+}
+
+func NewNVDRunner(queries db.TransactionQuerier) *nvdRunner {
+	return &nvdRunner{
+		queries: queries,
+	}
+}
+
+func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCpeAPIResult, dbCpes []*queries.NvdCpe) error {
 	for _, result := range result.Products {
 		var cpe *models.NvdCPE
 
@@ -41,6 +51,7 @@ func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, d
 		var forceUpdate = false
 
 		if !found {
+			slog.DebugContext(ctx, "Creating CPE", slog.Int("product", int(product)), slog.String("cpe", result.Cpe.CpeName))
 			cpe, err = database.CreateNvdCPE(ctx, queries.CreateNvdCPEParams{
 				Cpe:          result.Cpe.CpeName,
 				DatabaseType: int32(product),
@@ -71,7 +82,7 @@ func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, d
 	return nil
 }
 
-func (r *localRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCveAPIResult, cpe *models.NvdCPE) error {
+func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCveAPIResult, cpe *models.NvdCPE) error {
 	for _, result := range result.Vulnerabilities {
 		var cve *models.NvdCVE
 		cve, err := database.GetCveByCveID(ctx, result.Cve.ID)
@@ -79,6 +90,8 @@ func (r *localRunner) importCVEsInDB(ctx context.Context, product nvd.Product, d
 			return errors.Wrap(err, "failed to get cve")
 		}
 		if errors.Is(err, pgx.ErrNoRows) {
+			slog.DebugContext(ctx, "Creating CVE", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe), slog.String("cve", result.Cve.ID))
+
 			publishedDate, err := result.Cve.PubslihedDate()
 			if err != nil {
 				return errors.Wrap(err, "failed to parse published date")
@@ -125,7 +138,7 @@ func (r *localRunner) importCVEsInDB(ctx context.Context, product nvd.Product, d
 	return nil
 }
 
-func (r *localRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.TransactionQuerier, product nvd.Product, cpe *queries.NvdCpe) error {
+func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.TransactionQuerier, product nvd.Product, cpe *queries.NvdCpe) error {
 	var startIndex int64 = 0
 
 	for {
@@ -147,15 +160,15 @@ func (r *localRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.
 			return err
 		}
 
+		err = r.importCVEsInDB(ctx, product, database, result, cpe)
+		if err != nil {
+			return err
+		}
+
 		if result.StartIndex+result.ResultsPerPage < result.TotalResults {
 			startIndex += result.ResultsPerPage
 		} else {
 			break
-		}
-
-		err = r.importCVEsInDB(ctx, product, database, result, cpe)
-		if err != nil {
-			return err
 		}
 
 		slog.DebugContext(ctx, "Waiting 6 seconds before next request", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe))
@@ -165,17 +178,7 @@ func (r *localRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.
 	return nil
 }
 
-func (r *localRunner) SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error {
-	// TODO
-	return nil
-}
-
-func (r *localRunner) SendCVEMailsToAllProjects(ctx context.Context) error {
-	// TODO
-	return nil
-}
-
-func (r *localRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) (err error) {
+func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) (err error) {
 	database, err := r.queries.StartTransaction(ctx)
 	if err != nil {
 		return err

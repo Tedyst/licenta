@@ -10,13 +10,24 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
+	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/docker"
 	"github.com/tedyst/licenta/extractors/file"
 	"github.com/tedyst/licenta/models"
 )
 
-func (r *localRunner) ScanDockerRepository(ctx context.Context, image *models.ProjectDockerImage) (err error) {
+type dockerRunner struct {
+	queries db.TransactionQuerier
+}
+
+func NewDockerRunner(queries db.TransactionQuerier) *dockerRunner {
+	return &dockerRunner{
+		queries: queries,
+	}
+}
+
+func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.ProjectDockerImage) (err error) {
 	if image == nil {
 		return errors.New("image is nil")
 	}

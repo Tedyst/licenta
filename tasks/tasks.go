@@ -17,6 +17,8 @@ type TaskRunner interface {
 type EmailTasksRunner interface {
 	SendResetEmail(ctx context.Context, address string, subject string, html string, text string) error
 	SendCVEVulnerabilityEmail(ctx context.Context, project *models.Project) error
+	SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error
+	SendCVEMailsToAllProjects(ctx context.Context) error
 }
 
 type DockerTasksRunner interface {
@@ -29,6 +31,4 @@ type GitTasksRunner interface {
 
 type VulnerabilityTasksRunner interface {
 	UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) error
-	SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error
-	SendCVEMailsToAllProjects(ctx context.Context) error
 }

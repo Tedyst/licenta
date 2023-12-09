@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
+	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
@@ -21,7 +22,17 @@ func getPostgresConnectString(db *models.PostgresDatabases) string {
 	return fmt.Sprintf("host=%s port=%d database=%s user=%s password=%s", db.Host, db.Port, db.DatabaseName, db.Username, db.Password)
 }
 
-func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
+type scannerRunner struct {
+	queries db.TransactionQuerier
+}
+
+func NewScannerRunner(queries db.TransactionQuerier) *scannerRunner {
+	return &scannerRunner{
+		queries: queries,
+	}
+}
+
+func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
 	if err := runner.queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
 		ID:     scan.ID,
 		Status: models.SCAN_RUNNING,
@@ -95,7 +106,7 @@ func (runner *localRunner) ScanPostgresDB(ctx context.Context, scan *models.Post
 	return errors.Wrap(runner.bruteforcePostgres(ctx, scan, sc, notifyError, insertResults), "could not bruteforce passwords")
 }
 
-func (runner *localRunner) bruteforcePostgres(
+func (runner *scannerRunner) bruteforcePostgres(
 	ctx context.Context,
 	scan *models.PostgresScan,
 	sc scanner.Scanner,
