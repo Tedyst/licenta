@@ -37,8 +37,8 @@
             "program": ".",
             "args": [
                 "tasks",
-                "scanpostgres",
-                "1",
+                "updatenvd",
+                "postgres",
                 // "ubuntu",
                 // "--local"
             ],

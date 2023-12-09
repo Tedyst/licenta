@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
+	"time"
 )
 
 const baseNvdCpeUrl = "https://services.nvd.nist.gov/rest/json/cpes/2.0"
@@ -34,6 +36,9 @@ func DownloadCpe(ctx context.Context, product Product) (io.ReadCloser, error) {
 }
 
 func DownloadCpeNext(ctx context.Context, product Product, startIndex int64) (io.ReadCloser, error) {
+	slog.DebugContext(ctx, "Downloading CPEs from NVD", slog.String("product", fmt.Sprint(product)), slog.Int64("startIndex", startIndex))
+	start := time.Now()
+
 	u, err := url.Parse(baseNvdCpeUrl)
 	if err != nil {
 		return nil, err
@@ -58,6 +63,8 @@ func DownloadCpeNext(ctx context.Context, product Product, startIndex int64) (io
 		return nil, ErrRateLimit
 	}
 
+	slog.DebugContext(ctx, "Finished downloading CPEs from NVD", slog.String("product", fmt.Sprint(product)), slog.Int64("startIndex", startIndex), slog.Int64("ms", time.Since(start).Milliseconds()))
+
 	return resp.Body, err
 }
 
@@ -66,6 +73,9 @@ func DownloadCVEs(ctx context.Context, product Product, cpe string) (io.ReadClos
 }
 
 func DownloadCVEsNext(ctx context.Context, product Product, cpe string, startIndex int64) (io.ReadCloser, error) {
+	slog.DebugContext(ctx, "Downloading CVEs from NVD", slog.String("product", fmt.Sprint(product)), slog.String("cpe", cpe), slog.Int64("startIndex", startIndex))
+	start := time.Now()
+
 	u, err := url.Parse(baseNvdCveUrl)
 	if err != nil {
 		return nil, err
@@ -84,6 +94,8 @@ func DownloadCVEsNext(ctx context.Context, product Product, cpe string, startInd
 	if resp.StatusCode == 429 {
 		return nil, ErrRateLimit
 	}
+
+	slog.DebugContext(ctx, "Finished downloading CVEs from NVD", slog.String("product", fmt.Sprint(product)), slog.Int64("startIndex", startIndex), slog.Int64("ms", time.Since(start).Milliseconds()))
 
 	return resp.Body, err
 }

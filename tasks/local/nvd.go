@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"io"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -37,6 +38,8 @@ func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, d
 			}
 		}
 
+		var forceUpdate = false
+
 		if !found {
 			cpe, err = database.CreateNvdCPE(ctx, queries.CreateNvdCPEParams{
 				Cpe:          result.Cpe.CpeName,
@@ -47,9 +50,10 @@ func (r *localRunner) importCpesInDB(ctx context.Context, product nvd.Product, d
 			if err != nil {
 				return err
 			}
+			forceUpdate = true
 		}
 
-		if !cpe.LastModified.Time.Equal(t) {
+		if !cpe.LastModified.Time.Equal(t) || forceUpdate {
 			err = database.UpdateNvdCPE(ctx, queries.UpdateNvdCPEParams{
 				ID:           cpe.ID,
 				LastModified: pgtype.Timestamptz{Time: t, Valid: true},
@@ -133,6 +137,7 @@ func (r *localRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.
 		defer reader.Close()
 
 		if errors.Is(err, nvd.ErrRateLimit) {
+			slog.DebugContext(ctx, "Rate limit reached for getting CVEs, waiting 10 seconds", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe))
 			time.Sleep(10 * time.Second)
 			continue
 		}
@@ -153,6 +158,7 @@ func (r *localRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.
 			return err
 		}
 
+		slog.DebugContext(ctx, "Waiting 6 seconds before next request", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe))
 		time.Sleep(6 * time.Second)
 	}
 
@@ -187,6 +193,7 @@ func (r *localRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, pr
 		defer reader.Close()
 
 		if errors.Is(err, nvd.ErrRateLimit) {
+			slog.DebugContext(ctx, "Rate limit reached for getting CPEs, waiting 10 seconds", slog.Int("product", int(product)))
 			time.Sleep(10 * time.Second)
 			continue
 		}
@@ -194,12 +201,6 @@ func (r *localRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, pr
 		result, err := nvd.ParseCpeAPI(ctx, reader)
 		if err != nil {
 			return err
-		}
-
-		if result.StartIndex+result.ResultsPerPage < result.TotalResults {
-			startIndex += result.ResultsPerPage
-		} else {
-			break
 		}
 
 		dbCpes, err := r.queries.GetNvdCPEsByDBType(ctx, int32(product))
@@ -212,6 +213,13 @@ func (r *localRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, pr
 			return err
 		}
 
+		if result.StartIndex+result.ResultsPerPage < result.TotalResults {
+			startIndex += result.ResultsPerPage
+		} else {
+			break
+		}
+
+		slog.DebugContext(ctx, "Waiting 6 seconds before next request", slog.Int("product", int(product)))
 		time.Sleep(6 * time.Second)
 	}
 	return nil

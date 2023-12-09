@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -24,6 +25,11 @@ var rootCmd = &cobra.Command{
 		initConfig(cmd)
 		if err := viper.BindPFlags(cmd.Flags()); err != nil {
 			panic(err)
+		}
+		if viper.GetBool("debug") {
+			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+				Level: slog.LevelDebug,
+			})))
 		}
 		return nil
 	},
