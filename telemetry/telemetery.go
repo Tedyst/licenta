@@ -77,3 +77,29 @@ func InitTelemetry(collectorEndpoint string) error {
 	}
 	return nil
 }
+
+func ShutdownTelemetry() error {
+	tp := otel.GetTracerProvider()
+	if tp != nil {
+		switch tp.(type) {
+		case *sdktrace.TracerProvider:
+			err := otel.GetTracerProvider().(*sdktrace.TracerProvider).Shutdown(context.Background())
+			if err != nil {
+				return err
+			}
+		default:
+		}
+	}
+	mp := otel.GetMeterProvider()
+	if mp != nil {
+		switch mp.(type) {
+		case *sdkmetric.MeterProvider:
+			err := otel.GetMeterProvider().(*sdkmetric.MeterProvider).Shutdown(context.Background())
+			if err != nil {
+				return err
+			}
+		default:
+		}
+	}
+	return nil
+}

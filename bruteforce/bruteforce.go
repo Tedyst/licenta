@@ -3,10 +3,13 @@ package bruteforce
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/tedyst/licenta/scanner"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -37,7 +40,7 @@ type StatusFunc = func(map[scanner.User]BruteforceUserStatus) error
 type bruteforcer struct {
 	passwordProvider PasswordProvider
 	scanner          scanner.Scanner
-	updateStatus     func() error
+	updateStatus     func(ctx context.Context) error
 
 	status     map[scanner.User]BruteforceUserStatus
 	statusLock sync.Mutex
@@ -54,9 +57,18 @@ func NewBruteforcer(passwordProvider PasswordProvider, sc scanner.Scanner, statu
 		status:           map[scanner.User]BruteforceUserStatus{},
 		statusLock:       sync.Mutex{},
 	}
-	br.updateStatus = func() error {
+	br.updateStatus = func(ctx context.Context) error {
 		br.statusLock.Lock()
 		defer br.statusLock.Unlock()
+
+		for user, value := range br.status {
+			username, err := user.GetUsername()
+			if err != nil {
+				return err
+			}
+			slog.DebugContext(ctx, "Updating bruteforce status for user", "user", username, "tried", value.Tried, "total", value.Total, "found_password", value.FoundPassword, "maximum_internal_id", value.MaximumInternalID)
+		}
+
 		return statusFunc(br.status)
 	}
 	return br
@@ -83,7 +95,7 @@ func (br *bruteforcer) initialize(ctx context.Context) error {
 	}
 	br.statusLock.Unlock()
 
-	return br.updateStatus()
+	return br.updateStatus(ctx)
 }
 
 func (br *bruteforcer) savePasswordHash(ctx context.Context, user scanner.User, password string) error {
@@ -99,6 +111,9 @@ func (br *bruteforcer) savePasswordHash(ctx context.Context, user scanner.User, 
 }
 
 func (br *bruteforcer) BruteforcePasswordAllUsers(ctx context.Context) ([]scanner.ScanResult, error) {
+	ctx, span := tracer.Start(ctx, "BruteforcePasswordAllUsers")
+	defer span.End()
+
 	err := br.initialize(ctx)
 	if err != nil {
 		return nil, err
@@ -210,7 +225,20 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 	ctx context.Context,
 	u scanner.User,
 ) (string, error) {
-	defer br.updateStatus()
+	username, err := u.GetUsername()
+	if err != nil {
+		return "", err
+	}
+
+	ctx, span := tracer.Start(ctx, "bruteforcePasswordsUser", trace.WithAttributes(attribute.KeyValue{
+		Key:   attribute.Key("user"),
+		Value: attribute.StringValue(username),
+	}))
+	defer span.End()
+
+	slog.DebugContext(ctx, "Bruteforcing passwords for user", "user", username)
+
+	defer br.updateStatus(ctx)
 
 	pass, err := br.tryPlaintextPassword(ctx, u)
 	if err != nil {
@@ -224,10 +252,6 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 	if err != nil {
 		return "", err
 	}
-	username, err := u.GetUsername()
-	if err != nil {
-		return "", err
-	}
 
 	var startBruteforceID int64 = 0
 
@@ -237,12 +261,16 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 			return "", err
 		}
 		if alreadySolved != "" {
+			slog.DebugContext(ctx, "Password already solved", "user", username, "password", alreadySolved, "hash", hash, "last_id", lastID)
 			err = br.markStatusAsSolved(ctx, u, alreadySolved, lastID)
 			if err != nil {
 				return "", err
 			}
+			passwordsAlreadyFound.Add(ctx, 1)
 			return alreadySolved, nil
 		}
+
+		slog.DebugContext(ctx, "Password not already solved, but continuing from last_id", "user", username, "hash", hash, "last_id", lastID)
 
 		startBruteforceID = lastID
 	}
@@ -285,6 +313,8 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 				errorChan <- err
 			}
 
+			passwordsTried.Add(ctx, 1)
+
 			if ok {
 				br.markStatusAsSolved(ctx, u, pass, internalID)
 				resultChan <- struct {
@@ -299,7 +329,7 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 
 		select {
 		case <-ticker.C:
-			br.updateStatus()
+			br.updateStatus(ctx)
 		case err := <-errorChan:
 			return "", err
 		case pass := <-resultChan:

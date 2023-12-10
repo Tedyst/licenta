@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	errs "errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -33,6 +34,9 @@ func NewScannerRunner(queries db.TransactionQuerier) *scannerRunner {
 }
 
 func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
+	ctx, span := tracer.Start(ctx, "ScanPostgresDB")
+	defer span.End()
+
 	if err := runner.queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
 		ID:     scan.ID,
 		Status: models.SCAN_RUNNING,
@@ -44,6 +48,15 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	if err != nil {
 		return errors.Wrap(err, "could not get database")
 	}
+
+	logger := slog.With(
+		"scan", scan.ID,
+		"database_id", scan.PostgresDatabaseID,
+		"project_id", db.ProjectID,
+	)
+
+	logger.InfoContext(ctx, "Starting Postgres DB scan")
+	defer logger.InfoContext(ctx, "Finished Postgres DB scan")
 
 	notifyError := func(err error) error {
 		if err2 := runner.queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
@@ -79,18 +92,26 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	}
 	defer conn.Close(ctx)
 
+	logger.DebugContext(ctx, "Connected to database")
+
 	sc, err := postgres.NewScanner(ctx, conn)
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not create scanner"))
 	}
 
+	logger.DebugContext(ctx, "Created scanner")
+
 	if err := sc.Ping(ctx); err != nil {
 		return notifyError(errors.Wrap(err, "could not ping database"))
 	}
 
+	logger.DebugContext(ctx, "Pinged database")
+
 	if err := sc.CheckPermissions(ctx); err != nil {
 		return notifyError(errors.Wrap(err, "could not check permissions"))
 	}
+
+	logger.DebugContext(ctx, "Checked permissions")
 
 	results, err := sc.ScanConfig(ctx)
 	if err != nil {
@@ -98,12 +119,16 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	}
 	insertResults(results)
 
+	logger.DebugContext(ctx, "Scanned config")
+
 	_, err = sc.GetUsers(ctx)
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not get users"))
 	}
 
-	return errors.Wrap(runner.bruteforcePostgres(ctx, scan, sc, notifyError, insertResults), "could not bruteforce passwords")
+	logger.DebugContext(ctx, "Got users")
+
+	return errors.Wrap(runner.bruteforcePostgres(ctx, scan, sc, notifyError, insertResults, logger), "could not bruteforce passwords")
 }
 
 func (runner *scannerRunner) bruteforcePostgres(
@@ -112,7 +137,10 @@ func (runner *scannerRunner) bruteforcePostgres(
 	sc scanner.Scanner,
 	notifyError func(error) error,
 	insertResults func([]scanner.ScanResult) error,
+	logger *slog.Logger,
 ) error {
+	logger.DebugContext(ctx, "Bruteforcing passwords for all users")
+
 	bruteforceResults := map[scanner.User]int64{}
 	notifyBruteforceStatus := func(status map[scanner.User]bruteforce.BruteforceUserStatus) error {
 		for user, entry := range status {
@@ -166,6 +194,8 @@ func (runner *scannerRunner) bruteforcePostgres(
 	if err := insertResults(bruteforceResult); err != nil {
 		return notifyError(errors.Wrap(err, "could not insert bruteforce results"))
 	}
+
+	logger.DebugContext(ctx, "Bruteforced passwords for all users")
 
 	if err := runner.queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
 		ID:     scan.ID,

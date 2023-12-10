@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/tedyst/licenta/scanner"
 
@@ -36,8 +35,6 @@ func (sc *postgresScanner) Ping(ctx context.Context) error {
 }
 
 func (sc *postgresScanner) CheckPermissions(ctx context.Context) error {
-	slog.DebugContext(ctx, "Checking permissions for postgres", slog.String("scanner", "postgres"), slog.String("connection", sc.db.Config().Host))
-
 	row, err := sc.db.Query(ctx, "SELECT * FROM information_schema.role_table_grants;")
 	if err != nil {
 		return errors.Wrap(err, "could not see table information_schema.role_table_grants")

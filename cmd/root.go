@@ -44,6 +44,12 @@ var rootCmd = &cobra.Command{
 
 		return nil
 	},
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		if err := telemetry.ShutdownTelemetry(); err != nil {
+			return err
+		}
+		return nil
+	},
 }
 
 func Execute() {
