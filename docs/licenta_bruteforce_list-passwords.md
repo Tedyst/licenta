@@ -1,10 +1,10 @@
 ## licenta bruteforce list-passwords
 
-Run the extractor tool for the provided file
+List all the default bruteforce passwords
 
 ### Synopsis
 
-Run the extractor tool for the provided file
+This command allows you to list all the default bruteforce passwords from the database
 
 ```
 licenta bruteforce list-passwords [flags]

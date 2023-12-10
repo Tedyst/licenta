@@ -13,8 +13,8 @@ const baseCainAndAbelURL = "https://raw.githubusercontent.com/danielmiessler/Sec
 
 var cainAndAbelCmd = &cobra.Command{
 	Use:   "cain-and-abel",
-	Short: "Run the extractor tool for the provided file",
-	Long:  `Run the extractor tool for the provided file`,
+	Short: "Download the cain-and-abel.txt file and import it into the database",
+	Long:  `This command downloads the cain-and-abel password list and imports it into the database.`,
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error

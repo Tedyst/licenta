@@ -1,10 +1,10 @@
 ## licenta migrate up
 
-Migrations management
+Migrate up to latest version
 
 ### Synopsis
 
-Migrations management.
+This command allows you to migrate up to the latest version. If no migrations are found, the command will do nothing.
 
 ```
 licenta migrate up [flags]

@@ -16,8 +16,8 @@ import (
 
 var scanPostgresCmd = &cobra.Command{
 	Use:   "postgres [connection string]",
-	Short: "Run the extractor tool for the provided file",
-	Long:  `Run the extractor tool for the provided file`,
+	Short: "Scan a postgres database",
+	Long:  `This command allows you to scan a postgres database manually. It does not update the database, so the results will not be visible in the web interface. The database connection string is not required, but is recommended for the bruteforce module. If a bruteforce is successful, the database will store that result in order to avoid repeating the bruteforce.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

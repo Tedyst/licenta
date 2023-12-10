@@ -1,10 +1,10 @@
 ## licenta user
 
-Users management
+User management
 
 ### Synopsis
 
-Users management.
+Allows you to manage users and their permissions. These commands are intended only for recovery/initial setup. For the normal use, use the web interface.
 
 ### Options
 
@@ -24,7 +24,7 @@ Users management.
 
 ### SEE ALSO
 
-* [licenta](licenta.md)	 - A template for building Go applications
+* [licenta](licenta.md)	 - An app for verifying the security of your databases
 * [licenta user changepassword](licenta_user_changepassword.md)	 - Change the password of a user
 * [licenta user createadmin](licenta_user_createadmin.md)	 - Create an admin user
 * [licenta user delete](licenta_user_delete.md)	 - Delete a user by username or email

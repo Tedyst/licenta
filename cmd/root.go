@@ -22,8 +22,8 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "licenta",
-	Short: "A template for building Go applications",
-	Long:  `A template for building Go applications.`,
+	Short: "An app for verifying the security of your databases",
+	Long:  `This app allows you to verify the security of your databases by checking for vulnerabilities and misconfigurations. It also allows you to extract username and passwords from Git repositories/Docker images and try them against your databases. It features a REST API, which should be used by the frontend.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		initConfig(cmd)
 		if err := viper.BindPFlags(cmd.Flags()); err != nil {

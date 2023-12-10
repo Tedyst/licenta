@@ -9,13 +9,8 @@ import (
 
 var extractCmd = &cobra.Command{
 	Use:   "extract",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Run the extract process",
+	Long:  `This command allows you to run the extract process. The extract process will find all the passwords and usernames from a source and show them to you. It does not require a database running.`,
 }
 
 func NewExtractCmd() *cobra.Command {

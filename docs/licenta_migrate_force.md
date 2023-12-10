@@ -1,10 +1,10 @@
 ## licenta migrate force
 
-Migrations management
+Force a migration to a specific version
 
 ### Synopsis
 
-Migrations management.
+This command allows you to force a migration to a specific version. If no migrations are found, the command will do nothing.This dosen't do a migration, just sets the version in the database.
 
 ```
 licenta migrate force [flags]

@@ -1,10 +1,10 @@
 ## licenta bruteforce cain-and-abel
 
-Run the extractor tool for the provided file
+Download the cain-and-abel.txt file and import it into the database
 
 ### Synopsis
 
-Run the extractor tool for the provided file
+This command downloads the cain-and-abel password list and imports it into the database.
 
 ```
 licenta bruteforce cain-and-abel [flags]

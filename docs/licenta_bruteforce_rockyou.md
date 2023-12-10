@@ -1,10 +1,10 @@
 ## licenta bruteforce rockyou
 
-Run the extractor tool for the provided file
+Download the rockyou.txt file and import it into the database
 
 ### Synopsis
 
-Run the extractor tool for the provided file
+This command downloads the rockyou password list and imports it into the database.
 
 ```
 licenta bruteforce rockyou [flags]

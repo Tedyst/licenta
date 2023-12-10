@@ -14,8 +14,8 @@ import (
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
-	Short: "Run the server",
-	Long:  `Run the server.`,
+	Short: "Run the server using the production configuration",
+	Long:  `This command starts the API server and waits for requests. By default, it uses the local runner for async tasks.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		viper.SetConfigFile("config.yaml")
 		viper.ReadInConfig()
@@ -42,18 +42,7 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-
-	// serveCmd.Flags().String("sendgrid", "", "Sendgrid API Key")
-	// serveCmd.Flags().String("postmark", "", "Postmark API Key")
-
-	// serveCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
-	// serveCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
-
 	serveCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
-
-	// serveCmd.Flags().Bool("telemetry.metrics.enabled", false, "Enable metrics")
-	// serveCmd.Flags().Bool("telemetry.tracing.enabled", false, "Enable tracing")
-	// serveCmd.Flags().String("telemetry.tracing.jaeger", "", "Jaeger URL")
 
 	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 

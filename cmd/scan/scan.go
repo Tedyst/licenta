@@ -6,13 +6,8 @@ import (
 
 var scanCmd = &cobra.Command{
 	Use:   "scan",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Scan database type manually",
+	Long:  `This command allows you to scan a database type manually. It does not update the database, so the results will not be visible in the web interface. The database connection string is not required, but is recommended for the bruteforce module. If a bruteforce is successful, the database will store that result in order to avoid repeating the bruteforce.`,
 }
 
 func NewScanCmd() *cobra.Command {

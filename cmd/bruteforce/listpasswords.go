@@ -8,8 +8,8 @@ import (
 
 var listPasswordsCmd = &cobra.Command{
 	Use:   "list-passwords",
-	Short: "Run the extractor tool for the provided file",
-	Long:  `Run the extractor tool for the provided file`,
+	Short: "List all the default bruteforce passwords",
+	Long:  `This command allows you to list all the default bruteforce passwords from the database`,
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database := db.InitDatabase(viper.GetString("database"))

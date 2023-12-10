@@ -9,38 +9,45 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/models"
 )
 
 var changepasswordCmd = &cobra.Command{
 	Use:   "changepassword",
 	Short: "Change the password of a user",
-	Long: `Change the password of a user. Usage:
-	licenta changepassword [username or email] [new password]`,
-	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:  `Change the password of a user. This command is intended only for recovery/initial setup. For the normal use, use the web interface.`,
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var database db.TransactionQuerier
 		database = db.InitDatabase(viper.GetString("database"))
 		database, err := database.StartTransaction(context.Background())
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 		defer database.EndTransaction(context.Background(), err)
 
 		user, err := database.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
-			panic(err)
+			return err
 		}
 		if user == nil {
-			log.Panic("User does not exist.")
+			return nil
 		}
+
+		hash, err := models.GenerateHash(context.Background(), args[1])
+		if err != nil {
+			return err
+		}
+
 		err = database.UpdateUser(context.Background(), queries.UpdateUserParams{
 			ID:       user.ID,
-			Password: sql.NullString{Valid: true, String: args[1]},
+			Password: sql.NullString{Valid: true, String: hash},
 		})
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 		log.Println("Password changed.")
+		return nil
 	},
 }
 

@@ -12,8 +12,8 @@ import (
 
 var updateNVDTask = &cobra.Command{
 	Use:   "updatenvd [product]",
-	Short: "Scan postgres DB task",
-	Long:  `Scan postgres DB task`,
+	Short: "Update NVD vulnerabilities for a product",
+	Long:  `This task will update the NVD vulnerabilities for a product. The parameter is the product name. Currently only postgres is supported. The task will update the nvd_cpes and nvd_cves tables on success. If the product does not exist, or the update fails, the tables will not be updated. Will not schedule sending notifications for the new vulnerabilities.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var product nvd.Product

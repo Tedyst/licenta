@@ -14,8 +14,8 @@ const baseRockyouURL = "https://github.com/brannondorsey/naive-hashcat/releases/
 
 var rockyouCmd = &cobra.Command{
 	Use:   "rockyou",
-	Short: "Run the extractor tool for the provided file",
-	Long:  `Run the extractor tool for the provided file`,
+	Short: "Download the rockyou.txt file and import it into the database",
+	Long:  `This command downloads the rockyou password list and imports it into the database.`,
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error

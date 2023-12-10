@@ -1,10 +1,10 @@
 ## licenta migrate down
 
-Migrations management
+Migrate down to previous version
 
 ### Synopsis
 
-Migrations management.
+This command allows you to migrate down to the previous version. If no migrations are found, the command will do nothing.
 
 ```
 licenta migrate down [flags]

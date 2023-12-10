@@ -19,13 +19,8 @@ import (
 
 var importCpeCmd = &cobra.Command{
 	Use:   "importcpe",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Import CPE from NVD API or file",
+	Long:  `This command allows you to import CPE from NVD API or file into the database.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var reader io.ReadCloser
 		var err error
@@ -125,9 +120,6 @@ to quickly create a Cobra application.`,
 func init() {
 	importCpeCmd.Flags().String("file", "", "Load from file instead from API")
 	importCpeCmd.Flags().String("product", "", "Product to import for: postgresql/mysql/redis")
-	importCpeCmd.Flags().String("database", "", "Database connection string")
-
-	importCpeCmd.MarkFlagRequired("database")
 	importCpeCmd.MarkFlagRequired("product")
 
 	nvdCmd.AddCommand(importCpeCmd)

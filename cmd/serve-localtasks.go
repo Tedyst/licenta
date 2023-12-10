@@ -15,8 +15,8 @@ import (
 
 var serveLocalTasksCmd = &cobra.Command{
 	Use:   "servelocaltasks",
-	Short: "Run the server with local tasks",
-	Long:  `Run the server with local tasks.`,
+	Short: "Run the server using the development configuration",
+	Long:  `This command starts the API server and waits for requests. It uses the local runner for async tasks, to allow easier debugging. It also uses the console email sender, to allow easier debugging.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		viper.SetConfigFile("config.yaml")
 		viper.ReadInConfig()

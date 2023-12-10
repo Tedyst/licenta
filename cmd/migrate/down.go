@@ -12,8 +12,8 @@ import (
 
 var downCmd = &cobra.Command{
 	Use:   "down",
-	Short: "Migrations management",
-	Long:  `Migrations management.`,
+	Short: "Migrate down to previous version",
+	Long:  `This command allows you to migrate down to the previous version. If no migrations are found, the command will do nothing.`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		database := db.InitDatabase(viper.GetString("database"))
 		std := stdlib.OpenDBFromPool(database.GetRawPool())

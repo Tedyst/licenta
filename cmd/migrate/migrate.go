@@ -11,7 +11,7 @@ func NewMigrateCmd() *cobra.Command {
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Migrations management",
-	Long:  `Migrations management.`,
+	Long:  `This command allows you to manage migrations for the database.`,
 }
 
 func init() {

@@ -11,9 +11,12 @@ import (
 
 var extractGitCmd = &cobra.Command{
 	Use:   "git [filename]",
-	Short: "Run the extractor tool for the provided git repo",
-	Long:  `Run the extractor tool for the provided git repo`,
-	Args:  cobra.ExactArgs(1),
+	Short: "Runs the docker extractor",
+	Long: `This command allows you to run the git extractor for the provided git repository. The git extractor will find all the passwords and usernames from a git repository and show them to you. It does not require a database running. The outputs are printed to stdout. The git repository can be local or remote.
+
+	If it is remote, it must be accessible without authentication.
+	If it is local, it must be a valid git repository.`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var repo *gitgo.Repository
 		var err error

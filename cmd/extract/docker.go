@@ -17,8 +17,8 @@ import (
 
 var extractDockerCmd = &cobra.Command{
 	Use:   "docker [filename]",
-	Short: "Run the extractor tool for the provided file",
-	Long:  `Run the extractor tool for the provided file`,
+	Short: "Run the docker extractor",
+	Long:  `This command scans all the layers from a docker image and extracts the usernames and passwords from each layer. It does not require a database running. It can use the local Docker daemon to load images. If Docker daemon is not available, it will use the remote registry. The results will be printed to stdout.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var programLevel = new(slog.LevelVar)
@@ -27,7 +27,6 @@ var extractDockerCmd = &cobra.Command{
 		programLevel.Set(slog.LevelDebug)
 
 		callbackFunc := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
-			// slog.Info("ASD", "scanner", scanner, "result", result)
 			return nil
 		}
 		ctx := context.Background()

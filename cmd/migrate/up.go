@@ -12,8 +12,8 @@ import (
 
 var upCmd = &cobra.Command{
 	Use:   "up",
-	Short: "Migrations management",
-	Long:  `Migrations management.`,
+	Short: "Migrate up to latest version",
+	Long:  `This command allows you to migrate up to the latest version. If no migrations are found, the command will do nothing.`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		database := db.InitDatabase(viper.GetString("database"))
 		std := stdlib.OpenDBFromPool(database.GetRawPool())

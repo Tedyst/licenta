@@ -12,8 +12,8 @@ import (
 
 var downloadCmd = &cobra.Command{
 	Use:   "download [file]",
-	Short: "Run the extractor tool for the provided file",
-	Long:  `Run the extractor tool for the provided file`,
+	Short: "Download a file and import it into the database",
+	Long:  `Reads a file from the internet and imports it into the database. The file must be in ISO8859-1 encoding, otherwise the import will fail. The file must be a text file, with one password per line. Duplicate passwords will be ignored.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var err error

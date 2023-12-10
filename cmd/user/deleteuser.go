@@ -15,30 +15,30 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:   "delete [username or email]",
 	Short: "Delete a user by username or email",
-	Long: `Delete a user by username or email. Usage:
-	licenta deleteuser [username or email]`,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:  `Delete a user by username or email. This command is intended only for recovery/initial setup. For the normal use, use the web interface.`,
+	Args:  cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var database db.TransactionQuerier
 		database = db.InitDatabase(viper.GetString("database"))
 		database, err := database.StartTransaction(context.Background())
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 		defer database.EndTransaction(context.Background(), err)
 
 		user, err := database.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				log.Fatal("User does not exist.")
+				return fmt.Errorf("user not found")
 			}
-			log.Panic(err)
+			return err
 		}
 		err = database.DeleteUser(context.Background(), user.ID)
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
-		fmt.Printf("User %s deleted.", user.Username)
+		log.Printf("User %s deleted.", user.Username)
+		return nil
 	},
 }
 

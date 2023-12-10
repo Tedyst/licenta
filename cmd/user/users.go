@@ -10,8 +10,8 @@ func NewUserCmd() *cobra.Command {
 
 var userCmd = &cobra.Command{
 	Use:   "user",
-	Short: "Users management",
-	Long:  `Users management.`,
+	Short: "User management",
+	Long:  `Allows you to manage users and their permissions. These commands are intended only for recovery/initial setup. For the normal use, use the web interface.`,
 }
 
 func init() {

@@ -1,10 +1,10 @@
 ## licenta bruteforce download
 
-Run the extractor tool for the provided file
+Download a file and import it into the database
 
 ### Synopsis
 
-Run the extractor tool for the provided file
+Reads a file from the internet and imports it into the database. The file must be in ISO8859-1 encoding, otherwise the import will fail. The file must be a text file, with one password per line. Duplicate passwords will be ignored.
 
 ```
 licenta bruteforce download [file] [flags]
