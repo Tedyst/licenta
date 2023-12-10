@@ -1,9 +1,7 @@
 package extract
 
 import (
-	"context"
-	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 
 	gitgo "github.com/go-git/go-git/v5"
@@ -16,37 +14,41 @@ var extractGitCmd = &cobra.Command{
 	Short: "Run the extractor tool for the provided git repo",
 	Long:  `Run the extractor tool for the provided git repo`,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var repo *gitgo.Repository
 		var err error
 		var scanner *git.GitScan
 
 		if strings.HasPrefix(args[0], "https://") || strings.HasPrefix(args[0], "http://") || strings.HasPrefix(args[0], "git://") || strings.HasPrefix(args[0], "ssh://") {
+			slog.InfoContext(cmd.Context(), "Opening remote git repo", "url", args[0])
 			scanner, err = git.New(args[0])
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 		if strings.HasPrefix(args[0], "/") || strings.HasPrefix(args[0], ".") {
+			slog.InfoContext(cmd.Context(), "Opening local git repo", "path", args[0])
 			repo, err = gitgo.PlainOpen(args[0])
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			scanner, err = git.NewFromRepo(repo)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 		if repo == nil {
-			log.Fatal("Invalid git repo")
+			return err
 		}
-		fmt.Println("Extracting from git repo...")
+		slog.InfoContext(cmd.Context(), "Opened git repo")
 
-		err = scanner.Scan(context.Background())
+		err = scanner.Scan(cmd.Context())
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
-		log.Println("Done")
+		slog.InfoContext(cmd.Context(), "Finished git scan")
+
+		return nil
 	},
 }
 

@@ -79,7 +79,8 @@ func (scanner *GitScan) inspectFilePatch(ctx context.Context, commit *object.Com
 	results = file.FilterExtractResultsByProbability(ctx, results, scanner.options.probability)
 
 	if len(results) > 0 {
-		err = scanner.options.callbackResult(scanner, &GitResult{
+		foundResults.Add(ctx, int64(len(results)))
+		err = scanner.options.callbackResult(ctx, scanner, &GitResult{
 			CommitHash: commit.Hash.String(),
 			FileName:   to.Path(),
 			Results:    results,
@@ -105,7 +106,9 @@ func (scanner *GitScan) inspectCommit(ctx context.Context, commit *object.Commit
 	if parent != nil {
 		parentHash = parent.Hash.String()
 	}
-	slog.InfoContext(ctx, "Inspecting commit", "commit", commit.Hash.String(), "parent", parentHash)
+
+	slog.DebugContext(ctx, "Inspecting commit", "commit", commit.Hash.String(), "parent", parentHash)
+	commitsInspected.Add(ctx, 1)
 
 	wg := sync.WaitGroup{}
 	errorChannel := make(chan error)
@@ -144,6 +147,9 @@ type BatchItem struct {
 }
 
 func (scanner *GitScan) Scan(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "GitScan.Scan")
+	defer span.End()
+
 	objIter, err := scanner.repository.CommitObjects()
 	if err != nil {
 		return err

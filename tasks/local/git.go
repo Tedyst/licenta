@@ -52,8 +52,8 @@ func (r *gitRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectG
 	}
 
 	options = append(options, git.WithSkipCommitFunc(func(batch []git.BatchItem) ([]git.BatchItem, error) {
-		var commits []string
-		var commitsMap map[string]git.BatchItem
+		commits := []string{}
+		commitsMap := map[string]git.BatchItem{}
 		for _, item := range batch {
 			commits = append(commits, item.Commit.Hash.String())
 			commitsMap[item.Commit.Hash.String()] = item
@@ -72,7 +72,7 @@ func (r *gitRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectG
 		return result, nil
 	}))
 
-	options = append(options, git.WithCallbackResult(func(scanner *git.GitScan, result *git.GitResult) error {
+	options = append(options, git.WithCallbackResult(func(ctx context.Context, scanner *git.GitScan, result *git.GitResult) error {
 		commit, err := querier.CreateGitCommitForProject(ctx, queries.CreateGitCommitForProjectParams{
 			ProjectID:  repo.ProjectID,
 			CommitHash: result.CommitHash,

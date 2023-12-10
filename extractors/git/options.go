@@ -1,6 +1,7 @@
 package git
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/go-git/go-git/v5/plumbing/transport"
@@ -17,7 +18,7 @@ type options struct {
 	ignoreFileNames    []string
 	fileScannerOptions []file.Option
 	skipCommitFunc     func(batch []BatchItem) ([]BatchItem, error)
-	callbackResult     func(scanner *GitScan, result *GitResult) error
+	callbackResult     func(ctx context.Context, scanner *GitScan, result *GitResult) error
 }
 
 func WithCredentials(creds transport.AuthMethod) Option {
@@ -58,7 +59,7 @@ func WithSkipCommitFunc(f func(batch []BatchItem) ([]BatchItem, error)) Option {
 	}
 }
 
-func WithCallbackResult(f func(scanner *GitScan, result *GitResult) error) Option {
+func WithCallbackResult(f func(ctx context.Context, scanner *GitScan, result *GitResult) error) Option {
 	return func(o *options) error {
 		o.callbackResult = f
 		return nil
@@ -69,8 +70,10 @@ func makeOptions(opts ...Option) (*options, error) {
 	options := &options{
 		probability:     defaultProbability,
 		ignoreFileNames: defaultIgnoreFileNameIncluding[:],
-		callbackResult: func(scanner *GitScan, result *GitResult) error {
-			slog.Info("ProcessGit: git result", "result", result, "scanner", scanner)
+		callbackResult: func(ctx context.Context, scanner *GitScan, result *GitResult) error {
+			for _, r := range result.Results {
+				slog.InfoContext(ctx, "Found Git result", "filename", result.FileName, "commit_hash", result.CommitHash, "line", r.Line, "username", r.Username, "password", r.Password, "probability", r.Probability)
+			}
 			return nil
 		},
 		skipCommitFunc: func(batch []BatchItem) ([]BatchItem, error) {
