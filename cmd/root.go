@@ -33,7 +33,7 @@ var rootCmd = &cobra.Command{
 		if viper.GetBool("debug") {
 			level = "debug"
 		}
-		handler := slogx.New(slogx.WithTracing(), slogx.WithLevel(level), slogx.WithFullSource(), slogx.WithFormat("cli"))
+		handler := slogx.New(slogx.WithTracing(), slogx.WithLevel(level), slogx.WithFullSource(), slogx.WithFormat(viper.GetString("output")))
 		slog.SetDefault(handler)
 
 		if viper.GetBool("telemetry") {
@@ -78,8 +78,13 @@ func initConfig(cmd *cobra.Command) {
 	bindFlags(cmd, v)
 }
 
+func GetRootCmd() *cobra.Command {
+	return rootCmd
+}
+
 func init() {
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "Enable debug mode")
+	rootCmd.PersistentFlags().String("output", "cli", "Output format")
 	rootCmd.PersistentFlags().Bool("telemetry", false, "Enable telemetry")
 	rootCmd.PersistentFlags().String("telemetry-collector-endpoint", "", "Telemetry collector endpoint")
 

@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"log/slog"
 	"strconv"
 	"strings"
 	"unicode"
@@ -35,6 +36,7 @@ func isASCII(s string) bool {
 
 func (u *postgresUser) verifyPasswordSCRAMSHA256(password string) (bool, error) {
 	if !isASCII(password) {
+		slog.Warn("verifyPasswordSCRAMSHA256: password is not ASCII", "password", password)
 		return false, nil
 	}
 
