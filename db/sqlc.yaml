@@ -34,7 +34,3 @@ sql:
           - db_type: "text"
             go_type: "database/sql.NullString"
             nullable: true
-    database: 
-      uri: "${DATABASE}"
-    rules:
-      - sqlc/db-prepare
