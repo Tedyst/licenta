@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"os"
 
+	"log/slog"
+
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/daemon"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/extractors/docker"
-	"golang.org/x/exp/slog"
 )
 
 var extractDockerCmd = &cobra.Command{

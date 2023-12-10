@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"log/slog"
+
 	"github.com/djherbis/buffer"
 	"github.com/djherbis/nio/v3"
 	"github.com/google/go-containerregistry/pkg/name"
@@ -14,7 +16,6 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/extractors/file"
-	"golang.org/x/exp/slog"
 )
 
 type LayerResult struct {

@@ -85,7 +85,7 @@ const createNvdCveCPE = `-- name: CreateNvdCveCPE :one
 INSERT INTO nvd_cve_cpes(cve_id, cpe_id)
     VALUES ($1, $2)
 RETURNING
-    id, cve_id, cpe_id, created_at
+    id, cve_id, cpe_id
 `
 
 type CreateNvdCveCPEParams struct {
@@ -96,12 +96,7 @@ type CreateNvdCveCPEParams struct {
 func (q *Queries) CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error) {
 	row := q.db.QueryRow(ctx, createNvdCveCPE, arg.CveID, arg.CpeID)
 	var i NvdCveCpe
-	err := row.Scan(
-		&i.ID,
-		&i.CveID,
-		&i.CpeID,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.CveID, &i.CpeID)
 	return &i, err
 }
 
@@ -161,7 +156,7 @@ func (q *Queries) GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, err
 
 const getCveCpeByCveAndCpe = `-- name: GetCveCpeByCveAndCpe :one
 SELECT
-    id, cve_id, cpe_id, created_at
+    id, cve_id, cpe_id
 FROM
     nvd_cve_cpes
 WHERE
@@ -177,12 +172,7 @@ type GetCveCpeByCveAndCpeParams struct {
 func (q *Queries) GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error) {
 	row := q.db.QueryRow(ctx, getCveCpeByCveAndCpe, arg.CveID, arg.CpeID)
 	var i NvdCveCpe
-	err := row.Scan(
-		&i.ID,
-		&i.CveID,
-		&i.CpeID,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.CveID, &i.CpeID)
 	return &i, err
 }
 

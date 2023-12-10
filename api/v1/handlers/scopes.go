@@ -2,18 +2,19 @@ package handlers
 
 import (
 	"context"
-
-	scopes "github.com/SonicRoshan/scope"
 )
+
+type Scope string
 
 var (
-	UsersReadScope    = "users.read"
-	UsersWriteScope   = "users.write"
-	UsersMeReadScope  = "users.me.read"
-	UsersMeWriteScope = "users.me.write"
+	UserScope   Scope = "user"
+	WorkerScope Scope = "worker"
 )
 
-func (server *serverHandler) IsScopeAllowed(ctx context.Context, s string) bool {
+func (server *serverHandler) IsScopeAllowed(ctx context.Context, s string, scope Scope) bool {
 	sc := server.SessionStore.GetScope(ctx)
-	return scopes.ScopeInAllowed(s, sc) || scopes.ScopeInAllowed("user", sc)
+	if sc == nil {
+		return false
+	}
+	return s == string(scope)
 }

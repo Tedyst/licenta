@@ -3,9 +3,10 @@ package docker
 import (
 	"time"
 
+	"log/slog"
+
 	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/tedyst/licenta/extractors/file"
-	"golang.org/x/exp/slog"
 )
 
 type Option func(*options) error

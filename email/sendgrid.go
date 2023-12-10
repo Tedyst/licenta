@@ -3,9 +3,10 @@ package email
 import (
 	"context"
 
+	"log/slog"
+
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
-	"golang.org/x/exp/slog"
 )
 
 type sendGridEmailSender struct {

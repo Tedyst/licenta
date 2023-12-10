@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	scopes "github.com/SonicRoshan/scope"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -126,12 +125,6 @@ func (server *serverHandler) Post2faTotpFirstStep(ctx context.Context, request g
 			Success: false,
 		}, nil
 	}
-	if !scopes.ScopeInAllowed("user", server.SessionStore.GetScope(ctx)) {
-		return generated.Post2faTotpFirstStep401JSONResponse{
-			Message: Unauthorized,
-			Success: false,
-		}, nil
-	}
 
 	key, err := models.GenerateTOTPSecret(ctx)
 	if err != nil {
@@ -159,12 +152,6 @@ func (server *serverHandler) Post2faTotpSecondStep(ctx context.Context, request 
 	}
 	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
-		return generated.Post2faTotpSecondStep401JSONResponse{
-			Message: Unauthorized,
-			Success: false,
-		}, nil
-	}
-	if !scopes.ScopeInAllowed("user", server.SessionStore.GetScope(ctx)) {
 		return generated.Post2faTotpSecondStep401JSONResponse{
 			Message: Unauthorized,
 			Success: false,

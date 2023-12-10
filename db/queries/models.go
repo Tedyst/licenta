@@ -44,10 +44,9 @@ type NvdCpe struct {
 }
 
 type NvdCveCpe struct {
-	ID        int64
-	CveID     int64
-	CpeID     int64
-	CreatedAt pgtype.Timestamptz
+	ID    int64
+	CveID int64
+	CpeID int64
 }
 
 type Organization struct {

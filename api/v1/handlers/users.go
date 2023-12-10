@@ -19,12 +19,6 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 			Success: false,
 		}, nil
 	}
-	if !server.IsScopeAllowed(ctx, UsersReadScope) {
-		return generated.GetUsers401JSONResponse{
-			Message: Unauthorized,
-			Success: false,
-		}, nil
-	}
 
 	count, err := server.Queries.CountUsers(ctx)
 	if err != nil {
@@ -82,12 +76,6 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 			Success: false,
 		}, nil
 	}
-	if !server.IsScopeAllowed(ctx, UsersMeReadScope) {
-		return generated.GetUsersMe401JSONResponse{
-			Message: Unauthorized,
-			Success: false,
-		}, nil
-	}
 
 	return generated.GetUsersMe200JSONResponse{
 		Success: true,
@@ -102,12 +90,6 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 func (server *serverHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
 	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
-		return generated.GetUsersId401JSONResponse{
-			Message: Unauthorized,
-			Success: false,
-		}, nil
-	}
-	if !server.IsScopeAllowed(ctx, UsersReadScope) {
 		return generated.GetUsersId401JSONResponse{
 			Message: Unauthorized,
 			Success: false,
@@ -134,12 +116,6 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 
 	user := server.SessionStore.GetUser(ctx)
 	if user == nil {
-		return generated.PostUsersMeChangePassword401JSONResponse{
-			Message: Unauthorized,
-			Success: false,
-		}, nil
-	}
-	if !server.IsScopeAllowed(ctx, UsersMeWriteScope) {
 		return generated.PostUsersMeChangePassword401JSONResponse{
 			Message: Unauthorized,
 			Success: false,

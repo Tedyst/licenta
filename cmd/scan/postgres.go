@@ -3,6 +3,8 @@ package scan
 import (
 	"context"
 
+	"log/slog"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -10,7 +12,6 @@ import (
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/scanner"
 	"github.com/tedyst/licenta/scanner/postgres"
-	"golang.org/x/exp/slog"
 )
 
 var scanPostgresCmd = &cobra.Command{
@@ -35,28 +36,28 @@ var scanPostgresCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		slog.Info("Connection established")
+		slog.InfoContext(cmd.Context(), "Connection established")
 
 		err = sc.CheckPermissions(ctx)
 		if err != nil {
 			return err
 		}
-		slog.Info("Permissions checked")
+		slog.InfoContext(cmd.Context(), "Permissions checked")
 
 		results, err := sc.ScanConfig(ctx)
 		if err != nil {
 			return err
 		}
-		slog.Info("Config scanned")
+		slog.InfoContext(cmd.Context(), "Config scanned")
 
 		for _, result := range results {
 			switch result.Severity() {
 			case scanner.SEVERITY_HIGH:
-				slog.ErrorCtx(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
+				slog.ErrorContext(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
 			case scanner.SEVERITY_MEDIUM:
-				slog.WarnCtx(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
+				slog.WarnContext(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
 			case scanner.SEVERITY_WARNING:
-				slog.WarnCtx(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
+				slog.InfoContext(cmd.Context(), "Config scan result", "detail", result.Detail(), "severity", result.Severity())
 			default:
 			}
 		}
@@ -67,7 +68,7 @@ var scanPostgresCmd = &cobra.Command{
 		}
 
 		for _, user := range users {
-			slog.Info("User: %s", "user", user)
+			slog.DebugContext(cmd.Context(), "User: %s", "user", user)
 		}
 
 		slog.Info("Users scanned")
@@ -82,7 +83,11 @@ var scanPostgresCmd = &cobra.Command{
 
 			bruteforcer := bruteforce.NewBruteforcer(passProvider, sc, func(m map[scanner.User]bruteforce.BruteforceUserStatus) error {
 				for user, entry := range m {
-					slog.InfoContext(cmd.Context(), "Received update from function", "user", user, "entry", entry)
+					username, err := user.GetUsername()
+					if err != nil {
+						return err
+					}
+					slog.InfoContext(cmd.Context(), "Received update from function", "user", username, "password", entry.FoundPassword, "tried", entry.Tried, "total", entry.Total)
 				}
 				return nil
 			})
@@ -92,7 +97,7 @@ var scanPostgresCmd = &cobra.Command{
 				return err
 			}
 			for _, result := range result {
-				slog.Info("Bruteforced passwords", "result", result)
+				slog.InfoContext(cmd.Context(), "Bruteforced passwords", "detail", result.Detail(), "severity", result.Severity())
 			}
 		}
 

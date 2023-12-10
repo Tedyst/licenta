@@ -3,8 +3,9 @@ package email
 import (
 	"context"
 
+	"log/slog"
+
 	email_lib "github.com/jordan-wright/email"
-	"golang.org/x/exp/slog"
 )
 
 type consoleEmailSender struct {

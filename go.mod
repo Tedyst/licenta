@@ -2,10 +2,9 @@ module github.com/tedyst/licenta
 
 go 1.21
 
-toolchain go1.21.1
+toolchain go1.21.5
 
 require (
-	github.com/SonicRoshan/scope v0.0.0-20210525134824-9bbd38664a7f
 	github.com/deepmap/oapi-codegen v1.16.2
 	github.com/dghubble/trie v0.0.0-20230729160116-2bc358f28a8b
 	github.com/djherbis/buffer v1.2.0
@@ -20,7 +19,6 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
-	github.com/kataras/iris/v12 v12.2.7
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.4.0
 	github.com/sendgrid/sendgrid-go v3.13.0+incompatible
@@ -43,7 +41,6 @@ require (
 	go.opentelemetry.io/otel/trace v1.21.0
 	go.uber.org/mock v0.3.0
 	golang.org/x/crypto v0.14.0
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/sync v0.5.0
 	golang.org/x/text v0.14.0
 )
@@ -126,6 +123,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kataras/blocks v0.0.8 // indirect
 	github.com/kataras/golog v0.1.9 // indirect
+	github.com/kataras/iris/v12 v12.2.7 // indirect
 	github.com/kataras/pio v0.0.12 // indirect
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
@@ -191,6 +189,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/arch v0.5.0 // indirect
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect

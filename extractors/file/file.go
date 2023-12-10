@@ -10,8 +10,9 @@ import (
 	"regexp"
 	"strings"
 
+	"log/slog"
+
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slog"
 )
 
 type secretType struct {
