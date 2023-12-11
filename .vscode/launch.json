@@ -36,12 +36,9 @@
             "mode": "auto",
             "program": ".",
             "args": [
-                "scan",
-                "postgres",
-                "postgres://postgres:postgres@localhost:1001/postgres?sslmode=disable",
-                "-d",
-                // "ubuntu",
-                // "--local"
+                "extract",
+                "git",
+                "."
             ],
             "envFile": "${workspaceFolder}/.env"
         }

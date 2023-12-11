@@ -166,6 +166,7 @@ var defaultPasswordsCompletelyIgnore = []string{
 
 var defaultUsernamesCompletelyIgnore = []string{
 	"i18nKey",
+	"assetkey",
 }
 
 var defaultWordsIncreaseProbability = []string{

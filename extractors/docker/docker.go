@@ -37,6 +37,8 @@ func (scanner *DockerScan) scanFile(ctx context.Context, reader io.Reader, heade
 		return err
 	}
 
+	results = file.FilterExtractResultsByProbability(ctx, results, scanner.options.probability)
+
 	if len(results) > 0 {
 		err := scanner.options.callbackResult(scanner, &LayerResult{
 			Layer:    layer,

@@ -97,6 +97,10 @@ func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line 
 				}
 			}
 
+			if result.Username == "" && result.Password == "" {
+				continue
+			}
+
 			if secretType.probability != nil {
 				if result.Password != "" {
 					result.Probability = secretType.probability(result.Line, result.Password)
@@ -113,7 +117,7 @@ func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line 
 					continue
 				}
 				if passwordsCompletelyIgnoreTrie.Get(strings.ToLower(result.Password)) != nil {
-					slog.DebugContext(ctx, "Password completely ignored: %s", result.Password, "fileName", fileName, "lineNumber", lineNumber)
+					slog.DebugContext(ctx, "Password completely ignored", "password", result.Password, "fileName", fileName, "lineNumber", lineNumber)
 					continue
 				}
 			}

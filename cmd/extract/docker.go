@@ -3,8 +3,6 @@ package extract
 import (
 	"context"
 	"fmt"
-	"os"
-
 	"log/slog"
 
 	"github.com/google/go-containerregistry/pkg/name"
@@ -21,16 +19,14 @@ var extractDockerCmd = &cobra.Command{
 	Long:  `This command scans all the layers from a docker image and extracts the usernames and passwords from each layer. It does not require a database running. It can use the local Docker daemon to load images. If Docker daemon is not available, it will use the remote registry. The results will be printed to stdout.`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		var programLevel = new(slog.LevelVar)
-		h := slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: programLevel})
-		slog.SetDefault(slog.New(h))
-		programLevel.Set(slog.LevelDebug)
-
 		callbackFunc := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
+			for _, r := range result.Results {
+				slog.InfoContext(cmd.Context(), "Found hardcoded password", "layer", result.Layer, "filename", r.FileName, "username", r.Username, "password", r.Password, "probability", r.Probability)
+			}
 			return nil
 		}
 		ctx := context.Background()
-		scanner, err := docker.NewScanner(ctx, args[0], docker.WithCallbackResult(callbackFunc))
+		scanner, err := docker.NewScanner(ctx, args[0], docker.WithCallbackResult(callbackFunc), docker.WithProbability(0.8))
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 		}
