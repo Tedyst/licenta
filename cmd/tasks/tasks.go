@@ -15,6 +15,6 @@ func GetTasksCmd() *cobra.Command {
 }
 
 func init() {
-	tasksCmd.Flags().String("database", "", "Database connection string")
+	tasksCmd.PersistentFlags().String("database", "", "Database connection string")
 	tasksCmd.MarkFlagRequired("database")
 }

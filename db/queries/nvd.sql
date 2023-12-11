@@ -68,3 +68,14 @@ WHERE
     cve_id = $1
     AND cpe_id = $2;
 
+-- name: GetCvesByProductAndVersion :many
+SELECT
+    sqlc.embed(nvd_cves)
+FROM
+    nvd_cves
+    INNER JOIN nvd_cve_cpes ON nvd_cve_cpes.cve_id = nvd_cves.id
+    INNER JOIN nvd_cpes ON nvd_cve_cpes.cpe_id = nvd_cpes.id
+WHERE
+    nvd_cpes.database_type = $1
+    AND nvd_cpes.version = $2;
+

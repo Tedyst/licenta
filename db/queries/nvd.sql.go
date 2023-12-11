@@ -176,6 +176,55 @@ func (q *Queries) GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAn
 	return &i, err
 }
 
+const getCvesByProductAndVersion = `-- name: GetCvesByProductAndVersion :many
+SELECT
+    nvd_cves.id, nvd_cves.cve_id, nvd_cves.description, nvd_cves.published, nvd_cves.last_modified, nvd_cves.score, nvd_cves.created_at
+FROM
+    nvd_cves
+    INNER JOIN nvd_cve_cpes ON nvd_cve_cpes.cve_id = nvd_cves.id
+    INNER JOIN nvd_cpes ON nvd_cve_cpes.cpe_id = nvd_cpes.id
+WHERE
+    nvd_cpes.database_type = $1
+    AND nvd_cpes.version = $2
+`
+
+type GetCvesByProductAndVersionParams struct {
+	DatabaseType int32
+	Version      string
+}
+
+type GetCvesByProductAndVersionRow struct {
+	NvdCfe NvdCfe
+}
+
+func (q *Queries) GetCvesByProductAndVersion(ctx context.Context, arg GetCvesByProductAndVersionParams) ([]*GetCvesByProductAndVersionRow, error) {
+	rows, err := q.db.Query(ctx, getCvesByProductAndVersion, arg.DatabaseType, arg.Version)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetCvesByProductAndVersionRow
+	for rows.Next() {
+		var i GetCvesByProductAndVersionRow
+		if err := rows.Scan(
+			&i.NvdCfe.ID,
+			&i.NvdCfe.CveID,
+			&i.NvdCfe.Description,
+			&i.NvdCfe.Published,
+			&i.NvdCfe.LastModified,
+			&i.NvdCfe.Score,
+			&i.NvdCfe.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getNvdCPEsByDBType = `-- name: GetNvdCPEsByDBType :many
 SELECT
     id, cpe, database_type, version, last_modified, created_at

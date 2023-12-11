@@ -39,6 +39,7 @@ type Querier interface {
 	GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error)
 	GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
 	GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error)
+	GetCvesByProductAndVersion(ctx context.Context, arg GetCvesByProductAndVersionParams) ([]*GetCvesByProductAndVersionRow, error)
 	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*ProjectDockerImage, error)
 	GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
