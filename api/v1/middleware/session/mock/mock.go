@@ -76,44 +76,6 @@ func (c *SessionStoreClearSessionCall) DoAndReturn(f func(context.Context)) *Ses
 	return c
 }
 
-// GetScope mocks base method.
-func (m *MockSessionStore) GetScope(ctx context.Context) []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetScope", ctx)
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// GetScope indicates an expected call of GetScope.
-func (mr *MockSessionStoreMockRecorder) GetScope(ctx any) *SessionStoreGetScopeCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScope", reflect.TypeOf((*MockSessionStore)(nil).GetScope), ctx)
-	return &SessionStoreGetScopeCall{Call: call}
-}
-
-// SessionStoreGetScopeCall wrap *gomock.Call
-type SessionStoreGetScopeCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *SessionStoreGetScopeCall) Return(arg0 []string) *SessionStoreGetScopeCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *SessionStoreGetScopeCall) Do(f func(context.Context) []string) *SessionStoreGetScopeCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *SessionStoreGetScopeCall) DoAndReturn(f func(context.Context) []string) *SessionStoreGetScopeCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // GetUser mocks base method.
 func (m *MockSessionStore) GetUser(ctx context.Context) *models.User {
 	m.ctrl.T.Helper()
@@ -186,42 +148,6 @@ func (c *SessionStoreHandlerCall) Do(f func(http.Handler) http.Handler) *Session
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *SessionStoreHandlerCall) DoAndReturn(f func(http.Handler) http.Handler) *SessionStoreHandlerCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SetScope mocks base method.
-func (m *MockSessionStore) SetScope(ctx context.Context, scope []string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetScope", ctx, scope)
-}
-
-// SetScope indicates an expected call of SetScope.
-func (mr *MockSessionStoreMockRecorder) SetScope(ctx, scope any) *SessionStoreSetScopeCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetScope", reflect.TypeOf((*MockSessionStore)(nil).SetScope), ctx, scope)
-	return &SessionStoreSetScopeCall{Call: call}
-}
-
-// SessionStoreSetScopeCall wrap *gomock.Call
-type SessionStoreSetScopeCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *SessionStoreSetScopeCall) Return() *SessionStoreSetScopeCall {
-	c.Call = c.Call.Return()
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *SessionStoreSetScopeCall) Do(f func(context.Context, []string)) *SessionStoreSetScopeCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *SessionStoreSetScopeCall) DoAndReturn(f func(context.Context, []string)) *SessionStoreSetScopeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

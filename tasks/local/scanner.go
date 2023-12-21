@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
@@ -24,12 +23,22 @@ func getPostgresConnectString(db *models.PostgresDatabases) string {
 }
 
 type scannerRunner struct {
-	queries db.TransactionQuerier
+	queries            postgresQuerier
+	bruteforceProvider bruteforce.BruteforceProvider
 }
 
-func NewScannerRunner(queries db.TransactionQuerier) *scannerRunner {
+type postgresQuerier interface {
+	GetPostgresDatabase(ctx context.Context, id int64) (*models.PostgresDatabases, error)
+	UpdatePostgresScanStatus(ctx context.Context, params queries.UpdatePostgresScanStatusParams) error
+	CreatePostgresScanResult(ctx context.Context, params queries.CreatePostgresScanResultParams) (*models.PostgresScanResult, error)
+	CreatePostgresScanBruteforceResult(ctx context.Context, arg queries.CreatePostgresScanBruteforceResultParams) (*models.PostgresScanBruteforceResult, error)
+	UpdatePostgresScanBruteforceResult(ctx context.Context, params queries.UpdatePostgresScanBruteforceResultParams) error
+}
+
+func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider) *scannerRunner {
 	return &scannerRunner{
-		queries: queries,
+		queries:            queries,
+		bruteforceProvider: bruteforceProvider,
 	}
 }
 
@@ -179,13 +188,10 @@ func (runner *scannerRunner) bruteforcePostgres(
 		return notifyError(errors.Wrap(err, "could not get database"))
 	}
 
-	passProvider, err := bruteforce.NewDatabasePasswordProvider(ctx, runner.queries, database.ProjectID)
+	bruteforcer, err := runner.bruteforceProvider.NewBruteforcer(ctx, sc, notifyBruteforceStatus, int(database.ProjectID))
 	if err != nil {
-		return notifyError(errors.Wrap(err, "could not create password provider"))
+		return notifyError(errors.Wrap(err, "could not create bruteforcer"))
 	}
-	defer passProvider.Close()
-
-	bruteforcer := bruteforce.NewBruteforcer(passProvider, sc, notifyBruteforceStatus)
 
 	bruteforceResult, err := bruteforcer.BruteforcePasswordAllUsers(ctx)
 	if err != nil {

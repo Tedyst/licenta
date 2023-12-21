@@ -299,6 +299,77 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /worker/get-task:
+    get:
+      summary: Get a task for the worker
+      security:
+        - workerAuth: []
+      tags:
+        - worker
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  task:
+                    type: object
+                    required:
+                      - id
+                      - task_type
+                      - task_data
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                      task_type:
+                        type: string
+                      task_data:
+                        type: string
+        "204":
+          description: No task available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a task
+      tags:
+        - worker
+      security:
+        - workerAuth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     LoginUser:
@@ -479,5 +550,10 @@ components:
       type: apiKey
       in: cookie
       name: session
+    workerAuth:
+      type: apiKey
+      in: header
+      name: X-Worker-Token
 security:
   - sessionAuth: []
+  - workerAuth: []

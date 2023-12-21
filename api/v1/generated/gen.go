@@ -22,6 +22,7 @@ import (
 
 const (
 	SessionAuthScopes = "sessionAuth.Scopes"
+	WorkerAuthScopes  = "workerAuth.Scopes"
 )
 
 // ChangePasswordLoggedIn defines model for ChangePasswordLoggedIn.
@@ -183,6 +184,12 @@ type ServerInterface interface {
 	// Get user by ID
 	// (GET /users/{id})
 	GetUsersId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get a task for the worker
+	// (GET /worker/get-task)
+	GetWorkerGetTask(w http.ResponseWriter, r *http.Request)
+	// Create a task
+	// (POST /worker/get-task)
+	PostWorkerGetTask(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -243,6 +250,18 @@ func (_ Unimplemented) GetUsersId(w http.ResponseWriter, r *http.Request, id int
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get a task for the worker
+// (GET /worker/get-task)
+func (_ Unimplemented) GetWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a task
+// (POST /worker/get-task)
+func (_ Unimplemented) PostWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // ServerInterfaceWrapper converts contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler            ServerInterface
@@ -257,6 +276,8 @@ func (siw *ServerInterfaceWrapper) Post2faTotpFirstStep(w http.ResponseWriter, r
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Post2faTotpFirstStep(w, r)
@@ -274,6 +295,8 @@ func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(w http.ResponseWriter, 
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Post2faTotpSecondStep(w, r)
@@ -306,6 +329,8 @@ func (siw *ServerInterfaceWrapper) PostLogout(w http.ResponseWriter, r *http.Req
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostLogout(w, r)
@@ -340,6 +365,8 @@ func (siw *ServerInterfaceWrapper) GetUsers(w http.ResponseWriter, r *http.Reque
 	var err error
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersParams
@@ -393,6 +420,8 @@ func (siw *ServerInterfaceWrapper) GetUsersMe(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetUsersMe(w, r)
 	}))
@@ -409,6 +438,8 @@ func (siw *ServerInterfaceWrapper) PostUsersMeChangePassword(w http.ResponseWrit
 	ctx := r.Context()
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostUsersMeChangePassword(w, r)
@@ -438,8 +469,44 @@ func (siw *ServerInterfaceWrapper) GetUsersId(w http.ResponseWriter, r *http.Req
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetUsersId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetWorkerGetTask operation middleware
+func (siw *ServerInterfaceWrapper) GetWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetWorkerGetTask(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostWorkerGetTask operation middleware
+func (siw *ServerInterfaceWrapper) PostWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostWorkerGetTask(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -588,6 +655,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users/{id}", wrapper.GetUsersId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/worker/get-task", wrapper.GetWorkerGetTask)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/worker/get-task", wrapper.PostWorkerGetTask)
 	})
 
 	return r
@@ -871,6 +944,81 @@ func (response GetUsersId404JSONResponse) VisitGetUsersIdResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetWorkerGetTaskRequestObject struct {
+}
+
+type GetWorkerGetTaskResponseObject interface {
+	VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error
+}
+
+type GetWorkerGetTask200JSONResponse struct {
+	Success bool `json:"success"`
+	Task    struct {
+		Id       int64  `json:"id"`
+		TaskData string `json:"task_data"`
+		TaskType string `json:"task_type"`
+	} `json:"task"`
+}
+
+func (response GetWorkerGetTask200JSONResponse) VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetWorkerGetTask204JSONResponse Error
+
+func (response GetWorkerGetTask204JSONResponse) VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetWorkerGetTask401JSONResponse Error
+
+func (response GetWorkerGetTask401JSONResponse) VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostWorkerGetTaskRequestObject struct {
+}
+
+type PostWorkerGetTaskResponseObject interface {
+	VisitPostWorkerGetTaskResponse(w http.ResponseWriter) error
+}
+
+type PostWorkerGetTask200JSONResponse Success
+
+func (response PostWorkerGetTask200JSONResponse) VisitPostWorkerGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostWorkerGetTask400JSONResponse Error
+
+func (response PostWorkerGetTask400JSONResponse) VisitPostWorkerGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostWorkerGetTask401JSONResponse Error
+
+func (response PostWorkerGetTask401JSONResponse) VisitPostWorkerGetTaskResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// First step of the TOTP authentication process
@@ -900,6 +1048,12 @@ type StrictServerInterface interface {
 	// Get user by ID
 	// (GET /users/{id})
 	GetUsersId(ctx context.Context, request GetUsersIdRequestObject) (GetUsersIdResponseObject, error)
+	// Get a task for the worker
+	// (GET /worker/get-task)
+	GetWorkerGetTask(ctx context.Context, request GetWorkerGetTaskRequestObject) (GetWorkerGetTaskResponseObject, error)
+	// Create a task
+	// (POST /worker/get-task)
+	PostWorkerGetTask(ctx context.Context, request PostWorkerGetTaskRequestObject) (PostWorkerGetTaskResponseObject, error)
 }
 
 type StrictHandlerFunc = runtime.StrictHttpHandlerFunc
@@ -1179,37 +1333,88 @@ func (sh *strictHandler) GetUsersId(w http.ResponseWriter, r *http.Request, id i
 	}
 }
 
+// GetWorkerGetTask operation middleware
+func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	var request GetWorkerGetTaskRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetWorkerGetTask(ctx, request.(GetWorkerGetTaskRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetWorkerGetTask")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetWorkerGetTaskResponseObject); ok {
+		if err := validResponse.VisitGetWorkerGetTaskResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
+	}
+}
+
+// PostWorkerGetTask operation middleware
+func (sh *strictHandler) PostWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	var request PostWorkerGetTaskRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostWorkerGetTask(ctx, request.(PostWorkerGetTaskRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostWorkerGetTask")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostWorkerGetTaskResponseObject); ok {
+		if err := validResponse.VisitPostWorkerGetTaskResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
