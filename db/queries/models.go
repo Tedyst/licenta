@@ -208,7 +208,6 @@ type ResetPasswordToken struct {
 type Session struct {
 	ID        uuid.UUID
 	UserID    sql.NullInt64
-	Scope     []string
 	CreatedAt pgtype.Timestamptz
 }
 
@@ -226,4 +225,17 @@ type User struct {
 	Password  string
 	Email     string
 	CreatedAt pgtype.Timestamptz
+}
+
+type Worker struct {
+	ID        int64
+	Token     string
+	CreatedAt pgtype.Timestamptz
+}
+
+type WorkerProject struct {
+	ID            int64
+	ProjectID     int64
+	WorkerTokenID int64
+	CreatedAt     pgtype.Timestamptz
 }

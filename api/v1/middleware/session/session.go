@@ -25,8 +25,6 @@ type SessionStore interface {
 	GetUser(ctx context.Context) *models.User
 	SetUser(ctx context.Context, user *models.User)
 	ClearSession(ctx context.Context)
-	GetScope(ctx context.Context) []string
-	SetScope(ctx context.Context, scope []string)
 	Handler(next http.Handler) http.Handler
 }
 
@@ -94,7 +92,6 @@ func (store *sessionStore) saveSession(ctx context.Context, data *sessionData) e
 	err := store.database.UpdateSession(ctx, queries.UpdateSessionParams{
 		ID:     data.Session.ID,
 		UserID: data.Session.UserID,
-		Scope:  data.Session.Scope,
 	})
 	if err != nil {
 		return errors.Wrap(err, "SaveSession: error updating session")
@@ -196,23 +193,6 @@ func (store *sessionStore) ClearSession(ctx context.Context) {
 	}
 	data.User = nil
 	data.sessionChanged = true
-}
-
-func (store *sessionStore) GetScope(ctx context.Context) []string {
-	data, err := store.getSessionData(ctx)
-	if err != nil {
-		return nil
-	}
-	return data.Session.Scope
-}
-
-func (store *sessionStore) SetScope(ctx context.Context, scope []string) {
-	data, err := store.getSessionData(ctx)
-	if err != nil {
-		return
-	}
-	data.sessionChanged = true
-	data.Session.Scope = scope
 }
 
 func New(database db.TransactionQuerier, debug bool) *sessionStore {

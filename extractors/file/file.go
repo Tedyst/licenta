@@ -3,15 +3,13 @@ package file
 import (
 	"bufio"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
 
 	"log/slog"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/pkg/errors"
 )
 
@@ -22,28 +20,15 @@ type secretType struct {
 	postProcessing func(string) (string, error)
 }
 
-type ExtractResult struct {
-	Name        string
-	Line        string
-	LineNumber  int
-	Match       string
-	Probability float64
-	Username    string
-	Password    string
-	FileName    string
-}
+type fileScanner struct {
+	wordsReduceProbabilityTrie    mapset.Set[string]
+	wordsIncreaseProbabilityTrie  mapset.Set[string]
+	passwordsCompletelyIgnoreTrie mapset.Set[string]
+	usernamesCompletelyIgnoreTrie mapset.Set[string]
 
-func (e ExtractResult) Hash() string {
-	hasher := sha256.New()
-	hasher.Write([]byte(e.Name))
-	hasher.Write([]byte(e.Username))
-	hasher.Write([]byte(e.Password))
-	hasher.Write([]byte(e.FileName))
-	return hex.EncodeToString(hasher.Sum(nil))
-}
+	options options
 
-func (e ExtractResult) String() string {
-	return fmt.Sprintf("ExtractResult{Name: %s, Line: %s, LineNumber: %d, Match: %s, Probability: %f, Username: %s, Password: %s, FileName: %s}", e.Name, e.Line, e.LineNumber, e.Match, e.Probability, e.Username, e.Password, e.FileName)
+	secretTypes []secretType
 }
 
 func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {

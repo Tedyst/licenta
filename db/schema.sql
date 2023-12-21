@@ -13,7 +13,6 @@ CREATE INDEX users_email_idx ON users(email);
 CREATE TABLE sessions(
   id uuid PRIMARY KEY,
   user_id bigint REFERENCES users(id),
-  scope text[] NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -234,5 +233,18 @@ CREATE TABLE bruteforced_passwords(
   password text,
   last_bruteforce_id bigint,
   UNIQUE (hash, username)
+);
+
+CREATE TABLE workers(
+  id bigserial PRIMARY KEY,
+  token text NOT NULL UNIQUE,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE worker_projects(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  worker_token_id bigint NOT NULL REFERENCES worker_tokens(id) ON DELETE CASCADE,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

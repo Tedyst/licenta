@@ -9,6 +9,7 @@ import (
 	"github.com/tedyst/licenta/api/v1/middleware/session"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
+	localExchange "github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/tasks/local"
 )
 
@@ -27,11 +28,14 @@ var serveCmd = &cobra.Command{
 			viper.GetString("email.senderName"),
 			viper.GetString("email.sender"),
 		), db)
+
+		messageExchange := localExchange.NewLocalExchange()
+
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:      viper.GetBool("debug"),
 			Origin:     viper.GetString("baseurl"),
 			TaskRunner: taskRunner,
-		})
+		}, messageExchange)
 
 		print("Listening on port " + viper.GetString("port") + "\n")
 		err := http.ListenAndServe(":"+viper.GetString("port"), app)

@@ -11,6 +11,7 @@ import (
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/tasks"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -22,7 +23,7 @@ type ApiConfig struct {
 	TaskRunner tasks.TaskRunner
 }
 
-func Initialize(database db.TransactionQuerier, sessionStore session.SessionStore, config ApiConfig) http.Handler {
+func Initialize(database db.TransactionQuerier, sessionStore session.SessionStore, config ApiConfig, messageExchange messages.Exchange) http.Handler {
 	app := chi.NewRouter()
 	app.Use(middleware.RealIP)
 	app.Use(middleware.Logger)
@@ -44,6 +45,6 @@ func Initialize(database db.TransactionQuerier, sessionStore session.SessionStor
 	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
 		Debug:   config.Debug,
 		BaseURL: "/api/v1",
-	})
+	}, messageExchange)
 	return otelhttp.NewHandler(app, "api")
 }

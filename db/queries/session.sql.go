@@ -13,27 +13,21 @@ import (
 )
 
 const createSession = `-- name: CreateSession :one
-INSERT INTO sessions(id, user_id, scope)
-  VALUES ($1, $2, $3)
+INSERT INTO sessions(id, user_id)
+  VALUES ($1, $2)
 RETURNING
-  id, user_id, scope, created_at
+  id, user_id, created_at
 `
 
 type CreateSessionParams struct {
 	ID     uuid.UUID
 	UserID sql.NullInt64
-	Scope  []string
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error) {
-	row := q.db.QueryRow(ctx, createSession, arg.ID, arg.UserID, arg.Scope)
+	row := q.db.QueryRow(ctx, createSession, arg.ID, arg.UserID)
 	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Scope,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
 	return &i, err
 }
 
@@ -59,7 +53,7 @@ func (q *Queries) DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt
 
 const getSession = `-- name: GetSession :one
 SELECT
-  id, user_id, scope, created_at
+  id, user_id, created_at
 FROM
   sessions
 WHERE
@@ -70,12 +64,7 @@ LIMIT 1
 func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*Session, error) {
 	row := q.db.QueryRow(ctx, getSession, id)
 	var i Session
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Scope,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.UserID, &i.CreatedAt)
 	return &i, err
 }
 
@@ -83,8 +72,7 @@ const updateSession = `-- name: UpdateSession :exec
 UPDATE
   sessions
 SET
-  user_id = coalesce($2, user_id),
-  scope = coalesce($3, scope)
+  user_id = coalesce($2, user_id)
 WHERE
   id = $1
 `
@@ -92,10 +80,9 @@ WHERE
 type UpdateSessionParams struct {
 	ID     uuid.UUID
 	UserID sql.NullInt64
-	Scope  []string
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {
-	_, err := q.db.Exec(ctx, updateSession, arg.ID, arg.UserID, arg.Scope)
+	_, err := q.db.Exec(ctx, updateSession, arg.ID, arg.UserID)
 	return err
 }

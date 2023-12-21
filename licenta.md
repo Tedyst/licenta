@@ -49,7 +49,3 @@ Documentatie:
 - https://gobyexample.com/worker-pools
 - https://book.hacktricks.xyz/network-services-pentesting/pentesting-postgresql
 - https://docs.particular.net/transports/rabbitmq/delayed-delivery
-
-Technical documentation:
-
-- https://github.com/go-chi/cors

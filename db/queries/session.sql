@@ -8,8 +8,8 @@ WHERE
 LIMIT 1;
 
 -- name: CreateSession :one
-INSERT INTO sessions(id, user_id, scope)
-  VALUES ($1, $2, $3)
+INSERT INTO sessions(id, user_id)
+  VALUES ($1, $2)
 RETURNING
   *;
 
@@ -25,8 +25,7 @@ WHERE user_id = $1;
 UPDATE
   sessions
 SET
-  user_id = coalesce(sqlc.narg(user_id), user_id),
-  scope = coalesce(sqlc.narg(scope), scope)
+  user_id = coalesce(sqlc.narg(user_id), user_id)
 WHERE
   id = $1;
 
