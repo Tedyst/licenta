@@ -11,7 +11,7 @@ import (
 
 func ReceiveTasks(ctx context.Context, remoteURL string, authToken string) error {
 	for {
-		req, err := http.NewRequest("GET", remoteURL+"/api/worker/get-task", nil)
+		req, err := http.NewRequest("GET", remoteURL+"/api/v1/worker/get-task", nil)
 		if err != nil {
 			return err
 		}

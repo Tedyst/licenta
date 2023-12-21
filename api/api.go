@@ -1,11 +1,13 @@
 package api
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	slogchi "github.com/samber/slog-chi"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
@@ -26,7 +28,7 @@ type ApiConfig struct {
 func Initialize(database db.TransactionQuerier, sessionStore session.SessionStore, config ApiConfig, messageExchange messages.Exchange) http.Handler {
 	app := chi.NewRouter()
 	app.Use(middleware.RealIP)
-	app.Use(middleware.Logger)
+	app.Use(slogchi.New(slog.Default()))
 	app.Use(middleware.Recoverer)
 	app.Use(middleware.CleanPath)
 	app.Use(middleware.GetHead)
