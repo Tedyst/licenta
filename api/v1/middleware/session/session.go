@@ -35,6 +35,10 @@ type sessionData struct {
 	User           *models.User
 	Waiting2faUser *models.User
 	sessionChanged bool
+
+	request *http.Request
+
+	initialized bool
 }
 type contextSessionKey struct{}
 
@@ -48,11 +52,10 @@ type sessionStore struct {
 }
 
 func (store *sessionStore) initSessionData(ctx context.Context, w http.ResponseWriter, r *http.Request) (*http.Request, *sessionData) {
-	data := ctx.Value(contextSessionKey{})
-	if data != nil {
-		return r, data.(*sessionData)
+	newData := sessionData{
+		initialized: false,
+		request:     r,
 	}
-	newData := sessionData{}
 	newCtx := context.WithValue(ctx, contextSessionKey{}, &newData)
 	return r.WithContext(newCtx), &newData
 }
@@ -111,29 +114,38 @@ func (store *sessionStore) getUser(ctx context.Context, data *sessionData) error
 	return nil
 }
 
-func (store *sessionStore) initializeSession(ctx context.Context, r *http.Request, w http.ResponseWriter) (*http.Request, *sessionData, error) {
-	ctx, span := tracer.Start(ctx, "InitializeSession")
+func (store *sessionStore) initializeSession(ctx context.Context) (*sessionData, error) {
+	sessionData, err := store.getSessionData(ctx)
+	if err != nil {
+		return sessionData, errors.Wrap(err, "initializeSession: error getting session data")
+	}
+	if sessionData != nil && sessionData.initialized {
+		return sessionData, nil
+	}
+
+	ctx, span := tracer.Start(ctx, "initializeSession")
 	defer span.End()
 
-	r, data := store.initSessionData(ctx, w, r)
-	if data.Session == nil {
-		err := store.createNewSession(ctx, data)
+	if sessionData.Session == nil {
+		err := store.createNewSession(ctx, sessionData)
 		if err != nil {
-			return r, data, errors.Wrap(err, "initializeSession: error creating new session")
+			return sessionData, errors.Wrap(err, "initializeSession: error creating new session")
 		}
 	} else {
-		err := store.getSession(ctx, data, r)
+		err := store.getSession(ctx, sessionData, sessionData.request)
 		if err != nil {
-			return r, data, errors.Wrap(err, "initializeSession: error getting session")
+			return sessionData, errors.Wrap(err, "initializeSession: error getting session")
 		}
 	}
 
-	err := store.getUser(ctx, data)
+	err = store.getUser(ctx, sessionData)
 	if err != nil {
-		return r, data, errors.Wrap(err, "initializeSession: error getting user")
+		return sessionData, errors.Wrap(err, "initializeSession: error getting user")
 	}
 
-	return r, data, nil
+	sessionData.initialized = true
+
+	return sessionData, nil
 }
 
 func (store *sessionStore) getSessionData(ctx context.Context) (*sessionData, error) {
@@ -141,9 +153,9 @@ func (store *sessionStore) getSessionData(ctx context.Context) (*sessionData, er
 	if data == nil {
 		return nil, errors.New("getSessionData: no session data")
 	}
-	switch data.(type) {
+	switch newData := data.(type) {
 	case *sessionData:
-		return data.(*sessionData), nil
+		return newData, nil
 	default:
 		return nil, errors.New("getSessionData: invalid session data")
 	}
@@ -153,7 +165,7 @@ func (store *sessionStore) GetUser(ctx context.Context) *models.User {
 	ctx, span := tracer.Start(ctx, "GetUser")
 	defer span.End()
 
-	data, err := store.getSessionData(ctx)
+	data, err := store.initializeSession(ctx)
 	if err != nil {
 		return nil
 	}
@@ -161,7 +173,7 @@ func (store *sessionStore) GetUser(ctx context.Context) *models.User {
 }
 
 func (store *sessionStore) SetUser(ctx context.Context, user *models.User) {
-	data, err := store.getSessionData(ctx)
+	data, err := store.initializeSession(ctx)
 	if err != nil {
 		return
 	}
@@ -183,7 +195,7 @@ func (store *sessionStore) SetUser(ctx context.Context, user *models.User) {
 }
 
 func (store *sessionStore) ClearSession(ctx context.Context) {
-	data, err := store.getSessionData(ctx)
+	data, err := store.initializeSession(ctx)
 	if err != nil {
 		return
 	}
@@ -226,11 +238,7 @@ func (store *sessionStore) showError(w http.ResponseWriter, r *http.Request, err
 
 func (store *sessionStore) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r, data, err := store.initializeSession(r.Context(), r, w)
-		if err != nil {
-			store.showError(w, r, err)
-			return
-		}
+		r, data := store.initSessionData(r.Context(), w, r)
 		next.ServeHTTP(w, r)
 		if data.sessionChanged {
 			err := store.saveSession(r.Context(), data)
@@ -239,12 +247,14 @@ func (store *sessionStore) Handler(next http.Handler) http.Handler {
 				return
 			}
 		}
-		http.SetCookie(w, &http.Cookie{
-			Name:     cookieSessionKey,
-			Value:    data.Session.ID.String(),
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteStrictMode,
-		})
+		if data.initialized {
+			http.SetCookie(w, &http.Cookie{
+				Name:     cookieSessionKey,
+				Value:    data.Session.ID.String(),
+				Path:     "/",
+				HttpOnly: true,
+				SameSite: http.SameSiteStrictMode,
+			})
+		}
 	})
 }
