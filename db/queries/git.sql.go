@@ -18,8 +18,8 @@ RETURNING
 `
 
 type CreateGitCommitForProjectParams struct {
-	ProjectID  int64
-	CommitHash string
+	ProjectID  int64  `json:"project_id"`
+	CommitHash string `json:"commit_hash"`
 }
 
 func (q *Queries) CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*ProjectGitScannedCommit, error) {
@@ -42,10 +42,10 @@ RETURNING
 `
 
 type CreateGitRepositoryForProjectParams struct {
-	ProjectID     int64
-	GitRepository string
-	Username      sql.NullString
-	Password      sql.NullString
+	ProjectID     int64          `json:"project_id"`
+	GitRepository string         `json:"git_repository"`
+	Username      sql.NullString `json:"username"`
+	Password      sql.NullString `json:"password"`
 }
 
 func (q *Queries) CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*ProjectGitRepository, error) {
@@ -69,16 +69,16 @@ func (q *Queries) CreateGitRepositoryForProject(ctx context.Context, arg CreateG
 }
 
 type CreateGitResultForCommitParams struct {
-	ProjectID   int64
-	Commit      int64
-	Name        string
-	Line        string
-	LineNumber  int32
-	Match       string
-	Probability float64
-	Username    sql.NullString
-	Password    sql.NullString
-	Filename    string
+	ProjectID   int64          `json:"project_id"`
+	Commit      int64          `json:"commit"`
+	Name        string         `json:"name"`
+	Line        string         `json:"line"`
+	LineNumber  int32          `json:"line_number"`
+	Match       string         `json:"match"`
+	Probability float64        `json:"probability"`
+	Username    sql.NullString `json:"username"`
+	Password    sql.NullString `json:"password"`
+	Filename    string         `json:"filename"`
 }
 
 const deleteGitRepositoryForProject = `-- name: DeleteGitRepositoryForProject :exec
@@ -88,8 +88,8 @@ WHERE project_id = $1
 `
 
 type DeleteGitRepositoryForProjectParams struct {
-	ProjectID     int64
-	GitRepository string
+	ProjectID     int64  `json:"project_id"`
+	GitRepository string `json:"git_repository"`
 }
 
 func (q *Queries) DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error {
@@ -174,8 +174,8 @@ WHERE
 `
 
 type GetGitScannedCommitsForProjectBatchParams struct {
-	ProjectID    int64
-	CommitHashes []string
+	ProjectID    int64    `json:"project_id"`
+	CommitHashes []string `json:"commit_hashes"`
 }
 
 func (q *Queries) GetGitScannedCommitsForProjectBatch(ctx context.Context, arg GetGitScannedCommitsForProjectBatchParams) ([]string, error) {

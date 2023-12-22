@@ -2259,6 +2259,45 @@ func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(cont
 	return c
 }
 
+// GetWorkersForProject mocks base method.
+func (m *MockTransactionQuerier) GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.GetWorkersForProjectRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkersForProject", ctx, projectID)
+	ret0, _ := ret[0].([]*queries.GetWorkersForProjectRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkersForProject indicates an expected call of GetWorkersForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetWorkersForProject(ctx, projectID any) *TransactionQuerierGetWorkersForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkersForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkersForProject), ctx, projectID)
+	return &TransactionQuerierGetWorkersForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetWorkersForProjectCall wrap *gomock.Call
+type TransactionQuerierGetWorkersForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetWorkersForProjectCall) Return(arg0 []*queries.GetWorkersForProjectRow, arg1 error) *TransactionQuerierGetWorkersForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetWorkersForProjectCall) Do(f func(context.Context, int64) ([]*queries.GetWorkersForProjectRow, error)) *TransactionQuerierGetWorkersForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetWorkersForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetWorkersForProjectRow, error)) *TransactionQuerierGetWorkersForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // InsertBruteforcePasswords mocks base method.
 func (m *MockTransactionQuerier) InsertBruteforcePasswords(ctx context.Context, passwords []string) error {
 	m.ctrl.T.Helper()

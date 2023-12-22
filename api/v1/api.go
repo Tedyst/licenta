@@ -10,6 +10,7 @@ import (
 	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/messages"
+	"github.com/tedyst/licenta/tasks"
 )
 
 type ApiV1Config struct {
@@ -17,8 +18,8 @@ type ApiV1Config struct {
 	BaseURL string
 }
 
-func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore session.SessionStore, config ApiV1Config, messageExchange messages.Exchange) http.Handler {
-	api := generated.NewStrictHandlerWithOptions(handlers.NewServerHandler(database, sessionStore, messageExchange), nil, generated.StrictHTTPServerOptions{
+func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore session.SessionStore, config ApiV1Config, messageExchange messages.Exchange, taskRunner tasks.TaskRunner) http.Handler {
+	api := generated.NewStrictHandlerWithOptions(handlers.NewServerHandler(database, sessionStore, messageExchange, taskRunner), nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			var message = "Invalid request"
 			if config.Debug {

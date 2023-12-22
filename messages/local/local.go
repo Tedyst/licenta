@@ -4,13 +4,17 @@ import (
 	"context"
 	"reflect"
 	"strconv"
+	"sync"
 
 	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/models"
 )
 
+const bufferSize = 100
+
 type localExchange struct {
 	channels map[string]chan interface{}
+	mutex    sync.Mutex
 }
 
 func NewLocalExchange() *localExchange {
@@ -38,11 +42,15 @@ func (e *localExchange) ReceiveSendScanToWorkerMessage(ctx context.Context, work
 }
 
 func (e *localExchange) publish(ctx context.Context, topic string, message interface{}) error {
+	e.mutex.Lock()
+
 	channel, ok := e.channels[topic]
 	if !ok {
-		channel = make(chan interface{})
+		channel = make(chan interface{}, bufferSize)
 		e.channels[topic] = channel
 	}
+
+	e.mutex.Unlock()
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -54,7 +62,7 @@ func (e *localExchange) publish(ctx context.Context, topic string, message inter
 func (e *localExchange) receive(ctx context.Context, topic string, message interface{}) (bool, error) {
 	channel, ok := e.channels[topic]
 	if !ok {
-		channel = make(chan interface{})
+		channel = make(chan interface{}, bufferSize)
 		e.channels[topic] = channel
 	}
 	select {

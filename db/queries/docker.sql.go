@@ -18,10 +18,10 @@ RETURNING
 `
 
 type CreateDockerImageForProjectParams struct {
-	ProjectID   int64
-	DockerImage string
-	Username    sql.NullString
-	Password    sql.NullString
+	ProjectID   int64          `json:"project_id"`
+	DockerImage string         `json:"docker_image"`
+	Username    sql.NullString `json:"username"`
+	Password    sql.NullString `json:"password"`
 }
 
 func (q *Queries) CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error) {
@@ -53,16 +53,16 @@ func (q *Queries) CreateDockerImageForProject(ctx context.Context, arg CreateDoc
 }
 
 type CreateDockerLayerResultsForProjectParams struct {
-	ProjectID   int64
-	Layer       int64
-	Name        string
-	Line        string
-	LineNumber  int32
-	Match       string
-	Probability float64
-	Username    sql.NullString
-	Password    sql.NullString
-	Filename    string
+	ProjectID   int64          `json:"project_id"`
+	Layer       int64          `json:"layer"`
+	Name        string         `json:"name"`
+	Line        string         `json:"line"`
+	LineNumber  int32          `json:"line_number"`
+	Match       string         `json:"match"`
+	Probability float64        `json:"probability"`
+	Username    sql.NullString `json:"username"`
+	Password    sql.NullString `json:"password"`
+	Filename    string         `json:"filename"`
 }
 
 const createDockerLayerScanForProject = `-- name: CreateDockerLayerScanForProject :one
@@ -73,9 +73,9 @@ RETURNING
 `
 
 type CreateDockerLayerScanForProjectParams struct {
-	ProjectID    int64
-	DockerImage  int64
-	LayersToScan int32
+	ProjectID    int64 `json:"project_id"`
+	DockerImage  int64 `json:"docker_image"`
+	LayersToScan int32 `json:"layers_to_scan"`
 }
 
 func (q *Queries) CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error) {
@@ -101,8 +101,8 @@ RETURNING
 `
 
 type CreateDockerScannedLayerForProjectParams struct {
-	ProjectID int64
-	LayerHash string
+	ProjectID int64  `json:"project_id"`
+	LayerHash string `json:"layer_hash"`
 }
 
 func (q *Queries) CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*ProjectDockerScannedLayer, error) {
@@ -124,8 +124,8 @@ WHERE project_id = $1
 `
 
 type DeleteDockerImageForProjectParams struct {
-	ProjectID   int64
-	DockerImage string
+	ProjectID   int64  `json:"project_id"`
+	DockerImage string `json:"docker_image"`
 }
 
 func (q *Queries) DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error {
@@ -189,8 +189,8 @@ WHERE
 `
 
 type GetDockerLayerScanForProjectParams struct {
-	ProjectID   int64
-	DockerImage int64
+	ProjectID   int64 `json:"project_id"`
+	DockerImage int64 `json:"docker_image"`
 }
 
 func (q *Queries) GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error) {
@@ -251,10 +251,10 @@ RETURNING
 `
 
 type UpdateDockerLayerScanForProjectParams struct {
-	ProjectID     int64
-	DockerImage   int64
-	Finished      bool
-	ScannedLayers int32
+	ProjectID     int64 `json:"project_id"`
+	DockerImage   int64 `json:"docker_image"`
+	Finished      bool  `json:"finished"`
+	ScannedLayers int32 `json:"scanned_layers"`
 }
 
 func (q *Queries) UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error) {

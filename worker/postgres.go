@@ -2,9 +2,12 @@ package worker
 
 import (
 	"context"
+	"database/sql"
+	"log/slog"
 
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
+	localmessages "github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
 	"github.com/tedyst/licenta/tasks/local"
@@ -25,15 +28,33 @@ func (q *remotePostgresQuerier) UpdatePostgresScanStatus(ctx context.Context, pa
 }
 
 func (q *remotePostgresQuerier) CreatePostgresScanResult(ctx context.Context, params queries.CreatePostgresScanResultParams) (*models.PostgresScanResult, error) {
-	return nil, nil
+	slog.InfoContext(ctx, "Creating scan result", "params", params)
+	return &queries.PostgresScanResult{
+		ID:             1,
+		PostgresScanID: 1,
+		Severity:       1,
+		Message:        "asdasd",
+	}, nil
 }
 
 func (q *remotePostgresQuerier) CreatePostgresScanBruteforceResult(ctx context.Context, arg queries.CreatePostgresScanBruteforceResultParams) (*models.PostgresScanBruteforceResult, error) {
-	return nil, nil
+	slog.InfoContext(ctx, "Creating bruteforce result", "params", arg)
+	return &queries.PostgresScanBruteforceResult{
+		ID:             1,
+		PostgresScanID: 1,
+		Username:       "asdasd",
+		Password:       sql.NullString{String: "asdasd", Valid: true},
+		Total:          1,
+		Tried:          1,
+	}, nil
 }
 
 func (q *remotePostgresQuerier) UpdatePostgresScanBruteforceResult(ctx context.Context, params queries.UpdatePostgresScanBruteforceResultParams) error {
 	return nil
+}
+
+func (q *remotePostgresQuerier) GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.GetWorkersForProjectRow, error) {
+	return []*queries.GetWorkersForProjectRow{}, nil
 }
 
 type remoteBruteforceProvider struct {
@@ -93,6 +114,7 @@ func (p *remoteBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanne
 }
 
 func ScanPostgresDB(ctx context.Context, remoteURL string, authToken string, task Task) error {
+	localexchange := localmessages.NewLocalExchange()
 	runner := local.NewScannerRunner(&remotePostgresQuerier{
 		remoteURL: remoteURL,
 		authToken: authToken,
@@ -101,6 +123,6 @@ func ScanPostgresDB(ctx context.Context, remoteURL string, authToken string, tas
 		remoteURL: remoteURL,
 		authToken: authToken,
 		task:      task,
-	})
+	}, localexchange)
 	return runner.ScanPostgresDB(ctx, &task.PostgresScan.Scan)
 }

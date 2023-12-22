@@ -12,230 +12,232 @@ import (
 )
 
 type BruteforcedPassword struct {
-	ID               int64
-	Hash             string
-	Username         string
-	Password         sql.NullString
-	LastBruteforceID sql.NullInt64
+	ID               int64          `json:"id"`
+	Hash             string         `json:"hash"`
+	Username         string         `json:"username"`
+	Password         sql.NullString `json:"password"`
+	LastBruteforceID sql.NullInt64  `json:"last_bruteforce_id"`
 }
 
 type DefaultBruteforcePassword struct {
-	ID       int64
-	Password string
+	ID       int64  `json:"id"`
+	Password string `json:"password"`
 }
 
 type NvdCfe struct {
-	ID           int64
-	CveID        string
-	Description  string
-	Published    pgtype.Timestamptz
-	LastModified pgtype.Timestamptz
-	Score        float64
-	CreatedAt    pgtype.Timestamptz
+	ID           int64              `json:"id"`
+	CveID        string             `json:"cve_id"`
+	Description  string             `json:"description"`
+	Published    pgtype.Timestamptz `json:"published"`
+	LastModified pgtype.Timestamptz `json:"last_modified"`
+	Score        float64            `json:"score"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type NvdCpe struct {
-	ID           int64
-	Cpe          string
-	DatabaseType int32
-	Version      string
-	LastModified pgtype.Timestamptz
-	CreatedAt    pgtype.Timestamptz
+	ID           int64              `json:"id"`
+	Cpe          string             `json:"cpe"`
+	DatabaseType int32              `json:"database_type"`
+	Version      string             `json:"version"`
+	LastModified pgtype.Timestamptz `json:"last_modified"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type NvdCveCpe struct {
-	ID    int64
-	CveID int64
-	CpeID int64
+	ID    int64 `json:"id"`
+	CveID int64 `json:"cve_id"`
+	CpeID int64 `json:"cpe_id"`
 }
 
 type Organization struct {
-	ID        int64
-	Name      string
-	CreatedAt pgtype.Timestamptz
+	ID        int64              `json:"id"`
+	Name      string             `json:"name"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type OrganizationMember struct {
-	ID             int64
-	OrganizationID int64
-	UserID         int64
-	Role           int32
-	CreatedAt      pgtype.Timestamptz
+	ID             int64              `json:"id"`
+	OrganizationID int64              `json:"organization_id"`
+	UserID         int64              `json:"user_id"`
+	Role           int32              `json:"role"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type PostgresDatabase struct {
-	ID           int64
-	ProjectID    int64
-	Host         string
-	Port         int32
-	DatabaseName string
-	Username     string
-	Password     string
-	CreatedAt    pgtype.Timestamptz
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Remote       bool               `json:"remote"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type PostgresScan struct {
-	ID                 int64
-	PostgresDatabaseID int64
-	Status             int32
-	Error              sql.NullString
-	CreatedAt          pgtype.Timestamptz
-	EndedAt            pgtype.Timestamptz
+	ID                 int64              `json:"id"`
+	PostgresDatabaseID int64              `json:"postgres_database_id"`
+	Status             int32              `json:"status"`
+	Error              sql.NullString     `json:"error"`
+	WorkerID           sql.NullInt64      `json:"worker_id"`
+	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+	EndedAt            pgtype.Timestamptz `json:"ended_at"`
 }
 
 type PostgresScanBruteforceResult struct {
-	ID             int64
-	PostgresScanID int64
-	Username       string
-	Password       sql.NullString
-	Total          int32
-	Tried          int32
-	CreatedAt      pgtype.Timestamptz
+	ID             int64              `json:"id"`
+	PostgresScanID int64              `json:"postgres_scan_id"`
+	Username       string             `json:"username"`
+	Password       sql.NullString     `json:"password"`
+	Total          int32              `json:"total"`
+	Tried          int32              `json:"tried"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type PostgresScanResult struct {
-	ID             int64
-	PostgresScanID int64
-	Severity       int32
-	Message        string
-	CreatedAt      pgtype.Timestamptz
+	ID             int64              `json:"id"`
+	PostgresScanID int64              `json:"postgres_scan_id"`
+	Severity       int32              `json:"severity"`
+	Message        string             `json:"message"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type Project struct {
-	ID             int64
-	Name           string
-	OrganizationID int64
-	CreatedAt      pgtype.Timestamptz
+	ID             int64              `json:"id"`
+	Name           string             `json:"name"`
+	OrganizationID int64              `json:"organization_id"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectDockerImage struct {
-	ID                                  int64
-	ProjectID                           int64
-	DockerImage                         string
-	Username                            sql.NullString
-	Password                            sql.NullString
-	MinProbability                      sql.NullFloat64
-	UseDefaultWordsReduceProbability    bool
-	UseDefaultWordsIncreaseProbability  bool
-	UseDefaultPasswordsCompletelyIgnore bool
-	UseDefaultUsernamesCompletelyIgnore bool
-	ProbailityDecreaseMultiplier        sql.NullFloat64
-	ProbabilityIncreaseMultiplier       sql.NullFloat64
-	EntropyThreshold                    sql.NullInt32
-	LogisticGrowthRate                  sql.NullFloat64
-	CreatedAt                           pgtype.Timestamptz
+	ID                                  int64              `json:"id"`
+	ProjectID                           int64              `json:"project_id"`
+	DockerImage                         string             `json:"docker_image"`
+	Username                            sql.NullString     `json:"username"`
+	Password                            sql.NullString     `json:"password"`
+	MinProbability                      sql.NullFloat64    `json:"min_probability"`
+	UseDefaultWordsReduceProbability    bool               `json:"use_default_words_reduce_probability"`
+	UseDefaultWordsIncreaseProbability  bool               `json:"use_default_words_increase_probability"`
+	UseDefaultPasswordsCompletelyIgnore bool               `json:"use_default_passwords_completely_ignore"`
+	UseDefaultUsernamesCompletelyIgnore bool               `json:"use_default_usernames_completely_ignore"`
+	ProbailityDecreaseMultiplier        sql.NullFloat64    `json:"probaility_decrease_multiplier"`
+	ProbabilityIncreaseMultiplier       sql.NullFloat64    `json:"probability_increase_multiplier"`
+	EntropyThreshold                    sql.NullInt32      `json:"entropy_threshold"`
+	LogisticGrowthRate                  sql.NullFloat64    `json:"logistic_growth_rate"`
+	CreatedAt                           pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectDockerLayerResult struct {
-	ID          int64
-	ProjectID   int64
-	Layer       int64
-	Name        string
-	Line        string
-	LineNumber  int32
-	Match       string
-	Probability float64
-	Username    sql.NullString
-	Password    sql.NullString
-	Filename    string
-	CreatedAt   pgtype.Timestamptz
+	ID          int64              `json:"id"`
+	ProjectID   int64              `json:"project_id"`
+	Layer       int64              `json:"layer"`
+	Name        string             `json:"name"`
+	Line        string             `json:"line"`
+	LineNumber  int32              `json:"line_number"`
+	Match       string             `json:"match"`
+	Probability float64            `json:"probability"`
+	Username    sql.NullString     `json:"username"`
+	Password    sql.NullString     `json:"password"`
+	Filename    string             `json:"filename"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectDockerLayerScan struct {
-	ID            int64
-	ProjectID     int64
-	DockerImage   int64
-	Finished      bool
-	ScannedLayers int32
-	LayersToScan  int32
-	CreatedAt     pgtype.Timestamptz
+	ID            int64              `json:"id"`
+	ProjectID     int64              `json:"project_id"`
+	DockerImage   int64              `json:"docker_image"`
+	Finished      bool               `json:"finished"`
+	ScannedLayers int32              `json:"scanned_layers"`
+	LayersToScan  int32              `json:"layers_to_scan"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectDockerScannedLayer struct {
-	ID        int64
-	ProjectID int64
-	LayerHash string
-	ScannedAt pgtype.Timestamptz
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	LayerHash string             `json:"layer_hash"`
+	ScannedAt pgtype.Timestamptz `json:"scanned_at"`
 }
 
 type ProjectGitRepository struct {
-	ID            int64
-	ProjectID     int64
-	GitRepository string
-	Username      sql.NullString
-	Password      sql.NullString
-	PrivateKey    sql.NullString
-	CreatedAt     pgtype.Timestamptz
+	ID            int64              `json:"id"`
+	ProjectID     int64              `json:"project_id"`
+	GitRepository string             `json:"git_repository"`
+	Username      sql.NullString     `json:"username"`
+	Password      sql.NullString     `json:"password"`
+	PrivateKey    sql.NullString     `json:"private_key"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectGitResult struct {
-	ID          int64
-	ProjectID   int64
-	Commit      int64
-	Name        string
-	Line        string
-	LineNumber  int32
-	Match       string
-	Probability float64
-	Username    sql.NullString
-	Password    sql.NullString
-	Filename    string
-	CreatedAt   pgtype.Timestamptz
+	ID          int64              `json:"id"`
+	ProjectID   int64              `json:"project_id"`
+	Commit      int64              `json:"commit"`
+	Name        string             `json:"name"`
+	Line        string             `json:"line"`
+	LineNumber  int32              `json:"line_number"`
+	Match       string             `json:"match"`
+	Probability float64            `json:"probability"`
+	Username    sql.NullString     `json:"username"`
+	Password    sql.NullString     `json:"password"`
+	Filename    string             `json:"filename"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectGitScannedCommit struct {
-	ID         int64
-	ProjectID  int64
-	CommitHash string
-	CreatedAt  pgtype.Timestamptz
+	ID         int64              `json:"id"`
+	ProjectID  int64              `json:"project_id"`
+	CommitHash string             `json:"commit_hash"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectMember struct {
-	ID        int64
-	ProjectID int64
-	UserID    int64
-	Role      int16
-	CreatedAt pgtype.Timestamptz
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	UserID    int64              `json:"user_id"`
+	Role      int16              `json:"role"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type ResetPasswordToken struct {
-	ID        uuid.UUID
-	UserID    sql.NullInt64
-	Valid     bool
-	CreatedAt pgtype.Timestamptz
+	ID        uuid.UUID          `json:"id"`
+	UserID    sql.NullInt64      `json:"user_id"`
+	Valid     bool               `json:"valid"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Session struct {
-	ID        uuid.UUID
-	UserID    sql.NullInt64
-	CreatedAt pgtype.Timestamptz
+	ID        uuid.UUID          `json:"id"`
+	UserID    sql.NullInt64      `json:"user_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type TotpSecretToken struct {
-	ID         int64
-	UserID     int64
-	Valid      bool
-	TotpSecret string
-	CreatedAt  pgtype.Timestamptz
+	ID         int64              `json:"id"`
+	UserID     int64              `json:"user_id"`
+	Valid      bool               `json:"valid"`
+	TotpSecret string             `json:"totp_secret"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type User struct {
-	ID        int64
-	Username  string
-	Password  string
-	Email     string
-	CreatedAt pgtype.Timestamptz
+	ID        int64              `json:"id"`
+	Username  string             `json:"username"`
+	Password  string             `json:"password"`
+	Email     string             `json:"email"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type Worker struct {
-	ID        int64
-	Token     string
-	CreatedAt pgtype.Timestamptz
+	ID        int64              `json:"id"`
+	Token     string             `json:"token"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
 type WorkerProject struct {
-	ID            int64
-	ProjectID     int64
-	WorkerTokenID int64
-	CreatedAt     pgtype.Timestamptz
+	ID            int64              `json:"id"`
+	ProjectID     int64              `json:"project_id"`
+	WorkerTokenID int64              `json:"worker_token_id"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }

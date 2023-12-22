@@ -5,8 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
+	localExchange "github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks/local"
 )
@@ -19,7 +21,10 @@ var taskScanPostgresCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database := db.InitDatabase(viper.GetString("database"))
 
-		taskRunner := local.NewLocalRunner(true, nil, database)
+		localExchange := localExchange.NewLocalExchange()
+		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(database)
+
+		taskRunner := local.NewLocalRunner(true, nil, database, localExchange, bruteforceProvider)
 
 		dbid, err := strconv.ParseInt(args[0], 10, 64)
 		if err != nil {

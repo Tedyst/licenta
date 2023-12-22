@@ -32,9 +32,9 @@ RETURNING
 `
 
 type CreateUserParams struct {
-	Username string
-	Password string
-	Email    string
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, error) {
@@ -133,9 +133,9 @@ ORDER BY
 `
 
 type ListUsersParams struct {
-	Username string
-	Email    string
-	Admin    string
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Admin    string `json:"admin"`
 }
 
 func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, error) {
@@ -175,8 +175,8 @@ LIMIT $1 OFFSET $2
 `
 
 type ListUsersPaginatedParams struct {
-	Limit  int32
-	Offset int32
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error) {
@@ -217,10 +217,10 @@ WHERE
 `
 
 type UpdateUserParams struct {
-	Username sql.NullString
-	Password sql.NullString
-	Email    sql.NullString
-	ID       int64
+	Username sql.NullString `json:"username"`
+	Password sql.NullString `json:"password"`
+	Email    sql.NullString `json:"email"`
+	ID       int64          `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
@@ -243,8 +243,8 @@ WHERE
 `
 
 type UpdateUserPasswordParams struct {
-	ID       int64
-	Password string
+	ID       int64  `json:"id"`
+	Password string `json:"password"`
 }
 
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {

@@ -12,6 +12,7 @@ import (
 	sessionmock "github.com/tedyst/licenta/api/v1/middleware/session/mock"
 	dbmock "github.com/tedyst/licenta/db/mock"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/models"
 	"go.uber.org/mock/gomock"
 )
@@ -129,7 +130,7 @@ func TestPostLogin(t *testing.T) {
 
 			querier := dbmock.NewMockTransactionQuerier(ctrl)
 			sessionStore := sessionmock.NewMockSessionStore(ctrl)
-			server := handlers.NewServerHandler(querier, sessionStore)
+			server := handlers.NewServerHandler(querier, sessionStore, nil, nil)
 
 			newUser := &queries.User{}
 			if test.user != nil {
@@ -209,7 +210,8 @@ func TestPostLogout(t *testing.T) {
 
 	querier := dbmock.NewMockTransactionQuerier(ctrl)
 	sessionStore := sessionmock.NewMockSessionStore(ctrl)
-	server := handlers.NewServerHandler(querier, sessionStore)
+	exchange := local.NewLocalExchange()
+	server := handlers.NewServerHandler(querier, sessionStore, exchange, nil)
 
 	sessionStore.EXPECT().ClearSession(gomock.Any())
 

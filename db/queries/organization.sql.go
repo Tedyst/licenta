@@ -72,8 +72,8 @@ WHERE
 `
 
 type GetOrganizationPermissionsForUserParams struct {
-	OrganizationID int64
-	UserID         int64
+	OrganizationID int64 `json:"organization_id"`
+	UserID         int64 `json:"user_id"`
 }
 
 func (q *Queries) GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error) {
@@ -95,8 +95,8 @@ LIMIT 1
 `
 
 type GetOrganizationUserParams struct {
-	OrganizationID int64
-	UserID         int64
+	OrganizationID int64 `json:"organization_id"`
+	UserID         int64 `json:"user_id"`
 }
 
 func (q *Queries) GetOrganizationUser(ctx context.Context, arg GetOrganizationUserParams) (*OrganizationMember, error) {

@@ -25,6 +25,11 @@ const (
 	WorkerAuthScopes  = "workerAuth.Scopes"
 )
 
+// Defines values for WorkerTaskType.
+const (
+	WorkerTaskTypePostgresScan WorkerTaskType = "postgres_scan"
+)
+
 // ChangePasswordLoggedIn defines model for ChangePasswordLoggedIn.
 type ChangePasswordLoggedIn struct {
 	// NewPassword The new password
@@ -69,6 +74,29 @@ type PaginatedUsers struct {
 	Next     string `json:"next"`
 	Previous string `json:"previous"`
 	Results  []User `json:"results"`
+}
+
+// PostgresDatabase defines model for PostgresDatabase.
+type PostgresDatabase struct {
+	CreatedAt    string `json:"created_at"`
+	DatabaseName string `json:"database_name"`
+	Host         string `json:"host"`
+	Id           int    `json:"id"`
+	Password     string `json:"password"`
+	Port         int    `json:"port"`
+	ProjectId    int    `json:"project_id"`
+	Remote       bool   `json:"remote"`
+	Username     string `json:"username"`
+}
+
+// PostgresScan defines model for PostgresScan.
+type PostgresScan struct {
+	CreatedAt          string `json:"created_at"`
+	EndedAt            string `json:"ended_at"`
+	Error              string `json:"error"`
+	Id                 int    `json:"id"`
+	PostgresDatabaseId int    `json:"postgres_database_id"`
+	Status             int    `json:"status"`
 }
 
 // RegisterUser defines model for RegisterUser.
@@ -127,6 +155,20 @@ type User struct {
 	// Username The user name for login
 	Username string `json:"username"`
 }
+
+// WorkerTask defines model for WorkerTask.
+type WorkerTask struct {
+	PostgresScan *struct {
+		PostgresDatabase *PostgresDatabase `json:"postgres_database,omitempty"`
+		Scan             *PostgresScan     `json:"scan,omitempty"`
+	} `json:"postgres_scan,omitempty"`
+
+	// Type The Task type
+	Type WorkerTaskType `json:"type"`
+}
+
+// WorkerTaskType The Task type
+type WorkerTaskType string
 
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
@@ -952,12 +994,8 @@ type GetWorkerGetTaskResponseObject interface {
 }
 
 type GetWorkerGetTask200JSONResponse struct {
-	Success bool `json:"success"`
-	Task    struct {
-		Id       int64  `json:"id"`
-		TaskData string `json:"task_data"`
-		TaskType string `json:"task_type"`
-	} `json:"task"`
+	Success bool       `json:"success"`
+	Task    WorkerTask `json:"task"`
 }
 
 func (response GetWorkerGetTask200JSONResponse) VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error {
@@ -1384,37 +1422,40 @@ func (sh *strictHandler) PostWorkerGetTask(w http.ResponseWriter, r *http.Reques
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"dDqd0JyRzXLznwAAAP//zcQgDSwtAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

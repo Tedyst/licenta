@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
+	"github.com/tedyst/licenta/bruteforce"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
 	localExchange "github.com/tedyst/licenta/messages/local"
@@ -24,18 +25,19 @@ var serveCmd = &cobra.Command{
 		db := database.InitDatabase(viper.GetString("database"))
 		sessionStore := session.New(db, viper.GetBool("debug"))
 
+		localExchange := localExchange.NewLocalExchange()
+		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
+
 		taskRunner := local.NewLocalRunner(true, email.NewConsoleEmailSender(
 			viper.GetString("email.senderName"),
 			viper.GetString("email.sender"),
-		), db)
-
-		messageExchange := localExchange.NewLocalExchange()
+		), db, localExchange, bruteforceProvider)
 
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:      viper.GetBool("debug"),
 			Origin:     viper.GetString("baseurl"),
 			TaskRunner: taskRunner,
-		}, messageExchange)
+		}, localExchange)
 
 		print("Listening on port " + viper.GetString("port") + "\n")
 		err := http.ListenAndServe(":"+viper.GetString("port"), app)

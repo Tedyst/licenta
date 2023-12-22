@@ -17,9 +17,9 @@ RETURNING
 `
 
 type CreateTOTPSecretForUserParams struct {
-	UserID     int64
-	TotpSecret string
-	Valid      bool
+	UserID     int64  `json:"user_id"`
+	TotpSecret string `json:"totp_secret"`
+	Valid      bool   `json:"valid"`
 }
 
 func (q *Queries) CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error) {

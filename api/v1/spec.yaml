@@ -320,19 +320,7 @@ paths:
                   success:
                     type: boolean
                   task:
-                    type: object
-                    required:
-                      - id
-                      - task_type
-                      - task_data
-                    properties:
-                      id:
-                        type: integer
-                        format: int64
-                      task_type:
-                        type: string
-                      task_data:
-                        type: string
+                    $ref: '#/components/schemas/WorkerTask'
         "204":
           description: No task available
           content:
@@ -372,6 +360,74 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    PostgresDatabase:
+      type: object
+      required:
+        - id
+        - project_id
+        - host
+        - port
+        - database_name
+        - username
+        - password
+        - created_at
+        - remote
+      properties:
+        id: 
+          type: integer
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        created_at: 
+          type: string
+        remote:
+          type: boolean
+    PostgresScan:
+      required:
+        - id
+        - postgres_database_id
+        - status
+        - created_at
+        - ended_at
+        - error
+      type: object
+      properties:
+        id:
+          type: integer
+        postgres_database_id:
+          type: integer
+        status:
+          type: integer
+        error:
+          type: string
+        created_at:
+          type: string
+        ended_at:
+          type: string
+    WorkerTask:
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          description: The Task type
+          enum: [postgres_scan]
+        postgres_scan:
+          type: object
+          properties:
+            scan:
+              $ref: "#/components/schemas/PostgresScan"
+            postgres_database:
+              $ref: "#/components/schemas/PostgresDatabase"
     LoginUser:
       required:
         - username

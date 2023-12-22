@@ -20,10 +20,10 @@ RETURNING
 `
 
 type CreateNvdCPEParams struct {
-	Cpe          string
-	DatabaseType int32
-	Version      string
-	LastModified pgtype.Timestamptz
+	Cpe          string             `json:"cpe"`
+	DatabaseType int32              `json:"database_type"`
+	Version      string             `json:"version"`
+	LastModified pgtype.Timestamptz `json:"last_modified"`
 }
 
 func (q *Queries) CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error) {
@@ -53,11 +53,11 @@ RETURNING
 `
 
 type CreateNvdCveParams struct {
-	CveID        string
-	Description  string
-	Published    pgtype.Timestamptz
-	LastModified pgtype.Timestamptz
-	Score        float64
+	CveID        string             `json:"cve_id"`
+	Description  string             `json:"description"`
+	Published    pgtype.Timestamptz `json:"published"`
+	LastModified pgtype.Timestamptz `json:"last_modified"`
+	Score        float64            `json:"score"`
 }
 
 func (q *Queries) CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error) {
@@ -89,8 +89,8 @@ RETURNING
 `
 
 type CreateNvdCveCPEParams struct {
-	CveID int64
-	CpeID int64
+	CveID int64 `json:"cve_id"`
+	CpeID int64 `json:"cpe_id"`
 }
 
 func (q *Queries) CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error) {
@@ -112,8 +112,8 @@ LIMIT 1
 `
 
 type GetCPEByProductAndVersionParams struct {
-	DatabaseType int32
-	Version      string
+	DatabaseType int32  `json:"database_type"`
+	Version      string `json:"version"`
 }
 
 func (q *Queries) GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error) {
@@ -165,8 +165,8 @@ WHERE
 `
 
 type GetCveCpeByCveAndCpeParams struct {
-	CveID int64
-	CpeID int64
+	CveID int64 `json:"cve_id"`
+	CpeID int64 `json:"cpe_id"`
 }
 
 func (q *Queries) GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error) {
@@ -189,12 +189,12 @@ WHERE
 `
 
 type GetCvesByProductAndVersionParams struct {
-	DatabaseType int32
-	Version      string
+	DatabaseType int32  `json:"database_type"`
+	Version      string `json:"version"`
 }
 
 type GetCvesByProductAndVersionRow struct {
-	NvdCfe NvdCfe
+	NvdCfe NvdCfe `json:"nvd_cfe"`
 }
 
 func (q *Queries) GetCvesByProductAndVersion(ctx context.Context, arg GetCvesByProductAndVersionParams) ([]*GetCvesByProductAndVersionRow, error) {
@@ -296,9 +296,9 @@ WHERE
 `
 
 type UpdateNvdCPEParams struct {
-	ID           int64
-	Version      sql.NullString
-	LastModified pgtype.Timestamptz
+	ID           int64              `json:"id"`
+	Version      sql.NullString     `json:"version"`
+	LastModified pgtype.Timestamptz `json:"last_modified"`
 }
 
 func (q *Queries) UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error {

@@ -3,6 +3,7 @@ package tasks
 import (
 	"context"
 
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 )
@@ -12,6 +13,7 @@ type TaskRunner interface {
 	DockerTasksRunner
 	GitTasksRunner
 	VulnerabilityTasksRunner
+	ScannerTaskRunner
 }
 
 type EmailTasksRunner interface {
@@ -31,4 +33,10 @@ type GitTasksRunner interface {
 
 type VulnerabilityTasksRunner interface {
 	UpdateNVDVulnerabilitiesForProduct(ctx context.Context, product nvd.Product) error
+}
+
+type ScannerTaskRunner interface {
+	ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error
+	ScanPostgresDBForPublicAccess(ctx context.Context, scan *queries.PostgresScan) error
+	SchedulePostgresScan(ctx context.Context, scan *queries.PostgresScan) error
 }

@@ -196,6 +196,7 @@ CREATE TABLE postgres_databases(
   database_name text NOT NULL,
   username text NOT NULL,
   password text NOT NULL,
+  remote boolean NOT NULL DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -204,6 +205,7 @@ CREATE TABLE postgres_scan(
   postgres_database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE,
   status integer NOT NULL,
   error text,
+  worker_id bigint REFERENCES workers(id),
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
   ended_at timestamp with time zone
 );
@@ -244,7 +246,7 @@ CREATE TABLE workers(
 CREATE TABLE worker_projects(
   id bigserial PRIMARY KEY,
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  worker_token_id bigint NOT NULL REFERENCES worker_tokens(id) ON DELETE CASCADE,
+  worker_id bigint NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

@@ -16,12 +16,12 @@ const createPostgresScan = `-- name: CreatePostgresScan :one
 INSERT INTO postgres_scan(postgres_database_id, status)
     VALUES ($1, $2)
 RETURNING
-    id, postgres_database_id, status, error, created_at, ended_at
+    id, postgres_database_id, status, error, worker_id, created_at, ended_at
 `
 
 type CreatePostgresScanParams struct {
-	PostgresDatabaseID int64
-	Status             int32
+	PostgresDatabaseID int64 `json:"postgres_database_id"`
+	Status             int32 `json:"status"`
 }
 
 func (q *Queries) CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error) {
@@ -32,6 +32,7 @@ func (q *Queries) CreatePostgresScan(ctx context.Context, arg CreatePostgresScan
 		&i.PostgresDatabaseID,
 		&i.Status,
 		&i.Error,
+		&i.WorkerID,
 		&i.CreatedAt,
 		&i.EndedAt,
 	)
@@ -46,11 +47,11 @@ RETURNING
 `
 
 type CreatePostgresScanBruteforceResultParams struct {
-	PostgresScanID int64
-	Username       string
-	Password       sql.NullString
-	Tried          int32
-	Total          int32
+	PostgresScanID int64          `json:"postgres_scan_id"`
+	Username       string         `json:"username"`
+	Password       sql.NullString `json:"password"`
+	Tried          int32          `json:"tried"`
+	Total          int32          `json:"total"`
 }
 
 func (q *Queries) CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error) {
@@ -82,9 +83,9 @@ RETURNING
 `
 
 type CreatePostgresScanResultParams struct {
-	PostgresScanID int64
-	Severity       int32
-	Message        string
+	PostgresScanID int64  `json:"postgres_scan_id"`
+	Severity       int32  `json:"severity"`
+	Message        string `json:"message"`
 }
 
 func (q *Queries) CreatePostgresScanResult(ctx context.Context, arg CreatePostgresScanResultParams) (*PostgresScanResult, error) {
@@ -102,7 +103,7 @@ func (q *Queries) CreatePostgresScanResult(ctx context.Context, arg CreatePostgr
 
 const getPostgresDatabase = `-- name: GetPostgresDatabase :one
 SELECT
-    id, project_id, host, port, database_name, username, password, created_at
+    id, project_id, host, port, database_name, username, password, remote, created_at
 FROM
     postgres_databases
 WHERE
@@ -120,6 +121,7 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*PostgresD
 		&i.DatabaseName,
 		&i.Username,
 		&i.Password,
+		&i.Remote,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -127,7 +129,7 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*PostgresD
 
 const getPostgresScan = `-- name: GetPostgresScan :one
 SELECT
-    id, postgres_database_id, status, error, created_at, ended_at
+    id, postgres_database_id, status, error, worker_id, created_at, ended_at
 FROM
     postgres_scan
 WHERE
@@ -142,6 +144,7 @@ func (q *Queries) GetPostgresScan(ctx context.Context, id int64) (*PostgresScan,
 		&i.PostgresDatabaseID,
 		&i.Status,
 		&i.Error,
+		&i.WorkerID,
 		&i.CreatedAt,
 		&i.EndedAt,
 	)
@@ -195,10 +198,10 @@ WHERE
 `
 
 type UpdatePostgresScanBruteforceResultParams struct {
-	ID       int64
-	Password sql.NullString
-	Tried    int32
-	Total    int32
+	ID       int64          `json:"id"`
+	Password sql.NullString `json:"password"`
+	Tried    int32          `json:"tried"`
+	Total    int32          `json:"total"`
 }
 
 func (q *Queries) UpdatePostgresScanBruteforceResult(ctx context.Context, arg UpdatePostgresScanBruteforceResultParams) error {
@@ -223,10 +226,10 @@ WHERE
 `
 
 type UpdatePostgresScanStatusParams struct {
-	ID      int64
-	Status  int32
-	Error   sql.NullString
-	EndedAt pgtype.Timestamptz
+	ID      int64              `json:"id"`
+	Status  int32              `json:"status"`
+	Error   sql.NullString     `json:"error"`
+	EndedAt pgtype.Timestamptz `json:"ended_at"`
 }
 
 func (q *Queries) UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error {

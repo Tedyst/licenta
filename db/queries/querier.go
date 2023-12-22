@@ -67,6 +67,7 @@ type Querier interface {
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error)
+	GetWorkersForProject(ctx context.Context, projectID int64) ([]*GetWorkersForProjectRow, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
 	InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error

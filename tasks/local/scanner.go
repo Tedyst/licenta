@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
 	"github.com/tedyst/licenta/scanner/postgres"
@@ -25,6 +26,7 @@ func getPostgresConnectString(db *models.PostgresDatabases) string {
 type scannerRunner struct {
 	queries            postgresQuerier
 	bruteforceProvider bruteforce.BruteforceProvider
+	messageExchange    messages.Exchange
 }
 
 type postgresQuerier interface {
@@ -33,12 +35,14 @@ type postgresQuerier interface {
 	CreatePostgresScanResult(ctx context.Context, params queries.CreatePostgresScanResultParams) (*models.PostgresScanResult, error)
 	CreatePostgresScanBruteforceResult(ctx context.Context, arg queries.CreatePostgresScanBruteforceResultParams) (*models.PostgresScanBruteforceResult, error)
 	UpdatePostgresScanBruteforceResult(ctx context.Context, params queries.UpdatePostgresScanBruteforceResultParams) error
+	GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.GetWorkersForProjectRow, error)
 }
 
-func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider) *scannerRunner {
+func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider, exchange messages.Exchange) *scannerRunner {
 	return &scannerRunner{
 		queries:            queries,
 		bruteforceProvider: bruteforceProvider,
+		messageExchange:    exchange,
 	}
 }
 
@@ -215,4 +219,105 @@ func (runner *scannerRunner) bruteforcePostgres(
 	}
 
 	return nil
+}
+
+func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, scan *models.PostgresScan) error {
+	ctx, span := tracer.Start(ctx, "ScanPostgresDBForPublicAccess")
+	defer span.End()
+
+	db, err := runner.queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
+	if err != nil {
+		return errors.Wrap(err, "could not get database")
+	}
+
+	if !db.Remote {
+		return nil
+	}
+
+	logger := slog.With(
+		"scan", scan.ID,
+		"database_id", scan.PostgresDatabaseID,
+		"project_id", db.ProjectID,
+	)
+
+	logger.InfoContext(ctx, "Starting Postgres DB scan for public access")
+	defer logger.InfoContext(ctx, "Finished Postgres DB scan for public access")
+
+	notifyError := func(err error) error {
+		if err2 := runner.queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
+			ID:     scan.ID,
+			Status: models.SCAN_FINISHED,
+			Error:  sql.NullString{String: err.Error(), Valid: true},
+			EndedAt: pgtype.Timestamptz{
+				Time:  time.Now(),
+				Valid: true,
+			},
+		}); err2 != nil {
+			return errs.Join(err, errors.Wrap(err2, "could not update scan status"))
+		}
+		return err
+	}
+
+	conn, err := pgx.Connect(ctx, getPostgresConnectString(db))
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not connect to database"))
+	}
+	defer conn.Close(ctx)
+
+	logger.DebugContext(ctx, "Connected to database")
+
+	sc, err := postgres.NewScanner(ctx, conn)
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not create scanner"))
+	}
+
+	logger.DebugContext(ctx, "Created scanner")
+
+	err = sc.Ping(ctx)
+	if err == nil {
+		logger.DebugContext(ctx, "Database is accessible from the internet")
+
+		if _, err := runner.queries.CreatePostgresScanResult(ctx, queries.CreatePostgresScanResultParams{
+			PostgresScanID: scan.ID,
+			Severity:       int32(scanner.SEVERITY_HIGH),
+			Message:        "Database is accessible from the internet",
+		}); err != nil {
+			return errors.Wrap(err, "could not insert scan result")
+		}
+
+		return nil
+	}
+
+	return nil
+}
+
+func (runner *scannerRunner) SchedulePostgresScan(ctx context.Context, scan *models.PostgresScan) error {
+	database, err := runner.queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
+	if err != nil {
+		return errors.Wrap(err, "could not get database")
+	}
+
+	if database.Remote {
+		err = runner.ScanPostgresDBForPublicAccess(ctx, scan)
+		if err != nil {
+			return errors.Wrap(err, "could not scan database for public access")
+		}
+
+		workers, err := runner.queries.GetWorkersForProject(ctx, database.ProjectID)
+		if err != nil {
+			return errors.Wrap(err, "could not get workers for project")
+		}
+
+		if len(workers) == 0 {
+			return errors.New("no workers available")
+		}
+
+		for _, worker := range workers {
+			runner.messageExchange.PublishSendScanToWorkerMessage(ctx, worker.Worker, int(scan.ID), int(database.ProjectID))
+		}
+
+		return nil
+	}
+
+	return runner.ScanPostgresDB(ctx, scan)
 }

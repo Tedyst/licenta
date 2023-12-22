@@ -20,8 +20,8 @@ RETURNING
 `
 
 type CreateSessionParams struct {
-	ID     uuid.UUID
-	UserID sql.NullInt64
+	ID     uuid.UUID     `json:"id"`
+	UserID sql.NullInt64 `json:"user_id"`
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error) {
@@ -78,8 +78,8 @@ WHERE
 `
 
 type UpdateSessionParams struct {
-	ID     uuid.UUID
-	UserID sql.NullInt64
+	ID     uuid.UUID     `json:"id"`
+	UserID sql.NullInt64 `json:"user_id"`
 }
 
 func (q *Queries) UpdateSession(ctx context.Context, arg UpdateSessionParams) error {

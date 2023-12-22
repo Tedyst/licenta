@@ -1,8 +1,10 @@
 package local
 
 import (
+	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
+	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/tasks"
 )
 
@@ -14,24 +16,13 @@ type localRunner struct {
 	dockerRunner
 }
 
-func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier) *localRunner {
+func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *localRunner {
 	return &localRunner{
-		scannerRunner: scannerRunner{
-			queries: queries,
-		},
-		nvdRunner: nvdRunner{
-			queries: queries,
-		},
-		gitRunner: gitRunner{
-			queries: queries,
-		},
-		emailRunner: emailRunner{
-			queries:     queries,
-			emailSender: emailSender,
-		},
-		dockerRunner: dockerRunner{
-			queries: queries,
-		},
+		scannerRunner: *NewScannerRunner(queries, bruteforceProvider, exchange),
+		nvdRunner:     *NewNVDRunner(queries),
+		gitRunner:     *NewGitRunner(queries),
+		emailRunner:   *NewEmailRunner(queries, emailSender),
+		dockerRunner:  *NewDockerRunner(queries),
 	}
 }
 

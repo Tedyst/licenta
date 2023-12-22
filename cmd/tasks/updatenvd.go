@@ -5,7 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db"
+	localExchange "github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/tasks/local"
 )
@@ -26,7 +28,10 @@ var updateNVDTask = &cobra.Command{
 
 		database := db.InitDatabase(viper.GetString("database"))
 
-		taskRunner := local.NewLocalRunner(true, nil, database)
+		localExchange := localExchange.NewLocalExchange()
+		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(database)
+
+		taskRunner := local.NewLocalRunner(true, nil, database, localExchange, bruteforceProvider)
 
 		return taskRunner.UpdateNVDVulnerabilitiesForProduct(cmd.Context(), product)
 	},

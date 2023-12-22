@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
+	"github.com/tedyst/licenta/bruteforce"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
 	localExchange "github.com/tedyst/licenta/messages/local"
@@ -26,27 +27,28 @@ var serveLocalCmd = &cobra.Command{
 		db := database.InitDatabase(viper.GetString("database"))
 		sessionStore := session.New(db, viper.GetBool("debug"))
 
+		localExchange := localExchange.NewLocalExchange()
+		brutefroceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
+
 		var taskRunner tasks.TaskRunner
 		if viper.GetString("email.sendgrid") != "" {
 			taskRunner = local.NewLocalRunner(viper.GetBool("debug"), email.NewConsoleEmailSender(
 				viper.GetString("email.senderName"),
 				viper.GetString("email.sender"),
-			), db)
+			), db, localExchange, brutefroceProvider)
 		} else {
 			taskRunner = local.NewLocalRunner(viper.GetBool("debug"), email.NewSendGridEmailSender(
 				viper.GetString("email.sendgrid"),
 				viper.GetString("email.senderName"),
 				viper.GetString("email.sender"),
-			), db)
+			), db, localExchange, brutefroceProvider)
 		}
-
-		messageExchange := localExchange.NewLocalExchange()
 
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:      viper.GetBool("debug"),
 			Origin:     viper.GetString("baseurl"),
 			TaskRunner: taskRunner,
-		}, messageExchange)
+		}, localExchange)
 
 		slog.Info("Started web server", "port", viper.GetString("port"), "baseurl", viper.GetString("baseurl"))
 		err := http.ListenAndServe(":"+viper.GetString("port"), app)

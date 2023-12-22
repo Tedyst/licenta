@@ -22,8 +22,8 @@ LIMIT 1
 `
 
 type GetBruteforcedPasswordByHashAndUsernameParams struct {
-	Hash     string
-	Username string
+	Hash     string `json:"hash"`
+	Username string `json:"username"`
 }
 
 func (q *Queries) GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg GetBruteforcedPasswordByHashAndUsernameParams) (*BruteforcedPassword, error) {
@@ -59,10 +59,10 @@ ON CONFLICT
 `
 
 type InsertBruteforcedPasswordParams struct {
-	Hash             string
-	Username         string
-	Password         sql.NullString
-	LastBruteforceID sql.NullInt64
+	Hash             string         `json:"hash"`
+	Username         string         `json:"username"`
+	Password         sql.NullString `json:"password"`
+	LastBruteforceID sql.NullInt64  `json:"last_bruteforce_id"`
 }
 
 func (q *Queries) InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error {

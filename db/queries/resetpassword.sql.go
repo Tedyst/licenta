@@ -20,8 +20,8 @@ RETURNING
 `
 
 type CreateResetPasswordTokenParams struct {
-	ID     uuid.UUID
-	UserID sql.NullInt64
+	ID     uuid.UUID     `json:"id"`
+	UserID sql.NullInt64 `json:"user_id"`
 }
 
 func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error) {

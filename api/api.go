@@ -47,6 +47,6 @@ func Initialize(database db.TransactionQuerier, sessionStore session.SessionStor
 	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
 		Debug:   config.Debug,
 		BaseURL: "/api/v1",
-	}, messageExchange)
+	}, messageExchange, config.TaskRunner)
 	return otelhttp.NewHandler(app, "api")
 }

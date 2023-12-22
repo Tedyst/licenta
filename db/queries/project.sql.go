@@ -21,8 +21,8 @@ LIMIT 1
 `
 
 type GetProjectByOrganizationAndNameParams struct {
-	OrganizationID int64
-	Name           string
+	OrganizationID int64  `json:"organization_id"`
+	Name           string `json:"name"`
 }
 
 func (q *Queries) GetProjectByOrganizationAndName(ctx context.Context, arg GetProjectByOrganizationAndNameParams) (*Project, error) {
@@ -94,9 +94,9 @@ FROM (
 `
 
 type GetProjectPermissionsForUserParams struct {
-	ProjectID      int64
-	UserID         int64
-	OrganizationID int64
+	ProjectID      int64 `json:"project_id"`
+	UserID         int64 `json:"user_id"`
+	OrganizationID int64 `json:"organization_id"`
 }
 
 func (q *Queries) GetProjectPermissionsForUser(ctx context.Context, arg GetProjectPermissionsForUserParams) (int16, error) {
@@ -118,8 +118,8 @@ LIMIT 1
 `
 
 type GetProjectUserParams struct {
-	ProjectID int64
-	UserID    int64
+	ProjectID int64 `json:"project_id"`
+	UserID    int64 `json:"user_id"`
 }
 
 func (q *Queries) GetProjectUser(ctx context.Context, arg GetProjectUserParams) (*ProjectMember, error) {
