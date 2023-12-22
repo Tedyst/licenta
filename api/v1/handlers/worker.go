@@ -13,6 +13,8 @@ import (
 	"github.com/tedyst/licenta/worker"
 )
 
+const bruteforcePasswordsPerPage = 10000
+
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
 	workerA := models.Worker{
 		ID:    1,
@@ -232,7 +234,7 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 	}
 
 	var results []generated.BruteforcePassword
-	total := 1000
+	total := bruteforcePasswordsPerPage
 
 	if lastid < 0 {
 		specificPasswords, err := server.Queries.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)

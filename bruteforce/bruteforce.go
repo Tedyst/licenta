@@ -134,10 +134,12 @@ func (br *bruteforcer) BruteforcePasswordAllUsers(ctx context.Context) ([]scanne
 		if err != nil {
 			return nil, err
 		}
-		br.results = append(br.results, &bruteforceResult{
-			user:     username,
-			password: pass,
-		})
+		if pass != "" {
+			br.results = append(br.results, &bruteforceResult{
+				user:     username,
+				password: pass,
+			})
+		}
 	}
 
 	return br.results, nil
