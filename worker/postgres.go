@@ -1,10 +1,19 @@
 package worker
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
+	"io"
 	"log/slog"
+	"net/http"
+	"strconv"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/pkg/errors"
+	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	localmessages "github.com/tedyst/licenta/messages/local"
@@ -24,16 +33,103 @@ func (q *remotePostgresQuerier) GetPostgresDatabase(ctx context.Context, id int6
 }
 
 func (q *remotePostgresQuerier) UpdatePostgresScanStatus(ctx context.Context, params queries.UpdatePostgresScanStatusParams) error {
+	slog.InfoContext(ctx, "Updating scan status", "params", params)
+
+	remoteURL := q.remoteURL + "/api/v1/project/" + strconv.Itoa(int(q.task.PostgresScan.Database.ID)) + "/scanner/postgres/" + strconv.Itoa(int(params.ID)) + "/"
+
+	req, err := http.NewRequest("PATCH", remoteURL, nil)
+	if err != nil {
+		return err
+	}
+
+	req = req.WithContext(ctx)
+	req.Header.Set("X-Worker-Token", q.authToken)
+
+	body := generated.PatchProjectProjectidScannerPostgresScanidJSONRequestBody{
+		Status:  int(params.Status),
+		EndedAt: params.EndedAt.Time.Format(time.RFC3339),
+	}
+
+	data, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	req.Body = io.NopCloser(bytes.NewReader(data))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	var response generated.PatchProjectProjectidScannerPostgresScanid200JSONResponse
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return err
+	}
+
+	if !response.Success {
+		return errors.New("error updating scan status")
+	}
+
+	slog.InfoContext(ctx, "Received response", "status", resp.StatusCode)
+
 	return nil
 }
 
 func (q *remotePostgresQuerier) CreatePostgresScanResult(ctx context.Context, params queries.CreatePostgresScanResultParams) (*models.PostgresScanResult, error) {
 	slog.InfoContext(ctx, "Creating scan result", "params", params)
-	return &queries.PostgresScanResult{
-		ID:             1,
-		PostgresScanID: 1,
-		Severity:       1,
-		Message:        "asdasd",
+
+	remoteURL := q.remoteURL + "/api/v1/project/" + strconv.Itoa(int(q.task.PostgresScan.Database.ID)) + "/scanner/postgres/" + strconv.Itoa(int(params.PostgresScanID)) + "/result"
+
+	req, err := http.NewRequest("POST", remoteURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req = req.WithContext(ctx)
+	req.Header.Set("X-Worker-Token", q.authToken)
+
+	body := generated.PostProjectProjectidScannerPostgresScanidResultJSONRequestBody{
+		Message:  params.Message,
+		Severity: int(params.Severity),
+	}
+
+	data, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Body = io.NopCloser(bytes.NewReader(data))
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var response generated.PostProjectProjectidScannerPostgresScanidResult200JSONResponse
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+
+	if !response.Success {
+		return nil, errors.New("error creating scan result")
+	}
+
+	slog.InfoContext(ctx, "Received response", "status", resp.StatusCode)
+
+	t, err := time.Parse(time.RFC3339, response.Scan.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.PostgresScanResult{
+		ID:             int64(response.Scan.Id),
+		PostgresScanID: int64(response.Scan.PostgresScanId),
+		Severity:       int32(response.Scan.Severity),
+		Message:        response.Scan.Message,
+		CreatedAt:      pgtype.Timestamptz{Time: t},
 	}, nil
 }
 

@@ -43,6 +43,44 @@ func (m *MockTransactionQuerier) EXPECT() *MockTransactionQuerierMockRecorder {
 	return m.recorder
 }
 
+// BindPostgresScanToWorker mocks base method.
+func (m *MockTransactionQuerier) BindPostgresScanToWorker(ctx context.Context, arg queries.BindPostgresScanToWorkerParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BindPostgresScanToWorker", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BindPostgresScanToWorker indicates an expected call of BindPostgresScanToWorker.
+func (mr *MockTransactionQuerierMockRecorder) BindPostgresScanToWorker(ctx, arg any) *TransactionQuerierBindPostgresScanToWorkerCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindPostgresScanToWorker", reflect.TypeOf((*MockTransactionQuerier)(nil).BindPostgresScanToWorker), ctx, arg)
+	return &TransactionQuerierBindPostgresScanToWorkerCall{Call: call}
+}
+
+// TransactionQuerierBindPostgresScanToWorkerCall wrap *gomock.Call
+type TransactionQuerierBindPostgresScanToWorkerCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierBindPostgresScanToWorkerCall) Return(arg0 error) *TransactionQuerierBindPostgresScanToWorkerCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierBindPostgresScanToWorkerCall) Do(f func(context.Context, queries.BindPostgresScanToWorkerParams) error) *TransactionQuerierBindPostgresScanToWorkerCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierBindPostgresScanToWorkerCall) DoAndReturn(f func(context.Context, queries.BindPostgresScanToWorkerParams) error) *TransactionQuerierBindPostgresScanToWorkerCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CountUsers mocks base method.
 func (m *MockTransactionQuerier) CountUsers(ctx context.Context) (int64, error) {
 	m.ctrl.T.Helper()
@@ -2255,6 +2293,45 @@ func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Do(f func(context.Conte
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(context.Context, string) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetWorkerForPostgresScan mocks base method.
+func (m *MockTransactionQuerier) GetWorkerForPostgresScan(ctx context.Context, id int64) (*queries.GetWorkerForPostgresScanRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkerForPostgresScan", ctx, id)
+	ret0, _ := ret[0].(*queries.GetWorkerForPostgresScanRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkerForPostgresScan indicates an expected call of GetWorkerForPostgresScan.
+func (mr *MockTransactionQuerierMockRecorder) GetWorkerForPostgresScan(ctx, id any) *TransactionQuerierGetWorkerForPostgresScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerForPostgresScan", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkerForPostgresScan), ctx, id)
+	return &TransactionQuerierGetWorkerForPostgresScanCall{Call: call}
+}
+
+// TransactionQuerierGetWorkerForPostgresScanCall wrap *gomock.Call
+type TransactionQuerierGetWorkerForPostgresScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetWorkerForPostgresScanCall) Return(arg0 *queries.GetWorkerForPostgresScanRow, arg1 error) *TransactionQuerierGetWorkerForPostgresScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetWorkerForPostgresScanCall) Do(f func(context.Context, int64) (*queries.GetWorkerForPostgresScanRow, error)) *TransactionQuerierGetWorkerForPostgresScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetWorkerForPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.GetWorkerForPostgresScanRow, error)) *TransactionQuerierGetWorkerForPostgresScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

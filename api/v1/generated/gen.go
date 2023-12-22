@@ -39,6 +39,12 @@ type ChangePasswordLoggedIn struct {
 	OldPassword string `json:"old_password" validate:"min=8,alphanum"`
 }
 
+// CreatePostgresScanResult defines model for CreatePostgresScanResult.
+type CreatePostgresScanResult struct {
+	Message  string `json:"message"`
+	Severity int    `json:"severity"`
+}
+
 // Error defines model for Error.
 type Error struct {
 	// Message Error message
@@ -76,6 +82,13 @@ type PaginatedUsers struct {
 	Results  []User `json:"results"`
 }
 
+// PatchPostgresScan defines model for PatchPostgresScan.
+type PatchPostgresScan struct {
+	EndedAt string `json:"ended_at"`
+	Error   string `json:"error"`
+	Status  int    `json:"status"`
+}
+
 // PostgresDatabase defines model for PostgresDatabase.
 type PostgresDatabase struct {
 	CreatedAt    string `json:"created_at"`
@@ -97,6 +110,15 @@ type PostgresScan struct {
 	Id                 int    `json:"id"`
 	PostgresDatabaseId int    `json:"postgres_database_id"`
 	Status             int    `json:"status"`
+}
+
+// PostgresScanResult defines model for PostgresScanResult.
+type PostgresScanResult struct {
+	CreatedAt      string `json:"created_at"`
+	Id             int    `json:"id"`
+	Message        string `json:"message"`
+	PostgresScanId int    `json:"postgres_scan_id"`
+	Severity       int    `json:"severity"`
 }
 
 // RegisterUser defines model for RegisterUser.
@@ -191,6 +213,12 @@ type Post2faTotpSecondStepJSONRequestBody = TOTPSecondStep
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = LoginUser
 
+// PatchProjectProjectidScannerPostgresScanidJSONRequestBody defines body for PatchProjectProjectidScannerPostgresScanid for application/json ContentType.
+type PatchProjectProjectidScannerPostgresScanidJSONRequestBody = PatchPostgresScan
+
+// PostProjectProjectidScannerPostgresScanidResultJSONRequestBody defines body for PostProjectProjectidScannerPostgresScanidResult for application/json ContentType.
+type PostProjectProjectidScannerPostgresScanidResultJSONRequestBody = CreatePostgresScanResult
+
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = RegisterUser
 
@@ -211,6 +239,15 @@ type ServerInterface interface {
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(w http.ResponseWriter, r *http.Request)
+	// Get the postgres scan associated with a project
+	// (GET /project/{projectid}/scanner/postgres/{scanid})
+	GetProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64)
+	// Update the postgres scan associated with a project
+	// (PATCH /project/{projectid}/scanner/postgres/{scanid})
+	PatchProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64)
+	// Create a new postgres scan result
+	// (POST /project/{projectid}/scanner/postgres/{scanid}/result)
+	PostProjectProjectidScannerPostgresScanidResult(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64)
 	// Creates a new user
 	// (POST /register)
 	PostRegister(w http.ResponseWriter, r *http.Request)
@@ -259,6 +296,24 @@ func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
 // Logs out current logged in user session
 // (POST /logout)
 func (_ Unimplemented) PostLogout(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get the postgres scan associated with a project
+// (GET /project/{projectid}/scanner/postgres/{scanid})
+func (_ Unimplemented) GetProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update the postgres scan associated with a project
+// (PATCH /project/{projectid}/scanner/postgres/{scanid})
+func (_ Unimplemented) PatchProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new postgres scan result
+// (POST /project/{projectid}/scanner/postgres/{scanid}/result)
+func (_ Unimplemented) PostProjectProjectidScannerPostgresScanidResult(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -376,6 +431,123 @@ func (siw *ServerInterfaceWrapper) PostLogout(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostLogout(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetProjectProjectidScannerPostgresScanid operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "projectid" -------------
+	var projectid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "scanid" -------------
+	var scanid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "scanid", runtime.ParamLocationPath, chi.URLParam(r, "scanid"), &scanid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scanid", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetProjectProjectidScannerPostgresScanid(w, r, projectid, scanid)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchProjectProjectidScannerPostgresScanid operation middleware
+func (siw *ServerInterfaceWrapper) PatchProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "projectid" -------------
+	var projectid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "scanid" -------------
+	var scanid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "scanid", runtime.ParamLocationPath, chi.URLParam(r, "scanid"), &scanid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scanid", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchProjectProjectidScannerPostgresScanid(w, r, projectid, scanid)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostProjectProjectidScannerPostgresScanidResult operation middleware
+func (siw *ServerInterfaceWrapper) PostProjectProjectidScannerPostgresScanidResult(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "projectid" -------------
+	var projectid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "scanid" -------------
+	var scanid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "scanid", runtime.ParamLocationPath, chi.URLParam(r, "scanid"), &scanid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scanid", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostProjectProjectidScannerPostgresScanidResult(w, r, projectid, scanid)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -684,6 +856,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/logout", wrapper.PostLogout)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/project/{projectid}/scanner/postgres/{scanid}", wrapper.GetProjectProjectidScannerPostgresScanid)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/project/{projectid}/scanner/postgres/{scanid}", wrapper.PatchProjectProjectidScannerPostgresScanid)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/project/{projectid}/scanner/postgres/{scanid}/result", wrapper.PostProjectProjectidScannerPostgresScanidResult)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/register", wrapper.PostRegister)
 	})
 	r.Group(func(r chi.Router) {
@@ -820,6 +1001,116 @@ type PostLogout200JSONResponse Success
 func (response PostLogout200JSONResponse) VisitPostLogoutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectProjectidScannerPostgresScanidRequestObject struct {
+	Projectid int64 `json:"projectid"`
+	Scanid    int64 `json:"scanid"`
+}
+
+type GetProjectProjectidScannerPostgresScanidResponseObject interface {
+	VisitGetProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error
+}
+
+type GetProjectProjectidScannerPostgresScanid200JSONResponse struct {
+	Scan    *PostgresScan `json:"scan,omitempty"`
+	Success bool          `json:"success"`
+}
+
+func (response GetProjectProjectidScannerPostgresScanid200JSONResponse) VisitGetProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectProjectidScannerPostgresScanid401JSONResponse Error
+
+func (response GetProjectProjectidScannerPostgresScanid401JSONResponse) VisitGetProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchProjectProjectidScannerPostgresScanidRequestObject struct {
+	Projectid int64 `json:"projectid"`
+	Scanid    int64 `json:"scanid"`
+	Body      *PatchProjectProjectidScannerPostgresScanidJSONRequestBody
+}
+
+type PatchProjectProjectidScannerPostgresScanidResponseObject interface {
+	VisitPatchProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error
+}
+
+type PatchProjectProjectidScannerPostgresScanid200JSONResponse struct {
+	Scan    *PostgresScan `json:"scan,omitempty"`
+	Success bool          `json:"success"`
+}
+
+func (response PatchProjectProjectidScannerPostgresScanid200JSONResponse) VisitPatchProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchProjectProjectidScannerPostgresScanid400JSONResponse Error
+
+func (response PatchProjectProjectidScannerPostgresScanid400JSONResponse) VisitPatchProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchProjectProjectidScannerPostgresScanid401JSONResponse Error
+
+func (response PatchProjectProjectidScannerPostgresScanid401JSONResponse) VisitPatchProjectProjectidScannerPostgresScanidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidScannerPostgresScanidResultRequestObject struct {
+	Projectid int64 `json:"projectid"`
+	Scanid    int64 `json:"scanid"`
+	Body      *PostProjectProjectidScannerPostgresScanidResultJSONRequestBody
+}
+
+type PostProjectProjectidScannerPostgresScanidResultResponseObject interface {
+	VisitPostProjectProjectidScannerPostgresScanidResultResponse(w http.ResponseWriter) error
+}
+
+type PostProjectProjectidScannerPostgresScanidResult200JSONResponse struct {
+	Scan    *PostgresScanResult `json:"scan,omitempty"`
+	Success bool                `json:"success"`
+}
+
+func (response PostProjectProjectidScannerPostgresScanidResult200JSONResponse) VisitPostProjectProjectidScannerPostgresScanidResultResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidScannerPostgresScanidResult400JSONResponse Error
+
+func (response PostProjectProjectidScannerPostgresScanidResult400JSONResponse) VisitPostProjectProjectidScannerPostgresScanidResultResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidScannerPostgresScanidResult401JSONResponse Error
+
+func (response PostProjectProjectidScannerPostgresScanidResult401JSONResponse) VisitPostProjectProjectidScannerPostgresScanidResultResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1071,6 +1362,15 @@ type StrictServerInterface interface {
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
+	// Get the postgres scan associated with a project
+	// (GET /project/{projectid}/scanner/postgres/{scanid})
+	GetProjectProjectidScannerPostgresScanid(ctx context.Context, request GetProjectProjectidScannerPostgresScanidRequestObject) (GetProjectProjectidScannerPostgresScanidResponseObject, error)
+	// Update the postgres scan associated with a project
+	// (PATCH /project/{projectid}/scanner/postgres/{scanid})
+	PatchProjectProjectidScannerPostgresScanid(ctx context.Context, request PatchProjectProjectidScannerPostgresScanidRequestObject) (PatchProjectProjectidScannerPostgresScanidResponseObject, error)
+	// Create a new postgres scan result
+	// (POST /project/{projectid}/scanner/postgres/{scanid}/result)
+	PostProjectProjectidScannerPostgresScanidResult(ctx context.Context, request PostProjectProjectidScannerPostgresScanidResultRequestObject) (PostProjectProjectidScannerPostgresScanidResultResponseObject, error)
 	// Creates a new user
 	// (POST /register)
 	PostRegister(ctx context.Context, request PostRegisterRequestObject) (PostRegisterResponseObject, error)
@@ -1226,6 +1526,101 @@ func (sh *strictHandler) PostLogout(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostLogoutResponseObject); ok {
 		if err := validResponse.VisitPostLogoutResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
+	}
+}
+
+// GetProjectProjectidScannerPostgresScanid operation middleware
+func (sh *strictHandler) GetProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64) {
+	var request GetProjectProjectidScannerPostgresScanidRequestObject
+
+	request.Projectid = projectid
+	request.Scanid = scanid
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectProjectidScannerPostgresScanid(ctx, request.(GetProjectProjectidScannerPostgresScanidRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectProjectidScannerPostgresScanid")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectProjectidScannerPostgresScanidResponseObject); ok {
+		if err := validResponse.VisitGetProjectProjectidScannerPostgresScanidResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
+	}
+}
+
+// PatchProjectProjectidScannerPostgresScanid operation middleware
+func (sh *strictHandler) PatchProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64) {
+	var request PatchProjectProjectidScannerPostgresScanidRequestObject
+
+	request.Projectid = projectid
+	request.Scanid = scanid
+
+	var body PatchProjectProjectidScannerPostgresScanidJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchProjectProjectidScannerPostgresScanid(ctx, request.(PatchProjectProjectidScannerPostgresScanidRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchProjectProjectidScannerPostgresScanid")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchProjectProjectidScannerPostgresScanidResponseObject); ok {
+		if err := validResponse.VisitPatchProjectProjectidScannerPostgresScanidResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
+	}
+}
+
+// PostProjectProjectidScannerPostgresScanidResult operation middleware
+func (sh *strictHandler) PostProjectProjectidScannerPostgresScanidResult(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64) {
+	var request PostProjectProjectidScannerPostgresScanidResultRequestObject
+
+	request.Projectid = projectid
+	request.Scanid = scanid
+
+	var body PostProjectProjectidScannerPostgresScanidResultJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjectProjectidScannerPostgresScanidResult(ctx, request.(PostProjectProjectidScannerPostgresScanidResultRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjectProjectidScannerPostgresScanidResult")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostProjectProjectidScannerPostgresScanidResultResponseObject); ok {
+		if err := validResponse.VisitPostProjectProjectidScannerPostgresScanidResultResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1422,40 +1817,45 @@ func (sh *strictHandler) PostWorkerGetTask(w http.ResponseWriter, r *http.Reques
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"dDqd0JyRzXLznwAAAP//zcQgDSwtAAA=",
+	"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",
+	"IGiz3PwRAAD//5IE6vvhOwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

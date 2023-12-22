@@ -7,7 +7,48 @@ package queries
 
 import (
 	"context"
+	"database/sql"
 )
+
+const bindPostgresScanToWorker = `-- name: BindPostgresScanToWorker :exec
+UPDATE
+    postgres_scan
+SET
+    worker_id = $2
+WHERE
+    id = $1
+`
+
+type BindPostgresScanToWorkerParams struct {
+	ID       int64         `json:"id"`
+	WorkerID sql.NullInt64 `json:"worker_id"`
+}
+
+func (q *Queries) BindPostgresScanToWorker(ctx context.Context, arg BindPostgresScanToWorkerParams) error {
+	_, err := q.db.Exec(ctx, bindPostgresScanToWorker, arg.ID, arg.WorkerID)
+	return err
+}
+
+const getWorkerForPostgresScan = `-- name: GetWorkerForPostgresScan :one
+SELECT
+    workers.id, workers.token, workers.created_at
+FROM
+    workers
+    INNER JOIN postgres_scan ON workers.id = postgres_scan.worker_id
+WHERE
+    postgres_scan.id = $1
+`
+
+type GetWorkerForPostgresScanRow struct {
+	Worker Worker `json:"worker"`
+}
+
+func (q *Queries) GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error) {
+	row := q.db.QueryRow(ctx, getWorkerForPostgresScan, id)
+	var i GetWorkerForPostgresScanRow
+	err := row.Scan(&i.Worker.ID, &i.Worker.Token, &i.Worker.CreatedAt)
+	return &i, err
+}
 
 const getWorkersForProject = `-- name: GetWorkersForProject :many
 SELECT

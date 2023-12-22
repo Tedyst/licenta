@@ -236,8 +236,8 @@ type Worker struct {
 }
 
 type WorkerProject struct {
-	ID            int64              `json:"id"`
-	ProjectID     int64              `json:"project_id"`
-	WorkerTokenID int64              `json:"worker_token_id"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	WorkerID  int64              `json:"worker_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }

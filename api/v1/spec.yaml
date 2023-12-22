@@ -358,6 +358,163 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /project/{projectid}/scanner/postgres/{scanid}:
+    get:
+      summary: Get the postgres scan associated with a project
+      security:
+        - workerAuth: []
+        - sessionAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: scanid
+          in: path
+          description: The ID of the scan
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  scan:
+                    $ref: '#/components/schemas/PostgresScan'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update the postgres scan associated with a project
+      security:
+        - workerAuth: []
+        - sessionAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: scanid
+          in: path
+          description: The ID of the scan
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The scan object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchPostgresScan'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  scan:
+                    $ref: '#/components/schemas/PostgresScan'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /project/{projectid}/scanner/postgres/{scanid}/result:
+    post:
+      summary: Create a new postgres scan result
+      security:
+        - workerAuth: []
+        - sessionAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: scanid
+          in: path
+          description: The ID of the scan
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The scan result object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresScanResult'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  scan:
+                    $ref: '#/components/schemas/PostgresScanResult'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     PostgresDatabase:
@@ -391,6 +548,48 @@ components:
           type: string
         remote:
           type: boolean
+    PatchPostgresScan:
+      type: object
+      required:
+        - status
+        - error
+        - ended_at
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        ended_at:
+          type: string
+    CreatePostgresScanResult:
+      type: object
+      required:
+        - severity
+        - message
+      properties:
+        severity:
+          type: integer
+        message:
+          type: string
+    PostgresScanResult:
+      type: object
+      required:
+        - id
+        - postgres_scan_id
+        - severity
+        - message
+        - created_at
+      properties:
+        id:
+          type: integer
+        postgres_scan_id:
+          type: integer
+        severity:
+          type: integer
+        message:
+          type: string
+        created_at:
+          type: string
     PostgresScan:
       required:
         - id

@@ -12,6 +12,7 @@ import (
 )
 
 type Querier interface {
+	BindPostgresScanToWorker(ctx context.Context, arg BindPostgresScanToWorkerParams) error
 	CountUsers(ctx context.Context) (int64, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
@@ -67,6 +68,7 @@ type Querier interface {
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error)
+	GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*GetWorkersForProjectRow, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
 	InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error

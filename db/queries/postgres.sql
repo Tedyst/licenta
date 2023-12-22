@@ -1,6 +1,6 @@
 -- name: CreatePostgresScan :one
-INSERT INTO postgres_scan(postgres_database_id, status)
-    VALUES ($1, $2)
+INSERT INTO postgres_scan(postgres_database_id, status, worker_id)
+    VALUES ($1, $2, $3)
 RETURNING
     *;
 

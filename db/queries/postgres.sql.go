@@ -13,19 +13,20 @@ import (
 )
 
 const createPostgresScan = `-- name: CreatePostgresScan :one
-INSERT INTO postgres_scan(postgres_database_id, status)
-    VALUES ($1, $2)
+INSERT INTO postgres_scan(postgres_database_id, status, worker_id)
+    VALUES ($1, $2, $3)
 RETURNING
     id, postgres_database_id, status, error, worker_id, created_at, ended_at
 `
 
 type CreatePostgresScanParams struct {
-	PostgresDatabaseID int64 `json:"postgres_database_id"`
-	Status             int32 `json:"status"`
+	PostgresDatabaseID int64         `json:"postgres_database_id"`
+	Status             int32         `json:"status"`
+	WorkerID           sql.NullInt64 `json:"worker_id"`
 }
 
 func (q *Queries) CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error) {
-	row := q.db.QueryRow(ctx, createPostgresScan, arg.PostgresDatabaseID, arg.Status)
+	row := q.db.QueryRow(ctx, createPostgresScan, arg.PostgresDatabaseID, arg.Status, arg.WorkerID)
 	var i PostgresScan
 	err := row.Scan(
 		&i.ID,

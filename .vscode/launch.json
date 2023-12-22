@@ -36,9 +36,10 @@
             "mode": "auto",
             "program": ".",
             "args": [
-                "worker",
-                "--worker-token",
-                "asdasd"
+                // "worker",
+                // "--worker-token",
+                // "asdasd"
+                "servelocal"
             ],
             "envFile": "${workspaceFolder}/.env"
         }
