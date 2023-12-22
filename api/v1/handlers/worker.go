@@ -233,9 +233,8 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 
 	var results []generated.BruteforcePassword
 	total := 1000
-	lastReturnedID := 0
 
-	if lastid == -1 {
+	if lastid < 0 {
 		specificPasswords, err := server.Queries.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)
 		if err != nil {
 			return nil, err
@@ -265,12 +264,21 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 				Password: password.Password,
 			})
 		}
-		lastReturnedID = int(genericPasswords[len(genericPasswords)-1].ID)
 	}
+	if len(results) == 0 {
+		return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
+			Success: true,
+			Count:   int(count),
+			Results: []generated.BruteforcePassword{},
+			Next:    nil,
+		}, nil
+	}
+	lastReturnedID := int(results[len(results)-1].Id)
+	nextURL := "/api/v1/project/" + strconv.Itoa(int(request.Projectid)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID)
 	return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
 		Success: true,
 		Count:   int(count),
-		Next:    "/api/v1/project/" + strconv.Itoa(int(request.Projectid)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID),
+		Next:    &nextURL,
 		Results: results,
 	}, nil
 }

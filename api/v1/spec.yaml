@@ -802,7 +802,6 @@ components:
       required:
         - success
         - count
-        - next
         - results
       type: object
       properties:

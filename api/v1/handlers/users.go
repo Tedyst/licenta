@@ -58,7 +58,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 
 	return generated.GetUsers200JSONResponse{
 		Count:   int(count),
-		Next:    nextURL,
+		Next:    &nextURL,
 		Results: result,
 	}, nil
 }
