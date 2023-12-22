@@ -358,6 +358,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /project/{projectid}/bruteforce-passwords:
+    get:
+      summary: Get all bruteforce passwords associated with a project
+      security:
+        - workerAuth: []
+        - sessionAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: last_id
+          in: query
+          description: The last ID of the item to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: -1
+            default: -1
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBruteforcePasswords'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /project/{projectid}/scanner/postgres/{scanid}:
     get:
       summary: Get the postgres scan associated with a project
@@ -762,23 +800,47 @@ components:
           example: true
     PaginatedResult:
       required:
+        - success
         - count
         - next
-        - previous
         - results
       type: object
       properties:
+        success:
+          type: boolean
+          description: The success status
+          example: true
         count:
           type: integer
           example: 1
         next:
           type: string
-        previous:
-          type: string
-          example: null
         results: 
           type: array
           items: {}
+    PaginatedBruteforcePasswords:
+      allOf:
+        - $ref: "#/components/schemas/PaginatedResult"
+        - type: object
+          properties:
+            results:
+              type: array
+              items:
+                $ref: "#/components/schemas/BruteforcePassword"
+    BruteforcePassword:
+      required:
+        - id
+        - password
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the bruteforce password
+          example: 1
+        password:
+          type: string
+          description: The password
+          example: mypassword
     PaginatedUsers:
       allOf:
         - $ref: "#/components/schemas/PaginatedResult"

@@ -10,6 +10,109 @@ import (
 	"database/sql"
 )
 
+const getBruteforcePasswordsForProjectCount = `-- name: GetBruteforcePasswordsForProjectCount :one
+SELECT
+    SUM(count)
+FROM (
+    SELECT
+        COUNT(*)
+    FROM
+        default_bruteforce_passwords
+    UNION ALL
+    SELECT
+        COUNT(*)
+    FROM
+        project_docker_layer_results
+    WHERE
+        project_docker_layer_results.project_id = $1
+    UNION ALL
+    SELECT
+        COUNT(*)
+    FROM
+        project_git_results
+    WHERE
+        project_git_results.project_id = $1) AS count
+`
+
+func (q *Queries) GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, getBruteforcePasswordsForProjectCount, projectID)
+	var sum int64
+	err := row.Scan(&sum)
+	return sum, err
+}
+
+const getBruteforcePasswordsPaginated = `-- name: GetBruteforcePasswordsPaginated :many
+SELECT
+    id,
+    PASSWORD
+FROM
+    default_bruteforce_passwords
+WHERE
+    id > $1
+LIMIT $2
+`
+
+type GetBruteforcePasswordsPaginatedParams struct {
+	LastID int64 `json:"last_id"`
+	Limit  int32 `json:"limit"`
+}
+
+func (q *Queries) GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error) {
+	rows, err := q.db.Query(ctx, getBruteforcePasswordsPaginated, arg.LastID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*DefaultBruteforcePassword
+	for rows.Next() {
+		var i DefaultBruteforcePassword
+		if err := rows.Scan(&i.ID, &i.Password); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBruteforcePasswordsSpecificForProject = `-- name: GetBruteforcePasswordsSpecificForProject :many
+SELECT
+    PASSWORD
+FROM
+    project_docker_layer_results
+WHERE
+    project_docker_layer_results.project_id = $1
+UNION ALL
+SELECT
+    PASSWORD
+FROM
+    project_git_results
+WHERE
+    project_git_results.project_id = $1
+`
+
+func (q *Queries) GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error) {
+	rows, err := q.db.Query(ctx, getBruteforcePasswordsSpecificForProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []sql.NullString
+	for rows.Next() {
+		var password sql.NullString
+		if err := rows.Scan(&password); err != nil {
+			return nil, err
+		}
+		items = append(items, password)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBruteforcedPasswordByHashAndUsername = `-- name: GetBruteforcedPasswordByHashAndUsername :one
 SELECT
     id, hash, username, password, last_bruteforce_id

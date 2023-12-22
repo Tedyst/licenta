@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -217,5 +218,59 @@ func (server *serverHandler) PostProjectProjectidScannerPostgresScanidResult(ctx
 			Severity:       int(scanresult.Severity),
 		},
 	}, nil
+}
 
+func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.Context, request generated.GetProjectProjectidBruteforcePasswordsRequestObject) (generated.GetProjectProjectidBruteforcePasswordsResponseObject, error) {
+	lastid := -1
+	if request.Params.LastId != nil {
+		lastid = int(*request.Params.LastId)
+	}
+
+	count, err := server.Queries.GetBruteforcePasswordsForProjectCount(ctx, request.Projectid)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []generated.BruteforcePassword
+	total := 1000
+	lastReturnedID := 0
+
+	if lastid == -1 {
+		specificPasswords, err := server.Queries.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)
+		if err != nil {
+			return nil, err
+		}
+		total -= len(specificPasswords)
+
+		for _, password := range specificPasswords {
+			results = append(results, generated.BruteforcePassword{
+				Id:       -1,
+				Password: password.String,
+			})
+		}
+	}
+
+	if total > 0 {
+		genericPasswords, err := server.Queries.GetBruteforcePasswordsPaginated(ctx, queries.GetBruteforcePasswordsPaginatedParams{
+			LastID: int64(lastid),
+			Limit:  int32(total),
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		for _, password := range genericPasswords {
+			results = append(results, generated.BruteforcePassword{
+				Id:       int64(password.ID),
+				Password: password.Password,
+			})
+		}
+		lastReturnedID = int(genericPasswords[len(genericPasswords)-1].ID)
+	}
+	return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
+		Success: true,
+		Count:   int(count),
+		Next:    "/api/v1/project/" + strconv.Itoa(int(request.Projectid)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID),
+		Results: results,
+	}, nil
 }

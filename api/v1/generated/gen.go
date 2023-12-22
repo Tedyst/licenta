@@ -30,6 +30,15 @@ const (
 	WorkerTaskTypePostgresScan WorkerTaskType = "postgres_scan"
 )
 
+// BruteforcePassword defines model for BruteforcePassword.
+type BruteforcePassword struct {
+	// Id The internal ID of the bruteforce password
+	Id int64 `json:"id"`
+
+	// Password The password
+	Password string `json:"password"`
+}
+
 // ChangePasswordLoggedIn defines model for ChangePasswordLoggedIn.
 type ChangePasswordLoggedIn struct {
 	// NewPassword The new password
@@ -66,20 +75,34 @@ type LoginUser struct {
 	Username string `json:"username" validate:"printascii,min=3,max=20"`
 }
 
+// PaginatedBruteforcePasswords defines model for PaginatedBruteforcePasswords.
+type PaginatedBruteforcePasswords struct {
+	Count   int                  `json:"count"`
+	Next    string               `json:"next"`
+	Results []BruteforcePassword `json:"results"`
+
+	// Success The success status
+	Success bool `json:"success"`
+}
+
 // PaginatedResult defines model for PaginatedResult.
 type PaginatedResult struct {
-	Count    int           `json:"count"`
-	Next     string        `json:"next"`
-	Previous string        `json:"previous"`
-	Results  []interface{} `json:"results"`
+	Count   int           `json:"count"`
+	Next    string        `json:"next"`
+	Results []interface{} `json:"results"`
+
+	// Success The success status
+	Success bool `json:"success"`
 }
 
 // PaginatedUsers defines model for PaginatedUsers.
 type PaginatedUsers struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	Results  []User `json:"results"`
+	Count   int    `json:"count"`
+	Next    string `json:"next"`
+	Results []User `json:"results"`
+
+	// Success The success status
+	Success bool `json:"success"`
 }
 
 // PatchPostgresScan defines model for PatchPostgresScan.
@@ -192,6 +215,12 @@ type WorkerTask struct {
 // WorkerTaskType The Task type
 type WorkerTaskType string
 
+// GetProjectProjectidBruteforcePasswordsParams defines parameters for GetProjectProjectidBruteforcePasswords.
+type GetProjectProjectidBruteforcePasswordsParams struct {
+	// LastId The last ID of the item to return
+	LastId *int32 `form:"last_id,omitempty" json:"last_id,omitempty"`
+}
+
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
 	// Limit The number of items to return
@@ -239,6 +268,9 @@ type ServerInterface interface {
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(w http.ResponseWriter, r *http.Request)
+	// Get all bruteforce passwords associated with a project
+	// (GET /project/{projectid}/bruteforce-passwords)
+	GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams)
 	// Get the postgres scan associated with a project
 	// (GET /project/{projectid}/scanner/postgres/{scanid})
 	GetProjectProjectidScannerPostgresScanid(w http.ResponseWriter, r *http.Request, projectid int64, scanid int64)
@@ -296,6 +328,12 @@ func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
 // Logs out current logged in user session
 // (POST /logout)
 func (_ Unimplemented) PostLogout(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all bruteforce passwords associated with a project
+// (GET /project/{projectid}/bruteforce-passwords)
+func (_ Unimplemented) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -431,6 +469,47 @@ func (siw *ServerInterfaceWrapper) PostLogout(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostLogout(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetProjectProjectidBruteforcePasswords operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "projectid" -------------
+	var projectid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetProjectProjectidBruteforcePasswordsParams
+
+	// ------------- Optional query parameter "last_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "last_id", r.URL.Query(), &params.LastId)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "last_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetProjectProjectidBruteforcePasswords(w, r, projectid, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -856,6 +935,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/logout", wrapper.PostLogout)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/project/{projectid}/bruteforce-passwords", wrapper.GetProjectProjectidBruteforcePasswords)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/project/{projectid}/scanner/postgres/{scanid}", wrapper.GetProjectProjectidScannerPostgresScanid)
 	})
 	r.Group(func(r chi.Router) {
@@ -1001,6 +1083,33 @@ type PostLogout200JSONResponse Success
 func (response PostLogout200JSONResponse) VisitPostLogoutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectProjectidBruteforcePasswordsRequestObject struct {
+	Projectid int64 `json:"projectid"`
+	Params    GetProjectProjectidBruteforcePasswordsParams
+}
+
+type GetProjectProjectidBruteforcePasswordsResponseObject interface {
+	VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error
+}
+
+type GetProjectProjectidBruteforcePasswords200JSONResponse PaginatedBruteforcePasswords
+
+func (response GetProjectProjectidBruteforcePasswords200JSONResponse) VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectProjectidBruteforcePasswords401JSONResponse Error
+
+func (response GetProjectProjectidBruteforcePasswords401JSONResponse) VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1362,6 +1471,9 @@ type StrictServerInterface interface {
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
+	// Get all bruteforce passwords associated with a project
+	// (GET /project/{projectid}/bruteforce-passwords)
+	GetProjectProjectidBruteforcePasswords(ctx context.Context, request GetProjectProjectidBruteforcePasswordsRequestObject) (GetProjectProjectidBruteforcePasswordsResponseObject, error)
 	// Get the postgres scan associated with a project
 	// (GET /project/{projectid}/scanner/postgres/{scanid})
 	GetProjectProjectidScannerPostgresScanid(ctx context.Context, request GetProjectProjectidScannerPostgresScanidRequestObject) (GetProjectProjectidScannerPostgresScanidResponseObject, error)
@@ -1526,6 +1638,33 @@ func (sh *strictHandler) PostLogout(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostLogoutResponseObject); ok {
 		if err := validResponse.VisitPostLogoutResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("Unexpected response type: %T", response))
+	}
+}
+
+// GetProjectProjectidBruteforcePasswords operation middleware
+func (sh *strictHandler) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams) {
+	var request GetProjectProjectidBruteforcePasswordsRequestObject
+
+	request.Projectid = projectid
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectProjectidBruteforcePasswords(ctx, request.(GetProjectProjectidBruteforcePasswordsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectProjectidBruteforcePasswords")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectProjectidBruteforcePasswordsResponseObject); ok {
+		if err := validResponse.VisitGetProjectProjectidBruteforcePasswordsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -1817,45 +1956,47 @@ func (sh *strictHandler) PostWorkerGetTask(w http.ResponseWriter, r *http.Reques
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"IGiz3PwRAAD//5IE6vvhOwAA",
+	"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",
+	"AAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

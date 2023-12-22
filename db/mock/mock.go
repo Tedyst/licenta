@@ -1011,6 +1011,123 @@ func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Contex
 	return c
 }
 
+// GetBruteforcePasswordsForProjectCount mocks base method.
+func (m *MockTransactionQuerier) GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBruteforcePasswordsForProjectCount", ctx, projectID)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBruteforcePasswordsForProjectCount indicates an expected call of GetBruteforcePasswordsForProjectCount.
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsForProjectCount(ctx, projectID any) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswordsForProjectCount", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswordsForProjectCount), ctx, projectID)
+	return &TransactionQuerierGetBruteforcePasswordsForProjectCountCall{Call: call}
+}
+
+// TransactionQuerierGetBruteforcePasswordsForProjectCountCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsForProjectCountCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetBruteforcePasswordsForProjectCountCall) Return(arg0 int64, arg1 error) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetBruteforcePasswordsForProjectCountCall) Do(f func(context.Context, int64) (int64, error)) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetBruteforcePasswordsForProjectCountCall) DoAndReturn(f func(context.Context, int64) (int64, error)) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetBruteforcePasswordsPaginated mocks base method.
+func (m *MockTransactionQuerier) GetBruteforcePasswordsPaginated(ctx context.Context, arg queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBruteforcePasswordsPaginated", ctx, arg)
+	ret0, _ := ret[0].([]*queries.DefaultBruteforcePassword)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBruteforcePasswordsPaginated indicates an expected call of GetBruteforcePasswordsPaginated.
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsPaginated(ctx, arg any) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswordsPaginated", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswordsPaginated), ctx, arg)
+	return &TransactionQuerierGetBruteforcePasswordsPaginatedCall{Call: call}
+}
+
+// TransactionQuerierGetBruteforcePasswordsPaginatedCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsPaginatedCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetBruteforcePasswordsPaginatedCall) Return(arg0 []*queries.DefaultBruteforcePassword, arg1 error) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetBruteforcePasswordsPaginatedCall) Do(f func(context.Context, queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetBruteforcePasswordsPaginatedCall) DoAndReturn(f func(context.Context, queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetBruteforcePasswordsSpecificForProject mocks base method.
+func (m *MockTransactionQuerier) GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBruteforcePasswordsSpecificForProject", ctx, projectID)
+	ret0, _ := ret[0].([]sql.NullString)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBruteforcePasswordsSpecificForProject indicates an expected call of GetBruteforcePasswordsSpecificForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsSpecificForProject(ctx, projectID any) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswordsSpecificForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswordsSpecificForProject), ctx, projectID)
+	return &TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) Return(arg0 []sql.NullString, arg1 error) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) Do(f func(context.Context, int64) ([]sql.NullString, error)) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) DoAndReturn(f func(context.Context, int64) ([]sql.NullString, error)) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetBruteforcedPasswordByHashAndUsername mocks base method.
 func (m *MockTransactionQuerier) GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error) {
 	m.ctrl.T.Helper()

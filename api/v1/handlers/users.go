@@ -55,16 +55,11 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 	if int(offset+limit) > int(count) {
 		nextURL = ""
 	}
-	var previousURL = viper.GetString("baseurl") + Prefix + "/users?limit=" + string(limit) + "&offset=" + string(offset-limit)
-	if int(offset-limit) < 0 {
-		previousURL = ""
-	}
 
 	return generated.GetUsers200JSONResponse{
-		Count:    int(count),
-		Next:     nextURL,
-		Previous: previousURL,
-		Results:  result,
+		Count:   int(count),
+		Next:    nextURL,
+		Results: result,
 	}, nil
 }
 

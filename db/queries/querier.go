@@ -36,6 +36,9 @@ type Querier interface {
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
+	GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error)
+	GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error)
 	GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg GetBruteforcedPasswordByHashAndUsernameParams) (*BruteforcedPassword, error)
 	GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error)
 	GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
