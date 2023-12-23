@@ -57,6 +57,6 @@ jobs:
       - name: Check for changes
         run: |
           if [[ `git status --porcelain` ]]; then
-            echo "::error::Go generate has modified some files. Please run 'go generate ./...' locally and commit the changes."
+            echo "::error::Go generate has modified some files. Please install all the latest versions and run 'go generate ./...' locally and commit the changes."
             exit 1
           fi
