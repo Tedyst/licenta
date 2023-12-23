@@ -136,6 +136,9 @@ func (server *serverHandler) Post2faTotpFirstStep(ctx context.Context, request g
 		TotpSecret: key,
 		Valid:      false,
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Post2faTotpFirstStep: error creating totp secret for user")
+	}
 
 	return generated.Post2faTotpFirstStep200JSONResponse{
 		TotpSecret: totpSecret.TotpSecret,

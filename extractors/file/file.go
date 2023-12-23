@@ -31,6 +31,24 @@ type fileScanner struct {
 	secretTypes []secretType
 }
 
+func NewFileScanner(opts ...Option) (*fileScanner, error) {
+	o, err := makeOptions(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &fileScanner{
+		wordsReduceProbabilityTrie:    mapset.NewSet[string](),
+		wordsIncreaseProbabilityTrie:  mapset.NewSet[string](),
+		passwordsCompletelyIgnoreTrie: mapset.NewSet[string](),
+		usernamesCompletelyIgnoreTrie: mapset.NewSet[string](),
+
+		options: *o,
+
+		secretTypes: []secretType{},
+	}, nil
+}
+
 func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {
 	o, err := makeOptions(opts...)
 	if err != nil {
