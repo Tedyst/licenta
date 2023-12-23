@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"database/sql"
+	errorss "errors"
 	errs "errors"
 	"fmt"
 	"log/slog"
@@ -46,7 +47,7 @@ func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.Bru
 	}
 }
 
-func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
+func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) (err error) {
 	ctx, span := tracer.Start(ctx, "ScanPostgresDB")
 	defer span.End()
 
@@ -103,7 +104,9 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
-	defer conn.Close(ctx)
+	defer func() {
+		err = errorss.Join(err, conn.Close(ctx))
+	}()
 
 	logger.DebugContext(ctx, "Connected to database")
 
@@ -130,7 +133,10 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not scan config"))
 	}
-	insertResults(results)
+	err = insertResults(results)
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not insert scan results"))
+	}
 
 	logger.DebugContext(ctx, "Scanned config")
 
@@ -262,7 +268,9 @@ func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, 
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
-	defer conn.Close(ctx)
+	defer func() {
+		err = errorss.Join(err, conn.Close(ctx))
+	}()
 
 	logger.DebugContext(ctx, "Connected to database")
 
@@ -313,7 +321,10 @@ func (runner *scannerRunner) SchedulePostgresScan(ctx context.Context, scan *mod
 		}
 
 		for _, worker := range workers {
-			runner.messageExchange.PublishSendScanToWorkerMessage(ctx, worker.Worker, int(scan.ID), int(database.ProjectID))
+			err := runner.messageExchange.PublishSendScanToWorkerMessage(ctx, worker.Worker, int(scan.ID), int(database.ProjectID))
+			if err != nil {
+				return errors.Wrap(err, "could not publish message")
+			}
 		}
 
 		return nil

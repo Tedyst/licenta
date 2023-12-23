@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -227,12 +228,21 @@ func (store *sessionStore) showError(w http.ResponseWriter, r *http.Request, err
 			Message: err.Error(),
 		})
 		if err != nil {
-			w.Write([]byte(`{"success":false,"message":"Internal server error"}`))
+			_, err := w.Write([]byte(`{"success":false,"message":"Internal server error"}`))
+			if err != nil {
+				slog.Error("Error writing response", "error", err)
+			}
 			return
 		}
-		w.Write([]byte(data))
+		_, err = w.Write([]byte(data))
+		if err != nil {
+			slog.Error("Error writing response", "error", err)
+		}
 	} else {
-		w.Write([]byte(`{"success":false,"message":"Internal server error"}`))
+		_, err := w.Write([]byte(`{"success":false,"message":"Internal server error"}`))
+		if err != nil {
+			slog.Error("Error writing response", "error", err)
+		}
 	}
 }
 

@@ -226,7 +226,7 @@ func (br *bruteforcer) tryPlaintextPassword(ctx context.Context, user scanner.Us
 func (br *bruteforcer) bruteforcePasswordsUser(
 	ctx context.Context,
 	u scanner.User,
-) (string, error) {
+) (resultString string, err error) {
 	username, err := u.GetUsername()
 	if err != nil {
 		return "", err
@@ -240,7 +240,12 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 
 	slog.DebugContext(ctx, "Bruteforcing passwords for user", "user", username)
 
-	defer br.updateStatus(ctx)
+	defer func() {
+		if err != nil {
+			return
+		}
+		err = br.updateStatus(ctx)
+	}()
 
 	pass, err := br.tryPlaintextPassword(ctx, u)
 	if err != nil {
@@ -277,7 +282,10 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 		startBruteforceID = lastID
 	}
 
-	br.setMaximumInternalID(ctx, u, startBruteforceID)
+	err = br.setMaximumInternalID(ctx, u, startBruteforceID)
+	if err != nil {
+		return "", err
+	}
 
 	err = br.passwordProvider.Start(startBruteforceID)
 	if err != nil {
@@ -304,7 +312,10 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 			return "", err
 		}
 
-		sm.Acquire(ctx, 1)
+		err = sm.Acquire(ctx, 1)
+		if err != nil {
+			return "", err
+		}
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -318,7 +329,10 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 			passwordsTried.Add(ctx, 1)
 
 			if ok {
-				br.markStatusAsSolved(ctx, u, pass, internalID)
+				err = br.markStatusAsSolved(ctx, u, pass, internalID)
+				if err != nil {
+					errorChan <- err
+				}
 				resultChan <- struct {
 					password   string
 					internalID int64
@@ -326,12 +340,18 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 				return
 			}
 
-			br.markIncreaseTried(ctx, u, internalID)
+			err = br.markIncreaseTried(ctx, u, internalID)
+			if err != nil {
+				errorChan <- err
+			}
 		}()
 
 		select {
 		case <-ticker.C:
-			br.updateStatus(ctx)
+			err = br.updateStatus(ctx)
+			if err != nil {
+				return "", err
+			}
 		case err := <-errorChan:
 			return "", err
 		case pass := <-resultChan:
@@ -347,13 +367,13 @@ func (br *bruteforcer) bruteforcePasswordsUser(
 
 	select {
 	case err := <-errorChan:
-		br.markStatusAsUnsolved(ctx, u)
-		return "", err
+		err2 := br.markStatusAsUnsolved(ctx, u)
+		return "", errors.Join(err, err2)
 	case pass := <-resultChan:
-		br.markStatusAsSolved(ctx, u, pass.password, pass.internalID)
-		return pass.password, nil
+		err := br.markStatusAsSolved(ctx, u, pass.password, pass.internalID)
+		return pass.password, err
 	default:
-		br.markStatusAsUnsolved(ctx, u)
-		return "", err
+		err2 := br.markStatusAsUnsolved(ctx, u)
+		return "", errors.Join(err, err2)
 	}
 }

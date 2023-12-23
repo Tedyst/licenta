@@ -3,6 +3,7 @@ package git
 import (
 	"bufio"
 	"context"
+	errorss "errors"
 	"log/slog"
 	"strings"
 	"sync"
@@ -13,7 +14,7 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
-func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Commit, to diff.File) ([]file.ExtractResult, error) {
+func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Commit, to diff.File) (results []file.ExtractResult, err error) {
 	content, err := commit.File(to.Path())
 	if err == object.ErrFileNotFound {
 		// File was renamed, this is not supported yet by go-git
@@ -27,9 +28,11 @@ func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Co
 	if err != nil {
 		return nil, errors.Wrap(err, "inspectBinaryFile: cannot open reader")
 	}
-	defer rd.Close()
+	defer func() {
+		err = errorss.Join(err, rd.Close())
+	}()
 
-	results, err := file.ExtractFromReader(ctx, to.Path(), rd, scanner.options.fileScannerOptions...)
+	results, err = file.ExtractFromReader(ctx, to.Path(), rd, scanner.options.fileScannerOptions...)
 	if err != nil {
 		return nil, errors.Wrap(err, "inspectBinaryFile: cannot extract from reader")
 	}

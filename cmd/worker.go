@@ -18,7 +18,9 @@ var workerCmd = &cobra.Command{
 func init() {
 	workerCmd.Flags().String("api", "http://localhost:5000", "API Server URL")
 	workerCmd.Flags().String("worker-token", "", "Worker token")
-	workerCmd.MarkFlagRequired("worker-token")
+	if err := workerCmd.MarkFlagRequired("worker-token"); err != nil {
+		panic(err)
+	}
 
 	rootCmd.AddCommand(workerCmd)
 }

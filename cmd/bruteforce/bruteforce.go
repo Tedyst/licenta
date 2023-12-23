@@ -16,5 +16,8 @@ var bruteforceCmd = &cobra.Command{
 
 func init() {
 	bruteforceCmd.PersistentFlags().String("database", "", "Database connection string")
-	bruteforceCmd.MarkPersistentFlagRequired("database")
+	err := bruteforceCmd.MarkPersistentFlagRequired("database")
+	if err != nil {
+		panic(err)
+	}
 }

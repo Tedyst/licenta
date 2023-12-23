@@ -39,7 +39,9 @@ var updateNVDTask = &cobra.Command{
 
 func init() {
 	updateNVDTask.Flags().String("database", "", "Database connection string")
-	updateNVDTask.MarkFlagRequired("database")
+	if err := updateNVDTask.MarkFlagRequired("database"); err != nil {
+		panic(err)
+	}
 
 	tasksCmd.AddCommand(updateNVDTask)
 }

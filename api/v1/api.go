@@ -35,7 +35,10 @@ func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore 
 			if err != nil {
 				panic(err)
 			}
-			w.Write(data)
+			_, err = w.Write(data)
+			if err != nil {
+				panic(err)
+			}
 		},
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			if err == nil {
@@ -55,7 +58,10 @@ func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore 
 			if err != nil {
 				panic(err)
 			}
-			w.Write(data)
+			_, err = w.Write(data)
+			if err != nil {
+				panic(err)
+			}
 		},
 	})
 	return generated.HandlerFromMuxWithBaseURL(api, app, config.BaseURL)

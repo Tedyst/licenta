@@ -3,6 +3,7 @@ package docker
 import (
 	"archive/tar"
 	"context"
+	errorss "errors"
 	"io"
 	"strings"
 	"sync"
@@ -92,7 +93,12 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			defer r.Close()
+			defer func() {
+				err := r.Close()
+				if err != nil {
+					scanner.errorChannel <- err
+				}
+			}()
 			err := scanner.scanFile(ctx, r, *header, digest.String())
 			if err != nil {
 				scanner.errorChannel <- err
@@ -100,7 +106,12 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 		}()
 
 		_, err = io.Copy(w, &archive)
-		w.Close()
+		defer func() {
+			err := w.Close()
+			if err != nil {
+				scanner.errorChannel <- err
+			}
+		}()
 		if err != nil && !errors.Is(err, io.ErrClosedPipe) {
 			return errors.Wrap(err, "scanTarArchive: failed to read file from archive using Copy")
 		}
@@ -130,14 +141,16 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 	return nil
 }
 
-func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) error {
+func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) (err error) {
 	slog.DebugContext(ctx, "processLayer: processing layer", "layer", layer)
 
 	reader, err := layer.Uncompressed()
 	if err != nil {
 		return errors.Wrap(err, "processLayer: cannot get layer reader")
 	}
-	defer reader.Close()
+	defer func() {
+		err = errorss.Join(err, reader.Close())
+	}()
 
 	tarReader := tar.NewReader(reader)
 	return scanner.scanTarArchive(ctx, *tarReader, layer)

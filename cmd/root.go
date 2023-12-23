@@ -65,7 +65,9 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 
 		if !f.Changed && v.IsSet(configName) {
 			val := v.Get(configName)
-			cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val))
+			if err := cmd.Flags().Set(f.Name, fmt.Sprintf("%v", val)); err != nil {
+				panic(err)
+			}
 		}
 	})
 }

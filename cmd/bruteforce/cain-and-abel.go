@@ -1,6 +1,7 @@
 package bruteforce
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/spf13/cobra"
@@ -16,20 +17,22 @@ var cainAndAbelCmd = &cobra.Command{
 	Short: "Download the cain-and-abel.txt file and import it into the database",
 	Long:  `This command downloads the cain-and-abel password list and imports it into the database.`,
 	Args:  cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		database, err := db.InitDatabase(viper.GetString("database")).StartTransaction(cmd.Context())
 		if err != nil {
 			return err
 		}
-		defer database.EndTransaction(cmd.Context(), err)
+		defer func() {
+			err = errors.Join(err, database.EndTransaction(cmd.Context(), err))
+		}()
 
 		reader, err := http.Get(baseCainAndAbelURL)
 		if err != nil {
 			return err
 		}
-		defer reader.Body.Close()
+		defer func() {
+			err = errors.Join(reader.Body.Close())
+		}()
 
 		return bruteforce.ImportFromReader(cmd.Context(), reader.Body, database)
 	},

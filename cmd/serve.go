@@ -19,9 +19,6 @@ var serveCmd = &cobra.Command{
 	Short: "Run the server using the production configuration",
 	Long:  `This command starts the API server and waits for requests. By default, it uses the local runner for async tasks.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		viper.SetConfigFile("config.yaml")
-		viper.ReadInConfig()
-
 		db := database.InitDatabase(viper.GetString("database"))
 		sessionStore := session.New(db, viper.GetBool("debug"))
 

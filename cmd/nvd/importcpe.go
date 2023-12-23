@@ -2,6 +2,7 @@ package nvd
 
 import (
 	"database/sql"
+	errorss "errors"
 	"fmt"
 	"io"
 	"os"
@@ -21,9 +22,8 @@ var importCpeCmd = &cobra.Command{
 	Use:   "importcpe",
 	Short: "Import CPE from NVD API or file",
 	Long:  `This command allows you to import CPE from NVD API or file into the database.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var reader io.ReadCloser
-		var err error
 		var product nvd.Product
 
 		switch viper.GetString("product") {
@@ -38,7 +38,9 @@ var importCpeCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			defer reader.Close()
+			defer func() {
+				err = errorss.Join(err, reader.Close())
+			}()
 
 			fmt.Println("Downloaded CPE from NVD API")
 		} else {
@@ -46,7 +48,9 @@ var importCpeCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			defer reader.Close()
+			defer func() {
+				err = errorss.Join(err, reader.Close())
+			}()
 		}
 
 		result, err := nvd.ParseCpeAPI(cmd.Context(), reader)
@@ -60,7 +64,9 @@ var importCpeCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		defer database.EndTransaction(cmd.Context(), err)
+		defer func() {
+			err = errorss.Join(err, database.EndTransaction(cmd.Context(), err))
+		}()
 
 		dbCpes, err := database.GetNvdCPEsByDBType(cmd.Context(), int32(nvd.POSTGRESQL))
 		if err != nil {
@@ -120,7 +126,10 @@ var importCpeCmd = &cobra.Command{
 func init() {
 	importCpeCmd.Flags().String("file", "", "Load from file instead from API")
 	importCpeCmd.Flags().String("product", "", "Product to import for: postgresql/mysql/redis")
-	importCpeCmd.MarkFlagRequired("product")
+	err := importCpeCmd.MarkFlagRequired("product")
+	if err != nil {
+		panic(err)
+	}
 
 	nvdCmd.AddCommand(importCpeCmd)
 }

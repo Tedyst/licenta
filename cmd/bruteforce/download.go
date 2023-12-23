@@ -1,6 +1,7 @@
 package bruteforce
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/spf13/cobra"
@@ -22,13 +23,17 @@ var downloadCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		defer database.EndTransaction(cmd.Context(), err)
+		defer func() {
+			err = errors.Join(err, database.EndTransaction(cmd.Context(), err))
+		}()
 
 		reader, err := http.Get(args[0])
 		if err != nil {
 			return err
 		}
-		defer reader.Body.Close()
+		defer func() {
+			err = errors.Join(reader.Body.Close())
+		}()
 
 		return bruteforce.ImportFromReader(cmd.Context(), charmap.ISO8859_1.NewDecoder().Reader(reader.Body), database)
 	},

@@ -1,6 +1,7 @@
 package nvd
 
 import (
+	errorss "errors"
 	"fmt"
 	"os"
 
@@ -19,8 +20,7 @@ var importCveCmd = &cobra.Command{
 	Use:   "importcve",
 	Short: "Import CVE from NVD API or file",
 	Long:  `This command allows you to import CVE from NVD API or file into the database`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var product nvd.Product
 
 		switch viper.GetString("product") {
@@ -34,7 +34,9 @@ var importCveCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "failed to start transaction")
 		}
-		defer database.EndTransaction(cmd.Context(), err)
+		defer func() {
+			err = errorss.Join(database.EndTransaction(cmd.Context(), err))
+		}()
 
 		cpe, err := database.GetCPEByProductAndVersion(cmd.Context(), queries.GetCPEByProductAndVersionParams{
 			DatabaseType: int32(product),
@@ -56,7 +58,9 @@ var importCveCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "failed to open file")
 		}
-		defer reader.Close()
+		defer func() {
+			err = errorss.Join(err, reader.Close())
+		}()
 
 		result, err := nvd.ParseCveAPI(cmd.Context(), reader)
 		if err != nil {
@@ -122,8 +126,12 @@ func init() {
 	importCveCmd.Flags().String("product", "", "Product to import for: postgresql/mysql/redis")
 	importCveCmd.Flags().String("version", "", "Version to import for: 9.6.0/5.7.0/3.2.0")
 
-	importCveCmd.MarkFlagRequired("product")
-	importCveCmd.MarkFlagRequired("version")
+	if err := importCveCmd.MarkFlagRequired("product"); err != nil {
+		panic(err)
+	}
+	if err := importCveCmd.MarkFlagRequired("version"); err != nil {
+		panic(err)
+	}
 
 	nvdCmd.AddCommand(importCveCmd)
 }

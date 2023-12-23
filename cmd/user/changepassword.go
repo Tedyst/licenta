@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -17,14 +18,16 @@ var changepasswordCmd = &cobra.Command{
 	Short: "Change the password of a user",
 	Long:  `Change the password of a user. This command is intended only for recovery/initial setup. For the normal use, use the web interface.`,
 	Args:  cobra.ExactArgs(2),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var database db.TransactionQuerier
 		database = db.InitDatabase(viper.GetString("database"))
-		database, err := database.StartTransaction(context.Background())
+		database, err = database.StartTransaction(context.Background())
 		if err != nil {
 			return err
 		}
-		defer database.EndTransaction(context.Background(), err)
+		defer func() {
+			err = errors.Join(err, database.EndTransaction(context.Background(), err))
+		}()
 
 		user, err := database.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil {

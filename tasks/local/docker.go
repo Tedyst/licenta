@@ -50,12 +50,15 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 		if len(scannnedMap) == len(scanner.ScannedLayers()) {
 			finished = true
 		}
-		querier.UpdateDockerLayerScanForProject(ctx, queries.UpdateDockerLayerScanForProjectParams{
+		_, err = querier.UpdateDockerLayerScanForProject(ctx, queries.UpdateDockerLayerScanForProjectParams{
 			ProjectID:     image.ProjectID,
 			DockerImage:   image.ID,
 			ScannedLayers: int32(len(scanner.ScannedLayers())),
 			Finished:      finished,
 		})
+		if err != nil {
+			return errors.Wrap(err, "ScanDockerRepository: cannot update layer scan")
+		}
 		scannedLayer, err := querier.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
 			ProjectID: image.ProjectID,
 			LayerHash: result.Layer,

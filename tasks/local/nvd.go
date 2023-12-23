@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"database/sql"
+	errorss "errors"
 	"io"
 	"log/slog"
 	"time"
@@ -78,7 +79,10 @@ func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 			}
 
 			time.Sleep(6 * time.Second)
-			r.updateCVEsForSpecificCPE(ctx, database, product, cpe)
+			err := r.updateCVEsForSpecificCPE(ctx, database, product, cpe)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -144,7 +148,7 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 	return nil
 }
 
-func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.TransactionQuerier, product nvd.Product, cpe *queries.NvdCpe) error {
+func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.TransactionQuerier, product nvd.Product, cpe *queries.NvdCpe) (err error) {
 	ctx, span := tracer.Start(ctx, "updateCVEsForSpecificCPE")
 	defer span.End()
 
@@ -156,7 +160,9 @@ func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.Tr
 		if err != nil && !errors.Is(err, nvd.ErrRateLimit) {
 			return err
 		}
-		defer reader.Close()
+		defer func() {
+			err = errorss.Join(err, reader.Close())
+		}()
 
 		if errors.Is(err, nvd.ErrRateLimit) {
 			slog.DebugContext(ctx, "Rate limit reached for getting CVEs, waiting 10 seconds", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe))
@@ -195,7 +201,9 @@ func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, prod
 	if err != nil {
 		return err
 	}
-	defer database.EndTransaction(ctx, err)
+	defer func() {
+		err = errorss.Join(err, database.EndTransaction(ctx, err))
+	}()
 
 	var startIndex int64 = 0
 
@@ -205,7 +213,9 @@ func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, prod
 		if err != nil && !errors.Is(err, nvd.ErrRateLimit) {
 			return err
 		}
-		defer reader.Close()
+		defer func() {
+			err = errorss.Join(err, reader.Close())
+		}()
 
 		if errors.Is(err, nvd.ErrRateLimit) {
 			slog.DebugContext(ctx, "Rate limit reached for getting CPEs, waiting 10 seconds", slog.Int("product", int(product)))

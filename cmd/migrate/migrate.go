@@ -16,5 +16,8 @@ var migrateCmd = &cobra.Command{
 
 func init() {
 	migrateCmd.PersistentFlags().String("database", "", "Database connection string")
-	migrateCmd.MarkPersistentFlagRequired("database")
+	err := migrateCmd.MarkPersistentFlagRequired("database")
+	if err != nil {
+		panic(err)
+	}
 }

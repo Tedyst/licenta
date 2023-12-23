@@ -19,14 +19,16 @@ var createadminCmd = &cobra.Command{
 	Short: "Create an admin user",
 	Long:  `Create an admin user with the provided email and password. This command is intended only for recovery/initial setup. For the normal use, use the web interface.`,
 	Args:  cobra.ExactArgs(3),
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var database db.TransactionQuerier
 		database = db.InitDatabase(viper.GetString("database"))
-		database, err := database.StartTransaction(context.Background())
+		database, err = database.StartTransaction(context.Background())
 		if err != nil {
 			return err
 		}
-		defer database.EndTransaction(context.Background(), err)
+		defer func() {
+			err = errors.Join(err, database.EndTransaction(context.Background(), err))
+		}()
 
 		_, err = database.GetUserByUsernameOrEmail(context.Background(), args[0])
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {

@@ -41,7 +41,10 @@ func Initialize(database db.TransactionQuerier, sessionStore session.SessionStor
 
 	app.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Method not allowed"))
+		_, err := w.Write([]byte("Method not allowed"))
+		if err != nil {
+			slog.Error("Error writing response", "error", err)
+		}
 	})
 
 	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
