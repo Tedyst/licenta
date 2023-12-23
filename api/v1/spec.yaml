@@ -12,7 +12,7 @@ info:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
 servers:
-  - url: https://localhost:5000/api
+  - url: http://localhost:5000/api/v1
 paths:
   /login:
     post:
@@ -333,31 +333,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    post:
-      summary: Create a task
-      tags:
-        - worker
-      security:
-        - workerAuth: []
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Success'
-        "400":
-          description: Invalid body
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /project/{projectid}/bruteforce-passwords:
     get:
       summary: Get all bruteforce passwords associated with a project
@@ -390,6 +365,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedBruteforcePasswords'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /project/{projectid}/scanner/postgres:
+    post:
+      summary: Create a new postgres scan
+      security:
+        - workerAuth: []
+        - sessionAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  scan:
+                    $ref: '#/components/schemas/PostgresScan'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         "401":
           description: Unauthorized
           content:

@@ -93,7 +93,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 	}, nil
 }
 
-func (server *serverHandler) PostWorkerGetTask(ctx context.Context, request generated.PostWorkerGetTaskRequestObject) (generated.PostWorkerGetTaskResponseObject, error) {
+func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Context, request generated.PostProjectProjectidScannerPostgresRequestObject) (generated.PostProjectProjectidScannerPostgresResponseObject, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -110,8 +110,20 @@ func (server *serverHandler) PostWorkerGetTask(ctx context.Context, request gene
 		return nil, err
 	}
 
-	return generated.PostWorkerGetTask200JSONResponse{
+	endedTime := ""
+	if scan.EndedAt.Valid {
+		endedTime = scan.EndedAt.Time.Format(time.RFC3339)
+	}
+	return generated.PostProjectProjectidScannerPostgres200JSONResponse{
 		Success: true,
+		Scan: &generated.PostgresScan{
+			CreatedAt:          scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:            endedTime,
+			Error:              scan.Error.String,
+			Id:                 int(scan.ID),
+			PostgresDatabaseId: int(scan.PostgresDatabaseID),
+			Status:             int(scan.Status),
+		},
 	}, nil
 }
 
