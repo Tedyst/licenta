@@ -48,10 +48,6 @@ jobs:
       - name: Get dependencies
         run: |
           go mod download
-          go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
-          go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-          go install github.com/valyala/quicktemplate/qtc@latest
-          go install go.uber.org/mock/mockgen@latest
       - name: Generate
         run: go generate ./...
       - name: Check for changes
