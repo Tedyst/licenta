@@ -7,8 +7,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-http-utils/etag"
 	slogchi "github.com/samber/slog-chi"
 	v1 "github.com/tedyst/licenta/api/v1"
+	"github.com/tedyst/licenta/api/v1/middleware/cache"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
@@ -30,6 +32,10 @@ func Initialize(database db.TransactionQuerier, sessionStore session.SessionStor
 	app.Use(middleware.RealIP)
 	app.Use(slogchi.New(slog.Default()))
 	app.Use(middleware.Recoverer)
+	app.Use(cache.CacheControlHeaderMiddleware)
+	app.Use(func(h http.Handler) http.Handler {
+		return etag.Handler(h, false)
+	})
 	app.Use(middleware.CleanPath)
 	app.Use(middleware.GetHead)
 	app.Use(options.HandleOptions(config.Origin))

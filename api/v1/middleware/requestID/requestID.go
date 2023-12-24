@@ -9,7 +9,9 @@ import (
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		span := trace.SpanFromContext(r.Context())
-		w.Header().Set("X-Trace-Id", span.SpanContext().TraceID().String())
+		if span.IsRecording() {
+			w.Header().Set("X-Trace-Id", span.SpanContext().TraceID().String())
+		}
 		next.ServeHTTP(w, r)
 	})
 }
