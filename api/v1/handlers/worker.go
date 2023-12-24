@@ -3,17 +3,15 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"strconv"
+	"errors"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/worker"
 )
-
-const bruteforcePasswordsPerPage = 10000
 
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
 	workerA := models.Worker{
@@ -34,6 +32,10 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 			Success: false,
 			Message: "No task available",
 		}, nil
+	}
+
+	if message.ScanType != messages.PostgresScan {
+		return nil, errors.New("invalid scan type")
 	}
 
 	scan, err := server.Queries.GetPostgresScan(ctx, int64(message.PostgresScanID))
@@ -90,209 +92,5 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 				},
 			},
 		},
-	}, nil
-}
-
-func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Context, request generated.PostProjectProjectidScannerPostgresRequestObject) (generated.PostProjectProjectidScannerPostgresResponseObject, error) {
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-
-	scan, err := server.Queries.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
-		PostgresDatabaseID: 1,
-		Status:             int32(models.SCAN_QUEUED),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = server.TaskRunner.SchedulePostgresScan(ctx, scan)
-	if err != nil {
-		return nil, err
-	}
-
-	endedTime := ""
-	if scan.EndedAt.Valid {
-		endedTime = scan.EndedAt.Time.Format(time.RFC3339)
-	}
-	return generated.PostProjectProjectidScannerPostgres200JSONResponse{
-		Success: true,
-		Scan: &generated.PostgresScan{
-			CreatedAt:          scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:            endedTime,
-			Error:              scan.Error.String,
-			Id:                 int(scan.ID),
-			PostgresDatabaseId: int(scan.PostgresDatabaseID),
-			Status:             int(scan.Status),
-		},
-	}, nil
-}
-
-func (server *serverHandler) GetProjectProjectidScannerPostgresScanid(ctx context.Context, request generated.GetProjectProjectidScannerPostgresScanidRequestObject) (generated.GetProjectProjectidScannerPostgresScanidResponseObject, error) {
-	return nil, nil
-}
-
-func (server *serverHandler) PatchProjectProjectidScannerPostgresScanid(ctx context.Context, request generated.PatchProjectProjectidScannerPostgresScanidRequestObject) (generated.PatchProjectProjectidScannerPostgresScanidResponseObject, error) {
-	if request.Body == nil {
-		return generated.PatchProjectProjectidScannerPostgresScanid401JSONResponse{
-			Success: false,
-			Message: "Invalid request",
-		}, nil
-	}
-
-	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
-	if err != nil {
-		return nil, err
-	}
-
-	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
-	if err != nil {
-		return nil, err
-	}
-
-	if database.ProjectID != int64(request.Projectid) {
-		return generated.PatchProjectProjectidScannerPostgresScanid401JSONResponse{
-			Success: false,
-			Message: "Invalid request",
-		}, nil
-	}
-
-	t, err := time.Parse(time.RFC3339, request.Body.EndedAt)
-	if err != nil {
-		return nil, err
-	}
-
-	err = server.Queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
-		ID:     int64(request.Scanid),
-		Status: int32(request.Body.Status),
-		Error:  sql.NullString{String: request.Body.Error, Valid: request.Body.Error != ""},
-		EndedAt: pgtype.Timestamptz{
-			Time:  t,
-			Valid: true,
-		},
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return generated.PatchProjectProjectidScannerPostgresScanid200JSONResponse{
-		Success: true,
-		Scan: &generated.PostgresScan{
-			CreatedAt:          scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:            scan.EndedAt.Time.Format(time.RFC3339),
-			Error:              scan.Error.String,
-			Id:                 int(scan.ID),
-			PostgresDatabaseId: int(scan.PostgresDatabaseID),
-			Status:             int(scan.Status),
-		},
-	}, nil
-}
-
-func (server *serverHandler) PostProjectProjectidScannerPostgresScanidResult(ctx context.Context, request generated.PostProjectProjectidScannerPostgresScanidResultRequestObject) (generated.PostProjectProjectidScannerPostgresScanidResultResponseObject, error) {
-	if request.Body == nil {
-		return generated.PostProjectProjectidScannerPostgresScanidResult400JSONResponse{
-			Success: false,
-			Message: "Invalid request",
-		}, nil
-	}
-
-	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
-	if err != nil {
-		return nil, err
-	}
-
-	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
-	if err != nil {
-		return nil, err
-	}
-
-	if database.ProjectID != int64(request.Projectid) {
-		return generated.PostProjectProjectidScannerPostgresScanidResult400JSONResponse{
-			Success: false,
-			Message: "Invalid request",
-		}, nil
-	}
-
-	scanresult, err := server.Queries.CreatePostgresScanResult(ctx, queries.CreatePostgresScanResultParams{
-		PostgresScanID: int64(request.Scanid),
-		Severity:       int32(request.Body.Severity),
-		Message:        request.Body.Message,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return generated.PostProjectProjectidScannerPostgresScanidResult200JSONResponse{
-		Success: true,
-		Scan: &generated.PostgresScanResult{
-			CreatedAt:      scanresult.CreatedAt.Time.Format(time.RFC3339),
-			Id:             int(scanresult.ID),
-			Message:        scanresult.Message,
-			PostgresScanId: int(scanresult.PostgresScanID),
-			Severity:       int(scanresult.Severity),
-		},
-	}, nil
-}
-
-func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.Context, request generated.GetProjectProjectidBruteforcePasswordsRequestObject) (generated.GetProjectProjectidBruteforcePasswordsResponseObject, error) {
-	lastid := -1
-	if request.Params.LastId != nil {
-		lastid = int(*request.Params.LastId)
-	}
-
-	count, err := server.Queries.GetBruteforcePasswordsForProjectCount(ctx, request.Projectid)
-	if err != nil {
-		return nil, err
-	}
-
-	var results []generated.BruteforcePassword
-	total := bruteforcePasswordsPerPage
-
-	if lastid < 0 {
-		specificPasswords, err := server.Queries.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)
-		if err != nil {
-			return nil, err
-		}
-		total -= len(specificPasswords)
-
-		for _, password := range specificPasswords {
-			results = append(results, generated.BruteforcePassword{
-				Id:       -1,
-				Password: password.String,
-			})
-		}
-	}
-
-	if total > 0 {
-		genericPasswords, err := server.Queries.GetBruteforcePasswordsPaginated(ctx, queries.GetBruteforcePasswordsPaginatedParams{
-			LastID: int64(lastid),
-			Limit:  int32(total),
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		for _, password := range genericPasswords {
-			results = append(results, generated.BruteforcePassword{
-				Id:       int64(password.ID),
-				Password: password.Password,
-			})
-		}
-	}
-	if len(results) == 0 {
-		return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
-			Success: true,
-			Count:   int(count),
-			Results: []generated.BruteforcePassword{},
-			Next:    nil,
-		}, nil
-	}
-	lastReturnedID := int(results[len(results)-1].Id)
-	nextURL := "/api/v1/project/" + strconv.Itoa(int(request.Projectid)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID)
-	return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
-		Success: true,
-		Count:   int(count),
-		Next:    &nextURL,
-		Results: results,
 	}, nil
 }

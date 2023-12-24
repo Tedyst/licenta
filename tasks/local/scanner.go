@@ -3,7 +3,6 @@ package local
 import (
 	"context"
 	"database/sql"
-	errorss "errors"
 	errs "errors"
 	"fmt"
 	"log/slog"
@@ -105,7 +104,7 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
 	defer func() {
-		err = errorss.Join(err, conn.Close(ctx))
+		err = errs.Join(err, conn.Close(ctx))
 	}()
 
 	logger.DebugContext(ctx, "Connected to database")
@@ -269,7 +268,7 @@ func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, 
 		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
 	defer func() {
-		err = errorss.Join(err, conn.Close(ctx))
+		err = errs.Join(err, conn.Close(ctx))
 	}()
 
 	logger.DebugContext(ctx, "Connected to database")
@@ -321,7 +320,8 @@ func (runner *scannerRunner) SchedulePostgresScan(ctx context.Context, scan *mod
 		}
 
 		for _, worker := range workers {
-			err := runner.messageExchange.PublishSendScanToWorkerMessage(ctx, worker.Worker, int(scan.ID), int(database.ProjectID))
+			message := messages.GetPostgresScanMessage(int(scan.ID), int(database.ProjectID))
+			err := runner.messageExchange.PublishSendScanToWorkerMessage(ctx, worker.Worker, message)
 			if err != nil {
 				return errors.Wrap(err, "could not publish message")
 			}
