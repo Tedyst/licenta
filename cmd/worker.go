@@ -18,7 +18,7 @@ var workerCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "error creating security provider")
 		}
-		client, err := generated.NewClientWithResponses(viper.GetString("api"), generated.WithBaseURL("/api/v1"), generated.WithRequestEditorFn(apiKeyProvider.Intercept))
+		client, err := generated.NewClientWithResponses(viper.GetString("api")+"/api/v1", generated.WithRequestEditorFn(apiKeyProvider.Intercept))
 		if err != nil {
 			return errors.Wrap(err, "error creating client")
 		}

@@ -8,8 +8,11 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
+	"github.com/tedyst/licenta/api/v1/middleware/workerauth"
 	"github.com/tedyst/licenta/bruteforce"
+	"github.com/tedyst/licenta/cache"
 	database "github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/email"
 	localExchange "github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/tasks"
@@ -41,14 +44,20 @@ var serveLocalCmd = &cobra.Command{
 			), db, localExchange, brutefroceProvider)
 		}
 
+		waCacheProvider, err := cache.NewLocalCacheProvider[queries.Worker]()
+		if err != nil {
+			panic(err)
+		}
+		workerAuth := workerauth.NewWorkerAuth(waCacheProvider, db)
+
 		app := api.Initialize(db, sessionStore, api.ApiConfig{
 			Debug:      viper.GetBool("debug"),
 			Origin:     viper.GetString("baseurl"),
 			TaskRunner: taskRunner,
-		}, localExchange)
+		}, localExchange, workerAuth)
 
 		slog.Info("Started web server", "port", viper.GetString("port"), "baseurl", viper.GetString("baseurl"))
-		err := http.ListenAndServe(":"+viper.GetString("port"), app)
+		err = http.ListenAndServe(":"+viper.GetString("port"), app)
 		if err != nil {
 			panic(err)
 		}

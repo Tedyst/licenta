@@ -29,6 +29,22 @@ func (q *Queries) BindPostgresScanToWorker(ctx context.Context, arg BindPostgres
 	return err
 }
 
+const getWorkerByToken = `-- name: GetWorkerByToken :one
+SELECT
+    id, token, created_at
+FROM
+    workers
+WHERE
+    workers.token = $1
+`
+
+func (q *Queries) GetWorkerByToken(ctx context.Context, token string) (*Worker, error) {
+	row := q.db.QueryRow(ctx, getWorkerByToken, token)
+	var i Worker
+	err := row.Scan(&i.ID, &i.Token, &i.CreatedAt)
+	return &i, err
+}
+
 const getWorkerForPostgresScan = `-- name: GetWorkerForPostgresScan :one
 SELECT
     workers.id, workers.token, workers.created_at

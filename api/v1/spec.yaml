@@ -321,7 +321,7 @@ paths:
                     type: boolean
                   task:
                     $ref: '#/components/schemas/WorkerTask'
-        "204":
+        "202":
           description: No task available
           content:
             application/json:

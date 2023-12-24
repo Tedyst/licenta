@@ -17,10 +17,10 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 	slog.Info("Starting to receive tasks", "client", client)
 
 	for {
-		ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		newCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 
-		task, err := client.GetWorkerGetTaskWithResponse(ctx)
-		if err != nil {
+		task, err := client.GetWorkerGetTaskWithResponse(newCtx)
+		if err != nil && err != context.DeadlineExceeded {
 			cancel()
 			return errors.Wrap(err, "error getting task")
 		}
@@ -55,7 +55,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			if err != nil {
 				return errors.Wrap(err, "error running task")
 			}
-		case http.StatusNoContent:
+		case http.StatusAccepted:
 			slog.Debug("No task available yet, retrying in 5 seconds...")
 		default:
 			return errors.New("error receiving task")

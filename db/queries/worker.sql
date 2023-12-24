@@ -24,3 +24,11 @@ FROM
 WHERE
     postgres_scan.id = $1;
 
+-- name: GetWorkerByToken :one
+SELECT
+    *
+FROM
+    workers
+WHERE
+    workers.token = $1;
+

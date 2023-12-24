@@ -73,6 +73,7 @@ type Querier interface {
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error)
+	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
 	GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*GetWorkersForProjectRow, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error

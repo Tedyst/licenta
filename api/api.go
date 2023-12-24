@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"time"
@@ -13,9 +14,9 @@ import (
 	"github.com/tedyst/licenta/api/v1/middleware/cache"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
-	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/messages"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -27,7 +28,19 @@ type ApiConfig struct {
 	TaskRunner tasks.TaskRunner
 }
 
-func Initialize(database db.TransactionQuerier, sessionStore session.SessionStore, config ApiConfig, messageExchange messages.Exchange) http.Handler {
+type workerAuth interface {
+	Handler(next http.Handler) http.Handler
+	GetWorker(ctx context.Context) *models.Worker
+}
+
+type sessionStore interface {
+	GetUser(ctx context.Context) *models.User
+	SetUser(ctx context.Context, user *models.User)
+	ClearSession(ctx context.Context)
+	Handler(next http.Handler) http.Handler
+}
+
+func Initialize(database db.TransactionQuerier, sessionStore sessionStore, config ApiConfig, messageExchange messages.Exchange, workerAuth workerAuth) http.Handler {
 	app := chi.NewRouter()
 	app.Use(middleware.RealIP)
 	app.Use(slogchi.New(slog.Default()))
@@ -56,6 +69,6 @@ func Initialize(database db.TransactionQuerier, sessionStore session.SessionStor
 	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
 		Debug:   config.Debug,
 		BaseURL: "/api/v1",
-	}, messageExchange, config.TaskRunner)
+	}, messageExchange, config.TaskRunner, workerAuth)
 	return otelhttp.NewHandler(app, "api")
 }

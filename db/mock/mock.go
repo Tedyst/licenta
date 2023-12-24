@@ -2493,6 +2493,45 @@ func (c *MockTransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(
 	return c
 }
 
+// GetWorkerByToken mocks base method.
+func (m *MockTransactionQuerier) GetWorkerByToken(ctx context.Context, token string) (*queries.Worker, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkerByToken", ctx, token)
+	ret0, _ := ret[0].(*queries.Worker)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkerByToken indicates an expected call of GetWorkerByToken.
+func (mr *MockTransactionQuerierMockRecorder) GetWorkerByToken(ctx, token any) *MockTransactionQuerierGetWorkerByTokenCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerByToken", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkerByToken), ctx, token)
+	return &MockTransactionQuerierGetWorkerByTokenCall{Call: call}
+}
+
+// MockTransactionQuerierGetWorkerByTokenCall wrap *gomock.Call
+type MockTransactionQuerierGetWorkerByTokenCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetWorkerByTokenCall) Return(arg0 *queries.Worker, arg1 error) *MockTransactionQuerierGetWorkerByTokenCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetWorkerByTokenCall) Do(f func(context.Context, string) (*queries.Worker, error)) *MockTransactionQuerierGetWorkerByTokenCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetWorkerByTokenCall) DoAndReturn(f func(context.Context, string) (*queries.Worker, error)) *MockTransactionQuerierGetWorkerByTokenCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetWorkerForPostgresScan mocks base method.
 func (m *MockTransactionQuerier) GetWorkerForPostgresScan(ctx context.Context, id int64) (*queries.GetWorkerForPostgresScanRow, error) {
 	m.ctrl.T.Helper()

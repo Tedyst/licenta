@@ -28,7 +28,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 	}
 
 	if !ok {
-		return generated.GetWorkerGetTask204JSONResponse{
+		return generated.GetWorkerGetTask202JSONResponse{
 			Success: false,
 			Message: "No task available",
 		}, nil
@@ -44,7 +44,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 	}
 
 	if scan.PostgresScan.WorkerID.Valid {
-		return generated.GetWorkerGetTask204JSONResponse{
+		return generated.GetWorkerGetTask202JSONResponse{
 			Success: false,
 			Message: "Task already taken",
 		}, nil
