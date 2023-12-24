@@ -2956,6 +2956,44 @@ func (c *MockTransactionQuerierUpdateNvdCPECall) DoAndReturn(f func(context.Cont
 	return c
 }
 
+// UpdatePostgresDatabase mocks base method.
+func (m *MockTransactionQuerier) UpdatePostgresDatabase(ctx context.Context, arg queries.UpdatePostgresDatabaseParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePostgresDatabase", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePostgresDatabase indicates an expected call of UpdatePostgresDatabase.
+func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresDatabase(ctx, arg any) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePostgresDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdatePostgresDatabase), ctx, arg)
+	return &MockTransactionQuerierUpdatePostgresDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierUpdatePostgresDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierUpdatePostgresDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdatePostgresDatabaseCall) Return(arg0 error) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdatePostgresDatabaseCall) Do(f func(context.Context, queries.UpdatePostgresDatabaseParams) error) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdatePostgresDatabaseCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresDatabaseParams) error) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // UpdatePostgresScanBruteforceResult mocks base method.
 func (m *MockTransactionQuerier) UpdatePostgresScanBruteforceResult(ctx context.Context, arg queries.UpdatePostgresScanBruteforceResultParams) error {
 	m.ctrl.T.Helper()
@@ -3028,6 +3066,44 @@ func (c *MockTransactionQuerierUpdatePostgresScanStatusCall) Do(f func(context.C
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierUpdatePostgresScanStatusCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresScanStatusParams) error) *MockTransactionQuerierUpdatePostgresScanStatusCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdatePostgresVersion mocks base method.
+func (m *MockTransactionQuerier) UpdatePostgresVersion(ctx context.Context, arg queries.UpdatePostgresVersionParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePostgresVersion", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePostgresVersion indicates an expected call of UpdatePostgresVersion.
+func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresVersion(ctx, arg any) *MockTransactionQuerierUpdatePostgresVersionCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePostgresVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdatePostgresVersion), ctx, arg)
+	return &MockTransactionQuerierUpdatePostgresVersionCall{Call: call}
+}
+
+// MockTransactionQuerierUpdatePostgresVersionCall wrap *gomock.Call
+type MockTransactionQuerierUpdatePostgresVersionCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdatePostgresVersionCall) Return(arg0 error) *MockTransactionQuerierUpdatePostgresVersionCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdatePostgresVersionCall) Do(f func(context.Context, queries.UpdatePostgresVersionParams) error) *MockTransactionQuerierUpdatePostgresVersionCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdatePostgresVersionCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresVersionParams) error) *MockTransactionQuerierUpdatePostgresVersionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

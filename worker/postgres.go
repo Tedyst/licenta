@@ -97,7 +97,51 @@ func (q *remotePostgresQuerier) GetWorkersForProject(ctx context.Context, projec
 }
 
 func (q *remotePostgresQuerier) GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error) {
-	return []*queries.GetCvesByProductAndVersionRow{}, nil
+	response, err := q.client.GetCvesDatabaseTypeVersionWithResponse(ctx, "postgres", arg.Version)
+	if err != nil {
+		return nil, err
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		var result []*queries.GetCvesByProductAndVersionRow
+		for _, cve := range response.JSON200.Cves {
+			result = append(result, &queries.GetCvesByProductAndVersionRow{
+				NvdCfe: queries.NvdCfe{
+					CveID:       cve.CveId,
+					Description: cve.Description,
+					ID:          int64(cve.Id),
+					LastModified: pgtype.Timestamptz{
+						Time:  time.Now(),
+						Valid: true,
+					},
+					Published: pgtype.Timestamptz{
+						Time:  time.Now(),
+						Valid: true,
+					},
+				},
+			})
+		}
+		return result, nil
+	default:
+		return nil, errors.New("error getting cves")
+	}
+}
+
+func (q *remotePostgresQuerier) UpdatePostgresVersion(ctx context.Context, arg queries.UpdatePostgresVersionParams) error {
+	response, err := q.client.PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx, q.task.PostgresScan.Database.ID, generated.PatchPostgresDatabase{
+		Version: &arg.Version.String,
+	})
+	if err != nil {
+		return err
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return nil
+	default:
+		return errors.New("error updating postgres version")
+	}
 }
 
 func ScanPostgresDB(ctx context.Context, client generated.ClientWithResponsesInterface, task Task) error {

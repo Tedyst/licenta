@@ -38,6 +38,7 @@ type postgresQuerier interface {
 	UpdatePostgresScanBruteforceResult(ctx context.Context, params queries.UpdatePostgresScanBruteforceResultParams) error
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.GetWorkersForProjectRow, error)
 	GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)
+	UpdatePostgresVersion(ctx context.Context, arg queries.UpdatePostgresVersionParams) error
 }
 
 func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider, exchange messages.Exchange) *scannerRunner {
@@ -167,6 +168,14 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 		}); err != nil {
 			return errors.Wrap(err, "could not insert scan result")
 		}
+	}
+
+	err = runner.queries.UpdatePostgresVersion(ctx, queries.UpdatePostgresVersionParams{
+		ID:      db.PostgresDatabase.ID,
+		Version: sql.NullString{String: version, Valid: true},
+	})
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not update version"))
 	}
 
 	logger.DebugContext(ctx, "Got users")

@@ -41,6 +41,24 @@ type BruteforcePassword struct {
 	Password string `json:"password"`
 }
 
+// CVE defines model for CVE.
+type CVE struct {
+	// CveId The CVE ID
+	CveId string `json:"cve_id"`
+
+	// Description The CVE description
+	Description string `json:"description"`
+
+	// Id The internal ID of the CVE
+	Id int64 `json:"id"`
+
+	// LastModified The date the CVE was last modified
+	LastModified string `json:"last_modified"`
+
+	// PublishedAt The date the CVE was published
+	PublishedAt string `json:"published_at"`
+}
+
 // ChangePasswordLoggedIn defines model for ChangePasswordLoggedIn.
 type ChangePasswordLoggedIn struct {
 	// NewPassword The new password
@@ -107,6 +125,17 @@ type PaginatedUsers struct {
 	Success bool `json:"success"`
 }
 
+// PatchPostgresDatabase defines model for PatchPostgresDatabase.
+type PatchPostgresDatabase struct {
+	DatabaseName *string `json:"database_name,omitempty"`
+	Host         *string `json:"host,omitempty"`
+	Password     *string `json:"password,omitempty"`
+	Port         *int    `json:"port,omitempty"`
+	Remote       *bool   `json:"remote,omitempty"`
+	Username     *string `json:"username,omitempty"`
+	Version      *string `json:"version,omitempty"`
+}
+
 // PatchPostgresScan defines model for PatchPostgresScan.
 type PatchPostgresScan struct {
 	EndedAt string `json:"ended_at"`
@@ -125,6 +154,7 @@ type PostgresDatabase struct {
 	ProjectId    int    `json:"project_id"`
 	Remote       bool   `json:"remote"`
 	Username     string `json:"username"`
+	Version      string `json:"version"`
 }
 
 // PostgresScan defines model for PostgresScan.
@@ -179,6 +209,11 @@ type TOTPLogin struct {
 type TOTPSecondStep struct {
 	// TotpCode The TOTP code
 	TotpCode string `json:"totp_code" validate:"numeric,len=6"`
+}
+
+// UpdatePostgresVersion defines model for UpdatePostgresVersion.
+type UpdatePostgresVersion struct {
+	Version string `json:"version"`
 }
 
 // User defines model for User.
@@ -245,6 +280,9 @@ type PostLoginJSONRequestBody = LoginUser
 
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = RegisterUser
+
+// PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody defines body for PatchScannerPostgresDatabasePostgresDatabaseId for application/json ContentType.
+type PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody = PatchPostgresDatabase
 
 // PatchScannerPostgresScanScanidJSONRequestBody defines body for PatchScannerPostgresScanScanid for application/json ContentType.
 type PatchScannerPostgresScanScanidJSONRequestBody = PatchPostgresScan
@@ -336,6 +374,9 @@ type ClientInterface interface {
 
 	Post2faTotpSecondStep(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetCvesDatabaseTypeVersion request
+	GetCvesDatabaseTypeVersion(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostLoginWithBody request with any body
 	PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -354,6 +395,11 @@ type ClientInterface interface {
 
 	// GetScannerPostgresDatabasePostgresDatabaseId request
 	GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchScannerPostgresDatabasePostgresDatabaseIdWithBody request with any body
+	PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostScannerPostgresDatabasePostgresDatabaseId request
 	PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -415,6 +461,18 @@ func (c *Client) Post2faTotpSecondStepWithBody(ctx context.Context, contentType 
 
 func (c *Client) Post2faTotpSecondStep(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPost2faTotpSecondStepRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetCvesDatabaseTypeVersion(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCvesDatabaseTypeVersionRequest(c.Server, databaseType, version)
 	if err != nil {
 		return nil, err
 	}
@@ -499,6 +557,30 @@ func (c *Client) PostRegister(ctx context.Context, body PostRegisterJSONRequestB
 
 func (c *Client) GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetScannerPostgresDatabasePostgresDatabaseIdRequest(c.Server, postgresDatabaseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(c.Server, postgresDatabaseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchScannerPostgresDatabasePostgresDatabaseIdRequest(c.Server, postgresDatabaseId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -720,6 +802,47 @@ func NewPost2faTotpSecondStepRequestWithBody(server string, contentType string, 
 	return req, nil
 }
 
+// NewGetCvesDatabaseTypeVersionRequest generates requests for GetCvesDatabaseTypeVersion
+func NewGetCvesDatabaseTypeVersionRequest(server string, databaseType string, version string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "databaseType", runtime.ParamLocationPath, databaseType)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "version", runtime.ParamLocationPath, version)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/cves/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewPostLoginRequest calls the generic PostLogin builder with application/json body
 func NewPostLoginRequest(server string, body PostLoginJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -913,6 +1036,53 @@ func NewGetScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postg
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPatchScannerPostgresDatabasePostgresDatabaseIdRequest calls the generic PatchScannerPostgresDatabasePostgresDatabaseId builder with application/json body
+func NewPatchScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(server, postgresDatabaseId, "application/json", bodyReader)
+}
+
+// NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody generates requests for PatchScannerPostgresDatabasePostgresDatabaseId with any type of body
+func NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(server string, postgresDatabaseId int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, postgresDatabaseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/scanner/postgres/database/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -1355,6 +1525,9 @@ type ClientWithResponsesInterface interface {
 
 	Post2faTotpSecondStepWithResponse(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*Post2faTotpSecondStepResponse, error)
 
+	// GetCvesDatabaseTypeVersionWithResponse request
+	GetCvesDatabaseTypeVersionWithResponse(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDatabaseTypeVersionResponse, error)
+
 	// PostLoginWithBodyWithResponse request with any body
 	PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
 
@@ -1373,6 +1546,11 @@ type ClientWithResponsesInterface interface {
 
 	// GetScannerPostgresDatabasePostgresDatabaseIdWithResponse request
 	GetScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*GetScannerPostgresDatabasePostgresDatabaseIdResponse, error)
+
+	// PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse request with any body
+	PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error)
+
+	PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error)
 
 	// PostScannerPostgresDatabasePostgresDatabaseIdWithResponse request
 	PostScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*PostScannerPostgresDatabasePostgresDatabaseIdResponse, error)
@@ -1451,6 +1629,33 @@ func (r Post2faTotpSecondStepResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r Post2faTotpSecondStepResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetCvesDatabaseTypeVersionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Cves    []CVE `json:"cves"`
+		Success bool  `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetCvesDatabaseTypeVersionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetCvesDatabaseTypeVersionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1585,6 +1790,34 @@ func (r GetScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetScannerPostgresDatabasePostgresDatabaseIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Database *PostgresDatabase `json:"database,omitempty"`
+		Success  bool              `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchScannerPostgresDatabasePostgresDatabaseIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1852,6 +2085,15 @@ func (c *ClientWithResponses) Post2faTotpSecondStepWithResponse(ctx context.Cont
 	return ParsePost2faTotpSecondStepResponse(rsp)
 }
 
+// GetCvesDatabaseTypeVersionWithResponse request returning *GetCvesDatabaseTypeVersionResponse
+func (c *ClientWithResponses) GetCvesDatabaseTypeVersionWithResponse(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDatabaseTypeVersionResponse, error) {
+	rsp, err := c.GetCvesDatabaseTypeVersion(ctx, databaseType, version, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetCvesDatabaseTypeVersionResponse(rsp)
+}
+
 // PostLoginWithBodyWithResponse request with arbitrary body returning *PostLoginResponse
 func (c *ClientWithResponses) PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
 	rsp, err := c.PostLoginWithBody(ctx, contentType, body, reqEditors...)
@@ -1911,6 +2153,23 @@ func (c *ClientWithResponses) GetScannerPostgresDatabasePostgresDatabaseIdWithRe
 		return nil, err
 	}
 	return ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
+}
+
+// PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse request with arbitrary body returning *PatchScannerPostgresDatabasePostgresDatabaseIdResponse
+func (c *ClientWithResponses) PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
+	rsp, err := c.PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx, postgresDatabaseId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
+	rsp, err := c.PatchScannerPostgresDatabasePostgresDatabaseId(ctx, postgresDatabaseId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
 }
 
 // PostScannerPostgresDatabasePostgresDatabaseIdWithResponse request returning *PostScannerPostgresDatabasePostgresDatabaseIdResponse
@@ -2093,6 +2352,49 @@ func ParsePost2faTotpSecondStepResponse(rsp *http.Response) (*Post2faTotpSecondS
 	return response, nil
 }
 
+// ParseGetCvesDatabaseTypeVersionResponse parses an HTTP response from a GetCvesDatabaseTypeVersionWithResponse call
+func ParseGetCvesDatabaseTypeVersionResponse(rsp *http.Response) (*GetCvesDatabaseTypeVersionResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetCvesDatabaseTypeVersionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Cves    []CVE `json:"cves"`
+			Success bool  `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParsePostLoginResponse parses an HTTP response from a PostLoginWithResponse call
 func ParsePostLoginResponse(rsp *http.Response) (*PostLoginResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2269,6 +2571,56 @@ func ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Respons
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse parses an HTTP response from a PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse call
+func ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Response) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchScannerPostgresDatabasePostgresDatabaseIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Database *PostgresDatabase `json:"database,omitempty"`
+			Success  bool              `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest Error
@@ -2670,6 +3022,9 @@ type ServerInterface interface {
 	// Second step of the TOTP authentication process
 	// (POST /2fa/totp-second-step)
 	Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request)
+	// Get all CVEs for a database type and version
+	// (GET /cves/{databaseType}/{version})
+	GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string)
 	// Logs user into the system
 	// (POST /login)
 	PostLogin(w http.ResponseWriter, r *http.Request)
@@ -2685,6 +3040,9 @@ type ServerInterface interface {
 	// Get all postgres scans associated with a database
 	// (GET /scanner/postgres/database/{postgresDatabaseId})
 	GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
+	// Update a postgres database by ID
+	// (PATCH /scanner/postgres/database/{postgresDatabaseId})
+	PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
 	// Create a new postgres scan associated with a database
 	// (POST /scanner/postgres/database/{postgresDatabaseId})
 	PostScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
@@ -2730,6 +3088,12 @@ func (_ Unimplemented) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get all CVEs for a database type and version
+// (GET /cves/{databaseType}/{version})
+func (_ Unimplemented) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Logs user into the system
 // (POST /login)
 func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
@@ -2757,6 +3121,12 @@ func (_ Unimplemented) PostRegister(w http.ResponseWriter, r *http.Request) {
 // Get all postgres scans associated with a database
 // (GET /scanner/postgres/database/{postgresDatabaseId})
 func (_ Unimplemented) GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update a postgres database by ID
+// (PATCH /scanner/postgres/database/{postgresDatabaseId})
+func (_ Unimplemented) PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2852,6 +3222,43 @@ func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(w http.ResponseWriter, 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.Post2faTotpSecondStep(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetCvesDatabaseTypeVersion operation middleware
+func (siw *ServerInterfaceWrapper) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "databaseType" -------------
+	var databaseType string
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "databaseType", runtime.ParamLocationPath, chi.URLParam(r, "databaseType"), &databaseType)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "databaseType", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "version" -------------
+	var version string
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "version", runtime.ParamLocationPath, chi.URLParam(r, "version"), &version)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "version", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCvesDatabaseTypeVersion(w, r, databaseType, version)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2968,6 +3375,34 @@ func (siw *ServerInterfaceWrapper) GetScannerPostgresDatabasePostgresDatabaseId(
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetScannerPostgresDatabasePostgresDatabaseId(w, r, postgresDatabaseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchScannerPostgresDatabasePostgresDatabaseId operation middleware
+func (siw *ServerInterfaceWrapper) PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "postgresDatabaseId" -------------
+	var postgresDatabaseId int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, chi.URLParam(r, "postgresDatabaseId"), &postgresDatabaseId)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postgresDatabaseId", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchScannerPostgresDatabasePostgresDatabaseId(w, r, postgresDatabaseId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3350,6 +3785,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/2fa/totp-second-step", wrapper.Post2faTotpSecondStep)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/cves/{databaseType}/{version}", wrapper.GetCvesDatabaseTypeVersion)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/login", wrapper.PostLogin)
 	})
 	r.Group(func(r chi.Router) {
@@ -3363,6 +3801,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.GetScannerPostgresDatabasePostgresDatabaseId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.PatchScannerPostgresDatabasePostgresDatabaseId)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.PostScannerPostgresDatabasePostgresDatabaseId)
@@ -3453,6 +3894,45 @@ type Post2faTotpSecondStep401JSONResponse Error
 func (response Post2faTotpSecondStep401JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCvesDatabaseTypeVersionRequestObject struct {
+	DatabaseType string `json:"databaseType"`
+	Version      string `json:"version"`
+}
+
+type GetCvesDatabaseTypeVersionResponseObject interface {
+	VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error
+}
+
+type GetCvesDatabaseTypeVersion200JSONResponse struct {
+	Cves    []CVE `json:"cves"`
+	Success bool  `json:"success"`
+}
+
+func (response GetCvesDatabaseTypeVersion200JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCvesDatabaseTypeVersion401JSONResponse Error
+
+func (response GetCvesDatabaseTypeVersion401JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCvesDatabaseTypeVersion404JSONResponse Error
+
+func (response GetCvesDatabaseTypeVersion404JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -3616,6 +4096,54 @@ func (response GetScannerPostgresDatabasePostgresDatabaseId401JSONResponse) Visi
 type GetScannerPostgresDatabasePostgresDatabaseId404JSONResponse Error
 
 func (response GetScannerPostgresDatabasePostgresDatabaseId404JSONResponse) VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject struct {
+	PostgresDatabaseId int64 `json:"postgresDatabaseId"`
+	Body               *PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject interface {
+	VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseId200JSONResponse struct {
+	Database *PostgresDatabase `json:"database,omitempty"`
+	Success  bool              `json:"success"`
+}
+
+func (response PatchScannerPostgresDatabasePostgresDatabaseId200JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseId400JSONResponse Error
+
+func (response PatchScannerPostgresDatabasePostgresDatabaseId400JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseId401JSONResponse Error
+
+func (response PatchScannerPostgresDatabasePostgresDatabaseId401JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchScannerPostgresDatabasePostgresDatabaseId404JSONResponse Error
+
+func (response PatchScannerPostgresDatabasePostgresDatabaseId404JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -3956,6 +4484,9 @@ type StrictServerInterface interface {
 	// Second step of the TOTP authentication process
 	// (POST /2fa/totp-second-step)
 	Post2faTotpSecondStep(ctx context.Context, request Post2faTotpSecondStepRequestObject) (Post2faTotpSecondStepResponseObject, error)
+	// Get all CVEs for a database type and version
+	// (GET /cves/{databaseType}/{version})
+	GetCvesDatabaseTypeVersion(ctx context.Context, request GetCvesDatabaseTypeVersionRequestObject) (GetCvesDatabaseTypeVersionResponseObject, error)
 	// Logs user into the system
 	// (POST /login)
 	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
@@ -3971,6 +4502,9 @@ type StrictServerInterface interface {
 	// Get all postgres scans associated with a database
 	// (GET /scanner/postgres/database/{postgresDatabaseId})
 	GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request GetScannerPostgresDatabasePostgresDatabaseIdRequestObject) (GetScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
+	// Update a postgres database by ID
+	// (PATCH /scanner/postgres/database/{postgresDatabaseId})
+	PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject) (PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
 	// Create a new postgres scan associated with a database
 	// (POST /scanner/postgres/database/{postgresDatabaseId})
 	PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request PostScannerPostgresDatabasePostgresDatabaseIdRequestObject) (PostScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
@@ -4077,6 +4611,33 @@ func (sh *strictHandler) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(Post2faTotpSecondStepResponseObject); ok {
 		if err := validResponse.VisitPost2faTotpSecondStepResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetCvesDatabaseTypeVersion operation middleware
+func (sh *strictHandler) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string) {
+	var request GetCvesDatabaseTypeVersionRequestObject
+
+	request.DatabaseType = databaseType
+	request.Version = version
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCvesDatabaseTypeVersion(ctx, request.(GetCvesDatabaseTypeVersionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCvesDatabaseTypeVersion")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetCvesDatabaseTypeVersionResponseObject); ok {
+		if err := validResponse.VisitGetCvesDatabaseTypeVersionResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4216,6 +4777,39 @@ func (sh *strictHandler) GetScannerPostgresDatabasePostgresDatabaseId(w http.Res
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetScannerPostgresDatabasePostgresDatabaseIdResponseObject); ok {
 		if err := validResponse.VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchScannerPostgresDatabasePostgresDatabaseId operation middleware
+func (sh *strictHandler) PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
+	var request PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject
+
+	request.PostgresDatabaseId = postgresDatabaseId
+
+	var body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchScannerPostgresDatabasePostgresDatabaseId(ctx, request.(PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchScannerPostgresDatabasePostgresDatabaseId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject); ok {
+		if err := validResponse.VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4475,49 +5069,59 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"+v8BAAD//x72/x4ARgAA",
+	"H4sIAAAAAAAC/+xcfW/bONL/KoSe5085UtJucWtgge0muV7uet2gTrOHK4KAlkY2NxKpJSk7vsDf/UBS",
+	"rxYly3GcZK8FFttEFIfDef3NkMqDE7AkZRSoFM74wRHBHBKsf/yFZxIixgO4xEIsGQ/V05SzFLgkoN8h",
+	"+lkIIuAklYRRZ+xczQERKoFTHKOLM8QiJOeApiU5lBb0XAfucZLG4IyPXSdiPMHSGTuEyndvHdeRqxTM",
+	"rzAD7qxdJ61x0l7VRtdJVrXHOUUhOaEzZ712HQ5/ZIRD6Iy/qt3UlrhZu87p9Xl708ECbrs2fnp9ji7O",
+	"GgycXp+PTvzjH0e+7x+3eXCbVLqI1p/Wqb9HiyymwPGUxESuEKFa2kuYjqZYQIgSTPEMEqDSaCXCASid",
+	"nBIRMDRJcByjXzJBKAiBPl+/OfERpqH+6Qd0luEYfSAzPCUS/fb+E7q+/IQ+s0wCFyhgWRwiHMdsiTBF",
+	"GcWZnAOVJMASQhdxSJgEhKXEwR1wJBniIDmBBSABVBBJFspUjN4Jo0dI7XZjPwKFGai5JDFqQDgIFK8B",
+	"o5KzWKCIcfTl80dxhN7TajXDHdynMSMSyTkRG5SnK0WCQiAJnakFMEU4iiCQEKIQFiQAtCAY/e3q6hIx",
+	"rv+daNkomwGhp4kUAhKRoGAAiUxzF2VxuXZdTko3dYGEbEljhkM9wLVgFVcRmWVcy0StHILEJFZcETyj",
+	"TEgSNMRmM6odPFMZ+c6eGGMhbxMWkohAx1IhllAsgJZYIDUHlXPqVmz843h08ubq+N3Y98e+/2/brtJs",
+	"GhMxh/BWsTdo0XLKIxa0xYfc+5tuu8HZpnh0KJljOitD6Uc2m0F4QdvRhcLytj/MUVh2hToKy85o5zr3",
+	"I4ZTMgpYCDOgI7iXHI8knul1FzgmSniKDqE//cXFcTrHNEu0GFgcbuGKxeHOAXgPljZU0+DPbQpRS58D",
+	"lnDJhJxxEJMA088gsli25Z+AEHgG6seW+QlYACdyVRssXWKDofJVt6R4U26fTX+HQCqK55wz3stEU9L6",
+	"fVQMWzwkjz92HeWDSEgsM1HXUoRjASW5KWMxYNraVLVusYyS7Uc2I/SLAMs+huVrHcFjRUWlryAGzJGE",
+	"e3koM0o5oRKLgBC9Q8lkamfw6terS6SINuLjyZu3P7x7PA8sIRKSVK5cmiXASeDGQH96p1nJhArOCdjZ",
+	"UaNIDVcCa4jodzantyGDPQRUicZVsnrjJvj+pxO/7XAlpxuI6RLPCFX5vw0f9Vo4jn+NnPHXB+f/OUTO",
+	"2Pk/r0KgXg4/vZJK7qVrd9OyuB4wIFRCon/oo2hBs+tSTJhzvDK20HTQxo66IkbAMqof11NoO2NSZdG2",
+	"qGLZSou1Rzu25Nl2vy5ou/leKp5sMasUiPL5F1WqDjqD1SiDeZEAzrDECh63lRnmI7eFG7bUNWfCrsd6",
+	"sGsPMi5taUOJWsHk2lippWY8aJFcABd5zdDGLRat1favEmB770DDElm1VoMiU7VTjjG6ATmxtE5Ny60W",
+	"tJrZVl0FOql3cryHKklo19UjVZxypnZ120X2MCbQLm0rNvK950xvysq1hne3LvCS6YqJPiXaDW6LAh9p",
+	"j11STvA9SbLktg/F7WDNWoqlSTdEUzJemXpr8W3S6sw2/TLr3PzTwFqz6Ta2bQjAtrXPMCNCArfjREgw",
+	"ie2pTQ8VpaoyywbkUQ9+zn89CliyB/QxPKwHd5meG7U26rEXB4oFN4+AiW4uapWVJxWqaVrEc8Adm50q",
+	"yP9XwoWcSEjbbKla4VZAwEH2lAz5C40+3eSs/G9ro6G+SheTuurqYFCXLPtWNFam9NQuliYQMBr2CO5J",
+	"+Bpuo5v11U4b+pKGtY7BdZVom/sanIH7suSTBMVWWI+UGX/qDBJ62ESJruj6dzanuzQXddxptr+HdxO7",
+	"OdV9w15Gz5i1GZLOGe2gqYcQzZIp8G2CPFCwtebWWsCsouRvjN8Bv8LiztJiyS30VlghVjkc1mB0b5W2",
+	"CbsVQMhJD5mnkZ61AjEPrN6PxR3Swwo7ZYmSRnNfN1ujkxq9WWs0E2QKnUwUY3kyAaF8730m57q2VOsG",
+	"jN0RtaDRbPFOpSWckn+ALr2XWvyN2XPAoTaWfPa/RkZHoyt2BxYiijFCI2b6BVTiQNZcXL0mASc/iyWe",
+	"zYAfEVaRnphn6P3lBboCrCBOxtWkuZSpGHtebdLmaZLzHglth2q24zoxCYAaG8ipv09xMAd0cuS36C6X",
+	"yyOsh48Yn3n5XOF9vDg9/zQ5H50c+UdzmcRat8AT8Ws0Ab4gAViZ8/Q7npINkXF9Z1egS5EylDrHR/6R",
+	"r8iyFChOiTN23uhHCkXIudapdxJhT4XwkQ5kI1GknbymU06gj0cuQmeskfVJhK+YTKvsrtscKVObUjNO",
+	"fL9QD5iGDk7TmASaive7MFHe2Ps2b2jCCK3+pmJq50Qlp2rHb/3jJ2PCNJcti3/RR3WMk/9AqD1JZEmC",
+	"+coZO5pppIRZREWdmmtHe4RRlHKWN4xM2v1aep3xwUo5QmOC4dqpYQjj4CDkLyxcPalmaotYpGPOCkIT",
+	"2PPwVQ82CmOu97SdTrD7aOi6i4n5hzexC6qBGIoIxCESmVoBwtdg4Ub5+5t4sADhPRRp9WqVwtp7yGPY",
+	"WjE+A4upfwB5uqiyq5pWYEsV3DhOQOqu6teO0009rUiWOhepkFilizpDLbN1a3Jt5dPeBRclk5Y1q8Hh",
+	"y908qQcpZQxuG59enzv9Hfbh/XK17hBnnLyeeK8WfXv4Rc/qtooYL0wIUSZRxDKaO2bhVcri60jr642y",
+	"kcpvP4BEOI7R6fW5ufOBm+6gr2ZUllh4bbDIcaEXlxVzZxL6mKP3QySe6pjUIqyykJCs7ClJdvRyecdU",
+	"IsMOYDq9Q5P406SqqdL2yyWoyg8aZv+RzYQxDWUROl2JlZCQ1GxckaqMnGVyq5Wrdw4If4u23mBVr1tb",
+	"ZplEQcY5UKk8YgYhItQIolaqtQWQH3J4D/kPJFx71d3DUVo/jO7K0Jdm6mVBwXaWPSBbV1escl7s2bNk",
+	"tDd/bu2i2BO47p1UjKj8mF/Ey3iZzf/IgK8qhvTlJdPpL5cPIcL6PGK00dF5c+K4TkIoSVTdPrIcfe+d",
+	"6gcdKtt09Lrz8GOSn+UWrUBYCBYQXbMsiZwjXLO3wkMM8dxHeH4Y0x8miiObA+XDxonQay/DvsF0aKvc",
+	"fnwGH1HqxjEHHK4Q3BMhRW9+NGYiENb3IosWbjsviABTCtwr+opeAR69h3Sj5XkR9tZvE0Nps1F62aKy",
+	"Y47I55eotiNb2JbZJ208bSG2b5v5trxNZbn4Wnbr1ZvCepJgRuzHCETI+uRBtWKzrb3vtazBdWXBY00k",
+	"1SWN7wXnI7Jr4wygK72WPqjlb0msNd8s20ImHOi7NGa2PrNJsQzmlsSqHv8vRpCnBwj2G3sdxXPZCngW",
+	"pLBXlHtEm0licben138bhfRz97Z6elm9AcfcLlBIfdNn0XRljtBbyN3twerfMUkfrt/5+PrFvPS7w3Q4",
+	"jIH5OcpvpOk9srS1LlAPvAf1f7JTHaB+nehZu/mYtk6rW4mC2utxpWF3aHe9x2+592qD2s/kxrlCik0M",
+	"uru7i48/g7up7T/a1TQY3vCxzaS0P+h9ze5yYCybX5Gy4lgt7efpdv15suJ37PqMsaGvDd2Grdbo0Gg2",
+	"9ydYj1ffOQxFt1XoyJPFNxBAOj9g7osjRravM5xUef57UPm2g0oPtOeFf1sjS1Z8f9qF0M0HqgOiQ9VZ",
+	"1nh1+wkpSYi0n48e+7bzUYMg1ahfOy09HnqKy6JIgBzOn3nfzqDfd37rD+WouKeuWIlIbI4JbazULrTv",
+	"ePfMfOSwjb65Qn3Im2aDjp+Nqb3+A+dWyzvLfaTwMHNIWfmXZ7576HWxf4LzrR3Evrzy7Jdj+jXpBfqv",
+	"0IzqXzh2w65ct82/XHOg2wAdfx7nBa/KPen9pm/rKluV2rVWq09mWfQIs33Y0ofTZrprZ7uwoOIvktkr",
+	"ghfvvg0Ict+7y+bOyAb6bMRKre3NKrVmaAZWejOQI5l/ZddlbeY7rw8g9ed4z5f2Cr76BFT7TvCApdOJ",
+	"f3J4lX5iSDGK8AKTGE9j+LNc0jNsR4ybv8No6hVbAbOtJ+taFwO+KMJb9bXe2PNiFuB4zoQc/+D7vodT",
+	"4i2OnfXN+r8BAAD//+qGHq7iUwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -83,6 +83,9 @@ func (p *remotePasswordProvider) Next() bool {
 		return false
 	}
 
+	if len(p.currentBatch) == 0 {
+		return false
+	}
 	p.currentBatch = p.currentBatch[1:]
 
 	return len(p.currentBatch) != 0 || p.hasNext

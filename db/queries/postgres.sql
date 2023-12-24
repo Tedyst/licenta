@@ -114,3 +114,25 @@ WHERE
 ORDER BY
     postgres_scan.id DESC;
 
+-- name: UpdatePostgresVersion :exec
+UPDATE
+    postgres_databases
+SET
+    version = $2
+WHERE
+    id = $1;
+
+-- name: UpdatePostgresDatabase :exec
+UPDATE
+    postgres_databases
+SET
+    database_name = $2,
+    host = $3,
+    port = $4,
+    username = $5,
+    PASSWORD = $6,
+    remote = $7,
+    version = $8
+WHERE
+    id = $1;
+

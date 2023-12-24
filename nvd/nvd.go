@@ -31,6 +31,15 @@ const (
 	POSTGRESQL Product = iota
 )
 
+func GetNvdDatabaseType(name string) (Product, error) {
+	switch name {
+	case "postgres":
+		return POSTGRESQL, nil
+	default:
+		return 0, errors.New("Product does not exist")
+	}
+}
+
 func DownloadCpe(ctx context.Context, product Product) (io.ReadCloser, error) {
 	return DownloadCpeNext(ctx, product, 0)
 }

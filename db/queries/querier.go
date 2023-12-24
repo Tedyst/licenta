@@ -84,8 +84,10 @@ type Querier interface {
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
+	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error
 	UpdatePostgresScanBruteforceResult(ctx context.Context, arg UpdatePostgresScanBruteforceResultParams) error
 	UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error
+	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
 	UpdateSession(ctx context.Context, arg UpdateSessionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error

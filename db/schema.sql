@@ -197,6 +197,7 @@ CREATE TABLE postgres_databases(
   username text NOT NULL,
   password text NOT NULL,
   remote boolean NOT NULL DEFAULT FALSE,
+  version text,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

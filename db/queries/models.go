@@ -72,6 +72,7 @@ type PostgresDatabase struct {
 	Username     string             `json:"username"`
 	Password     string             `json:"password"`
 	Remote       bool               `json:"remote"`
+	Version      sql.NullString     `json:"version"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 

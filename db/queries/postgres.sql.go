@@ -104,7 +104,7 @@ func (q *Queries) CreatePostgresScanResult(ctx context.Context, arg CreatePostgr
 
 const getPostgresDatabase = `-- name: GetPostgresDatabase :one
 SELECT
-    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.remote, postgres_databases.created_at,
+    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.remote, postgres_databases.version, postgres_databases.created_at,
 (
         SELECT
             COUNT(*)
@@ -135,6 +135,7 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgr
 		&i.PostgresDatabase.Username,
 		&i.PostgresDatabase.Password,
 		&i.PostgresDatabase.Remote,
+		&i.PostgresDatabase.Version,
 		&i.PostgresDatabase.CreatedAt,
 		&i.ScanCount,
 	)
@@ -323,6 +324,46 @@ func (q *Queries) GetPostgresScansForProject(ctx context.Context, projectID int6
 	return items, nil
 }
 
+const updatePostgresDatabase = `-- name: UpdatePostgresDatabase :exec
+UPDATE
+    postgres_databases
+SET
+    database_name = $2,
+    host = $3,
+    port = $4,
+    username = $5,
+    PASSWORD = $6,
+    remote = $7,
+    version = $8
+WHERE
+    id = $1
+`
+
+type UpdatePostgresDatabaseParams struct {
+	ID           int64          `json:"id"`
+	DatabaseName string         `json:"database_name"`
+	Host         string         `json:"host"`
+	Port         int32          `json:"port"`
+	Username     string         `json:"username"`
+	Password     string         `json:"password"`
+	Remote       bool           `json:"remote"`
+	Version      sql.NullString `json:"version"`
+}
+
+func (q *Queries) UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error {
+	_, err := q.db.Exec(ctx, updatePostgresDatabase,
+		arg.ID,
+		arg.DatabaseName,
+		arg.Host,
+		arg.Port,
+		arg.Username,
+		arg.Password,
+		arg.Remote,
+		arg.Version,
+	)
+	return err
+}
+
 const updatePostgresScanBruteforceResult = `-- name: UpdatePostgresScanBruteforceResult :exec
 UPDATE
     postgres_scan_bruteforce_results
@@ -376,5 +417,24 @@ func (q *Queries) UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgr
 		arg.Error,
 		arg.EndedAt,
 	)
+	return err
+}
+
+const updatePostgresVersion = `-- name: UpdatePostgresVersion :exec
+UPDATE
+    postgres_databases
+SET
+    version = $2
+WHERE
+    id = $1
+`
+
+type UpdatePostgresVersionParams struct {
+	ID      int64          `json:"id"`
+	Version sql.NullString `json:"version"`
+}
+
+func (q *Queries) UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error {
+	_, err := q.db.Exec(ctx, updatePostgresVersion, arg.ID, arg.Version)
 	return err
 }

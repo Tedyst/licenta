@@ -466,6 +466,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a postgres database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: postgresDatabaseId
+          in: path
+          description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchPostgresDatabase'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  database:
+                    $ref: '#/components/schemas/PostgresDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /scanner/postgres/scan/{scanid}:
     get:
       summary: Get a postgres scan by ID
@@ -620,8 +674,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /cves/{databaseType}/{version}:
+    get:
+      summary: Get all CVEs for a database type and version
+      security:
+        - workerAuth: []
+      tags:
+        - cve
+      parameters:
+        - name: databaseType
+          in: path
+          description: The database type
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: path
+          description: The database version
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - cves
+                properties:
+                  success:
+                    type: boolean
+                  cves:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CVE'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Database type or version not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
+    CVE:
+      required:
+        - id
+        - cve_id
+        - description
+        - published_at
+        - last_modified
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the CVE
+          example: 1
+        cve_id:
+          type: string
+          description: The CVE ID
+          example: CVE-2019-0001
+        description:
+          type: string
+          description: The CVE description
+          example: A vulnerability in the web-based management interface of Cisco Small Business RV320 and RV325 Dual Gigabit WAN VPN Routers could allow an unauthenticated, remote attacker to retrieve sensitive information. The vulnerability is due to improper access controls for URLs. An attacker could exploit this vulnerability by connecting to an affected device via HTTP or HTTPS and requesting specific URLs. A successful exploit could allow the attacker to download the router configuration or detailed diagnostic information.
+        published_at:
+          type: string
+          description: The date the CVE was published
+          example: 2019-01-23T16:00:00Z
+        last_modified:
+          type: string
+          description: The date the CVE was last modified
+          example: 2019-01-23T16:00:00Z
+    PatchPostgresDatabase:
+      type: object
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        remote:
+          type: boolean
+        version:
+          type: string
     PostgresDatabase:
       type: object
       required:
@@ -634,6 +783,7 @@ components:
         - password
         - created_at
         - remote
+        - version
       properties:
         id: 
           type: integer
@@ -653,6 +803,8 @@ components:
           type: string
         remote:
           type: boolean
+        version:
+          type: string
     PatchPostgresScan:
       type: object
       required:
@@ -675,6 +827,13 @@ components:
         severity:
           type: integer
         message:
+          type: string
+    UpdatePostgresVersion:
+      type: object
+      required:
+        - version
+      properties:
+        version:
           type: string
     PostgresScanResult:
       type: object

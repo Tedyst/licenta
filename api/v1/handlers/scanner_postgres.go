@@ -45,6 +45,7 @@ func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx c
 	}
 
 	go func() {
+		ctx := context.WithoutCancel(ctx)
 		err := server.TaskRunner.SchedulePostgresScan(ctx, scan)
 		if err != nil {
 			slog.Error("Error scheduling postgres scan", "error", err)
@@ -244,8 +245,82 @@ func (server *serverHandler) GetScannerPostgresDatabasePostgresDatabaseId(ctx co
 			Id:           int(database.PostgresDatabase.ID),
 			Port:         int(database.PostgresDatabase.Port),
 			Username:     database.PostgresDatabase.Username,
+			Version:      database.PostgresDatabase.Version.String,
+			ProjectId:    int(database.PostgresDatabase.ProjectID),
 		},
 		Scans:     results,
 		ScanCount: int(database.ScanCount),
+	}, nil
+}
+
+func (server *serverHandler) PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
+	database, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, errors.Wrap(err, "error getting postgres database")
+	}
+	if err == pgx.ErrNoRows {
+		return generated.PatchScannerPostgresDatabasePostgresDatabaseId404JSONResponse{
+			Success: false,
+			Message: "Database not found",
+		}, nil
+	}
+
+	host := database.PostgresDatabase.Host
+	if request.Body.Host != nil {
+		host = *request.Body.Host
+	}
+	username := database.PostgresDatabase.Username
+	if request.Body.Username != nil {
+		username = *request.Body.Username
+	}
+	password := database.PostgresDatabase.Password
+	if request.Body.Password != nil {
+		password = *request.Body.Password
+	}
+	databaseName := database.PostgresDatabase.DatabaseName
+	if request.Body.DatabaseName != nil {
+		databaseName = *request.Body.DatabaseName
+	}
+	port := database.PostgresDatabase.Port
+	if request.Body.Port != nil {
+		port = int32(*request.Body.Port)
+	}
+	remote := database.PostgresDatabase.Remote
+	if request.Body.Remote != nil {
+		remote = *request.Body.Remote
+	}
+	version := database.PostgresDatabase.Version
+	if request.Body.Version != nil {
+		version = sql.NullString{String: *request.Body.Version, Valid: true}
+	}
+
+	err = server.Queries.UpdatePostgresDatabase(ctx, queries.UpdatePostgresDatabaseParams{
+		ID:           int64(request.PostgresDatabaseId),
+		Host:         host,
+		Username:     username,
+		Password:     password,
+		DatabaseName: databaseName,
+		Port:         port,
+		Remote:       remote,
+		Version:      version,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.PatchScannerPostgresDatabasePostgresDatabaseId200JSONResponse{
+		Success: true,
+		Database: &generated.PostgresDatabase{
+			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
+			Host:         host,
+			DatabaseName: databaseName,
+			Password:     password,
+			Remote:       remote,
+			Id:           int(database.PostgresDatabase.ID),
+			Port:         int(port),
+			Username:     username,
+			ProjectId:    int(database.PostgresDatabase.ProjectID),
+			Version:      version.String,
+		},
 	}, nil
 }
