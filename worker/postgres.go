@@ -123,11 +123,10 @@ func (q *remotePostgresQuerier) CreatePostgresScanResult(ctx context.Context, pa
 	}
 
 	return &models.PostgresScanResult{
-		ID:             int64(response.Scan.Id),
-		PostgresScanID: int64(response.Scan.PostgresScanId),
-		Severity:       int32(response.Scan.Severity),
-		Message:        response.Scan.Message,
-		CreatedAt:      pgtype.Timestamptz{Time: t},
+		ID:        int64(response.Scan.Id),
+		Severity:  int32(response.Scan.Severity),
+		Message:   response.Scan.Message,
+		CreatedAt: pgtype.Timestamptz{Time: t},
 	}, nil
 }
 

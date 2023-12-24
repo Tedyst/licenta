@@ -15,9 +15,6 @@ import (
 const bruteforcePasswordsPerPage = 10000
 
 func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Context, request generated.PostProjectProjectidScannerPostgresRequestObject) (generated.PostProjectProjectidScannerPostgresResponseObject, error) {
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-
 	scan, err := server.Queries.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
 		PostgresDatabaseID: 1,
 		Status:             int32(models.SCAN_QUEUED),
@@ -27,8 +24,6 @@ func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Con
 	}
 
 	go func() {
-		ctx := context.WithoutCancel(ctx)
-		defer cancel()
 		err := server.TaskRunner.SchedulePostgresScan(ctx, scan)
 		if err != nil {
 			slog.Error("Error scheduling postgres scan", "error", err)
@@ -42,18 +37,53 @@ func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Con
 	return generated.PostProjectProjectidScannerPostgres200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScan{
-			CreatedAt:          scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:            endedTime,
-			Error:              scan.Error.String,
-			Id:                 int(scan.ID),
-			PostgresDatabaseId: int(scan.PostgresDatabaseID),
-			Status:             int(scan.Status),
+			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:   endedTime,
+			Error:     scan.Error.String,
+			Id:        int(scan.ID),
+			Status:    int(scan.Status),
 		},
 	}, nil
 }
 
 func (server *serverHandler) GetProjectProjectidScannerPostgresScanid(ctx context.Context, request generated.GetProjectProjectidScannerPostgresScanidRequestObject) (generated.GetProjectProjectidScannerPostgresScanidResponseObject, error) {
-	return generated.GetProjectProjectidScannerPostgresScanid200JSONResponse{}, nil
+	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, err
+	}
+	if err == sql.ErrNoRows {
+		return generated.GetProjectProjectidScannerPostgresScanid404JSONResponse{
+			Success: false,
+			Message: "Scan not found",
+		}, nil
+	}
+
+	scanResults, err := server.Queries.GetPostgresScanResults(ctx, scan.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	results := make([]generated.PostgresScanResult, len(scanResults))
+	for i, scanResult := range scanResults {
+		results[i] = generated.PostgresScanResult{
+			CreatedAt: scanResult.CreatedAt.Time.Format(time.RFC3339),
+			Id:        int(scanResult.ID),
+			Message:   scanResult.Message,
+			Severity:  int(scanResult.Severity),
+		}
+	}
+
+	return generated.GetProjectProjectidScannerPostgresScanid200JSONResponse{
+		Success: true,
+		Scan: generated.PostgresScan{
+			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:   scan.EndedAt.Time.Format(time.RFC3339),
+			Error:     scan.Error.String,
+			Id:        int(scan.ID),
+			Status:    int(scan.Status),
+		},
+		Results: results,
+	}, nil
 }
 
 func (server *serverHandler) PatchProjectProjectidScannerPostgresScanid(ctx context.Context, request generated.PatchProjectProjectidScannerPostgresScanidRequestObject) (generated.PatchProjectProjectidScannerPostgresScanidResponseObject, error) {
@@ -103,12 +133,11 @@ func (server *serverHandler) PatchProjectProjectidScannerPostgresScanid(ctx cont
 	return generated.PatchProjectProjectidScannerPostgresScanid200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScan{
-			CreatedAt:          scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:            scan.EndedAt.Time.Format(time.RFC3339),
-			Error:              scan.Error.String,
-			Id:                 int(scan.ID),
-			PostgresDatabaseId: int(scan.PostgresDatabaseID),
-			Status:             int(scan.Status),
+			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:   scan.EndedAt.Time.Format(time.RFC3339),
+			Error:     scan.Error.String,
+			Id:        int(scan.ID),
+			Status:    int(scan.Status),
 		},
 	}, nil
 }
@@ -150,11 +179,10 @@ func (server *serverHandler) PostProjectProjectidScannerPostgresScanidResult(ctx
 	return generated.PostProjectProjectidScannerPostgresScanidResult200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScanResult{
-			CreatedAt:      scanresult.CreatedAt.Time.Format(time.RFC3339),
-			Id:             int(scanresult.ID),
-			Message:        scanresult.Message,
-			PostgresScanId: int(scanresult.PostgresScanID),
-			Severity:       int(scanresult.Severity),
+			CreatedAt: scanresult.CreatedAt.Time.Format(time.RFC3339),
+			Id:        int(scanresult.ID),
+			Message:   scanresult.Message,
+			Severity:  int(scanresult.Severity),
 		},
 	}, nil
 }

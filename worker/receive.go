@@ -65,12 +65,11 @@ func ReceiveTasks(ctx context.Context, remoteURL string, authToken string) error
 				Type: TaskType(response.Task.Type),
 				PostgresScan: PostgresScan{
 					Scan: models.PostgresScan{
-						ID:                 int64(response.Task.PostgresScan.Scan.Id),
-						PostgresDatabaseID: int64(response.Task.PostgresScan.Scan.PostgresDatabaseId),
-						Status:             int32(response.Task.PostgresScan.Scan.Status),
-						CreatedAt:          pgtype.Timestamptz{Time: time.Now()},
-						EndedAt:            pgtype.Timestamptz{Time: time.Now()},
-						Error:              sql.NullString{String: response.Task.PostgresScan.Scan.Error},
+						ID:        int64(response.Task.PostgresScan.Scan.Id),
+						Status:    int32(response.Task.PostgresScan.Scan.Status),
+						CreatedAt: pgtype.Timestamptz{Time: time.Now()},
+						EndedAt:   pgtype.Timestamptz{Time: time.Now()},
+						Error:     sql.NullString{String: response.Task.PostgresScan.Scan.Error},
 					},
 					Database: models.PostgresDatabases{
 						ID:           int64(response.Task.PostgresScan.PostgresDatabase.Id),

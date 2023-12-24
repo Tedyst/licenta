@@ -3,8 +3,6 @@ package email
 import (
 	"context"
 
-	"log/slog"
-
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
@@ -17,8 +15,6 @@ type sendGridEmailSender struct {
 }
 
 func NewSendGridEmailSender(apiKey, senderName, sender string) EmailSender {
-	slog.Info("Using sendgrid email sender")
-
 	return &sendGridEmailSender{
 		client:     sendgrid.NewSendClient(apiKey),
 		senderName: senderName,

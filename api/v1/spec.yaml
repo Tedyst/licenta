@@ -446,13 +446,24 @@ paths:
                 type: object
                 required:
                   - success
-                  - task
+                  - scan
+                  - results
                 properties:
                   success:
                     type: boolean
                   scan:
                     $ref: '#/components/schemas/PostgresScan'
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostgresScanResult'
         "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
           description: Unauthorized
           content:
             application/json:
@@ -631,14 +642,11 @@ components:
       type: object
       required:
         - id
-        - postgres_scan_id
         - severity
         - message
         - created_at
       properties:
         id:
-          type: integer
-        postgres_scan_id:
           type: integer
         severity:
           type: integer
@@ -649,7 +657,6 @@ components:
     PostgresScan:
       required:
         - id
-        - postgres_database_id
         - status
         - created_at
         - ended_at
@@ -657,8 +664,6 @@ components:
       type: object
       properties:
         id:
-          type: integer
-        postgres_database_id:
           type: integer
         status:
           type: integer

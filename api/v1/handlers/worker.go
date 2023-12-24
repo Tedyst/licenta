@@ -72,12 +72,11 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 				Scan             *generated.PostgresScan     "json:\"scan,omitempty\""
 			}{
 				Scan: &generated.PostgresScan{
-					CreatedAt:          scan.CreatedAt.Time.Format(time.RFC3339),
-					EndedAt:            scan.EndedAt.Time.Format(time.RFC3339),
-					Error:              scan.Error.String,
-					Id:                 int(scan.ID),
-					PostgresDatabaseId: int(scan.PostgresDatabaseID),
-					Status:             int(scan.Status),
+					CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
+					EndedAt:   scan.EndedAt.Time.Format(time.RFC3339),
+					Error:     scan.Error.String,
+					Id:        int(scan.ID),
+					Status:    int(scan.Status),
 				},
 				PostgresDatabase: &generated.PostgresDatabase{
 					CreatedAt:    database.CreatedAt.Time.Format(time.RFC3339),
