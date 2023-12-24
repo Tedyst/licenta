@@ -52,7 +52,11 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 					return
 				}
 				if err == nil {
-					wa.cache.Set(r.Header.Get(workerAuthHeader), *worker)
+					err = wa.cache.Set(r.Header.Get(workerAuthHeader), *worker)
+					if err != nil {
+						http.Error(w, "Internal server error", http.StatusInternalServerError)
+						return
+					}
 					workerAuthData = worker
 				}
 			} else {
