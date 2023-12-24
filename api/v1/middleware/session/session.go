@@ -18,8 +18,6 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-//go:generate mockgen -source=session.go -package mock -typed -destination mock/mock.go
-
 var tracer = otel.Tracer("github.com/tedyst/licenta/api/v1/middleware/session")
 
 type SessionStore interface {

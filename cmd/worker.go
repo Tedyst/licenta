@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/deepmap/oapi-codegen/pkg/securityprovider"
+	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

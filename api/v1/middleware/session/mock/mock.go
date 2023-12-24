@@ -5,7 +5,6 @@
 //
 //	mockgen -source=session.go -package mock -typed -destination mock/mock.go
 //
-
 // Package mock is a generated GoMock package.
 package mock
 
@@ -48,31 +47,31 @@ func (m *MockSessionStore) ClearSession(ctx context.Context) {
 }
 
 // ClearSession indicates an expected call of ClearSession.
-func (mr *MockSessionStoreMockRecorder) ClearSession(ctx any) *MockSessionStoreClearSessionCall {
+func (mr *MockSessionStoreMockRecorder) ClearSession(ctx any) *SessionStoreClearSessionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClearSession", reflect.TypeOf((*MockSessionStore)(nil).ClearSession), ctx)
-	return &MockSessionStoreClearSessionCall{Call: call}
+	return &SessionStoreClearSessionCall{Call: call}
 }
 
-// MockSessionStoreClearSessionCall wrap *gomock.Call
-type MockSessionStoreClearSessionCall struct {
+// SessionStoreClearSessionCall wrap *gomock.Call
+type SessionStoreClearSessionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockSessionStoreClearSessionCall) Return() *MockSessionStoreClearSessionCall {
+func (c *SessionStoreClearSessionCall) Return() *SessionStoreClearSessionCall {
 	c.Call = c.Call.Return()
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockSessionStoreClearSessionCall) Do(f func(context.Context)) *MockSessionStoreClearSessionCall {
+func (c *SessionStoreClearSessionCall) Do(f func(context.Context)) *SessionStoreClearSessionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockSessionStoreClearSessionCall) DoAndReturn(f func(context.Context)) *MockSessionStoreClearSessionCall {
+func (c *SessionStoreClearSessionCall) DoAndReturn(f func(context.Context)) *SessionStoreClearSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -86,31 +85,31 @@ func (m *MockSessionStore) GetUser(ctx context.Context) *models.User {
 }
 
 // GetUser indicates an expected call of GetUser.
-func (mr *MockSessionStoreMockRecorder) GetUser(ctx any) *MockSessionStoreGetUserCall {
+func (mr *MockSessionStoreMockRecorder) GetUser(ctx any) *SessionStoreGetUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockSessionStore)(nil).GetUser), ctx)
-	return &MockSessionStoreGetUserCall{Call: call}
+	return &SessionStoreGetUserCall{Call: call}
 }
 
-// MockSessionStoreGetUserCall wrap *gomock.Call
-type MockSessionStoreGetUserCall struct {
+// SessionStoreGetUserCall wrap *gomock.Call
+type SessionStoreGetUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockSessionStoreGetUserCall) Return(arg0 *models.User) *MockSessionStoreGetUserCall {
+func (c *SessionStoreGetUserCall) Return(arg0 *models.User) *SessionStoreGetUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockSessionStoreGetUserCall) Do(f func(context.Context) *models.User) *MockSessionStoreGetUserCall {
+func (c *SessionStoreGetUserCall) Do(f func(context.Context) *models.User) *SessionStoreGetUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockSessionStoreGetUserCall) DoAndReturn(f func(context.Context) *models.User) *MockSessionStoreGetUserCall {
+func (c *SessionStoreGetUserCall) DoAndReturn(f func(context.Context) *models.User) *SessionStoreGetUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -124,31 +123,31 @@ func (m *MockSessionStore) Handler(next http.Handler) http.Handler {
 }
 
 // Handler indicates an expected call of Handler.
-func (mr *MockSessionStoreMockRecorder) Handler(next any) *MockSessionStoreHandlerCall {
+func (mr *MockSessionStoreMockRecorder) Handler(next any) *SessionStoreHandlerCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Handler", reflect.TypeOf((*MockSessionStore)(nil).Handler), next)
-	return &MockSessionStoreHandlerCall{Call: call}
+	return &SessionStoreHandlerCall{Call: call}
 }
 
-// MockSessionStoreHandlerCall wrap *gomock.Call
-type MockSessionStoreHandlerCall struct {
+// SessionStoreHandlerCall wrap *gomock.Call
+type SessionStoreHandlerCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockSessionStoreHandlerCall) Return(arg0 http.Handler) *MockSessionStoreHandlerCall {
+func (c *SessionStoreHandlerCall) Return(arg0 http.Handler) *SessionStoreHandlerCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockSessionStoreHandlerCall) Do(f func(http.Handler) http.Handler) *MockSessionStoreHandlerCall {
+func (c *SessionStoreHandlerCall) Do(f func(http.Handler) http.Handler) *SessionStoreHandlerCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockSessionStoreHandlerCall) DoAndReturn(f func(http.Handler) http.Handler) *MockSessionStoreHandlerCall {
+func (c *SessionStoreHandlerCall) DoAndReturn(f func(http.Handler) http.Handler) *SessionStoreHandlerCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -160,31 +159,31 @@ func (m *MockSessionStore) SetUser(ctx context.Context, user *models.User) {
 }
 
 // SetUser indicates an expected call of SetUser.
-func (mr *MockSessionStoreMockRecorder) SetUser(ctx, user any) *MockSessionStoreSetUserCall {
+func (mr *MockSessionStoreMockRecorder) SetUser(ctx, user any) *SessionStoreSetUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUser", reflect.TypeOf((*MockSessionStore)(nil).SetUser), ctx, user)
-	return &MockSessionStoreSetUserCall{Call: call}
+	return &SessionStoreSetUserCall{Call: call}
 }
 
-// MockSessionStoreSetUserCall wrap *gomock.Call
-type MockSessionStoreSetUserCall struct {
+// SessionStoreSetUserCall wrap *gomock.Call
+type SessionStoreSetUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockSessionStoreSetUserCall) Return() *MockSessionStoreSetUserCall {
+func (c *SessionStoreSetUserCall) Return() *SessionStoreSetUserCall {
 	c.Call = c.Call.Return()
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockSessionStoreSetUserCall) Do(f func(context.Context, *models.User)) *MockSessionStoreSetUserCall {
+func (c *SessionStoreSetUserCall) Do(f func(context.Context, *models.User)) *SessionStoreSetUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockSessionStoreSetUserCall) DoAndReturn(f func(context.Context, *models.User)) *MockSessionStoreSetUserCall {
+func (c *SessionStoreSetUserCall) DoAndReturn(f func(context.Context, *models.User)) *SessionStoreSetUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

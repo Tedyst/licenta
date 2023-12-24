@@ -3,6 +3,6 @@
 
 package v1
 
-import _ "github.com/deepmap/oapi-codegen/cmd/oapi-codegen"
+import _ "github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen"
 
-//go:generate oapi-codegen -config oapi-codegen.yaml spec.yaml
+//go:generate go run github.com/deepmap/oapi-codegen/v2/cmd/oapi-codegen -config oapi-codegen.yaml spec.yaml

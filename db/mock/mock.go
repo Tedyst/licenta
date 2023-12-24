@@ -5,7 +5,6 @@
 //
 //	mockgen -source=db.go -package mock -typed -destination mock/mock.go
 //
-
 // Package mock is a generated GoMock package.
 package mock
 
@@ -53,31 +52,31 @@ func (m *MockTransactionQuerier) BindPostgresScanToWorker(ctx context.Context, a
 }
 
 // BindPostgresScanToWorker indicates an expected call of BindPostgresScanToWorker.
-func (mr *MockTransactionQuerierMockRecorder) BindPostgresScanToWorker(ctx, arg any) *MockTransactionQuerierBindPostgresScanToWorkerCall {
+func (mr *MockTransactionQuerierMockRecorder) BindPostgresScanToWorker(ctx, arg any) *TransactionQuerierBindPostgresScanToWorkerCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindPostgresScanToWorker", reflect.TypeOf((*MockTransactionQuerier)(nil).BindPostgresScanToWorker), ctx, arg)
-	return &MockTransactionQuerierBindPostgresScanToWorkerCall{Call: call}
+	return &TransactionQuerierBindPostgresScanToWorkerCall{Call: call}
 }
 
-// MockTransactionQuerierBindPostgresScanToWorkerCall wrap *gomock.Call
-type MockTransactionQuerierBindPostgresScanToWorkerCall struct {
+// TransactionQuerierBindPostgresScanToWorkerCall wrap *gomock.Call
+type TransactionQuerierBindPostgresScanToWorkerCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierBindPostgresScanToWorkerCall) Return(arg0 error) *MockTransactionQuerierBindPostgresScanToWorkerCall {
+func (c *TransactionQuerierBindPostgresScanToWorkerCall) Return(arg0 error) *TransactionQuerierBindPostgresScanToWorkerCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierBindPostgresScanToWorkerCall) Do(f func(context.Context, queries.BindPostgresScanToWorkerParams) error) *MockTransactionQuerierBindPostgresScanToWorkerCall {
+func (c *TransactionQuerierBindPostgresScanToWorkerCall) Do(f func(context.Context, queries.BindPostgresScanToWorkerParams) error) *TransactionQuerierBindPostgresScanToWorkerCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierBindPostgresScanToWorkerCall) DoAndReturn(f func(context.Context, queries.BindPostgresScanToWorkerParams) error) *MockTransactionQuerierBindPostgresScanToWorkerCall {
+func (c *TransactionQuerierBindPostgresScanToWorkerCall) DoAndReturn(f func(context.Context, queries.BindPostgresScanToWorkerParams) error) *TransactionQuerierBindPostgresScanToWorkerCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -92,31 +91,31 @@ func (m *MockTransactionQuerier) CountUsers(ctx context.Context) (int64, error) 
 }
 
 // CountUsers indicates an expected call of CountUsers.
-func (mr *MockTransactionQuerierMockRecorder) CountUsers(ctx any) *MockTransactionQuerierCountUsersCall {
+func (mr *MockTransactionQuerierMockRecorder) CountUsers(ctx any) *TransactionQuerierCountUsersCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountUsers", reflect.TypeOf((*MockTransactionQuerier)(nil).CountUsers), ctx)
-	return &MockTransactionQuerierCountUsersCall{Call: call}
+	return &TransactionQuerierCountUsersCall{Call: call}
 }
 
-// MockTransactionQuerierCountUsersCall wrap *gomock.Call
-type MockTransactionQuerierCountUsersCall struct {
+// TransactionQuerierCountUsersCall wrap *gomock.Call
+type TransactionQuerierCountUsersCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCountUsersCall) Return(arg0 int64, arg1 error) *MockTransactionQuerierCountUsersCall {
+func (c *TransactionQuerierCountUsersCall) Return(arg0 int64, arg1 error) *TransactionQuerierCountUsersCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCountUsersCall) Do(f func(context.Context) (int64, error)) *MockTransactionQuerierCountUsersCall {
+func (c *TransactionQuerierCountUsersCall) Do(f func(context.Context) (int64, error)) *TransactionQuerierCountUsersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCountUsersCall) DoAndReturn(f func(context.Context) (int64, error)) *MockTransactionQuerierCountUsersCall {
+func (c *TransactionQuerierCountUsersCall) DoAndReturn(f func(context.Context) (int64, error)) *TransactionQuerierCountUsersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -131,31 +130,31 @@ func (m *MockTransactionQuerier) CreateDockerImageForProject(ctx context.Context
 }
 
 // CreateDockerImageForProject indicates an expected call of CreateDockerImageForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateDockerImageForProject(ctx, arg any) *MockTransactionQuerierCreateDockerImageForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateDockerImageForProject(ctx, arg any) *TransactionQuerierCreateDockerImageForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDockerImageForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateDockerImageForProject), ctx, arg)
-	return &MockTransactionQuerierCreateDockerImageForProjectCall{Call: call}
+	return &TransactionQuerierCreateDockerImageForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierCreateDockerImageForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateDockerImageForProjectCall struct {
+// TransactionQuerierCreateDockerImageForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateDockerImageForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateDockerImageForProjectCall) Return(arg0 *queries.ProjectDockerImage, arg1 error) *MockTransactionQuerierCreateDockerImageForProjectCall {
+func (c *TransactionQuerierCreateDockerImageForProjectCall) Return(arg0 *queries.ProjectDockerImage, arg1 error) *TransactionQuerierCreateDockerImageForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateDockerImageForProjectCall) Do(f func(context.Context, queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error)) *MockTransactionQuerierCreateDockerImageForProjectCall {
+func (c *TransactionQuerierCreateDockerImageForProjectCall) Do(f func(context.Context, queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error)) *TransactionQuerierCreateDockerImageForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateDockerImageForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error)) *MockTransactionQuerierCreateDockerImageForProjectCall {
+func (c *TransactionQuerierCreateDockerImageForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerImageForProjectParams) (*queries.ProjectDockerImage, error)) *TransactionQuerierCreateDockerImageForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -170,31 +169,31 @@ func (m *MockTransactionQuerier) CreateDockerLayerResultsForProject(ctx context.
 }
 
 // CreateDockerLayerResultsForProject indicates an expected call of CreateDockerLayerResultsForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateDockerLayerResultsForProject(ctx, arg any) *MockTransactionQuerierCreateDockerLayerResultsForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateDockerLayerResultsForProject(ctx, arg any) *TransactionQuerierCreateDockerLayerResultsForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDockerLayerResultsForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateDockerLayerResultsForProject), ctx, arg)
-	return &MockTransactionQuerierCreateDockerLayerResultsForProjectCall{Call: call}
+	return &TransactionQuerierCreateDockerLayerResultsForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierCreateDockerLayerResultsForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateDockerLayerResultsForProjectCall struct {
+// TransactionQuerierCreateDockerLayerResultsForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateDockerLayerResultsForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateDockerLayerResultsForProjectCall) Return(arg0 int64, arg1 error) *MockTransactionQuerierCreateDockerLayerResultsForProjectCall {
+func (c *TransactionQuerierCreateDockerLayerResultsForProjectCall) Return(arg0 int64, arg1 error) *TransactionQuerierCreateDockerLayerResultsForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateDockerLayerResultsForProjectCall) Do(f func(context.Context, []queries.CreateDockerLayerResultsForProjectParams) (int64, error)) *MockTransactionQuerierCreateDockerLayerResultsForProjectCall {
+func (c *TransactionQuerierCreateDockerLayerResultsForProjectCall) Do(f func(context.Context, []queries.CreateDockerLayerResultsForProjectParams) (int64, error)) *TransactionQuerierCreateDockerLayerResultsForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateDockerLayerResultsForProjectCall) DoAndReturn(f func(context.Context, []queries.CreateDockerLayerResultsForProjectParams) (int64, error)) *MockTransactionQuerierCreateDockerLayerResultsForProjectCall {
+func (c *TransactionQuerierCreateDockerLayerResultsForProjectCall) DoAndReturn(f func(context.Context, []queries.CreateDockerLayerResultsForProjectParams) (int64, error)) *TransactionQuerierCreateDockerLayerResultsForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -209,31 +208,31 @@ func (m *MockTransactionQuerier) CreateDockerLayerScanForProject(ctx context.Con
 }
 
 // CreateDockerLayerScanForProject indicates an expected call of CreateDockerLayerScanForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateDockerLayerScanForProject(ctx, arg any) *MockTransactionQuerierCreateDockerLayerScanForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateDockerLayerScanForProject(ctx, arg any) *TransactionQuerierCreateDockerLayerScanForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDockerLayerScanForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateDockerLayerScanForProject), ctx, arg)
-	return &MockTransactionQuerierCreateDockerLayerScanForProjectCall{Call: call}
+	return &TransactionQuerierCreateDockerLayerScanForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierCreateDockerLayerScanForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateDockerLayerScanForProjectCall struct {
+// TransactionQuerierCreateDockerLayerScanForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateDockerLayerScanForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *MockTransactionQuerierCreateDockerLayerScanForProjectCall {
+func (c *TransactionQuerierCreateDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *TransactionQuerierCreateDockerLayerScanForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateDockerLayerScanForProjectCall) Do(f func(context.Context, queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *MockTransactionQuerierCreateDockerLayerScanForProjectCall {
+func (c *TransactionQuerierCreateDockerLayerScanForProjectCall) Do(f func(context.Context, queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierCreateDockerLayerScanForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *MockTransactionQuerierCreateDockerLayerScanForProjectCall {
+func (c *TransactionQuerierCreateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierCreateDockerLayerScanForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -248,31 +247,31 @@ func (m *MockTransactionQuerier) CreateDockerScannedLayerForProject(ctx context.
 }
 
 // CreateDockerScannedLayerForProject indicates an expected call of CreateDockerScannedLayerForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateDockerScannedLayerForProject(ctx, arg any) *MockTransactionQuerierCreateDockerScannedLayerForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateDockerScannedLayerForProject(ctx, arg any) *TransactionQuerierCreateDockerScannedLayerForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDockerScannedLayerForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateDockerScannedLayerForProject), ctx, arg)
-	return &MockTransactionQuerierCreateDockerScannedLayerForProjectCall{Call: call}
+	return &TransactionQuerierCreateDockerScannedLayerForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierCreateDockerScannedLayerForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateDockerScannedLayerForProjectCall struct {
+// TransactionQuerierCreateDockerScannedLayerForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateDockerScannedLayerForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateDockerScannedLayerForProjectCall) Return(arg0 *queries.ProjectDockerScannedLayer, arg1 error) *MockTransactionQuerierCreateDockerScannedLayerForProjectCall {
+func (c *TransactionQuerierCreateDockerScannedLayerForProjectCall) Return(arg0 *queries.ProjectDockerScannedLayer, arg1 error) *TransactionQuerierCreateDockerScannedLayerForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateDockerScannedLayerForProjectCall) Do(f func(context.Context, queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)) *MockTransactionQuerierCreateDockerScannedLayerForProjectCall {
+func (c *TransactionQuerierCreateDockerScannedLayerForProjectCall) Do(f func(context.Context, queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)) *TransactionQuerierCreateDockerScannedLayerForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateDockerScannedLayerForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)) *MockTransactionQuerierCreateDockerScannedLayerForProjectCall {
+func (c *TransactionQuerierCreateDockerScannedLayerForProjectCall) DoAndReturn(f func(context.Context, queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)) *TransactionQuerierCreateDockerScannedLayerForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -287,31 +286,31 @@ func (m *MockTransactionQuerier) CreateGitCommitForProject(ctx context.Context, 
 }
 
 // CreateGitCommitForProject indicates an expected call of CreateGitCommitForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateGitCommitForProject(ctx, arg any) *MockTransactionQuerierCreateGitCommitForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateGitCommitForProject(ctx, arg any) *TransactionQuerierCreateGitCommitForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitCommitForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitCommitForProject), ctx, arg)
-	return &MockTransactionQuerierCreateGitCommitForProjectCall{Call: call}
+	return &TransactionQuerierCreateGitCommitForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierCreateGitCommitForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateGitCommitForProjectCall struct {
+// TransactionQuerierCreateGitCommitForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateGitCommitForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateGitCommitForProjectCall) Return(arg0 *queries.ProjectGitScannedCommit, arg1 error) *MockTransactionQuerierCreateGitCommitForProjectCall {
+func (c *TransactionQuerierCreateGitCommitForProjectCall) Return(arg0 *queries.ProjectGitScannedCommit, arg1 error) *TransactionQuerierCreateGitCommitForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateGitCommitForProjectCall) Do(f func(context.Context, queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)) *MockTransactionQuerierCreateGitCommitForProjectCall {
+func (c *TransactionQuerierCreateGitCommitForProjectCall) Do(f func(context.Context, queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)) *TransactionQuerierCreateGitCommitForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateGitCommitForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)) *MockTransactionQuerierCreateGitCommitForProjectCall {
+func (c *TransactionQuerierCreateGitCommitForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)) *TransactionQuerierCreateGitCommitForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -326,31 +325,31 @@ func (m *MockTransactionQuerier) CreateGitRepositoryForProject(ctx context.Conte
 }
 
 // CreateGitRepositoryForProject indicates an expected call of CreateGitRepositoryForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateGitRepositoryForProject(ctx, arg any) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateGitRepositoryForProject(ctx, arg any) *TransactionQuerierCreateGitRepositoryForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitRepositoryForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitRepositoryForProject), ctx, arg)
-	return &MockTransactionQuerierCreateGitRepositoryForProjectCall{Call: call}
+	return &TransactionQuerierCreateGitRepositoryForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierCreateGitRepositoryForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateGitRepositoryForProjectCall struct {
+// TransactionQuerierCreateGitRepositoryForProjectCall wrap *gomock.Call
+type TransactionQuerierCreateGitRepositoryForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateGitRepositoryForProjectCall) Return(arg0 *queries.ProjectGitRepository, arg1 error) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
+func (c *TransactionQuerierCreateGitRepositoryForProjectCall) Return(arg0 *queries.ProjectGitRepository, arg1 error) *TransactionQuerierCreateGitRepositoryForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateGitRepositoryForProjectCall) Do(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
+func (c *TransactionQuerierCreateGitRepositoryForProjectCall) Do(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *TransactionQuerierCreateGitRepositoryForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
+func (c *TransactionQuerierCreateGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.ProjectGitRepository, error)) *TransactionQuerierCreateGitRepositoryForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -365,31 +364,31 @@ func (m *MockTransactionQuerier) CreateGitResultForCommit(ctx context.Context, a
 }
 
 // CreateGitResultForCommit indicates an expected call of CreateGitResultForCommit.
-func (mr *MockTransactionQuerierMockRecorder) CreateGitResultForCommit(ctx, arg any) *MockTransactionQuerierCreateGitResultForCommitCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateGitResultForCommit(ctx, arg any) *TransactionQuerierCreateGitResultForCommitCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitResultForCommit", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitResultForCommit), ctx, arg)
-	return &MockTransactionQuerierCreateGitResultForCommitCall{Call: call}
+	return &TransactionQuerierCreateGitResultForCommitCall{Call: call}
 }
 
-// MockTransactionQuerierCreateGitResultForCommitCall wrap *gomock.Call
-type MockTransactionQuerierCreateGitResultForCommitCall struct {
+// TransactionQuerierCreateGitResultForCommitCall wrap *gomock.Call
+type TransactionQuerierCreateGitResultForCommitCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateGitResultForCommitCall) Return(arg0 int64, arg1 error) *MockTransactionQuerierCreateGitResultForCommitCall {
+func (c *TransactionQuerierCreateGitResultForCommitCall) Return(arg0 int64, arg1 error) *TransactionQuerierCreateGitResultForCommitCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateGitResultForCommitCall) Do(f func(context.Context, []queries.CreateGitResultForCommitParams) (int64, error)) *MockTransactionQuerierCreateGitResultForCommitCall {
+func (c *TransactionQuerierCreateGitResultForCommitCall) Do(f func(context.Context, []queries.CreateGitResultForCommitParams) (int64, error)) *TransactionQuerierCreateGitResultForCommitCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateGitResultForCommitCall) DoAndReturn(f func(context.Context, []queries.CreateGitResultForCommitParams) (int64, error)) *MockTransactionQuerierCreateGitResultForCommitCall {
+func (c *TransactionQuerierCreateGitResultForCommitCall) DoAndReturn(f func(context.Context, []queries.CreateGitResultForCommitParams) (int64, error)) *TransactionQuerierCreateGitResultForCommitCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -404,31 +403,31 @@ func (m *MockTransactionQuerier) CreateNvdCPE(ctx context.Context, arg queries.C
 }
 
 // CreateNvdCPE indicates an expected call of CreateNvdCPE.
-func (mr *MockTransactionQuerierMockRecorder) CreateNvdCPE(ctx, arg any) *MockTransactionQuerierCreateNvdCPECall {
+func (mr *MockTransactionQuerierMockRecorder) CreateNvdCPE(ctx, arg any) *TransactionQuerierCreateNvdCPECall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNvdCPE", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateNvdCPE), ctx, arg)
-	return &MockTransactionQuerierCreateNvdCPECall{Call: call}
+	return &TransactionQuerierCreateNvdCPECall{Call: call}
 }
 
-// MockTransactionQuerierCreateNvdCPECall wrap *gomock.Call
-type MockTransactionQuerierCreateNvdCPECall struct {
+// TransactionQuerierCreateNvdCPECall wrap *gomock.Call
+type TransactionQuerierCreateNvdCPECall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateNvdCPECall) Return(arg0 *queries.NvdCpe, arg1 error) *MockTransactionQuerierCreateNvdCPECall {
+func (c *TransactionQuerierCreateNvdCPECall) Return(arg0 *queries.NvdCpe, arg1 error) *TransactionQuerierCreateNvdCPECall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateNvdCPECall) Do(f func(context.Context, queries.CreateNvdCPEParams) (*queries.NvdCpe, error)) *MockTransactionQuerierCreateNvdCPECall {
+func (c *TransactionQuerierCreateNvdCPECall) Do(f func(context.Context, queries.CreateNvdCPEParams) (*queries.NvdCpe, error)) *TransactionQuerierCreateNvdCPECall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateNvdCPECall) DoAndReturn(f func(context.Context, queries.CreateNvdCPEParams) (*queries.NvdCpe, error)) *MockTransactionQuerierCreateNvdCPECall {
+func (c *TransactionQuerierCreateNvdCPECall) DoAndReturn(f func(context.Context, queries.CreateNvdCPEParams) (*queries.NvdCpe, error)) *TransactionQuerierCreateNvdCPECall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -443,31 +442,31 @@ func (m *MockTransactionQuerier) CreateNvdCve(ctx context.Context, arg queries.C
 }
 
 // CreateNvdCve indicates an expected call of CreateNvdCve.
-func (mr *MockTransactionQuerierMockRecorder) CreateNvdCve(ctx, arg any) *MockTransactionQuerierCreateNvdCveCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateNvdCve(ctx, arg any) *TransactionQuerierCreateNvdCveCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNvdCve", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateNvdCve), ctx, arg)
-	return &MockTransactionQuerierCreateNvdCveCall{Call: call}
+	return &TransactionQuerierCreateNvdCveCall{Call: call}
 }
 
-// MockTransactionQuerierCreateNvdCveCall wrap *gomock.Call
-type MockTransactionQuerierCreateNvdCveCall struct {
+// TransactionQuerierCreateNvdCveCall wrap *gomock.Call
+type TransactionQuerierCreateNvdCveCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateNvdCveCall) Return(arg0 *queries.NvdCfe, arg1 error) *MockTransactionQuerierCreateNvdCveCall {
+func (c *TransactionQuerierCreateNvdCveCall) Return(arg0 *queries.NvdCfe, arg1 error) *TransactionQuerierCreateNvdCveCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateNvdCveCall) Do(f func(context.Context, queries.CreateNvdCveParams) (*queries.NvdCfe, error)) *MockTransactionQuerierCreateNvdCveCall {
+func (c *TransactionQuerierCreateNvdCveCall) Do(f func(context.Context, queries.CreateNvdCveParams) (*queries.NvdCfe, error)) *TransactionQuerierCreateNvdCveCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateNvdCveCall) DoAndReturn(f func(context.Context, queries.CreateNvdCveParams) (*queries.NvdCfe, error)) *MockTransactionQuerierCreateNvdCveCall {
+func (c *TransactionQuerierCreateNvdCveCall) DoAndReturn(f func(context.Context, queries.CreateNvdCveParams) (*queries.NvdCfe, error)) *TransactionQuerierCreateNvdCveCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -482,31 +481,31 @@ func (m *MockTransactionQuerier) CreateNvdCveCPE(ctx context.Context, arg querie
 }
 
 // CreateNvdCveCPE indicates an expected call of CreateNvdCveCPE.
-func (mr *MockTransactionQuerierMockRecorder) CreateNvdCveCPE(ctx, arg any) *MockTransactionQuerierCreateNvdCveCPECall {
+func (mr *MockTransactionQuerierMockRecorder) CreateNvdCveCPE(ctx, arg any) *TransactionQuerierCreateNvdCveCPECall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNvdCveCPE", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateNvdCveCPE), ctx, arg)
-	return &MockTransactionQuerierCreateNvdCveCPECall{Call: call}
+	return &TransactionQuerierCreateNvdCveCPECall{Call: call}
 }
 
-// MockTransactionQuerierCreateNvdCveCPECall wrap *gomock.Call
-type MockTransactionQuerierCreateNvdCveCPECall struct {
+// TransactionQuerierCreateNvdCveCPECall wrap *gomock.Call
+type TransactionQuerierCreateNvdCveCPECall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateNvdCveCPECall) Return(arg0 *queries.NvdCveCpe, arg1 error) *MockTransactionQuerierCreateNvdCveCPECall {
+func (c *TransactionQuerierCreateNvdCveCPECall) Return(arg0 *queries.NvdCveCpe, arg1 error) *TransactionQuerierCreateNvdCveCPECall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateNvdCveCPECall) Do(f func(context.Context, queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)) *MockTransactionQuerierCreateNvdCveCPECall {
+func (c *TransactionQuerierCreateNvdCveCPECall) Do(f func(context.Context, queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateNvdCveCPECall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateNvdCveCPECall) DoAndReturn(f func(context.Context, queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)) *MockTransactionQuerierCreateNvdCveCPECall {
+func (c *TransactionQuerierCreateNvdCveCPECall) DoAndReturn(f func(context.Context, queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)) *TransactionQuerierCreateNvdCveCPECall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -521,31 +520,31 @@ func (m *MockTransactionQuerier) CreatePostgresScan(ctx context.Context, arg que
 }
 
 // CreatePostgresScan indicates an expected call of CreatePostgresScan.
-func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScan(ctx, arg any) *MockTransactionQuerierCreatePostgresScanCall {
+func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScan(ctx, arg any) *TransactionQuerierCreatePostgresScanCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostgresScan", reflect.TypeOf((*MockTransactionQuerier)(nil).CreatePostgresScan), ctx, arg)
-	return &MockTransactionQuerierCreatePostgresScanCall{Call: call}
+	return &TransactionQuerierCreatePostgresScanCall{Call: call}
 }
 
-// MockTransactionQuerierCreatePostgresScanCall wrap *gomock.Call
-type MockTransactionQuerierCreatePostgresScanCall struct {
+// TransactionQuerierCreatePostgresScanCall wrap *gomock.Call
+type TransactionQuerierCreatePostgresScanCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreatePostgresScanCall) Return(arg0 *queries.PostgresScan, arg1 error) *MockTransactionQuerierCreatePostgresScanCall {
+func (c *TransactionQuerierCreatePostgresScanCall) Return(arg0 *queries.PostgresScan, arg1 error) *TransactionQuerierCreatePostgresScanCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreatePostgresScanCall) Do(f func(context.Context, queries.CreatePostgresScanParams) (*queries.PostgresScan, error)) *MockTransactionQuerierCreatePostgresScanCall {
+func (c *TransactionQuerierCreatePostgresScanCall) Do(f func(context.Context, queries.CreatePostgresScanParams) (*queries.PostgresScan, error)) *TransactionQuerierCreatePostgresScanCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreatePostgresScanCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanParams) (*queries.PostgresScan, error)) *MockTransactionQuerierCreatePostgresScanCall {
+func (c *TransactionQuerierCreatePostgresScanCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanParams) (*queries.PostgresScan, error)) *TransactionQuerierCreatePostgresScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -560,31 +559,31 @@ func (m *MockTransactionQuerier) CreatePostgresScanBruteforceResult(ctx context.
 }
 
 // CreatePostgresScanBruteforceResult indicates an expected call of CreatePostgresScanBruteforceResult.
-func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScanBruteforceResult(ctx, arg any) *MockTransactionQuerierCreatePostgresScanBruteforceResultCall {
+func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScanBruteforceResult(ctx, arg any) *TransactionQuerierCreatePostgresScanBruteforceResultCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostgresScanBruteforceResult", reflect.TypeOf((*MockTransactionQuerier)(nil).CreatePostgresScanBruteforceResult), ctx, arg)
-	return &MockTransactionQuerierCreatePostgresScanBruteforceResultCall{Call: call}
+	return &TransactionQuerierCreatePostgresScanBruteforceResultCall{Call: call}
 }
 
-// MockTransactionQuerierCreatePostgresScanBruteforceResultCall wrap *gomock.Call
-type MockTransactionQuerierCreatePostgresScanBruteforceResultCall struct {
+// TransactionQuerierCreatePostgresScanBruteforceResultCall wrap *gomock.Call
+type TransactionQuerierCreatePostgresScanBruteforceResultCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreatePostgresScanBruteforceResultCall) Return(arg0 *queries.PostgresScanBruteforceResult, arg1 error) *MockTransactionQuerierCreatePostgresScanBruteforceResultCall {
+func (c *TransactionQuerierCreatePostgresScanBruteforceResultCall) Return(arg0 *queries.PostgresScanBruteforceResult, arg1 error) *TransactionQuerierCreatePostgresScanBruteforceResultCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreatePostgresScanBruteforceResultCall) Do(f func(context.Context, queries.CreatePostgresScanBruteforceResultParams) (*queries.PostgresScanBruteforceResult, error)) *MockTransactionQuerierCreatePostgresScanBruteforceResultCall {
+func (c *TransactionQuerierCreatePostgresScanBruteforceResultCall) Do(f func(context.Context, queries.CreatePostgresScanBruteforceResultParams) (*queries.PostgresScanBruteforceResult, error)) *TransactionQuerierCreatePostgresScanBruteforceResultCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreatePostgresScanBruteforceResultCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanBruteforceResultParams) (*queries.PostgresScanBruteforceResult, error)) *MockTransactionQuerierCreatePostgresScanBruteforceResultCall {
+func (c *TransactionQuerierCreatePostgresScanBruteforceResultCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanBruteforceResultParams) (*queries.PostgresScanBruteforceResult, error)) *TransactionQuerierCreatePostgresScanBruteforceResultCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -599,31 +598,31 @@ func (m *MockTransactionQuerier) CreatePostgresScanResult(ctx context.Context, a
 }
 
 // CreatePostgresScanResult indicates an expected call of CreatePostgresScanResult.
-func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScanResult(ctx, arg any) *MockTransactionQuerierCreatePostgresScanResultCall {
+func (mr *MockTransactionQuerierMockRecorder) CreatePostgresScanResult(ctx, arg any) *TransactionQuerierCreatePostgresScanResultCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostgresScanResult", reflect.TypeOf((*MockTransactionQuerier)(nil).CreatePostgresScanResult), ctx, arg)
-	return &MockTransactionQuerierCreatePostgresScanResultCall{Call: call}
+	return &TransactionQuerierCreatePostgresScanResultCall{Call: call}
 }
 
-// MockTransactionQuerierCreatePostgresScanResultCall wrap *gomock.Call
-type MockTransactionQuerierCreatePostgresScanResultCall struct {
+// TransactionQuerierCreatePostgresScanResultCall wrap *gomock.Call
+type TransactionQuerierCreatePostgresScanResultCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreatePostgresScanResultCall) Return(arg0 *queries.PostgresScanResult, arg1 error) *MockTransactionQuerierCreatePostgresScanResultCall {
+func (c *TransactionQuerierCreatePostgresScanResultCall) Return(arg0 *queries.PostgresScanResult, arg1 error) *TransactionQuerierCreatePostgresScanResultCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreatePostgresScanResultCall) Do(f func(context.Context, queries.CreatePostgresScanResultParams) (*queries.PostgresScanResult, error)) *MockTransactionQuerierCreatePostgresScanResultCall {
+func (c *TransactionQuerierCreatePostgresScanResultCall) Do(f func(context.Context, queries.CreatePostgresScanResultParams) (*queries.PostgresScanResult, error)) *TransactionQuerierCreatePostgresScanResultCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreatePostgresScanResultCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanResultParams) (*queries.PostgresScanResult, error)) *MockTransactionQuerierCreatePostgresScanResultCall {
+func (c *TransactionQuerierCreatePostgresScanResultCall) DoAndReturn(f func(context.Context, queries.CreatePostgresScanResultParams) (*queries.PostgresScanResult, error)) *TransactionQuerierCreatePostgresScanResultCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -638,31 +637,31 @@ func (m *MockTransactionQuerier) CreateResetPasswordToken(ctx context.Context, a
 }
 
 // CreateResetPasswordToken indicates an expected call of CreateResetPasswordToken.
-func (mr *MockTransactionQuerierMockRecorder) CreateResetPasswordToken(ctx, arg any) *MockTransactionQuerierCreateResetPasswordTokenCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateResetPasswordToken(ctx, arg any) *TransactionQuerierCreateResetPasswordTokenCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateResetPasswordToken", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateResetPasswordToken), ctx, arg)
-	return &MockTransactionQuerierCreateResetPasswordTokenCall{Call: call}
+	return &TransactionQuerierCreateResetPasswordTokenCall{Call: call}
 }
 
-// MockTransactionQuerierCreateResetPasswordTokenCall wrap *gomock.Call
-type MockTransactionQuerierCreateResetPasswordTokenCall struct {
+// TransactionQuerierCreateResetPasswordTokenCall wrap *gomock.Call
+type TransactionQuerierCreateResetPasswordTokenCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateResetPasswordTokenCall) Return(arg0 *queries.ResetPasswordToken, arg1 error) *MockTransactionQuerierCreateResetPasswordTokenCall {
+func (c *TransactionQuerierCreateResetPasswordTokenCall) Return(arg0 *queries.ResetPasswordToken, arg1 error) *TransactionQuerierCreateResetPasswordTokenCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateResetPasswordTokenCall) Do(f func(context.Context, queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error)) *MockTransactionQuerierCreateResetPasswordTokenCall {
+func (c *TransactionQuerierCreateResetPasswordTokenCall) Do(f func(context.Context, queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error)) *TransactionQuerierCreateResetPasswordTokenCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateResetPasswordTokenCall) DoAndReturn(f func(context.Context, queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error)) *MockTransactionQuerierCreateResetPasswordTokenCall {
+func (c *TransactionQuerierCreateResetPasswordTokenCall) DoAndReturn(f func(context.Context, queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error)) *TransactionQuerierCreateResetPasswordTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -677,31 +676,31 @@ func (m *MockTransactionQuerier) CreateSession(ctx context.Context, arg queries.
 }
 
 // CreateSession indicates an expected call of CreateSession.
-func (mr *MockTransactionQuerierMockRecorder) CreateSession(ctx, arg any) *MockTransactionQuerierCreateSessionCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateSession(ctx, arg any) *TransactionQuerierCreateSessionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateSession), ctx, arg)
-	return &MockTransactionQuerierCreateSessionCall{Call: call}
+	return &TransactionQuerierCreateSessionCall{Call: call}
 }
 
-// MockTransactionQuerierCreateSessionCall wrap *gomock.Call
-type MockTransactionQuerierCreateSessionCall struct {
+// TransactionQuerierCreateSessionCall wrap *gomock.Call
+type TransactionQuerierCreateSessionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateSessionCall) Return(arg0 *queries.Session, arg1 error) *MockTransactionQuerierCreateSessionCall {
+func (c *TransactionQuerierCreateSessionCall) Return(arg0 *queries.Session, arg1 error) *TransactionQuerierCreateSessionCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateSessionCall) Do(f func(context.Context, queries.CreateSessionParams) (*queries.Session, error)) *MockTransactionQuerierCreateSessionCall {
+func (c *TransactionQuerierCreateSessionCall) Do(f func(context.Context, queries.CreateSessionParams) (*queries.Session, error)) *TransactionQuerierCreateSessionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateSessionCall) DoAndReturn(f func(context.Context, queries.CreateSessionParams) (*queries.Session, error)) *MockTransactionQuerierCreateSessionCall {
+func (c *TransactionQuerierCreateSessionCall) DoAndReturn(f func(context.Context, queries.CreateSessionParams) (*queries.Session, error)) *TransactionQuerierCreateSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -716,31 +715,31 @@ func (m *MockTransactionQuerier) CreateTOTPSecretForUser(ctx context.Context, ar
 }
 
 // CreateTOTPSecretForUser indicates an expected call of CreateTOTPSecretForUser.
-func (mr *MockTransactionQuerierMockRecorder) CreateTOTPSecretForUser(ctx, arg any) *MockTransactionQuerierCreateTOTPSecretForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateTOTPSecretForUser(ctx, arg any) *TransactionQuerierCreateTOTPSecretForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateTOTPSecretForUser), ctx, arg)
-	return &MockTransactionQuerierCreateTOTPSecretForUserCall{Call: call}
+	return &TransactionQuerierCreateTOTPSecretForUserCall{Call: call}
 }
 
-// MockTransactionQuerierCreateTOTPSecretForUserCall wrap *gomock.Call
-type MockTransactionQuerierCreateTOTPSecretForUserCall struct {
+// TransactionQuerierCreateTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierCreateTOTPSecretForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *MockTransactionQuerierCreateTOTPSecretForUserCall {
+func (c *TransactionQuerierCreateTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *TransactionQuerierCreateTOTPSecretForUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateTOTPSecretForUserCall) Do(f func(context.Context, queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error)) *MockTransactionQuerierCreateTOTPSecretForUserCall {
+func (c *TransactionQuerierCreateTOTPSecretForUserCall) Do(f func(context.Context, queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error)) *TransactionQuerierCreateTOTPSecretForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error)) *MockTransactionQuerierCreateTOTPSecretForUserCall {
+func (c *TransactionQuerierCreateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, queries.CreateTOTPSecretForUserParams) (*queries.TotpSecretToken, error)) *TransactionQuerierCreateTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -755,31 +754,31 @@ func (m *MockTransactionQuerier) CreateUser(ctx context.Context, arg queries.Cre
 }
 
 // CreateUser indicates an expected call of CreateUser.
-func (mr *MockTransactionQuerierMockRecorder) CreateUser(ctx, arg any) *MockTransactionQuerierCreateUserCall {
+func (mr *MockTransactionQuerierMockRecorder) CreateUser(ctx, arg any) *TransactionQuerierCreateUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateUser), ctx, arg)
-	return &MockTransactionQuerierCreateUserCall{Call: call}
+	return &TransactionQuerierCreateUserCall{Call: call}
 }
 
-// MockTransactionQuerierCreateUserCall wrap *gomock.Call
-type MockTransactionQuerierCreateUserCall struct {
+// TransactionQuerierCreateUserCall wrap *gomock.Call
+type TransactionQuerierCreateUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateUserCall) Return(arg0 *queries.User, arg1 error) *MockTransactionQuerierCreateUserCall {
+func (c *TransactionQuerierCreateUserCall) Return(arg0 *queries.User, arg1 error) *TransactionQuerierCreateUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateUserCall) Do(f func(context.Context, queries.CreateUserParams) (*queries.User, error)) *MockTransactionQuerierCreateUserCall {
+func (c *TransactionQuerierCreateUserCall) Do(f func(context.Context, queries.CreateUserParams) (*queries.User, error)) *TransactionQuerierCreateUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateUserCall) DoAndReturn(f func(context.Context, queries.CreateUserParams) (*queries.User, error)) *MockTransactionQuerierCreateUserCall {
+func (c *TransactionQuerierCreateUserCall) DoAndReturn(f func(context.Context, queries.CreateUserParams) (*queries.User, error)) *TransactionQuerierCreateUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -793,31 +792,31 @@ func (m *MockTransactionQuerier) DeleteDockerImageForProject(ctx context.Context
 }
 
 // DeleteDockerImageForProject indicates an expected call of DeleteDockerImageForProject.
-func (mr *MockTransactionQuerierMockRecorder) DeleteDockerImageForProject(ctx, arg any) *MockTransactionQuerierDeleteDockerImageForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) DeleteDockerImageForProject(ctx, arg any) *TransactionQuerierDeleteDockerImageForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteDockerImageForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteDockerImageForProject), ctx, arg)
-	return &MockTransactionQuerierDeleteDockerImageForProjectCall{Call: call}
+	return &TransactionQuerierDeleteDockerImageForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierDeleteDockerImageForProjectCall wrap *gomock.Call
-type MockTransactionQuerierDeleteDockerImageForProjectCall struct {
+// TransactionQuerierDeleteDockerImageForProjectCall wrap *gomock.Call
+type TransactionQuerierDeleteDockerImageForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierDeleteDockerImageForProjectCall) Return(arg0 error) *MockTransactionQuerierDeleteDockerImageForProjectCall {
+func (c *TransactionQuerierDeleteDockerImageForProjectCall) Return(arg0 error) *TransactionQuerierDeleteDockerImageForProjectCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierDeleteDockerImageForProjectCall) Do(f func(context.Context, queries.DeleteDockerImageForProjectParams) error) *MockTransactionQuerierDeleteDockerImageForProjectCall {
+func (c *TransactionQuerierDeleteDockerImageForProjectCall) Do(f func(context.Context, queries.DeleteDockerImageForProjectParams) error) *TransactionQuerierDeleteDockerImageForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierDeleteDockerImageForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteDockerImageForProjectParams) error) *MockTransactionQuerierDeleteDockerImageForProjectCall {
+func (c *TransactionQuerierDeleteDockerImageForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteDockerImageForProjectParams) error) *TransactionQuerierDeleteDockerImageForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -831,31 +830,31 @@ func (m *MockTransactionQuerier) DeleteGitRepositoryForProject(ctx context.Conte
 }
 
 // DeleteGitRepositoryForProject indicates an expected call of DeleteGitRepositoryForProject.
-func (mr *MockTransactionQuerierMockRecorder) DeleteGitRepositoryForProject(ctx, arg any) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) DeleteGitRepositoryForProject(ctx, arg any) *TransactionQuerierDeleteGitRepositoryForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGitRepositoryForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteGitRepositoryForProject), ctx, arg)
-	return &MockTransactionQuerierDeleteGitRepositoryForProjectCall{Call: call}
+	return &TransactionQuerierDeleteGitRepositoryForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierDeleteGitRepositoryForProjectCall wrap *gomock.Call
-type MockTransactionQuerierDeleteGitRepositoryForProjectCall struct {
+// TransactionQuerierDeleteGitRepositoryForProjectCall wrap *gomock.Call
+type TransactionQuerierDeleteGitRepositoryForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierDeleteGitRepositoryForProjectCall) Return(arg0 error) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
+func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) Return(arg0 error) *TransactionQuerierDeleteGitRepositoryForProjectCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierDeleteGitRepositoryForProjectCall) Do(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
+func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) Do(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *TransactionQuerierDeleteGitRepositoryForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierDeleteGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
+func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *TransactionQuerierDeleteGitRepositoryForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -869,31 +868,31 @@ func (m *MockTransactionQuerier) DeleteSession(ctx context.Context, id uuid.UUID
 }
 
 // DeleteSession indicates an expected call of DeleteSession.
-func (mr *MockTransactionQuerierMockRecorder) DeleteSession(ctx, id any) *MockTransactionQuerierDeleteSessionCall {
+func (mr *MockTransactionQuerierMockRecorder) DeleteSession(ctx, id any) *TransactionQuerierDeleteSessionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteSession), ctx, id)
-	return &MockTransactionQuerierDeleteSessionCall{Call: call}
+	return &TransactionQuerierDeleteSessionCall{Call: call}
 }
 
-// MockTransactionQuerierDeleteSessionCall wrap *gomock.Call
-type MockTransactionQuerierDeleteSessionCall struct {
+// TransactionQuerierDeleteSessionCall wrap *gomock.Call
+type TransactionQuerierDeleteSessionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierDeleteSessionCall) Return(arg0 error) *MockTransactionQuerierDeleteSessionCall {
+func (c *TransactionQuerierDeleteSessionCall) Return(arg0 error) *TransactionQuerierDeleteSessionCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierDeleteSessionCall) Do(f func(context.Context, uuid.UUID) error) *MockTransactionQuerierDeleteSessionCall {
+func (c *TransactionQuerierDeleteSessionCall) Do(f func(context.Context, uuid.UUID) error) *TransactionQuerierDeleteSessionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierDeleteSessionCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockTransactionQuerierDeleteSessionCall {
+func (c *TransactionQuerierDeleteSessionCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *TransactionQuerierDeleteSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -907,31 +906,31 @@ func (m *MockTransactionQuerier) DeleteSessionsByUserID(ctx context.Context, use
 }
 
 // DeleteSessionsByUserID indicates an expected call of DeleteSessionsByUserID.
-func (mr *MockTransactionQuerierMockRecorder) DeleteSessionsByUserID(ctx, userID any) *MockTransactionQuerierDeleteSessionsByUserIDCall {
+func (mr *MockTransactionQuerierMockRecorder) DeleteSessionsByUserID(ctx, userID any) *TransactionQuerierDeleteSessionsByUserIDCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSessionsByUserID", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteSessionsByUserID), ctx, userID)
-	return &MockTransactionQuerierDeleteSessionsByUserIDCall{Call: call}
+	return &TransactionQuerierDeleteSessionsByUserIDCall{Call: call}
 }
 
-// MockTransactionQuerierDeleteSessionsByUserIDCall wrap *gomock.Call
-type MockTransactionQuerierDeleteSessionsByUserIDCall struct {
+// TransactionQuerierDeleteSessionsByUserIDCall wrap *gomock.Call
+type TransactionQuerierDeleteSessionsByUserIDCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierDeleteSessionsByUserIDCall) Return(arg0 error) *MockTransactionQuerierDeleteSessionsByUserIDCall {
+func (c *TransactionQuerierDeleteSessionsByUserIDCall) Return(arg0 error) *TransactionQuerierDeleteSessionsByUserIDCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierDeleteSessionsByUserIDCall) Do(f func(context.Context, sql.NullInt64) error) *MockTransactionQuerierDeleteSessionsByUserIDCall {
+func (c *TransactionQuerierDeleteSessionsByUserIDCall) Do(f func(context.Context, sql.NullInt64) error) *TransactionQuerierDeleteSessionsByUserIDCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierDeleteSessionsByUserIDCall) DoAndReturn(f func(context.Context, sql.NullInt64) error) *MockTransactionQuerierDeleteSessionsByUserIDCall {
+func (c *TransactionQuerierDeleteSessionsByUserIDCall) DoAndReturn(f func(context.Context, sql.NullInt64) error) *TransactionQuerierDeleteSessionsByUserIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -945,31 +944,31 @@ func (m *MockTransactionQuerier) DeleteUser(ctx context.Context, id int64) error
 }
 
 // DeleteUser indicates an expected call of DeleteUser.
-func (mr *MockTransactionQuerierMockRecorder) DeleteUser(ctx, id any) *MockTransactionQuerierDeleteUserCall {
+func (mr *MockTransactionQuerierMockRecorder) DeleteUser(ctx, id any) *TransactionQuerierDeleteUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteUser), ctx, id)
-	return &MockTransactionQuerierDeleteUserCall{Call: call}
+	return &TransactionQuerierDeleteUserCall{Call: call}
 }
 
-// MockTransactionQuerierDeleteUserCall wrap *gomock.Call
-type MockTransactionQuerierDeleteUserCall struct {
+// TransactionQuerierDeleteUserCall wrap *gomock.Call
+type TransactionQuerierDeleteUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierDeleteUserCall) Return(arg0 error) *MockTransactionQuerierDeleteUserCall {
+func (c *TransactionQuerierDeleteUserCall) Return(arg0 error) *TransactionQuerierDeleteUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierDeleteUserCall) Do(f func(context.Context, int64) error) *MockTransactionQuerierDeleteUserCall {
+func (c *TransactionQuerierDeleteUserCall) Do(f func(context.Context, int64) error) *TransactionQuerierDeleteUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierDeleteUserCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierDeleteUserCall {
+func (c *TransactionQuerierDeleteUserCall) DoAndReturn(f func(context.Context, int64) error) *TransactionQuerierDeleteUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -983,31 +982,31 @@ func (m *MockTransactionQuerier) EndTransaction(ctx context.Context, err error) 
 }
 
 // EndTransaction indicates an expected call of EndTransaction.
-func (mr *MockTransactionQuerierMockRecorder) EndTransaction(ctx, err any) *MockTransactionQuerierEndTransactionCall {
+func (mr *MockTransactionQuerierMockRecorder) EndTransaction(ctx, err any) *TransactionQuerierEndTransactionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndTransaction", reflect.TypeOf((*MockTransactionQuerier)(nil).EndTransaction), ctx, err)
-	return &MockTransactionQuerierEndTransactionCall{Call: call}
+	return &TransactionQuerierEndTransactionCall{Call: call}
 }
 
-// MockTransactionQuerierEndTransactionCall wrap *gomock.Call
-type MockTransactionQuerierEndTransactionCall struct {
+// TransactionQuerierEndTransactionCall wrap *gomock.Call
+type TransactionQuerierEndTransactionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierEndTransactionCall) Return(arg0 error) *MockTransactionQuerierEndTransactionCall {
+func (c *TransactionQuerierEndTransactionCall) Return(arg0 error) *TransactionQuerierEndTransactionCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierEndTransactionCall) Do(f func(context.Context, error) error) *MockTransactionQuerierEndTransactionCall {
+func (c *TransactionQuerierEndTransactionCall) Do(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, error) error) *MockTransactionQuerierEndTransactionCall {
+func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1022,31 +1021,31 @@ func (m *MockTransactionQuerier) GetBruteforcePasswordsForProjectCount(ctx conte
 }
 
 // GetBruteforcePasswordsForProjectCount indicates an expected call of GetBruteforcePasswordsForProjectCount.
-func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsForProjectCount(ctx, projectID any) *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsForProjectCount(ctx, projectID any) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswordsForProjectCount", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswordsForProjectCount), ctx, projectID)
-	return &MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall{Call: call}
+	return &TransactionQuerierGetBruteforcePasswordsForProjectCountCall{Call: call}
 }
 
-// MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall wrap *gomock.Call
-type MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall struct {
+// TransactionQuerierGetBruteforcePasswordsForProjectCountCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsForProjectCountCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall) Return(arg0 int64, arg1 error) *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+func (c *TransactionQuerierGetBruteforcePasswordsForProjectCountCall) Return(arg0 int64, arg1 error) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall) Do(f func(context.Context, int64) (int64, error)) *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+func (c *TransactionQuerierGetBruteforcePasswordsForProjectCountCall) Do(f func(context.Context, int64) (int64, error)) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall) DoAndReturn(f func(context.Context, int64) (int64, error)) *MockTransactionQuerierGetBruteforcePasswordsForProjectCountCall {
+func (c *TransactionQuerierGetBruteforcePasswordsForProjectCountCall) DoAndReturn(f func(context.Context, int64) (int64, error)) *TransactionQuerierGetBruteforcePasswordsForProjectCountCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1061,31 +1060,31 @@ func (m *MockTransactionQuerier) GetBruteforcePasswordsPaginated(ctx context.Con
 }
 
 // GetBruteforcePasswordsPaginated indicates an expected call of GetBruteforcePasswordsPaginated.
-func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsPaginated(ctx, arg any) *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall {
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsPaginated(ctx, arg any) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswordsPaginated", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswordsPaginated), ctx, arg)
-	return &MockTransactionQuerierGetBruteforcePasswordsPaginatedCall{Call: call}
+	return &TransactionQuerierGetBruteforcePasswordsPaginatedCall{Call: call}
 }
 
-// MockTransactionQuerierGetBruteforcePasswordsPaginatedCall wrap *gomock.Call
-type MockTransactionQuerierGetBruteforcePasswordsPaginatedCall struct {
+// TransactionQuerierGetBruteforcePasswordsPaginatedCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsPaginatedCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall) Return(arg0 []*queries.DefaultBruteforcePassword, arg1 error) *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall {
+func (c *TransactionQuerierGetBruteforcePasswordsPaginatedCall) Return(arg0 []*queries.DefaultBruteforcePassword, arg1 error) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall) Do(f func(context.Context, queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)) *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall {
+func (c *TransactionQuerierGetBruteforcePasswordsPaginatedCall) Do(f func(context.Context, queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall) DoAndReturn(f func(context.Context, queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)) *MockTransactionQuerierGetBruteforcePasswordsPaginatedCall {
+func (c *TransactionQuerierGetBruteforcePasswordsPaginatedCall) DoAndReturn(f func(context.Context, queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)) *TransactionQuerierGetBruteforcePasswordsPaginatedCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1100,31 +1099,31 @@ func (m *MockTransactionQuerier) GetBruteforcePasswordsSpecificForProject(ctx co
 }
 
 // GetBruteforcePasswordsSpecificForProject indicates an expected call of GetBruteforcePasswordsSpecificForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsSpecificForProject(ctx, projectID any) *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcePasswordsSpecificForProject(ctx, projectID any) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcePasswordsSpecificForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcePasswordsSpecificForProject), ctx, projectID)
-	return &MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall{Call: call}
+	return &TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall struct {
+// TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) Return(arg0 []sql.NullString, arg1 error) *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+func (c *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) Return(arg0 []sql.NullString, arg1 error) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) Do(f func(context.Context, int64) ([]sql.NullString, error)) *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+func (c *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) Do(f func(context.Context, int64) ([]sql.NullString, error)) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) DoAndReturn(f func(context.Context, int64) ([]sql.NullString, error)) *MockTransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
+func (c *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall) DoAndReturn(f func(context.Context, int64) ([]sql.NullString, error)) *TransactionQuerierGetBruteforcePasswordsSpecificForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1139,31 +1138,31 @@ func (m *MockTransactionQuerier) GetBruteforcedPasswordByHashAndUsername(ctx con
 }
 
 // GetBruteforcedPasswordByHashAndUsername indicates an expected call of GetBruteforcedPasswordByHashAndUsername.
-func (mr *MockTransactionQuerierMockRecorder) GetBruteforcedPasswordByHashAndUsername(ctx, arg any) *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+func (mr *MockTransactionQuerierMockRecorder) GetBruteforcedPasswordByHashAndUsername(ctx, arg any) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBruteforcedPasswordByHashAndUsername", reflect.TypeOf((*MockTransactionQuerier)(nil).GetBruteforcedPasswordByHashAndUsername), ctx, arg)
-	return &MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall{Call: call}
+	return &TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall{Call: call}
 }
 
-// MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall wrap *gomock.Call
-type MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall struct {
+// TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall wrap *gomock.Call
+type TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) Return(arg0 *queries.BruteforcedPassword, arg1 error) *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+func (c *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) Return(arg0 *queries.BruteforcedPassword, arg1 error) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) Do(f func(context.Context, queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error)) *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+func (c *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) Do(f func(context.Context, queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error)) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) DoAndReturn(f func(context.Context, queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error)) *MockTransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
+func (c *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall) DoAndReturn(f func(context.Context, queries.GetBruteforcedPasswordByHashAndUsernameParams) (*queries.BruteforcedPassword, error)) *TransactionQuerierGetBruteforcedPasswordByHashAndUsernameCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1178,31 +1177,31 @@ func (m *MockTransactionQuerier) GetCPEByProductAndVersion(ctx context.Context, 
 }
 
 // GetCPEByProductAndVersion indicates an expected call of GetCPEByProductAndVersion.
-func (mr *MockTransactionQuerierMockRecorder) GetCPEByProductAndVersion(ctx, arg any) *MockTransactionQuerierGetCPEByProductAndVersionCall {
+func (mr *MockTransactionQuerierMockRecorder) GetCPEByProductAndVersion(ctx, arg any) *TransactionQuerierGetCPEByProductAndVersionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCPEByProductAndVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCPEByProductAndVersion), ctx, arg)
-	return &MockTransactionQuerierGetCPEByProductAndVersionCall{Call: call}
+	return &TransactionQuerierGetCPEByProductAndVersionCall{Call: call}
 }
 
-// MockTransactionQuerierGetCPEByProductAndVersionCall wrap *gomock.Call
-type MockTransactionQuerierGetCPEByProductAndVersionCall struct {
+// TransactionQuerierGetCPEByProductAndVersionCall wrap *gomock.Call
+type TransactionQuerierGetCPEByProductAndVersionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetCPEByProductAndVersionCall) Return(arg0 *queries.NvdCpe, arg1 error) *MockTransactionQuerierGetCPEByProductAndVersionCall {
+func (c *TransactionQuerierGetCPEByProductAndVersionCall) Return(arg0 *queries.NvdCpe, arg1 error) *TransactionQuerierGetCPEByProductAndVersionCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetCPEByProductAndVersionCall) Do(f func(context.Context, queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error)) *MockTransactionQuerierGetCPEByProductAndVersionCall {
+func (c *TransactionQuerierGetCPEByProductAndVersionCall) Do(f func(context.Context, queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error)) *TransactionQuerierGetCPEByProductAndVersionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetCPEByProductAndVersionCall) DoAndReturn(f func(context.Context, queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error)) *MockTransactionQuerierGetCPEByProductAndVersionCall {
+func (c *TransactionQuerierGetCPEByProductAndVersionCall) DoAndReturn(f func(context.Context, queries.GetCPEByProductAndVersionParams) (*queries.NvdCpe, error)) *TransactionQuerierGetCPEByProductAndVersionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1217,31 +1216,31 @@ func (m *MockTransactionQuerier) GetCveByCveID(ctx context.Context, cveID string
 }
 
 // GetCveByCveID indicates an expected call of GetCveByCveID.
-func (mr *MockTransactionQuerierMockRecorder) GetCveByCveID(ctx, cveID any) *MockTransactionQuerierGetCveByCveIDCall {
+func (mr *MockTransactionQuerierMockRecorder) GetCveByCveID(ctx, cveID any) *TransactionQuerierGetCveByCveIDCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCveByCveID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCveByCveID), ctx, cveID)
-	return &MockTransactionQuerierGetCveByCveIDCall{Call: call}
+	return &TransactionQuerierGetCveByCveIDCall{Call: call}
 }
 
-// MockTransactionQuerierGetCveByCveIDCall wrap *gomock.Call
-type MockTransactionQuerierGetCveByCveIDCall struct {
+// TransactionQuerierGetCveByCveIDCall wrap *gomock.Call
+type TransactionQuerierGetCveByCveIDCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetCveByCveIDCall) Return(arg0 *queries.NvdCfe, arg1 error) *MockTransactionQuerierGetCveByCveIDCall {
+func (c *TransactionQuerierGetCveByCveIDCall) Return(arg0 *queries.NvdCfe, arg1 error) *TransactionQuerierGetCveByCveIDCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetCveByCveIDCall) Do(f func(context.Context, string) (*queries.NvdCfe, error)) *MockTransactionQuerierGetCveByCveIDCall {
+func (c *TransactionQuerierGetCveByCveIDCall) Do(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetCveByCveIDCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetCveByCveIDCall) DoAndReturn(f func(context.Context, string) (*queries.NvdCfe, error)) *MockTransactionQuerierGetCveByCveIDCall {
+func (c *TransactionQuerierGetCveByCveIDCall) DoAndReturn(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetCveByCveIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1256,31 +1255,31 @@ func (m *MockTransactionQuerier) GetCveCpeByCveAndCpe(ctx context.Context, arg q
 }
 
 // GetCveCpeByCveAndCpe indicates an expected call of GetCveCpeByCveAndCpe.
-func (mr *MockTransactionQuerierMockRecorder) GetCveCpeByCveAndCpe(ctx, arg any) *MockTransactionQuerierGetCveCpeByCveAndCpeCall {
+func (mr *MockTransactionQuerierMockRecorder) GetCveCpeByCveAndCpe(ctx, arg any) *TransactionQuerierGetCveCpeByCveAndCpeCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCveCpeByCveAndCpe", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCveCpeByCveAndCpe), ctx, arg)
-	return &MockTransactionQuerierGetCveCpeByCveAndCpeCall{Call: call}
+	return &TransactionQuerierGetCveCpeByCveAndCpeCall{Call: call}
 }
 
-// MockTransactionQuerierGetCveCpeByCveAndCpeCall wrap *gomock.Call
-type MockTransactionQuerierGetCveCpeByCveAndCpeCall struct {
+// TransactionQuerierGetCveCpeByCveAndCpeCall wrap *gomock.Call
+type TransactionQuerierGetCveCpeByCveAndCpeCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetCveCpeByCveAndCpeCall) Return(arg0 *queries.NvdCveCpe, arg1 error) *MockTransactionQuerierGetCveCpeByCveAndCpeCall {
+func (c *TransactionQuerierGetCveCpeByCveAndCpeCall) Return(arg0 *queries.NvdCveCpe, arg1 error) *TransactionQuerierGetCveCpeByCveAndCpeCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetCveCpeByCveAndCpeCall) Do(f func(context.Context, queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)) *MockTransactionQuerierGetCveCpeByCveAndCpeCall {
+func (c *TransactionQuerierGetCveCpeByCveAndCpeCall) Do(f func(context.Context, queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierGetCveCpeByCveAndCpeCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetCveCpeByCveAndCpeCall) DoAndReturn(f func(context.Context, queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)) *MockTransactionQuerierGetCveCpeByCveAndCpeCall {
+func (c *TransactionQuerierGetCveCpeByCveAndCpeCall) DoAndReturn(f func(context.Context, queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)) *TransactionQuerierGetCveCpeByCveAndCpeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1295,31 +1294,31 @@ func (m *MockTransactionQuerier) GetCvesByProductAndVersion(ctx context.Context,
 }
 
 // GetCvesByProductAndVersion indicates an expected call of GetCvesByProductAndVersion.
-func (mr *MockTransactionQuerierMockRecorder) GetCvesByProductAndVersion(ctx, arg any) *MockTransactionQuerierGetCvesByProductAndVersionCall {
+func (mr *MockTransactionQuerierMockRecorder) GetCvesByProductAndVersion(ctx, arg any) *TransactionQuerierGetCvesByProductAndVersionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCvesByProductAndVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).GetCvesByProductAndVersion), ctx, arg)
-	return &MockTransactionQuerierGetCvesByProductAndVersionCall{Call: call}
+	return &TransactionQuerierGetCvesByProductAndVersionCall{Call: call}
 }
 
-// MockTransactionQuerierGetCvesByProductAndVersionCall wrap *gomock.Call
-type MockTransactionQuerierGetCvesByProductAndVersionCall struct {
+// TransactionQuerierGetCvesByProductAndVersionCall wrap *gomock.Call
+type TransactionQuerierGetCvesByProductAndVersionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetCvesByProductAndVersionCall) Return(arg0 []*queries.GetCvesByProductAndVersionRow, arg1 error) *MockTransactionQuerierGetCvesByProductAndVersionCall {
+func (c *TransactionQuerierGetCvesByProductAndVersionCall) Return(arg0 []*queries.GetCvesByProductAndVersionRow, arg1 error) *TransactionQuerierGetCvesByProductAndVersionCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetCvesByProductAndVersionCall) Do(f func(context.Context, queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)) *MockTransactionQuerierGetCvesByProductAndVersionCall {
+func (c *TransactionQuerierGetCvesByProductAndVersionCall) Do(f func(context.Context, queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)) *TransactionQuerierGetCvesByProductAndVersionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetCvesByProductAndVersionCall) DoAndReturn(f func(context.Context, queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)) *MockTransactionQuerierGetCvesByProductAndVersionCall {
+func (c *TransactionQuerierGetCvesByProductAndVersionCall) DoAndReturn(f func(context.Context, queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)) *TransactionQuerierGetCvesByProductAndVersionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1334,31 +1333,31 @@ func (m *MockTransactionQuerier) GetDockerImagesForProject(ctx context.Context, 
 }
 
 // GetDockerImagesForProject indicates an expected call of GetDockerImagesForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetDockerImagesForProject(ctx, projectID any) *MockTransactionQuerierGetDockerImagesForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetDockerImagesForProject(ctx, projectID any) *TransactionQuerierGetDockerImagesForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDockerImagesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetDockerImagesForProject), ctx, projectID)
-	return &MockTransactionQuerierGetDockerImagesForProjectCall{Call: call}
+	return &TransactionQuerierGetDockerImagesForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetDockerImagesForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetDockerImagesForProjectCall struct {
+// TransactionQuerierGetDockerImagesForProjectCall wrap *gomock.Call
+type TransactionQuerierGetDockerImagesForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetDockerImagesForProjectCall) Return(arg0 []*queries.ProjectDockerImage, arg1 error) *MockTransactionQuerierGetDockerImagesForProjectCall {
+func (c *TransactionQuerierGetDockerImagesForProjectCall) Return(arg0 []*queries.ProjectDockerImage, arg1 error) *TransactionQuerierGetDockerImagesForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetDockerImagesForProjectCall) Do(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *MockTransactionQuerierGetDockerImagesForProjectCall {
+func (c *TransactionQuerierGetDockerImagesForProjectCall) Do(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *TransactionQuerierGetDockerImagesForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetDockerImagesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *MockTransactionQuerierGetDockerImagesForProjectCall {
+func (c *TransactionQuerierGetDockerImagesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectDockerImage, error)) *TransactionQuerierGetDockerImagesForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1373,31 +1372,31 @@ func (m *MockTransactionQuerier) GetDockerLayerScanForProject(ctx context.Contex
 }
 
 // GetDockerLayerScanForProject indicates an expected call of GetDockerLayerScanForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetDockerLayerScanForProject(ctx, arg any) *MockTransactionQuerierGetDockerLayerScanForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetDockerLayerScanForProject(ctx, arg any) *TransactionQuerierGetDockerLayerScanForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDockerLayerScanForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetDockerLayerScanForProject), ctx, arg)
-	return &MockTransactionQuerierGetDockerLayerScanForProjectCall{Call: call}
+	return &TransactionQuerierGetDockerLayerScanForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetDockerLayerScanForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetDockerLayerScanForProjectCall struct {
+// TransactionQuerierGetDockerLayerScanForProjectCall wrap *gomock.Call
+type TransactionQuerierGetDockerLayerScanForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *MockTransactionQuerierGetDockerLayerScanForProjectCall {
+func (c *TransactionQuerierGetDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *TransactionQuerierGetDockerLayerScanForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetDockerLayerScanForProjectCall) Do(f func(context.Context, queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *MockTransactionQuerierGetDockerLayerScanForProjectCall {
+func (c *TransactionQuerierGetDockerLayerScanForProjectCall) Do(f func(context.Context, queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierGetDockerLayerScanForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *MockTransactionQuerierGetDockerLayerScanForProjectCall {
+func (c *TransactionQuerierGetDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.GetDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierGetDockerLayerScanForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1412,31 +1411,31 @@ func (m *MockTransactionQuerier) GetDockerScannedLayersForProject(ctx context.Co
 }
 
 // GetDockerScannedLayersForProject indicates an expected call of GetDockerScannedLayersForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetDockerScannedLayersForProject(ctx, projectID any) *MockTransactionQuerierGetDockerScannedLayersForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetDockerScannedLayersForProject(ctx, projectID any) *TransactionQuerierGetDockerScannedLayersForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDockerScannedLayersForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetDockerScannedLayersForProject), ctx, projectID)
-	return &MockTransactionQuerierGetDockerScannedLayersForProjectCall{Call: call}
+	return &TransactionQuerierGetDockerScannedLayersForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetDockerScannedLayersForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetDockerScannedLayersForProjectCall struct {
+// TransactionQuerierGetDockerScannedLayersForProjectCall wrap *gomock.Call
+type TransactionQuerierGetDockerScannedLayersForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetDockerScannedLayersForProjectCall) Return(arg0 []string, arg1 error) *MockTransactionQuerierGetDockerScannedLayersForProjectCall {
+func (c *TransactionQuerierGetDockerScannedLayersForProjectCall) Return(arg0 []string, arg1 error) *TransactionQuerierGetDockerScannedLayersForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetDockerScannedLayersForProjectCall) Do(f func(context.Context, int64) ([]string, error)) *MockTransactionQuerierGetDockerScannedLayersForProjectCall {
+func (c *TransactionQuerierGetDockerScannedLayersForProjectCall) Do(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetDockerScannedLayersForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetDockerScannedLayersForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *MockTransactionQuerierGetDockerScannedLayersForProjectCall {
+func (c *TransactionQuerierGetDockerScannedLayersForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetDockerScannedLayersForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1451,31 +1450,31 @@ func (m *MockTransactionQuerier) GetGitRepositoriesForProject(ctx context.Contex
 }
 
 // GetGitRepositoriesForProject indicates an expected call of GetGitRepositoriesForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetGitRepositoriesForProject(ctx, projectID any) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetGitRepositoriesForProject(ctx, projectID any) *TransactionQuerierGetGitRepositoriesForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitRepositoriesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitRepositoriesForProject), ctx, projectID)
-	return &MockTransactionQuerierGetGitRepositoriesForProjectCall{Call: call}
+	return &TransactionQuerierGetGitRepositoriesForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetGitRepositoriesForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetGitRepositoriesForProjectCall struct {
+// TransactionQuerierGetGitRepositoriesForProjectCall wrap *gomock.Call
+type TransactionQuerierGetGitRepositoriesForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) Return(arg0 []*queries.ProjectGitRepository, arg1 error) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (c *TransactionQuerierGetGitRepositoriesForProjectCall) Return(arg0 []*queries.ProjectGitRepository, arg1 error) *TransactionQuerierGetGitRepositoriesForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) Do(f func(context.Context, int64) ([]*queries.ProjectGitRepository, error)) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (c *TransactionQuerierGetGitRepositoriesForProjectCall) Do(f func(context.Context, int64) ([]*queries.ProjectGitRepository, error)) *TransactionQuerierGetGitRepositoriesForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectGitRepository, error)) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (c *TransactionQuerierGetGitRepositoriesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectGitRepository, error)) *TransactionQuerierGetGitRepositoriesForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1490,31 +1489,31 @@ func (m *MockTransactionQuerier) GetGitScannedCommitsForProject(ctx context.Cont
 }
 
 // GetGitScannedCommitsForProject indicates an expected call of GetGitScannedCommitsForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetGitScannedCommitsForProject(ctx, projectID any) *MockTransactionQuerierGetGitScannedCommitsForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetGitScannedCommitsForProject(ctx, projectID any) *TransactionQuerierGetGitScannedCommitsForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitScannedCommitsForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitScannedCommitsForProject), ctx, projectID)
-	return &MockTransactionQuerierGetGitScannedCommitsForProjectCall{Call: call}
+	return &TransactionQuerierGetGitScannedCommitsForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetGitScannedCommitsForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetGitScannedCommitsForProjectCall struct {
+// TransactionQuerierGetGitScannedCommitsForProjectCall wrap *gomock.Call
+type TransactionQuerierGetGitScannedCommitsForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetGitScannedCommitsForProjectCall) Return(arg0 []string, arg1 error) *MockTransactionQuerierGetGitScannedCommitsForProjectCall {
+func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) Return(arg0 []string, arg1 error) *TransactionQuerierGetGitScannedCommitsForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetGitScannedCommitsForProjectCall) Do(f func(context.Context, int64) ([]string, error)) *MockTransactionQuerierGetGitScannedCommitsForProjectCall {
+func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) Do(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetGitScannedCommitsForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *MockTransactionQuerierGetGitScannedCommitsForProjectCall {
+func (c *TransactionQuerierGetGitScannedCommitsForProjectCall) DoAndReturn(f func(context.Context, int64) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1529,31 +1528,31 @@ func (m *MockTransactionQuerier) GetGitScannedCommitsForProjectBatch(ctx context
 }
 
 // GetGitScannedCommitsForProjectBatch indicates an expected call of GetGitScannedCommitsForProjectBatch.
-func (mr *MockTransactionQuerierMockRecorder) GetGitScannedCommitsForProjectBatch(ctx, arg any) *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+func (mr *MockTransactionQuerierMockRecorder) GetGitScannedCommitsForProjectBatch(ctx, arg any) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitScannedCommitsForProjectBatch", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitScannedCommitsForProjectBatch), ctx, arg)
-	return &MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall{Call: call}
+	return &TransactionQuerierGetGitScannedCommitsForProjectBatchCall{Call: call}
 }
 
-// MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall wrap *gomock.Call
-type MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall struct {
+// TransactionQuerierGetGitScannedCommitsForProjectBatchCall wrap *gomock.Call
+type TransactionQuerierGetGitScannedCommitsForProjectBatchCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall) Return(arg0 []string, arg1 error) *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+func (c *TransactionQuerierGetGitScannedCommitsForProjectBatchCall) Return(arg0 []string, arg1 error) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall) Do(f func(context.Context, queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)) *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+func (c *TransactionQuerierGetGitScannedCommitsForProjectBatchCall) Do(f func(context.Context, queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall) DoAndReturn(f func(context.Context, queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)) *MockTransactionQuerierGetGitScannedCommitsForProjectBatchCall {
+func (c *TransactionQuerierGetGitScannedCommitsForProjectBatchCall) DoAndReturn(f func(context.Context, queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)) *TransactionQuerierGetGitScannedCommitsForProjectBatchCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1568,31 +1567,31 @@ func (m *MockTransactionQuerier) GetInvalidTOTPSecretForUser(ctx context.Context
 }
 
 // GetInvalidTOTPSecretForUser indicates an expected call of GetInvalidTOTPSecretForUser.
-func (mr *MockTransactionQuerierMockRecorder) GetInvalidTOTPSecretForUser(ctx, userID any) *MockTransactionQuerierGetInvalidTOTPSecretForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetInvalidTOTPSecretForUser(ctx, userID any) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInvalidTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetInvalidTOTPSecretForUser), ctx, userID)
-	return &MockTransactionQuerierGetInvalidTOTPSecretForUserCall{Call: call}
+	return &TransactionQuerierGetInvalidTOTPSecretForUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetInvalidTOTPSecretForUserCall wrap *gomock.Call
-type MockTransactionQuerierGetInvalidTOTPSecretForUserCall struct {
+// TransactionQuerierGetInvalidTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierGetInvalidTOTPSecretForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetInvalidTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *MockTransactionQuerierGetInvalidTOTPSecretForUserCall {
+func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetInvalidTOTPSecretForUserCall) Do(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *MockTransactionQuerierGetInvalidTOTPSecretForUserCall {
+func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) Do(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *MockTransactionQuerierGetInvalidTOTPSecretForUserCall {
+func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1607,31 +1606,31 @@ func (m *MockTransactionQuerier) GetNvdCPEsByDBType(ctx context.Context, databas
 }
 
 // GetNvdCPEsByDBType indicates an expected call of GetNvdCPEsByDBType.
-func (mr *MockTransactionQuerierMockRecorder) GetNvdCPEsByDBType(ctx, databaseType any) *MockTransactionQuerierGetNvdCPEsByDBTypeCall {
+func (mr *MockTransactionQuerierMockRecorder) GetNvdCPEsByDBType(ctx, databaseType any) *TransactionQuerierGetNvdCPEsByDBTypeCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNvdCPEsByDBType", reflect.TypeOf((*MockTransactionQuerier)(nil).GetNvdCPEsByDBType), ctx, databaseType)
-	return &MockTransactionQuerierGetNvdCPEsByDBTypeCall{Call: call}
+	return &TransactionQuerierGetNvdCPEsByDBTypeCall{Call: call}
 }
 
-// MockTransactionQuerierGetNvdCPEsByDBTypeCall wrap *gomock.Call
-type MockTransactionQuerierGetNvdCPEsByDBTypeCall struct {
+// TransactionQuerierGetNvdCPEsByDBTypeCall wrap *gomock.Call
+type TransactionQuerierGetNvdCPEsByDBTypeCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetNvdCPEsByDBTypeCall) Return(arg0 []*queries.NvdCpe, arg1 error) *MockTransactionQuerierGetNvdCPEsByDBTypeCall {
+func (c *TransactionQuerierGetNvdCPEsByDBTypeCall) Return(arg0 []*queries.NvdCpe, arg1 error) *TransactionQuerierGetNvdCPEsByDBTypeCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetNvdCPEsByDBTypeCall) Do(f func(context.Context, int32) ([]*queries.NvdCpe, error)) *MockTransactionQuerierGetNvdCPEsByDBTypeCall {
+func (c *TransactionQuerierGetNvdCPEsByDBTypeCall) Do(f func(context.Context, int32) ([]*queries.NvdCpe, error)) *TransactionQuerierGetNvdCPEsByDBTypeCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetNvdCPEsByDBTypeCall) DoAndReturn(f func(context.Context, int32) ([]*queries.NvdCpe, error)) *MockTransactionQuerierGetNvdCPEsByDBTypeCall {
+func (c *TransactionQuerierGetNvdCPEsByDBTypeCall) DoAndReturn(f func(context.Context, int32) ([]*queries.NvdCpe, error)) *TransactionQuerierGetNvdCPEsByDBTypeCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1646,31 +1645,31 @@ func (m *MockTransactionQuerier) GetNvdCveByCveID(ctx context.Context, cveID str
 }
 
 // GetNvdCveByCveID indicates an expected call of GetNvdCveByCveID.
-func (mr *MockTransactionQuerierMockRecorder) GetNvdCveByCveID(ctx, cveID any) *MockTransactionQuerierGetNvdCveByCveIDCall {
+func (mr *MockTransactionQuerierMockRecorder) GetNvdCveByCveID(ctx, cveID any) *TransactionQuerierGetNvdCveByCveIDCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNvdCveByCveID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetNvdCveByCveID), ctx, cveID)
-	return &MockTransactionQuerierGetNvdCveByCveIDCall{Call: call}
+	return &TransactionQuerierGetNvdCveByCveIDCall{Call: call}
 }
 
-// MockTransactionQuerierGetNvdCveByCveIDCall wrap *gomock.Call
-type MockTransactionQuerierGetNvdCveByCveIDCall struct {
+// TransactionQuerierGetNvdCveByCveIDCall wrap *gomock.Call
+type TransactionQuerierGetNvdCveByCveIDCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetNvdCveByCveIDCall) Return(arg0 *queries.NvdCfe, arg1 error) *MockTransactionQuerierGetNvdCveByCveIDCall {
+func (c *TransactionQuerierGetNvdCveByCveIDCall) Return(arg0 *queries.NvdCfe, arg1 error) *TransactionQuerierGetNvdCveByCveIDCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetNvdCveByCveIDCall) Do(f func(context.Context, string) (*queries.NvdCfe, error)) *MockTransactionQuerierGetNvdCveByCveIDCall {
+func (c *TransactionQuerierGetNvdCveByCveIDCall) Do(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetNvdCveByCveIDCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetNvdCveByCveIDCall) DoAndReturn(f func(context.Context, string) (*queries.NvdCfe, error)) *MockTransactionQuerierGetNvdCveByCveIDCall {
+func (c *TransactionQuerierGetNvdCveByCveIDCall) DoAndReturn(f func(context.Context, string) (*queries.NvdCfe, error)) *TransactionQuerierGetNvdCveByCveIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1685,31 +1684,31 @@ func (m *MockTransactionQuerier) GetOrganizationByName(ctx context.Context, name
 }
 
 // GetOrganizationByName indicates an expected call of GetOrganizationByName.
-func (mr *MockTransactionQuerierMockRecorder) GetOrganizationByName(ctx, name any) *MockTransactionQuerierGetOrganizationByNameCall {
+func (mr *MockTransactionQuerierMockRecorder) GetOrganizationByName(ctx, name any) *TransactionQuerierGetOrganizationByNameCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganizationByName", reflect.TypeOf((*MockTransactionQuerier)(nil).GetOrganizationByName), ctx, name)
-	return &MockTransactionQuerierGetOrganizationByNameCall{Call: call}
+	return &TransactionQuerierGetOrganizationByNameCall{Call: call}
 }
 
-// MockTransactionQuerierGetOrganizationByNameCall wrap *gomock.Call
-type MockTransactionQuerierGetOrganizationByNameCall struct {
+// TransactionQuerierGetOrganizationByNameCall wrap *gomock.Call
+type TransactionQuerierGetOrganizationByNameCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetOrganizationByNameCall) Return(arg0 *queries.Organization, arg1 error) *MockTransactionQuerierGetOrganizationByNameCall {
+func (c *TransactionQuerierGetOrganizationByNameCall) Return(arg0 *queries.Organization, arg1 error) *TransactionQuerierGetOrganizationByNameCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetOrganizationByNameCall) Do(f func(context.Context, string) (*queries.Organization, error)) *MockTransactionQuerierGetOrganizationByNameCall {
+func (c *TransactionQuerierGetOrganizationByNameCall) Do(f func(context.Context, string) (*queries.Organization, error)) *TransactionQuerierGetOrganizationByNameCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetOrganizationByNameCall) DoAndReturn(f func(context.Context, string) (*queries.Organization, error)) *MockTransactionQuerierGetOrganizationByNameCall {
+func (c *TransactionQuerierGetOrganizationByNameCall) DoAndReturn(f func(context.Context, string) (*queries.Organization, error)) *TransactionQuerierGetOrganizationByNameCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1724,31 +1723,31 @@ func (m *MockTransactionQuerier) GetOrganizationMembers(ctx context.Context, org
 }
 
 // GetOrganizationMembers indicates an expected call of GetOrganizationMembers.
-func (mr *MockTransactionQuerierMockRecorder) GetOrganizationMembers(ctx, organizationID any) *MockTransactionQuerierGetOrganizationMembersCall {
+func (mr *MockTransactionQuerierMockRecorder) GetOrganizationMembers(ctx, organizationID any) *TransactionQuerierGetOrganizationMembersCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganizationMembers", reflect.TypeOf((*MockTransactionQuerier)(nil).GetOrganizationMembers), ctx, organizationID)
-	return &MockTransactionQuerierGetOrganizationMembersCall{Call: call}
+	return &TransactionQuerierGetOrganizationMembersCall{Call: call}
 }
 
-// MockTransactionQuerierGetOrganizationMembersCall wrap *gomock.Call
-type MockTransactionQuerierGetOrganizationMembersCall struct {
+// TransactionQuerierGetOrganizationMembersCall wrap *gomock.Call
+type TransactionQuerierGetOrganizationMembersCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetOrganizationMembersCall) Return(arg0 []*queries.OrganizationMember, arg1 error) *MockTransactionQuerierGetOrganizationMembersCall {
+func (c *TransactionQuerierGetOrganizationMembersCall) Return(arg0 []*queries.OrganizationMember, arg1 error) *TransactionQuerierGetOrganizationMembersCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetOrganizationMembersCall) Do(f func(context.Context, int64) ([]*queries.OrganizationMember, error)) *MockTransactionQuerierGetOrganizationMembersCall {
+func (c *TransactionQuerierGetOrganizationMembersCall) Do(f func(context.Context, int64) ([]*queries.OrganizationMember, error)) *TransactionQuerierGetOrganizationMembersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetOrganizationMembersCall) DoAndReturn(f func(context.Context, int64) ([]*queries.OrganizationMember, error)) *MockTransactionQuerierGetOrganizationMembersCall {
+func (c *TransactionQuerierGetOrganizationMembersCall) DoAndReturn(f func(context.Context, int64) ([]*queries.OrganizationMember, error)) *TransactionQuerierGetOrganizationMembersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1763,31 +1762,31 @@ func (m *MockTransactionQuerier) GetOrganizationPermissionsForUser(ctx context.C
 }
 
 // GetOrganizationPermissionsForUser indicates an expected call of GetOrganizationPermissionsForUser.
-func (mr *MockTransactionQuerierMockRecorder) GetOrganizationPermissionsForUser(ctx, arg any) *MockTransactionQuerierGetOrganizationPermissionsForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetOrganizationPermissionsForUser(ctx, arg any) *TransactionQuerierGetOrganizationPermissionsForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganizationPermissionsForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetOrganizationPermissionsForUser), ctx, arg)
-	return &MockTransactionQuerierGetOrganizationPermissionsForUserCall{Call: call}
+	return &TransactionQuerierGetOrganizationPermissionsForUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetOrganizationPermissionsForUserCall wrap *gomock.Call
-type MockTransactionQuerierGetOrganizationPermissionsForUserCall struct {
+// TransactionQuerierGetOrganizationPermissionsForUserCall wrap *gomock.Call
+type TransactionQuerierGetOrganizationPermissionsForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetOrganizationPermissionsForUserCall) Return(arg0 int16, arg1 error) *MockTransactionQuerierGetOrganizationPermissionsForUserCall {
+func (c *TransactionQuerierGetOrganizationPermissionsForUserCall) Return(arg0 int16, arg1 error) *TransactionQuerierGetOrganizationPermissionsForUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetOrganizationPermissionsForUserCall) Do(f func(context.Context, queries.GetOrganizationPermissionsForUserParams) (int16, error)) *MockTransactionQuerierGetOrganizationPermissionsForUserCall {
+func (c *TransactionQuerierGetOrganizationPermissionsForUserCall) Do(f func(context.Context, queries.GetOrganizationPermissionsForUserParams) (int16, error)) *TransactionQuerierGetOrganizationPermissionsForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetOrganizationPermissionsForUserCall) DoAndReturn(f func(context.Context, queries.GetOrganizationPermissionsForUserParams) (int16, error)) *MockTransactionQuerierGetOrganizationPermissionsForUserCall {
+func (c *TransactionQuerierGetOrganizationPermissionsForUserCall) DoAndReturn(f func(context.Context, queries.GetOrganizationPermissionsForUserParams) (int16, error)) *TransactionQuerierGetOrganizationPermissionsForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1802,31 +1801,31 @@ func (m *MockTransactionQuerier) GetOrganizationUser(ctx context.Context, arg qu
 }
 
 // GetOrganizationUser indicates an expected call of GetOrganizationUser.
-func (mr *MockTransactionQuerierMockRecorder) GetOrganizationUser(ctx, arg any) *MockTransactionQuerierGetOrganizationUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetOrganizationUser(ctx, arg any) *TransactionQuerierGetOrganizationUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganizationUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetOrganizationUser), ctx, arg)
-	return &MockTransactionQuerierGetOrganizationUserCall{Call: call}
+	return &TransactionQuerierGetOrganizationUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetOrganizationUserCall wrap *gomock.Call
-type MockTransactionQuerierGetOrganizationUserCall struct {
+// TransactionQuerierGetOrganizationUserCall wrap *gomock.Call
+type TransactionQuerierGetOrganizationUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetOrganizationUserCall) Return(arg0 *queries.OrganizationMember, arg1 error) *MockTransactionQuerierGetOrganizationUserCall {
+func (c *TransactionQuerierGetOrganizationUserCall) Return(arg0 *queries.OrganizationMember, arg1 error) *TransactionQuerierGetOrganizationUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetOrganizationUserCall) Do(f func(context.Context, queries.GetOrganizationUserParams) (*queries.OrganizationMember, error)) *MockTransactionQuerierGetOrganizationUserCall {
+func (c *TransactionQuerierGetOrganizationUserCall) Do(f func(context.Context, queries.GetOrganizationUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierGetOrganizationUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetOrganizationUserCall) DoAndReturn(f func(context.Context, queries.GetOrganizationUserParams) (*queries.OrganizationMember, error)) *MockTransactionQuerierGetOrganizationUserCall {
+func (c *TransactionQuerierGetOrganizationUserCall) DoAndReturn(f func(context.Context, queries.GetOrganizationUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierGetOrganizationUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1841,31 +1840,31 @@ func (m *MockTransactionQuerier) GetOrganizationsByUser(ctx context.Context, use
 }
 
 // GetOrganizationsByUser indicates an expected call of GetOrganizationsByUser.
-func (mr *MockTransactionQuerierMockRecorder) GetOrganizationsByUser(ctx, userID any) *MockTransactionQuerierGetOrganizationsByUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetOrganizationsByUser(ctx, userID any) *TransactionQuerierGetOrganizationsByUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrganizationsByUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetOrganizationsByUser), ctx, userID)
-	return &MockTransactionQuerierGetOrganizationsByUserCall{Call: call}
+	return &TransactionQuerierGetOrganizationsByUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetOrganizationsByUserCall wrap *gomock.Call
-type MockTransactionQuerierGetOrganizationsByUserCall struct {
+// TransactionQuerierGetOrganizationsByUserCall wrap *gomock.Call
+type TransactionQuerierGetOrganizationsByUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetOrganizationsByUserCall) Return(arg0 []*queries.Organization, arg1 error) *MockTransactionQuerierGetOrganizationsByUserCall {
+func (c *TransactionQuerierGetOrganizationsByUserCall) Return(arg0 []*queries.Organization, arg1 error) *TransactionQuerierGetOrganizationsByUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetOrganizationsByUserCall) Do(f func(context.Context, int64) ([]*queries.Organization, error)) *MockTransactionQuerierGetOrganizationsByUserCall {
+func (c *TransactionQuerierGetOrganizationsByUserCall) Do(f func(context.Context, int64) ([]*queries.Organization, error)) *TransactionQuerierGetOrganizationsByUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetOrganizationsByUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Organization, error)) *MockTransactionQuerierGetOrganizationsByUserCall {
+func (c *TransactionQuerierGetOrganizationsByUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Organization, error)) *TransactionQuerierGetOrganizationsByUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1880,31 +1879,31 @@ func (m *MockTransactionQuerier) GetPostgresDatabase(ctx context.Context, id int
 }
 
 // GetPostgresDatabase indicates an expected call of GetPostgresDatabase.
-func (mr *MockTransactionQuerierMockRecorder) GetPostgresDatabase(ctx, id any) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresDatabase(ctx, id any) *TransactionQuerierGetPostgresDatabaseCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresDatabase), ctx, id)
-	return &MockTransactionQuerierGetPostgresDatabaseCall{Call: call}
+	return &TransactionQuerierGetPostgresDatabaseCall{Call: call}
 }
 
-// MockTransactionQuerierGetPostgresDatabaseCall wrap *gomock.Call
-type MockTransactionQuerierGetPostgresDatabaseCall struct {
+// TransactionQuerierGetPostgresDatabaseCall wrap *gomock.Call
+type TransactionQuerierGetPostgresDatabaseCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresDatabaseCall) Return(arg0 *queries.GetPostgresDatabaseRow, arg1 error) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (c *TransactionQuerierGetPostgresDatabaseCall) Return(arg0 *queries.GetPostgresDatabaseRow, arg1 error) *TransactionQuerierGetPostgresDatabaseCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresDatabaseCall) Do(f func(context.Context, int64) (*queries.GetPostgresDatabaseRow, error)) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (c *TransactionQuerierGetPostgresDatabaseCall) Do(f func(context.Context, int64) (*queries.GetPostgresDatabaseRow, error)) *TransactionQuerierGetPostgresDatabaseCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresDatabaseCall) DoAndReturn(f func(context.Context, int64) (*queries.GetPostgresDatabaseRow, error)) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (c *TransactionQuerierGetPostgresDatabaseCall) DoAndReturn(f func(context.Context, int64) (*queries.GetPostgresDatabaseRow, error)) *TransactionQuerierGetPostgresDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1919,31 +1918,31 @@ func (m *MockTransactionQuerier) GetPostgresScan(ctx context.Context, id int64) 
 }
 
 // GetPostgresScan indicates an expected call of GetPostgresScan.
-func (mr *MockTransactionQuerierMockRecorder) GetPostgresScan(ctx, id any) *MockTransactionQuerierGetPostgresScanCall {
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresScan(ctx, id any) *TransactionQuerierGetPostgresScanCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresScan", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresScan), ctx, id)
-	return &MockTransactionQuerierGetPostgresScanCall{Call: call}
+	return &TransactionQuerierGetPostgresScanCall{Call: call}
 }
 
-// MockTransactionQuerierGetPostgresScanCall wrap *gomock.Call
-type MockTransactionQuerierGetPostgresScanCall struct {
+// TransactionQuerierGetPostgresScanCall wrap *gomock.Call
+type TransactionQuerierGetPostgresScanCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresScanCall) Return(arg0 *queries.GetPostgresScanRow, arg1 error) *MockTransactionQuerierGetPostgresScanCall {
+func (c *TransactionQuerierGetPostgresScanCall) Return(arg0 *queries.GetPostgresScanRow, arg1 error) *TransactionQuerierGetPostgresScanCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresScanCall) Do(f func(context.Context, int64) (*queries.GetPostgresScanRow, error)) *MockTransactionQuerierGetPostgresScanCall {
+func (c *TransactionQuerierGetPostgresScanCall) Do(f func(context.Context, int64) (*queries.GetPostgresScanRow, error)) *TransactionQuerierGetPostgresScanCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.GetPostgresScanRow, error)) *MockTransactionQuerierGetPostgresScanCall {
+func (c *TransactionQuerierGetPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.GetPostgresScanRow, error)) *TransactionQuerierGetPostgresScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1958,31 +1957,31 @@ func (m *MockTransactionQuerier) GetPostgresScanResults(ctx context.Context, pos
 }
 
 // GetPostgresScanResults indicates an expected call of GetPostgresScanResults.
-func (mr *MockTransactionQuerierMockRecorder) GetPostgresScanResults(ctx, postgresScanID any) *MockTransactionQuerierGetPostgresScanResultsCall {
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresScanResults(ctx, postgresScanID any) *TransactionQuerierGetPostgresScanResultsCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresScanResults", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresScanResults), ctx, postgresScanID)
-	return &MockTransactionQuerierGetPostgresScanResultsCall{Call: call}
+	return &TransactionQuerierGetPostgresScanResultsCall{Call: call}
 }
 
-// MockTransactionQuerierGetPostgresScanResultsCall wrap *gomock.Call
-type MockTransactionQuerierGetPostgresScanResultsCall struct {
+// TransactionQuerierGetPostgresScanResultsCall wrap *gomock.Call
+type TransactionQuerierGetPostgresScanResultsCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresScanResultsCall) Return(arg0 []*queries.PostgresScanResult, arg1 error) *MockTransactionQuerierGetPostgresScanResultsCall {
+func (c *TransactionQuerierGetPostgresScanResultsCall) Return(arg0 []*queries.PostgresScanResult, arg1 error) *TransactionQuerierGetPostgresScanResultsCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresScanResultsCall) Do(f func(context.Context, int64) ([]*queries.PostgresScanResult, error)) *MockTransactionQuerierGetPostgresScanResultsCall {
+func (c *TransactionQuerierGetPostgresScanResultsCall) Do(f func(context.Context, int64) ([]*queries.PostgresScanResult, error)) *TransactionQuerierGetPostgresScanResultsCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresScanResultsCall) DoAndReturn(f func(context.Context, int64) ([]*queries.PostgresScanResult, error)) *MockTransactionQuerierGetPostgresScanResultsCall {
+func (c *TransactionQuerierGetPostgresScanResultsCall) DoAndReturn(f func(context.Context, int64) ([]*queries.PostgresScanResult, error)) *TransactionQuerierGetPostgresScanResultsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1997,31 +1996,31 @@ func (m *MockTransactionQuerier) GetPostgresScansForDatabase(ctx context.Context
 }
 
 // GetPostgresScansForDatabase indicates an expected call of GetPostgresScansForDatabase.
-func (mr *MockTransactionQuerierMockRecorder) GetPostgresScansForDatabase(ctx, postgresDatabaseID any) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresScansForDatabase(ctx, postgresDatabaseID any) *TransactionQuerierGetPostgresScansForDatabaseCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresScansForDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresScansForDatabase), ctx, postgresDatabaseID)
-	return &MockTransactionQuerierGetPostgresScansForDatabaseCall{Call: call}
+	return &TransactionQuerierGetPostgresScansForDatabaseCall{Call: call}
 }
 
-// MockTransactionQuerierGetPostgresScansForDatabaseCall wrap *gomock.Call
-type MockTransactionQuerierGetPostgresScansForDatabaseCall struct {
+// TransactionQuerierGetPostgresScansForDatabaseCall wrap *gomock.Call
+type TransactionQuerierGetPostgresScansForDatabaseCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresScansForDatabaseCall) Return(arg0 []*queries.GetPostgresScansForDatabaseRow, arg1 error) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+func (c *TransactionQuerierGetPostgresScansForDatabaseCall) Return(arg0 []*queries.GetPostgresScansForDatabaseRow, arg1 error) *TransactionQuerierGetPostgresScansForDatabaseCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresScansForDatabaseCall) Do(f func(context.Context, int64) ([]*queries.GetPostgresScansForDatabaseRow, error)) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+func (c *TransactionQuerierGetPostgresScansForDatabaseCall) Do(f func(context.Context, int64) ([]*queries.GetPostgresScansForDatabaseRow, error)) *TransactionQuerierGetPostgresScansForDatabaseCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresScansForDatabaseCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForDatabaseRow, error)) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+func (c *TransactionQuerierGetPostgresScansForDatabaseCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForDatabaseRow, error)) *TransactionQuerierGetPostgresScansForDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2036,31 +2035,31 @@ func (m *MockTransactionQuerier) GetPostgresScansForProject(ctx context.Context,
 }
 
 // GetPostgresScansForProject indicates an expected call of GetPostgresScansForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetPostgresScansForProject(ctx, projectID any) *MockTransactionQuerierGetPostgresScansForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresScansForProject(ctx, projectID any) *TransactionQuerierGetPostgresScansForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresScansForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresScansForProject), ctx, projectID)
-	return &MockTransactionQuerierGetPostgresScansForProjectCall{Call: call}
+	return &TransactionQuerierGetPostgresScansForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetPostgresScansForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetPostgresScansForProjectCall struct {
+// TransactionQuerierGetPostgresScansForProjectCall wrap *gomock.Call
+type TransactionQuerierGetPostgresScansForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresScansForProjectCall) Return(arg0 []*queries.GetPostgresScansForProjectRow, arg1 error) *MockTransactionQuerierGetPostgresScansForProjectCall {
+func (c *TransactionQuerierGetPostgresScansForProjectCall) Return(arg0 []*queries.GetPostgresScansForProjectRow, arg1 error) *TransactionQuerierGetPostgresScansForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresScansForProjectCall) Do(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *MockTransactionQuerierGetPostgresScansForProjectCall {
+func (c *TransactionQuerierGetPostgresScansForProjectCall) Do(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *TransactionQuerierGetPostgresScansForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresScansForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *MockTransactionQuerierGetPostgresScansForProjectCall {
+func (c *TransactionQuerierGetPostgresScansForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *TransactionQuerierGetPostgresScansForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2075,31 +2074,31 @@ func (m *MockTransactionQuerier) GetProjectByOrganizationAndName(ctx context.Con
 }
 
 // GetProjectByOrganizationAndName indicates an expected call of GetProjectByOrganizationAndName.
-func (mr *MockTransactionQuerierMockRecorder) GetProjectByOrganizationAndName(ctx, arg any) *MockTransactionQuerierGetProjectByOrganizationAndNameCall {
+func (mr *MockTransactionQuerierMockRecorder) GetProjectByOrganizationAndName(ctx, arg any) *TransactionQuerierGetProjectByOrganizationAndNameCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectByOrganizationAndName", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectByOrganizationAndName), ctx, arg)
-	return &MockTransactionQuerierGetProjectByOrganizationAndNameCall{Call: call}
+	return &TransactionQuerierGetProjectByOrganizationAndNameCall{Call: call}
 }
 
-// MockTransactionQuerierGetProjectByOrganizationAndNameCall wrap *gomock.Call
-type MockTransactionQuerierGetProjectByOrganizationAndNameCall struct {
+// TransactionQuerierGetProjectByOrganizationAndNameCall wrap *gomock.Call
+type TransactionQuerierGetProjectByOrganizationAndNameCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetProjectByOrganizationAndNameCall) Return(arg0 *queries.Project, arg1 error) *MockTransactionQuerierGetProjectByOrganizationAndNameCall {
+func (c *TransactionQuerierGetProjectByOrganizationAndNameCall) Return(arg0 *queries.Project, arg1 error) *TransactionQuerierGetProjectByOrganizationAndNameCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetProjectByOrganizationAndNameCall) Do(f func(context.Context, queries.GetProjectByOrganizationAndNameParams) (*queries.Project, error)) *MockTransactionQuerierGetProjectByOrganizationAndNameCall {
+func (c *TransactionQuerierGetProjectByOrganizationAndNameCall) Do(f func(context.Context, queries.GetProjectByOrganizationAndNameParams) (*queries.Project, error)) *TransactionQuerierGetProjectByOrganizationAndNameCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetProjectByOrganizationAndNameCall) DoAndReturn(f func(context.Context, queries.GetProjectByOrganizationAndNameParams) (*queries.Project, error)) *MockTransactionQuerierGetProjectByOrganizationAndNameCall {
+func (c *TransactionQuerierGetProjectByOrganizationAndNameCall) DoAndReturn(f func(context.Context, queries.GetProjectByOrganizationAndNameParams) (*queries.Project, error)) *TransactionQuerierGetProjectByOrganizationAndNameCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2114,31 +2113,31 @@ func (m *MockTransactionQuerier) GetProjectMembers(ctx context.Context, projectI
 }
 
 // GetProjectMembers indicates an expected call of GetProjectMembers.
-func (mr *MockTransactionQuerierMockRecorder) GetProjectMembers(ctx, projectID any) *MockTransactionQuerierGetProjectMembersCall {
+func (mr *MockTransactionQuerierMockRecorder) GetProjectMembers(ctx, projectID any) *TransactionQuerierGetProjectMembersCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectMembers", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectMembers), ctx, projectID)
-	return &MockTransactionQuerierGetProjectMembersCall{Call: call}
+	return &TransactionQuerierGetProjectMembersCall{Call: call}
 }
 
-// MockTransactionQuerierGetProjectMembersCall wrap *gomock.Call
-type MockTransactionQuerierGetProjectMembersCall struct {
+// TransactionQuerierGetProjectMembersCall wrap *gomock.Call
+type TransactionQuerierGetProjectMembersCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetProjectMembersCall) Return(arg0 []*queries.ProjectMember, arg1 error) *MockTransactionQuerierGetProjectMembersCall {
+func (c *TransactionQuerierGetProjectMembersCall) Return(arg0 []*queries.ProjectMember, arg1 error) *TransactionQuerierGetProjectMembersCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetProjectMembersCall) Do(f func(context.Context, int64) ([]*queries.ProjectMember, error)) *MockTransactionQuerierGetProjectMembersCall {
+func (c *TransactionQuerierGetProjectMembersCall) Do(f func(context.Context, int64) ([]*queries.ProjectMember, error)) *TransactionQuerierGetProjectMembersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetProjectMembersCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectMember, error)) *MockTransactionQuerierGetProjectMembersCall {
+func (c *TransactionQuerierGetProjectMembersCall) DoAndReturn(f func(context.Context, int64) ([]*queries.ProjectMember, error)) *TransactionQuerierGetProjectMembersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2153,31 +2152,31 @@ func (m *MockTransactionQuerier) GetProjectPermissionsForUser(ctx context.Contex
 }
 
 // GetProjectPermissionsForUser indicates an expected call of GetProjectPermissionsForUser.
-func (mr *MockTransactionQuerierMockRecorder) GetProjectPermissionsForUser(ctx, arg any) *MockTransactionQuerierGetProjectPermissionsForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetProjectPermissionsForUser(ctx, arg any) *TransactionQuerierGetProjectPermissionsForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectPermissionsForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectPermissionsForUser), ctx, arg)
-	return &MockTransactionQuerierGetProjectPermissionsForUserCall{Call: call}
+	return &TransactionQuerierGetProjectPermissionsForUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetProjectPermissionsForUserCall wrap *gomock.Call
-type MockTransactionQuerierGetProjectPermissionsForUserCall struct {
+// TransactionQuerierGetProjectPermissionsForUserCall wrap *gomock.Call
+type TransactionQuerierGetProjectPermissionsForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetProjectPermissionsForUserCall) Return(arg0 int16, arg1 error) *MockTransactionQuerierGetProjectPermissionsForUserCall {
+func (c *TransactionQuerierGetProjectPermissionsForUserCall) Return(arg0 int16, arg1 error) *TransactionQuerierGetProjectPermissionsForUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetProjectPermissionsForUserCall) Do(f func(context.Context, queries.GetProjectPermissionsForUserParams) (int16, error)) *MockTransactionQuerierGetProjectPermissionsForUserCall {
+func (c *TransactionQuerierGetProjectPermissionsForUserCall) Do(f func(context.Context, queries.GetProjectPermissionsForUserParams) (int16, error)) *TransactionQuerierGetProjectPermissionsForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetProjectPermissionsForUserCall) DoAndReturn(f func(context.Context, queries.GetProjectPermissionsForUserParams) (int16, error)) *MockTransactionQuerierGetProjectPermissionsForUserCall {
+func (c *TransactionQuerierGetProjectPermissionsForUserCall) DoAndReturn(f func(context.Context, queries.GetProjectPermissionsForUserParams) (int16, error)) *TransactionQuerierGetProjectPermissionsForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2192,31 +2191,31 @@ func (m *MockTransactionQuerier) GetProjectUser(ctx context.Context, arg queries
 }
 
 // GetProjectUser indicates an expected call of GetProjectUser.
-func (mr *MockTransactionQuerierMockRecorder) GetProjectUser(ctx, arg any) *MockTransactionQuerierGetProjectUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetProjectUser(ctx, arg any) *TransactionQuerierGetProjectUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectUser), ctx, arg)
-	return &MockTransactionQuerierGetProjectUserCall{Call: call}
+	return &TransactionQuerierGetProjectUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetProjectUserCall wrap *gomock.Call
-type MockTransactionQuerierGetProjectUserCall struct {
+// TransactionQuerierGetProjectUserCall wrap *gomock.Call
+type TransactionQuerierGetProjectUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetProjectUserCall) Return(arg0 *queries.ProjectMember, arg1 error) *MockTransactionQuerierGetProjectUserCall {
+func (c *TransactionQuerierGetProjectUserCall) Return(arg0 *queries.ProjectMember, arg1 error) *TransactionQuerierGetProjectUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetProjectUserCall) Do(f func(context.Context, queries.GetProjectUserParams) (*queries.ProjectMember, error)) *MockTransactionQuerierGetProjectUserCall {
+func (c *TransactionQuerierGetProjectUserCall) Do(f func(context.Context, queries.GetProjectUserParams) (*queries.ProjectMember, error)) *TransactionQuerierGetProjectUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetProjectUserCall) DoAndReturn(f func(context.Context, queries.GetProjectUserParams) (*queries.ProjectMember, error)) *MockTransactionQuerierGetProjectUserCall {
+func (c *TransactionQuerierGetProjectUserCall) DoAndReturn(f func(context.Context, queries.GetProjectUserParams) (*queries.ProjectMember, error)) *TransactionQuerierGetProjectUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2231,31 +2230,31 @@ func (m *MockTransactionQuerier) GetProjectsByOrganization(ctx context.Context, 
 }
 
 // GetProjectsByOrganization indicates an expected call of GetProjectsByOrganization.
-func (mr *MockTransactionQuerierMockRecorder) GetProjectsByOrganization(ctx, organizationID any) *MockTransactionQuerierGetProjectsByOrganizationCall {
+func (mr *MockTransactionQuerierMockRecorder) GetProjectsByOrganization(ctx, organizationID any) *TransactionQuerierGetProjectsByOrganizationCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectsByOrganization", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectsByOrganization), ctx, organizationID)
-	return &MockTransactionQuerierGetProjectsByOrganizationCall{Call: call}
+	return &TransactionQuerierGetProjectsByOrganizationCall{Call: call}
 }
 
-// MockTransactionQuerierGetProjectsByOrganizationCall wrap *gomock.Call
-type MockTransactionQuerierGetProjectsByOrganizationCall struct {
+// TransactionQuerierGetProjectsByOrganizationCall wrap *gomock.Call
+type TransactionQuerierGetProjectsByOrganizationCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetProjectsByOrganizationCall) Return(arg0 []*queries.Project, arg1 error) *MockTransactionQuerierGetProjectsByOrganizationCall {
+func (c *TransactionQuerierGetProjectsByOrganizationCall) Return(arg0 []*queries.Project, arg1 error) *TransactionQuerierGetProjectsByOrganizationCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetProjectsByOrganizationCall) Do(f func(context.Context, int64) ([]*queries.Project, error)) *MockTransactionQuerierGetProjectsByOrganizationCall {
+func (c *TransactionQuerierGetProjectsByOrganizationCall) Do(f func(context.Context, int64) ([]*queries.Project, error)) *TransactionQuerierGetProjectsByOrganizationCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetProjectsByOrganizationCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Project, error)) *MockTransactionQuerierGetProjectsByOrganizationCall {
+func (c *TransactionQuerierGetProjectsByOrganizationCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Project, error)) *TransactionQuerierGetProjectsByOrganizationCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2269,31 +2268,31 @@ func (m *MockTransactionQuerier) GetRawPool() *pgxpool.Pool {
 }
 
 // GetRawPool indicates an expected call of GetRawPool.
-func (mr *MockTransactionQuerierMockRecorder) GetRawPool() *MockTransactionQuerierGetRawPoolCall {
+func (mr *MockTransactionQuerierMockRecorder) GetRawPool() *TransactionQuerierGetRawPoolCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRawPool", reflect.TypeOf((*MockTransactionQuerier)(nil).GetRawPool))
-	return &MockTransactionQuerierGetRawPoolCall{Call: call}
+	return &TransactionQuerierGetRawPoolCall{Call: call}
 }
 
-// MockTransactionQuerierGetRawPoolCall wrap *gomock.Call
-type MockTransactionQuerierGetRawPoolCall struct {
+// TransactionQuerierGetRawPoolCall wrap *gomock.Call
+type TransactionQuerierGetRawPoolCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetRawPoolCall) Return(arg0 *pgxpool.Pool) *MockTransactionQuerierGetRawPoolCall {
+func (c *TransactionQuerierGetRawPoolCall) Return(arg0 *pgxpool.Pool) *TransactionQuerierGetRawPoolCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetRawPoolCall) Do(f func() *pgxpool.Pool) *MockTransactionQuerierGetRawPoolCall {
+func (c *TransactionQuerierGetRawPoolCall) Do(f func() *pgxpool.Pool) *TransactionQuerierGetRawPoolCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetRawPoolCall) DoAndReturn(f func() *pgxpool.Pool) *MockTransactionQuerierGetRawPoolCall {
+func (c *TransactionQuerierGetRawPoolCall) DoAndReturn(f func() *pgxpool.Pool) *TransactionQuerierGetRawPoolCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2308,31 +2307,31 @@ func (m *MockTransactionQuerier) GetResetPasswordToken(ctx context.Context, id u
 }
 
 // GetResetPasswordToken indicates an expected call of GetResetPasswordToken.
-func (mr *MockTransactionQuerierMockRecorder) GetResetPasswordToken(ctx, id any) *MockTransactionQuerierGetResetPasswordTokenCall {
+func (mr *MockTransactionQuerierMockRecorder) GetResetPasswordToken(ctx, id any) *TransactionQuerierGetResetPasswordTokenCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResetPasswordToken", reflect.TypeOf((*MockTransactionQuerier)(nil).GetResetPasswordToken), ctx, id)
-	return &MockTransactionQuerierGetResetPasswordTokenCall{Call: call}
+	return &TransactionQuerierGetResetPasswordTokenCall{Call: call}
 }
 
-// MockTransactionQuerierGetResetPasswordTokenCall wrap *gomock.Call
-type MockTransactionQuerierGetResetPasswordTokenCall struct {
+// TransactionQuerierGetResetPasswordTokenCall wrap *gomock.Call
+type TransactionQuerierGetResetPasswordTokenCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetResetPasswordTokenCall) Return(arg0 *queries.ResetPasswordToken, arg1 error) *MockTransactionQuerierGetResetPasswordTokenCall {
+func (c *TransactionQuerierGetResetPasswordTokenCall) Return(arg0 *queries.ResetPasswordToken, arg1 error) *TransactionQuerierGetResetPasswordTokenCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetResetPasswordTokenCall) Do(f func(context.Context, uuid.UUID) (*queries.ResetPasswordToken, error)) *MockTransactionQuerierGetResetPasswordTokenCall {
+func (c *TransactionQuerierGetResetPasswordTokenCall) Do(f func(context.Context, uuid.UUID) (*queries.ResetPasswordToken, error)) *TransactionQuerierGetResetPasswordTokenCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetResetPasswordTokenCall) DoAndReturn(f func(context.Context, uuid.UUID) (*queries.ResetPasswordToken, error)) *MockTransactionQuerierGetResetPasswordTokenCall {
+func (c *TransactionQuerierGetResetPasswordTokenCall) DoAndReturn(f func(context.Context, uuid.UUID) (*queries.ResetPasswordToken, error)) *TransactionQuerierGetResetPasswordTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2347,31 +2346,31 @@ func (m *MockTransactionQuerier) GetSession(ctx context.Context, id uuid.UUID) (
 }
 
 // GetSession indicates an expected call of GetSession.
-func (mr *MockTransactionQuerierMockRecorder) GetSession(ctx, id any) *MockTransactionQuerierGetSessionCall {
+func (mr *MockTransactionQuerierMockRecorder) GetSession(ctx, id any) *TransactionQuerierGetSessionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockTransactionQuerier)(nil).GetSession), ctx, id)
-	return &MockTransactionQuerierGetSessionCall{Call: call}
+	return &TransactionQuerierGetSessionCall{Call: call}
 }
 
-// MockTransactionQuerierGetSessionCall wrap *gomock.Call
-type MockTransactionQuerierGetSessionCall struct {
+// TransactionQuerierGetSessionCall wrap *gomock.Call
+type TransactionQuerierGetSessionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetSessionCall) Return(arg0 *queries.Session, arg1 error) *MockTransactionQuerierGetSessionCall {
+func (c *TransactionQuerierGetSessionCall) Return(arg0 *queries.Session, arg1 error) *TransactionQuerierGetSessionCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetSessionCall) Do(f func(context.Context, uuid.UUID) (*queries.Session, error)) *MockTransactionQuerierGetSessionCall {
+func (c *TransactionQuerierGetSessionCall) Do(f func(context.Context, uuid.UUID) (*queries.Session, error)) *TransactionQuerierGetSessionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetSessionCall) DoAndReturn(f func(context.Context, uuid.UUID) (*queries.Session, error)) *MockTransactionQuerierGetSessionCall {
+func (c *TransactionQuerierGetSessionCall) DoAndReturn(f func(context.Context, uuid.UUID) (*queries.Session, error)) *TransactionQuerierGetSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2386,31 +2385,31 @@ func (m *MockTransactionQuerier) GetTOTPSecretForUser(ctx context.Context, userI
 }
 
 // GetTOTPSecretForUser indicates an expected call of GetTOTPSecretForUser.
-func (mr *MockTransactionQuerierMockRecorder) GetTOTPSecretForUser(ctx, userID any) *MockTransactionQuerierGetTOTPSecretForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetTOTPSecretForUser(ctx, userID any) *TransactionQuerierGetTOTPSecretForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetTOTPSecretForUser), ctx, userID)
-	return &MockTransactionQuerierGetTOTPSecretForUserCall{Call: call}
+	return &TransactionQuerierGetTOTPSecretForUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetTOTPSecretForUserCall wrap *gomock.Call
-type MockTransactionQuerierGetTOTPSecretForUserCall struct {
+// TransactionQuerierGetTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierGetTOTPSecretForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *MockTransactionQuerierGetTOTPSecretForUserCall {
+func (c *TransactionQuerierGetTOTPSecretForUserCall) Return(arg0 *queries.TotpSecretToken, arg1 error) *TransactionQuerierGetTOTPSecretForUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetTOTPSecretForUserCall) Do(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *MockTransactionQuerierGetTOTPSecretForUserCall {
+func (c *TransactionQuerierGetTOTPSecretForUserCall) Do(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetTOTPSecretForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *MockTransactionQuerierGetTOTPSecretForUserCall {
+func (c *TransactionQuerierGetTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2425,31 +2424,31 @@ func (m *MockTransactionQuerier) GetUser(ctx context.Context, id int64) (*querie
 }
 
 // GetUser indicates an expected call of GetUser.
-func (mr *MockTransactionQuerierMockRecorder) GetUser(ctx, id any) *MockTransactionQuerierGetUserCall {
+func (mr *MockTransactionQuerierMockRecorder) GetUser(ctx, id any) *TransactionQuerierGetUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUser), ctx, id)
-	return &MockTransactionQuerierGetUserCall{Call: call}
+	return &TransactionQuerierGetUserCall{Call: call}
 }
 
-// MockTransactionQuerierGetUserCall wrap *gomock.Call
-type MockTransactionQuerierGetUserCall struct {
+// TransactionQuerierGetUserCall wrap *gomock.Call
+type TransactionQuerierGetUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetUserCall) Return(arg0 *queries.User, arg1 error) *MockTransactionQuerierGetUserCall {
+func (c *TransactionQuerierGetUserCall) Return(arg0 *queries.User, arg1 error) *TransactionQuerierGetUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetUserCall) Do(f func(context.Context, int64) (*queries.User, error)) *MockTransactionQuerierGetUserCall {
+func (c *TransactionQuerierGetUserCall) Do(f func(context.Context, int64) (*queries.User, error)) *TransactionQuerierGetUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetUserCall) DoAndReturn(f func(context.Context, int64) (*queries.User, error)) *MockTransactionQuerierGetUserCall {
+func (c *TransactionQuerierGetUserCall) DoAndReturn(f func(context.Context, int64) (*queries.User, error)) *TransactionQuerierGetUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2464,31 +2463,31 @@ func (m *MockTransactionQuerier) GetUserByUsernameOrEmail(ctx context.Context, u
 }
 
 // GetUserByUsernameOrEmail indicates an expected call of GetUserByUsernameOrEmail.
-func (mr *MockTransactionQuerierMockRecorder) GetUserByUsernameOrEmail(ctx, username any) *MockTransactionQuerierGetUserByUsernameOrEmailCall {
+func (mr *MockTransactionQuerierMockRecorder) GetUserByUsernameOrEmail(ctx, username any) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsernameOrEmail", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByUsernameOrEmail), ctx, username)
-	return &MockTransactionQuerierGetUserByUsernameOrEmailCall{Call: call}
+	return &TransactionQuerierGetUserByUsernameOrEmailCall{Call: call}
 }
 
-// MockTransactionQuerierGetUserByUsernameOrEmailCall wrap *gomock.Call
-type MockTransactionQuerierGetUserByUsernameOrEmailCall struct {
+// TransactionQuerierGetUserByUsernameOrEmailCall wrap *gomock.Call
+type TransactionQuerierGetUserByUsernameOrEmailCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetUserByUsernameOrEmailCall) Return(arg0 *queries.User, arg1 error) *MockTransactionQuerierGetUserByUsernameOrEmailCall {
+func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Return(arg0 *queries.User, arg1 error) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetUserByUsernameOrEmailCall) Do(f func(context.Context, string) (*queries.User, error)) *MockTransactionQuerierGetUserByUsernameOrEmailCall {
+func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Do(f func(context.Context, string) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(context.Context, string) (*queries.User, error)) *MockTransactionQuerierGetUserByUsernameOrEmailCall {
+func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(context.Context, string) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2503,31 +2502,31 @@ func (m *MockTransactionQuerier) GetWorkerByToken(ctx context.Context, token str
 }
 
 // GetWorkerByToken indicates an expected call of GetWorkerByToken.
-func (mr *MockTransactionQuerierMockRecorder) GetWorkerByToken(ctx, token any) *MockTransactionQuerierGetWorkerByTokenCall {
+func (mr *MockTransactionQuerierMockRecorder) GetWorkerByToken(ctx, token any) *TransactionQuerierGetWorkerByTokenCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerByToken", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkerByToken), ctx, token)
-	return &MockTransactionQuerierGetWorkerByTokenCall{Call: call}
+	return &TransactionQuerierGetWorkerByTokenCall{Call: call}
 }
 
-// MockTransactionQuerierGetWorkerByTokenCall wrap *gomock.Call
-type MockTransactionQuerierGetWorkerByTokenCall struct {
+// TransactionQuerierGetWorkerByTokenCall wrap *gomock.Call
+type TransactionQuerierGetWorkerByTokenCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetWorkerByTokenCall) Return(arg0 *queries.Worker, arg1 error) *MockTransactionQuerierGetWorkerByTokenCall {
+func (c *TransactionQuerierGetWorkerByTokenCall) Return(arg0 *queries.Worker, arg1 error) *TransactionQuerierGetWorkerByTokenCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetWorkerByTokenCall) Do(f func(context.Context, string) (*queries.Worker, error)) *MockTransactionQuerierGetWorkerByTokenCall {
+func (c *TransactionQuerierGetWorkerByTokenCall) Do(f func(context.Context, string) (*queries.Worker, error)) *TransactionQuerierGetWorkerByTokenCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetWorkerByTokenCall) DoAndReturn(f func(context.Context, string) (*queries.Worker, error)) *MockTransactionQuerierGetWorkerByTokenCall {
+func (c *TransactionQuerierGetWorkerByTokenCall) DoAndReturn(f func(context.Context, string) (*queries.Worker, error)) *TransactionQuerierGetWorkerByTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2542,31 +2541,31 @@ func (m *MockTransactionQuerier) GetWorkerForPostgresScan(ctx context.Context, i
 }
 
 // GetWorkerForPostgresScan indicates an expected call of GetWorkerForPostgresScan.
-func (mr *MockTransactionQuerierMockRecorder) GetWorkerForPostgresScan(ctx, id any) *MockTransactionQuerierGetWorkerForPostgresScanCall {
+func (mr *MockTransactionQuerierMockRecorder) GetWorkerForPostgresScan(ctx, id any) *TransactionQuerierGetWorkerForPostgresScanCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerForPostgresScan", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkerForPostgresScan), ctx, id)
-	return &MockTransactionQuerierGetWorkerForPostgresScanCall{Call: call}
+	return &TransactionQuerierGetWorkerForPostgresScanCall{Call: call}
 }
 
-// MockTransactionQuerierGetWorkerForPostgresScanCall wrap *gomock.Call
-type MockTransactionQuerierGetWorkerForPostgresScanCall struct {
+// TransactionQuerierGetWorkerForPostgresScanCall wrap *gomock.Call
+type TransactionQuerierGetWorkerForPostgresScanCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetWorkerForPostgresScanCall) Return(arg0 *queries.GetWorkerForPostgresScanRow, arg1 error) *MockTransactionQuerierGetWorkerForPostgresScanCall {
+func (c *TransactionQuerierGetWorkerForPostgresScanCall) Return(arg0 *queries.GetWorkerForPostgresScanRow, arg1 error) *TransactionQuerierGetWorkerForPostgresScanCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetWorkerForPostgresScanCall) Do(f func(context.Context, int64) (*queries.GetWorkerForPostgresScanRow, error)) *MockTransactionQuerierGetWorkerForPostgresScanCall {
+func (c *TransactionQuerierGetWorkerForPostgresScanCall) Do(f func(context.Context, int64) (*queries.GetWorkerForPostgresScanRow, error)) *TransactionQuerierGetWorkerForPostgresScanCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetWorkerForPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.GetWorkerForPostgresScanRow, error)) *MockTransactionQuerierGetWorkerForPostgresScanCall {
+func (c *TransactionQuerierGetWorkerForPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.GetWorkerForPostgresScanRow, error)) *TransactionQuerierGetWorkerForPostgresScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2581,31 +2580,31 @@ func (m *MockTransactionQuerier) GetWorkersForProject(ctx context.Context, proje
 }
 
 // GetWorkersForProject indicates an expected call of GetWorkersForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetWorkersForProject(ctx, projectID any) *MockTransactionQuerierGetWorkersForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetWorkersForProject(ctx, projectID any) *TransactionQuerierGetWorkersForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkersForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkersForProject), ctx, projectID)
-	return &MockTransactionQuerierGetWorkersForProjectCall{Call: call}
+	return &TransactionQuerierGetWorkersForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierGetWorkersForProjectCall wrap *gomock.Call
-type MockTransactionQuerierGetWorkersForProjectCall struct {
+// TransactionQuerierGetWorkersForProjectCall wrap *gomock.Call
+type TransactionQuerierGetWorkersForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetWorkersForProjectCall) Return(arg0 []*queries.GetWorkersForProjectRow, arg1 error) *MockTransactionQuerierGetWorkersForProjectCall {
+func (c *TransactionQuerierGetWorkersForProjectCall) Return(arg0 []*queries.GetWorkersForProjectRow, arg1 error) *TransactionQuerierGetWorkersForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetWorkersForProjectCall) Do(f func(context.Context, int64) ([]*queries.GetWorkersForProjectRow, error)) *MockTransactionQuerierGetWorkersForProjectCall {
+func (c *TransactionQuerierGetWorkersForProjectCall) Do(f func(context.Context, int64) ([]*queries.GetWorkersForProjectRow, error)) *TransactionQuerierGetWorkersForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetWorkersForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetWorkersForProjectRow, error)) *MockTransactionQuerierGetWorkersForProjectCall {
+func (c *TransactionQuerierGetWorkersForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetWorkersForProjectRow, error)) *TransactionQuerierGetWorkersForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2619,31 +2618,31 @@ func (m *MockTransactionQuerier) InsertBruteforcePasswords(ctx context.Context, 
 }
 
 // InsertBruteforcePasswords indicates an expected call of InsertBruteforcePasswords.
-func (mr *MockTransactionQuerierMockRecorder) InsertBruteforcePasswords(ctx, passwords any) *MockTransactionQuerierInsertBruteforcePasswordsCall {
+func (mr *MockTransactionQuerierMockRecorder) InsertBruteforcePasswords(ctx, passwords any) *TransactionQuerierInsertBruteforcePasswordsCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertBruteforcePasswords", reflect.TypeOf((*MockTransactionQuerier)(nil).InsertBruteforcePasswords), ctx, passwords)
-	return &MockTransactionQuerierInsertBruteforcePasswordsCall{Call: call}
+	return &TransactionQuerierInsertBruteforcePasswordsCall{Call: call}
 }
 
-// MockTransactionQuerierInsertBruteforcePasswordsCall wrap *gomock.Call
-type MockTransactionQuerierInsertBruteforcePasswordsCall struct {
+// TransactionQuerierInsertBruteforcePasswordsCall wrap *gomock.Call
+type TransactionQuerierInsertBruteforcePasswordsCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierInsertBruteforcePasswordsCall) Return(arg0 error) *MockTransactionQuerierInsertBruteforcePasswordsCall {
+func (c *TransactionQuerierInsertBruteforcePasswordsCall) Return(arg0 error) *TransactionQuerierInsertBruteforcePasswordsCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierInsertBruteforcePasswordsCall) Do(f func(context.Context, []string) error) *MockTransactionQuerierInsertBruteforcePasswordsCall {
+func (c *TransactionQuerierInsertBruteforcePasswordsCall) Do(f func(context.Context, []string) error) *TransactionQuerierInsertBruteforcePasswordsCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierInsertBruteforcePasswordsCall) DoAndReturn(f func(context.Context, []string) error) *MockTransactionQuerierInsertBruteforcePasswordsCall {
+func (c *TransactionQuerierInsertBruteforcePasswordsCall) DoAndReturn(f func(context.Context, []string) error) *TransactionQuerierInsertBruteforcePasswordsCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2657,31 +2656,31 @@ func (m *MockTransactionQuerier) InsertBruteforcedPassword(ctx context.Context, 
 }
 
 // InsertBruteforcedPassword indicates an expected call of InsertBruteforcedPassword.
-func (mr *MockTransactionQuerierMockRecorder) InsertBruteforcedPassword(ctx, arg any) *MockTransactionQuerierInsertBruteforcedPasswordCall {
+func (mr *MockTransactionQuerierMockRecorder) InsertBruteforcedPassword(ctx, arg any) *TransactionQuerierInsertBruteforcedPasswordCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertBruteforcedPassword", reflect.TypeOf((*MockTransactionQuerier)(nil).InsertBruteforcedPassword), ctx, arg)
-	return &MockTransactionQuerierInsertBruteforcedPasswordCall{Call: call}
+	return &TransactionQuerierInsertBruteforcedPasswordCall{Call: call}
 }
 
-// MockTransactionQuerierInsertBruteforcedPasswordCall wrap *gomock.Call
-type MockTransactionQuerierInsertBruteforcedPasswordCall struct {
+// TransactionQuerierInsertBruteforcedPasswordCall wrap *gomock.Call
+type TransactionQuerierInsertBruteforcedPasswordCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierInsertBruteforcedPasswordCall) Return(arg0 error) *MockTransactionQuerierInsertBruteforcedPasswordCall {
+func (c *TransactionQuerierInsertBruteforcedPasswordCall) Return(arg0 error) *TransactionQuerierInsertBruteforcedPasswordCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierInsertBruteforcedPasswordCall) Do(f func(context.Context, queries.InsertBruteforcedPasswordParams) error) *MockTransactionQuerierInsertBruteforcedPasswordCall {
+func (c *TransactionQuerierInsertBruteforcedPasswordCall) Do(f func(context.Context, queries.InsertBruteforcedPasswordParams) error) *TransactionQuerierInsertBruteforcedPasswordCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierInsertBruteforcedPasswordCall) DoAndReturn(f func(context.Context, queries.InsertBruteforcedPasswordParams) error) *MockTransactionQuerierInsertBruteforcedPasswordCall {
+func (c *TransactionQuerierInsertBruteforcedPasswordCall) DoAndReturn(f func(context.Context, queries.InsertBruteforcedPasswordParams) error) *TransactionQuerierInsertBruteforcedPasswordCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2695,31 +2694,31 @@ func (m *MockTransactionQuerier) InvalidateResetPasswordToken(ctx context.Contex
 }
 
 // InvalidateResetPasswordToken indicates an expected call of InvalidateResetPasswordToken.
-func (mr *MockTransactionQuerierMockRecorder) InvalidateResetPasswordToken(ctx, id any) *MockTransactionQuerierInvalidateResetPasswordTokenCall {
+func (mr *MockTransactionQuerierMockRecorder) InvalidateResetPasswordToken(ctx, id any) *TransactionQuerierInvalidateResetPasswordTokenCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InvalidateResetPasswordToken", reflect.TypeOf((*MockTransactionQuerier)(nil).InvalidateResetPasswordToken), ctx, id)
-	return &MockTransactionQuerierInvalidateResetPasswordTokenCall{Call: call}
+	return &TransactionQuerierInvalidateResetPasswordTokenCall{Call: call}
 }
 
-// MockTransactionQuerierInvalidateResetPasswordTokenCall wrap *gomock.Call
-type MockTransactionQuerierInvalidateResetPasswordTokenCall struct {
+// TransactionQuerierInvalidateResetPasswordTokenCall wrap *gomock.Call
+type TransactionQuerierInvalidateResetPasswordTokenCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierInvalidateResetPasswordTokenCall) Return(arg0 error) *MockTransactionQuerierInvalidateResetPasswordTokenCall {
+func (c *TransactionQuerierInvalidateResetPasswordTokenCall) Return(arg0 error) *TransactionQuerierInvalidateResetPasswordTokenCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierInvalidateResetPasswordTokenCall) Do(f func(context.Context, uuid.UUID) error) *MockTransactionQuerierInvalidateResetPasswordTokenCall {
+func (c *TransactionQuerierInvalidateResetPasswordTokenCall) Do(f func(context.Context, uuid.UUID) error) *TransactionQuerierInvalidateResetPasswordTokenCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierInvalidateResetPasswordTokenCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *MockTransactionQuerierInvalidateResetPasswordTokenCall {
+func (c *TransactionQuerierInvalidateResetPasswordTokenCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *TransactionQuerierInvalidateResetPasswordTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2733,31 +2732,31 @@ func (m *MockTransactionQuerier) InvalidateTOTPSecretForUser(ctx context.Context
 }
 
 // InvalidateTOTPSecretForUser indicates an expected call of InvalidateTOTPSecretForUser.
-func (mr *MockTransactionQuerierMockRecorder) InvalidateTOTPSecretForUser(ctx, userID any) *MockTransactionQuerierInvalidateTOTPSecretForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) InvalidateTOTPSecretForUser(ctx, userID any) *TransactionQuerierInvalidateTOTPSecretForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InvalidateTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).InvalidateTOTPSecretForUser), ctx, userID)
-	return &MockTransactionQuerierInvalidateTOTPSecretForUserCall{Call: call}
+	return &TransactionQuerierInvalidateTOTPSecretForUserCall{Call: call}
 }
 
-// MockTransactionQuerierInvalidateTOTPSecretForUserCall wrap *gomock.Call
-type MockTransactionQuerierInvalidateTOTPSecretForUserCall struct {
+// TransactionQuerierInvalidateTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierInvalidateTOTPSecretForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierInvalidateTOTPSecretForUserCall) Return(arg0 error) *MockTransactionQuerierInvalidateTOTPSecretForUserCall {
+func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) Return(arg0 error) *TransactionQuerierInvalidateTOTPSecretForUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierInvalidateTOTPSecretForUserCall) Do(f func(context.Context, int64) error) *MockTransactionQuerierInvalidateTOTPSecretForUserCall {
+func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) Do(f func(context.Context, int64) error) *TransactionQuerierInvalidateTOTPSecretForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierInvalidateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierInvalidateTOTPSecretForUserCall {
+func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) error) *TransactionQuerierInvalidateTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2772,31 +2771,31 @@ func (m *MockTransactionQuerier) ListUsers(ctx context.Context, arg queries.List
 }
 
 // ListUsers indicates an expected call of ListUsers.
-func (mr *MockTransactionQuerierMockRecorder) ListUsers(ctx, arg any) *MockTransactionQuerierListUsersCall {
+func (mr *MockTransactionQuerierMockRecorder) ListUsers(ctx, arg any) *TransactionQuerierListUsersCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockTransactionQuerier)(nil).ListUsers), ctx, arg)
-	return &MockTransactionQuerierListUsersCall{Call: call}
+	return &TransactionQuerierListUsersCall{Call: call}
 }
 
-// MockTransactionQuerierListUsersCall wrap *gomock.Call
-type MockTransactionQuerierListUsersCall struct {
+// TransactionQuerierListUsersCall wrap *gomock.Call
+type TransactionQuerierListUsersCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierListUsersCall) Return(arg0 []*queries.User, arg1 error) *MockTransactionQuerierListUsersCall {
+func (c *TransactionQuerierListUsersCall) Return(arg0 []*queries.User, arg1 error) *TransactionQuerierListUsersCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierListUsersCall) Do(f func(context.Context, queries.ListUsersParams) ([]*queries.User, error)) *MockTransactionQuerierListUsersCall {
+func (c *TransactionQuerierListUsersCall) Do(f func(context.Context, queries.ListUsersParams) ([]*queries.User, error)) *TransactionQuerierListUsersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierListUsersCall) DoAndReturn(f func(context.Context, queries.ListUsersParams) ([]*queries.User, error)) *MockTransactionQuerierListUsersCall {
+func (c *TransactionQuerierListUsersCall) DoAndReturn(f func(context.Context, queries.ListUsersParams) ([]*queries.User, error)) *TransactionQuerierListUsersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2811,31 +2810,31 @@ func (m *MockTransactionQuerier) ListUsersPaginated(ctx context.Context, arg que
 }
 
 // ListUsersPaginated indicates an expected call of ListUsersPaginated.
-func (mr *MockTransactionQuerierMockRecorder) ListUsersPaginated(ctx, arg any) *MockTransactionQuerierListUsersPaginatedCall {
+func (mr *MockTransactionQuerierMockRecorder) ListUsersPaginated(ctx, arg any) *TransactionQuerierListUsersPaginatedCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsersPaginated", reflect.TypeOf((*MockTransactionQuerier)(nil).ListUsersPaginated), ctx, arg)
-	return &MockTransactionQuerierListUsersPaginatedCall{Call: call}
+	return &TransactionQuerierListUsersPaginatedCall{Call: call}
 }
 
-// MockTransactionQuerierListUsersPaginatedCall wrap *gomock.Call
-type MockTransactionQuerierListUsersPaginatedCall struct {
+// TransactionQuerierListUsersPaginatedCall wrap *gomock.Call
+type TransactionQuerierListUsersPaginatedCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierListUsersPaginatedCall) Return(arg0 []*queries.User, arg1 error) *MockTransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) Return(arg0 []*queries.User, arg1 error) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *MockTransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *MockTransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2850,31 +2849,31 @@ func (m *MockTransactionQuerier) StartTransaction(ctx context.Context) (db.Trans
 }
 
 // StartTransaction indicates an expected call of StartTransaction.
-func (mr *MockTransactionQuerierMockRecorder) StartTransaction(ctx any) *MockTransactionQuerierStartTransactionCall {
+func (mr *MockTransactionQuerierMockRecorder) StartTransaction(ctx any) *TransactionQuerierStartTransactionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartTransaction", reflect.TypeOf((*MockTransactionQuerier)(nil).StartTransaction), ctx)
-	return &MockTransactionQuerierStartTransactionCall{Call: call}
+	return &TransactionQuerierStartTransactionCall{Call: call}
 }
 
-// MockTransactionQuerierStartTransactionCall wrap *gomock.Call
-type MockTransactionQuerierStartTransactionCall struct {
+// TransactionQuerierStartTransactionCall wrap *gomock.Call
+type TransactionQuerierStartTransactionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierStartTransactionCall) Return(arg0 db.TransactionQuerier, arg1 error) *MockTransactionQuerierStartTransactionCall {
+func (c *TransactionQuerierStartTransactionCall) Return(arg0 db.TransactionQuerier, arg1 error) *TransactionQuerierStartTransactionCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierStartTransactionCall) Do(f func(context.Context) (db.TransactionQuerier, error)) *MockTransactionQuerierStartTransactionCall {
+func (c *TransactionQuerierStartTransactionCall) Do(f func(context.Context) (db.TransactionQuerier, error)) *TransactionQuerierStartTransactionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierStartTransactionCall) DoAndReturn(f func(context.Context) (db.TransactionQuerier, error)) *MockTransactionQuerierStartTransactionCall {
+func (c *TransactionQuerierStartTransactionCall) DoAndReturn(f func(context.Context) (db.TransactionQuerier, error)) *TransactionQuerierStartTransactionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2889,31 +2888,31 @@ func (m *MockTransactionQuerier) UpdateDockerLayerScanForProject(ctx context.Con
 }
 
 // UpdateDockerLayerScanForProject indicates an expected call of UpdateDockerLayerScanForProject.
-func (mr *MockTransactionQuerierMockRecorder) UpdateDockerLayerScanForProject(ctx, arg any) *MockTransactionQuerierUpdateDockerLayerScanForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdateDockerLayerScanForProject(ctx, arg any) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateDockerLayerScanForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateDockerLayerScanForProject), ctx, arg)
-	return &MockTransactionQuerierUpdateDockerLayerScanForProjectCall{Call: call}
+	return &TransactionQuerierUpdateDockerLayerScanForProjectCall{Call: call}
 }
 
-// MockTransactionQuerierUpdateDockerLayerScanForProjectCall wrap *gomock.Call
-type MockTransactionQuerierUpdateDockerLayerScanForProjectCall struct {
+// TransactionQuerierUpdateDockerLayerScanForProjectCall wrap *gomock.Call
+type TransactionQuerierUpdateDockerLayerScanForProjectCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdateDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *MockTransactionQuerierUpdateDockerLayerScanForProjectCall {
+func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) Return(arg0 *queries.ProjectDockerLayerScan, arg1 error) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdateDockerLayerScanForProjectCall) Do(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *MockTransactionQuerierUpdateDockerLayerScanForProjectCall {
+func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) Do(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *MockTransactionQuerierUpdateDockerLayerScanForProjectCall {
+func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2927,31 +2926,31 @@ func (m *MockTransactionQuerier) UpdateNvdCPE(ctx context.Context, arg queries.U
 }
 
 // UpdateNvdCPE indicates an expected call of UpdateNvdCPE.
-func (mr *MockTransactionQuerierMockRecorder) UpdateNvdCPE(ctx, arg any) *MockTransactionQuerierUpdateNvdCPECall {
+func (mr *MockTransactionQuerierMockRecorder) UpdateNvdCPE(ctx, arg any) *TransactionQuerierUpdateNvdCPECall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNvdCPE", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateNvdCPE), ctx, arg)
-	return &MockTransactionQuerierUpdateNvdCPECall{Call: call}
+	return &TransactionQuerierUpdateNvdCPECall{Call: call}
 }
 
-// MockTransactionQuerierUpdateNvdCPECall wrap *gomock.Call
-type MockTransactionQuerierUpdateNvdCPECall struct {
+// TransactionQuerierUpdateNvdCPECall wrap *gomock.Call
+type TransactionQuerierUpdateNvdCPECall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdateNvdCPECall) Return(arg0 error) *MockTransactionQuerierUpdateNvdCPECall {
+func (c *TransactionQuerierUpdateNvdCPECall) Return(arg0 error) *TransactionQuerierUpdateNvdCPECall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdateNvdCPECall) Do(f func(context.Context, queries.UpdateNvdCPEParams) error) *MockTransactionQuerierUpdateNvdCPECall {
+func (c *TransactionQuerierUpdateNvdCPECall) Do(f func(context.Context, queries.UpdateNvdCPEParams) error) *TransactionQuerierUpdateNvdCPECall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdateNvdCPECall) DoAndReturn(f func(context.Context, queries.UpdateNvdCPEParams) error) *MockTransactionQuerierUpdateNvdCPECall {
+func (c *TransactionQuerierUpdateNvdCPECall) DoAndReturn(f func(context.Context, queries.UpdateNvdCPEParams) error) *TransactionQuerierUpdateNvdCPECall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2965,31 +2964,31 @@ func (m *MockTransactionQuerier) UpdatePostgresDatabase(ctx context.Context, arg
 }
 
 // UpdatePostgresDatabase indicates an expected call of UpdatePostgresDatabase.
-func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresDatabase(ctx, arg any) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresDatabase(ctx, arg any) *TransactionQuerierUpdatePostgresDatabaseCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePostgresDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdatePostgresDatabase), ctx, arg)
-	return &MockTransactionQuerierUpdatePostgresDatabaseCall{Call: call}
+	return &TransactionQuerierUpdatePostgresDatabaseCall{Call: call}
 }
 
-// MockTransactionQuerierUpdatePostgresDatabaseCall wrap *gomock.Call
-type MockTransactionQuerierUpdatePostgresDatabaseCall struct {
+// TransactionQuerierUpdatePostgresDatabaseCall wrap *gomock.Call
+type TransactionQuerierUpdatePostgresDatabaseCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdatePostgresDatabaseCall) Return(arg0 error) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+func (c *TransactionQuerierUpdatePostgresDatabaseCall) Return(arg0 error) *TransactionQuerierUpdatePostgresDatabaseCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdatePostgresDatabaseCall) Do(f func(context.Context, queries.UpdatePostgresDatabaseParams) error) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+func (c *TransactionQuerierUpdatePostgresDatabaseCall) Do(f func(context.Context, queries.UpdatePostgresDatabaseParams) error) *TransactionQuerierUpdatePostgresDatabaseCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdatePostgresDatabaseCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresDatabaseParams) error) *MockTransactionQuerierUpdatePostgresDatabaseCall {
+func (c *TransactionQuerierUpdatePostgresDatabaseCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresDatabaseParams) error) *TransactionQuerierUpdatePostgresDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3003,31 +3002,31 @@ func (m *MockTransactionQuerier) UpdatePostgresScanBruteforceResult(ctx context.
 }
 
 // UpdatePostgresScanBruteforceResult indicates an expected call of UpdatePostgresScanBruteforceResult.
-func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresScanBruteforceResult(ctx, arg any) *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresScanBruteforceResult(ctx, arg any) *TransactionQuerierUpdatePostgresScanBruteforceResultCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePostgresScanBruteforceResult", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdatePostgresScanBruteforceResult), ctx, arg)
-	return &MockTransactionQuerierUpdatePostgresScanBruteforceResultCall{Call: call}
+	return &TransactionQuerierUpdatePostgresScanBruteforceResultCall{Call: call}
 }
 
-// MockTransactionQuerierUpdatePostgresScanBruteforceResultCall wrap *gomock.Call
-type MockTransactionQuerierUpdatePostgresScanBruteforceResultCall struct {
+// TransactionQuerierUpdatePostgresScanBruteforceResultCall wrap *gomock.Call
+type TransactionQuerierUpdatePostgresScanBruteforceResultCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall) Return(arg0 error) *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall {
+func (c *TransactionQuerierUpdatePostgresScanBruteforceResultCall) Return(arg0 error) *TransactionQuerierUpdatePostgresScanBruteforceResultCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall) Do(f func(context.Context, queries.UpdatePostgresScanBruteforceResultParams) error) *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall {
+func (c *TransactionQuerierUpdatePostgresScanBruteforceResultCall) Do(f func(context.Context, queries.UpdatePostgresScanBruteforceResultParams) error) *TransactionQuerierUpdatePostgresScanBruteforceResultCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresScanBruteforceResultParams) error) *MockTransactionQuerierUpdatePostgresScanBruteforceResultCall {
+func (c *TransactionQuerierUpdatePostgresScanBruteforceResultCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresScanBruteforceResultParams) error) *TransactionQuerierUpdatePostgresScanBruteforceResultCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3041,31 +3040,31 @@ func (m *MockTransactionQuerier) UpdatePostgresScanStatus(ctx context.Context, a
 }
 
 // UpdatePostgresScanStatus indicates an expected call of UpdatePostgresScanStatus.
-func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresScanStatus(ctx, arg any) *MockTransactionQuerierUpdatePostgresScanStatusCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresScanStatus(ctx, arg any) *TransactionQuerierUpdatePostgresScanStatusCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePostgresScanStatus", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdatePostgresScanStatus), ctx, arg)
-	return &MockTransactionQuerierUpdatePostgresScanStatusCall{Call: call}
+	return &TransactionQuerierUpdatePostgresScanStatusCall{Call: call}
 }
 
-// MockTransactionQuerierUpdatePostgresScanStatusCall wrap *gomock.Call
-type MockTransactionQuerierUpdatePostgresScanStatusCall struct {
+// TransactionQuerierUpdatePostgresScanStatusCall wrap *gomock.Call
+type TransactionQuerierUpdatePostgresScanStatusCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdatePostgresScanStatusCall) Return(arg0 error) *MockTransactionQuerierUpdatePostgresScanStatusCall {
+func (c *TransactionQuerierUpdatePostgresScanStatusCall) Return(arg0 error) *TransactionQuerierUpdatePostgresScanStatusCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdatePostgresScanStatusCall) Do(f func(context.Context, queries.UpdatePostgresScanStatusParams) error) *MockTransactionQuerierUpdatePostgresScanStatusCall {
+func (c *TransactionQuerierUpdatePostgresScanStatusCall) Do(f func(context.Context, queries.UpdatePostgresScanStatusParams) error) *TransactionQuerierUpdatePostgresScanStatusCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdatePostgresScanStatusCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresScanStatusParams) error) *MockTransactionQuerierUpdatePostgresScanStatusCall {
+func (c *TransactionQuerierUpdatePostgresScanStatusCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresScanStatusParams) error) *TransactionQuerierUpdatePostgresScanStatusCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3079,31 +3078,31 @@ func (m *MockTransactionQuerier) UpdatePostgresVersion(ctx context.Context, arg 
 }
 
 // UpdatePostgresVersion indicates an expected call of UpdatePostgresVersion.
-func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresVersion(ctx, arg any) *MockTransactionQuerierUpdatePostgresVersionCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdatePostgresVersion(ctx, arg any) *TransactionQuerierUpdatePostgresVersionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePostgresVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdatePostgresVersion), ctx, arg)
-	return &MockTransactionQuerierUpdatePostgresVersionCall{Call: call}
+	return &TransactionQuerierUpdatePostgresVersionCall{Call: call}
 }
 
-// MockTransactionQuerierUpdatePostgresVersionCall wrap *gomock.Call
-type MockTransactionQuerierUpdatePostgresVersionCall struct {
+// TransactionQuerierUpdatePostgresVersionCall wrap *gomock.Call
+type TransactionQuerierUpdatePostgresVersionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdatePostgresVersionCall) Return(arg0 error) *MockTransactionQuerierUpdatePostgresVersionCall {
+func (c *TransactionQuerierUpdatePostgresVersionCall) Return(arg0 error) *TransactionQuerierUpdatePostgresVersionCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdatePostgresVersionCall) Do(f func(context.Context, queries.UpdatePostgresVersionParams) error) *MockTransactionQuerierUpdatePostgresVersionCall {
+func (c *TransactionQuerierUpdatePostgresVersionCall) Do(f func(context.Context, queries.UpdatePostgresVersionParams) error) *TransactionQuerierUpdatePostgresVersionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdatePostgresVersionCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresVersionParams) error) *MockTransactionQuerierUpdatePostgresVersionCall {
+func (c *TransactionQuerierUpdatePostgresVersionCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresVersionParams) error) *TransactionQuerierUpdatePostgresVersionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3117,31 +3116,31 @@ func (m *MockTransactionQuerier) UpdateSession(ctx context.Context, arg queries.
 }
 
 // UpdateSession indicates an expected call of UpdateSession.
-func (mr *MockTransactionQuerierMockRecorder) UpdateSession(ctx, arg any) *MockTransactionQuerierUpdateSessionCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdateSession(ctx, arg any) *TransactionQuerierUpdateSessionCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSession", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateSession), ctx, arg)
-	return &MockTransactionQuerierUpdateSessionCall{Call: call}
+	return &TransactionQuerierUpdateSessionCall{Call: call}
 }
 
-// MockTransactionQuerierUpdateSessionCall wrap *gomock.Call
-type MockTransactionQuerierUpdateSessionCall struct {
+// TransactionQuerierUpdateSessionCall wrap *gomock.Call
+type TransactionQuerierUpdateSessionCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdateSessionCall) Return(arg0 error) *MockTransactionQuerierUpdateSessionCall {
+func (c *TransactionQuerierUpdateSessionCall) Return(arg0 error) *TransactionQuerierUpdateSessionCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdateSessionCall) Do(f func(context.Context, queries.UpdateSessionParams) error) *MockTransactionQuerierUpdateSessionCall {
+func (c *TransactionQuerierUpdateSessionCall) Do(f func(context.Context, queries.UpdateSessionParams) error) *TransactionQuerierUpdateSessionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdateSessionCall) DoAndReturn(f func(context.Context, queries.UpdateSessionParams) error) *MockTransactionQuerierUpdateSessionCall {
+func (c *TransactionQuerierUpdateSessionCall) DoAndReturn(f func(context.Context, queries.UpdateSessionParams) error) *TransactionQuerierUpdateSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3155,31 +3154,31 @@ func (m *MockTransactionQuerier) UpdateUser(ctx context.Context, arg queries.Upd
 }
 
 // UpdateUser indicates an expected call of UpdateUser.
-func (mr *MockTransactionQuerierMockRecorder) UpdateUser(ctx, arg any) *MockTransactionQuerierUpdateUserCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdateUser(ctx, arg any) *TransactionQuerierUpdateUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateUser), ctx, arg)
-	return &MockTransactionQuerierUpdateUserCall{Call: call}
+	return &TransactionQuerierUpdateUserCall{Call: call}
 }
 
-// MockTransactionQuerierUpdateUserCall wrap *gomock.Call
-type MockTransactionQuerierUpdateUserCall struct {
+// TransactionQuerierUpdateUserCall wrap *gomock.Call
+type TransactionQuerierUpdateUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdateUserCall) Return(arg0 error) *MockTransactionQuerierUpdateUserCall {
+func (c *TransactionQuerierUpdateUserCall) Return(arg0 error) *TransactionQuerierUpdateUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdateUserCall) Do(f func(context.Context, queries.UpdateUserParams) error) *MockTransactionQuerierUpdateUserCall {
+func (c *TransactionQuerierUpdateUserCall) Do(f func(context.Context, queries.UpdateUserParams) error) *TransactionQuerierUpdateUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdateUserCall) DoAndReturn(f func(context.Context, queries.UpdateUserParams) error) *MockTransactionQuerierUpdateUserCall {
+func (c *TransactionQuerierUpdateUserCall) DoAndReturn(f func(context.Context, queries.UpdateUserParams) error) *TransactionQuerierUpdateUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3193,31 +3192,31 @@ func (m *MockTransactionQuerier) UpdateUserPassword(ctx context.Context, arg que
 }
 
 // UpdateUserPassword indicates an expected call of UpdateUserPassword.
-func (mr *MockTransactionQuerierMockRecorder) UpdateUserPassword(ctx, arg any) *MockTransactionQuerierUpdateUserPasswordCall {
+func (mr *MockTransactionQuerierMockRecorder) UpdateUserPassword(ctx, arg any) *TransactionQuerierUpdateUserPasswordCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPassword", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateUserPassword), ctx, arg)
-	return &MockTransactionQuerierUpdateUserPasswordCall{Call: call}
+	return &TransactionQuerierUpdateUserPasswordCall{Call: call}
 }
 
-// MockTransactionQuerierUpdateUserPasswordCall wrap *gomock.Call
-type MockTransactionQuerierUpdateUserPasswordCall struct {
+// TransactionQuerierUpdateUserPasswordCall wrap *gomock.Call
+type TransactionQuerierUpdateUserPasswordCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierUpdateUserPasswordCall) Return(arg0 error) *MockTransactionQuerierUpdateUserPasswordCall {
+func (c *TransactionQuerierUpdateUserPasswordCall) Return(arg0 error) *TransactionQuerierUpdateUserPasswordCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierUpdateUserPasswordCall) Do(f func(context.Context, queries.UpdateUserPasswordParams) error) *MockTransactionQuerierUpdateUserPasswordCall {
+func (c *TransactionQuerierUpdateUserPasswordCall) Do(f func(context.Context, queries.UpdateUserPasswordParams) error) *TransactionQuerierUpdateUserPasswordCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierUpdateUserPasswordCall) DoAndReturn(f func(context.Context, queries.UpdateUserPasswordParams) error) *MockTransactionQuerierUpdateUserPasswordCall {
+func (c *TransactionQuerierUpdateUserPasswordCall) DoAndReturn(f func(context.Context, queries.UpdateUserPasswordParams) error) *TransactionQuerierUpdateUserPasswordCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3231,31 +3230,31 @@ func (m *MockTransactionQuerier) ValidateTOTPSecretForUser(ctx context.Context, 
 }
 
 // ValidateTOTPSecretForUser indicates an expected call of ValidateTOTPSecretForUser.
-func (mr *MockTransactionQuerierMockRecorder) ValidateTOTPSecretForUser(ctx, userID any) *MockTransactionQuerierValidateTOTPSecretForUserCall {
+func (mr *MockTransactionQuerierMockRecorder) ValidateTOTPSecretForUser(ctx, userID any) *TransactionQuerierValidateTOTPSecretForUserCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTOTPSecretForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).ValidateTOTPSecretForUser), ctx, userID)
-	return &MockTransactionQuerierValidateTOTPSecretForUserCall{Call: call}
+	return &TransactionQuerierValidateTOTPSecretForUserCall{Call: call}
 }
 
-// MockTransactionQuerierValidateTOTPSecretForUserCall wrap *gomock.Call
-type MockTransactionQuerierValidateTOTPSecretForUserCall struct {
+// TransactionQuerierValidateTOTPSecretForUserCall wrap *gomock.Call
+type TransactionQuerierValidateTOTPSecretForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierValidateTOTPSecretForUserCall) Return(arg0 error) *MockTransactionQuerierValidateTOTPSecretForUserCall {
+func (c *TransactionQuerierValidateTOTPSecretForUserCall) Return(arg0 error) *TransactionQuerierValidateTOTPSecretForUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierValidateTOTPSecretForUserCall) Do(f func(context.Context, int64) error) *MockTransactionQuerierValidateTOTPSecretForUserCall {
+func (c *TransactionQuerierValidateTOTPSecretForUserCall) Do(f func(context.Context, int64) error) *TransactionQuerierValidateTOTPSecretForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierValidateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierValidateTOTPSecretForUserCall {
+func (c *TransactionQuerierValidateTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) error) *TransactionQuerierValidateTOTPSecretForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

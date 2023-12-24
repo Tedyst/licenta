@@ -8,5 +8,5 @@ import (
 	_ "go.uber.org/mock/mockgen"
 )
 
-//go:generate sqlc generate
-//go:generate mockgen -source=db.go -package mock -typed -destination mock/mock.go
+//go:generate go run github.com/sqlc-dev/sqlc/cmd/sqlc generate
+//go:generate go run go.uber.org/mock/mockgen -source=db.go -package mock -typed -destination mock/mock.go
