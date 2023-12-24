@@ -24,7 +24,8 @@ func (l *localCacheProvider[T]) Get(key string) (T, bool, error) {
 		return v, true, nil
 	}
 
-	return any(nil).(T), false, nil
+	var result T
+	return result, false, nil
 }
 
 func (l *localCacheProvider[T]) Set(key string, value T) error {

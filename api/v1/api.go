@@ -32,7 +32,7 @@ type sessionStore interface {
 }
 
 func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore sessionStore, config ApiV1Config, messageExchange messages.Exchange, taskRunner tasks.TaskRunner, workerAuth workerAuth) http.Handler {
-	api := generated.NewStrictHandlerWithOptions(handlers.NewServerHandler(database, sessionStore, messageExchange, taskRunner), nil, generated.StrictHTTPServerOptions{
+	api := generated.NewStrictHandlerWithOptions(handlers.NewServerHandler(database, sessionStore, messageExchange, taskRunner, workerAuth), nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			var message = "Invalid request"
 			if config.Debug {

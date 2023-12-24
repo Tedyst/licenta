@@ -9,20 +9,22 @@ import (
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/worker"
 )
 
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
-	workerA := models.Worker{
-		ID:    1,
-		Token: "asdasd",
+	w := server.workerauth.GetWorker(ctx)
+	if w == nil {
+		return generated.GetWorkerGetTask401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	message, ok, err := server.MessageExchange.ReceiveSendScanToWorkerMessage(ctx, workerA)
+	message, ok, err := server.MessageExchange.ReceiveSendScanToWorkerMessage(ctx, *w)
 	if err != nil && err != context.DeadlineExceeded {
 		return nil, err
 	}
@@ -52,7 +54,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 
 	err = server.Queries.BindPostgresScanToWorker(ctx, queries.BindPostgresScanToWorkerParams{
 		ID:       int64(message.PostgresScanID),
-		WorkerID: sql.NullInt64{Int64: int64(workerA.ID), Valid: true},
+		WorkerID: sql.NullInt64{Int64: int64(w.ID), Valid: true},
 	})
 	if err != nil {
 		return nil, err

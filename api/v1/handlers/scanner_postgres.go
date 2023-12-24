@@ -17,6 +17,14 @@ import (
 const bruteforcePasswordsPerPage = 10000
 
 func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.PostScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.PostScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
+	w := server.workerauth.GetWorker(ctx)
+	if w == nil {
+		return generated.PostScannerPostgresDatabasePostgresDatabaseId401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
+	}
+
 	_, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, err

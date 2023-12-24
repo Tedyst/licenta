@@ -54,9 +54,10 @@ func Initialize(database db.TransactionQuerier, sessionStore sessionStore, confi
 	app.Use(options.HandleOptions(config.Origin))
 	app.Use(requestid.RequestIDMiddleware)
 	if !config.Debug {
-		app.Use(middleware.Timeout(10 * time.Second))
+		app.Use(middleware.Timeout(30 * time.Second))
 	}
 	app.Use(sessionStore.Handler)
+	app.Use(workerAuth.Handler)
 
 	app.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)

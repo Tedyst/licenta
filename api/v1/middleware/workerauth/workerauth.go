@@ -9,7 +9,7 @@ import (
 	"github.com/tedyst/licenta/models"
 )
 
-const workerAuthHeader = "X-Worker-Auth"
+const workerAuthHeader = "X-Worker-Token"
 
 type WorkerAuth interface {
 	Handler(next http.Handler) http.Handler
@@ -38,9 +38,6 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		workerAuthData := wa.getWorkerAuthData(ctx)
-		if workerAuthData == nil {
-			workerAuthData = &models.Worker{}
-		}
 
 		if r.Header.Get(workerAuthHeader) != "" {
 			worker, ok, err := wa.cache.Get(r.Header.Get(workerAuthHeader))
@@ -54,12 +51,18 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 					http.Error(w, "Internal server error", http.StatusInternalServerError)
 					return
 				}
-				wa.cache.Set(r.Header.Get(workerAuthHeader), *worker)
+				if err == nil {
+					wa.cache.Set(r.Header.Get(workerAuthHeader), *worker)
+					workerAuthData = worker
+				}
+			} else {
+				workerAuthData = &worker
 			}
-			workerAuthData = &worker
 		}
 
-		ctx = context.WithValue(ctx, workerAuthKey{}, workerAuthData)
+		if workerAuthData != nil {
+			ctx = context.WithValue(ctx, workerAuthKey{}, workerAuthData)
+		}
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

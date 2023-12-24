@@ -14,7 +14,7 @@ var workerCmd = &cobra.Command{
 	Short: "Run the worker using the production configuration",
 	Long:  `This command connects to the API server and listens to tasks.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		apiKeyProvider, err := securityprovider.NewSecurityProviderApiKey("header", "X-Worker-Tokena", viper.GetString("worker-token"))
+		apiKeyProvider, err := securityprovider.NewSecurityProviderApiKey("header", "X-Worker-Token", viper.GetString("worker-token"))
 		if err != nil {
 			return errors.Wrap(err, "error creating security provider")
 		}
