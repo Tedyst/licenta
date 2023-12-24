@@ -30,7 +30,7 @@ type scannerRunner struct {
 }
 
 type postgresQuerier interface {
-	GetPostgresDatabase(ctx context.Context, id int64) (*models.PostgresDatabases, error)
+	GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error)
 	UpdatePostgresScanStatus(ctx context.Context, params queries.UpdatePostgresScanStatusParams) error
 	CreatePostgresScanResult(ctx context.Context, params queries.CreatePostgresScanResultParams) (*models.PostgresScanResult, error)
 	CreatePostgresScanBruteforceResult(ctx context.Context, arg queries.CreatePostgresScanBruteforceResultParams) (*models.PostgresScanBruteforceResult, error)
@@ -65,7 +65,7 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	logger := slog.With(
 		"scan", scan.ID,
 		"database_id", scan.PostgresDatabaseID,
-		"project_id", db.ProjectID,
+		"project_id", db.PostgresDatabase.ProjectID,
 	)
 
 	logger.InfoContext(ctx, "Starting Postgres DB scan")
@@ -99,7 +99,7 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 		return nil
 	}
 
-	conn, err := pgx.Connect(ctx, getPostgresConnectString(db))
+	conn, err := pgx.Connect(ctx, getPostgresConnectString(&db.PostgresDatabase))
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
@@ -197,7 +197,7 @@ func (runner *scannerRunner) bruteforcePostgres(
 		return notifyError(errors.Wrap(err, "could not get database"))
 	}
 
-	bruteforcer, err := runner.bruteforceProvider.NewBruteforcer(ctx, sc, notifyBruteforceStatus, int(database.ProjectID))
+	bruteforcer, err := runner.bruteforceProvider.NewBruteforcer(ctx, sc, notifyBruteforceStatus, int(database.PostgresDatabase.ProjectID))
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not create bruteforcer"))
 	}
@@ -235,14 +235,14 @@ func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, 
 		return errors.Wrap(err, "could not get database")
 	}
 
-	if !db.Remote {
+	if !db.PostgresDatabase.Remote {
 		return nil
 	}
 
 	logger := slog.With(
 		"scan", scan.ID,
 		"database_id", scan.PostgresDatabaseID,
-		"project_id", db.ProjectID,
+		"project_id", db.PostgresDatabase.ProjectID,
 	)
 
 	logger.InfoContext(ctx, "Starting Postgres DB scan for public access")
@@ -263,7 +263,7 @@ func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, 
 		return err
 	}
 
-	conn, err := pgx.Connect(ctx, getPostgresConnectString(db))
+	conn, err := pgx.Connect(ctx, getPostgresConnectString(&db.PostgresDatabase))
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not connect to database"))
 	}
@@ -304,13 +304,13 @@ func (runner *scannerRunner) SchedulePostgresScan(ctx context.Context, scan *mod
 		return errors.Wrap(err, "could not get database")
 	}
 
-	if database.Remote {
+	if database.PostgresDatabase.Remote {
 		err = runner.ScanPostgresDBForPublicAccess(ctx, scan)
 		if err != nil {
 			return errors.Wrap(err, "could not scan database for public access")
 		}
 
-		workers, err := runner.queries.GetWorkersForProject(ctx, database.ProjectID)
+		workers, err := runner.queries.GetWorkersForProject(ctx, database.PostgresDatabase.ProjectID)
 		if err != nil {
 			return errors.Wrap(err, "could not get workers for project")
 		}
@@ -320,7 +320,7 @@ func (runner *scannerRunner) SchedulePostgresScan(ctx context.Context, scan *mod
 		}
 
 		for _, worker := range workers {
-			message := messages.GetPostgresScanMessage(int(scan.ID), int(database.ProjectID))
+			message := messages.GetPostgresScanMessage(int(scan.ID), int(database.PostgresDatabase.ProjectID))
 			err := runner.messageExchange.PublishSendScanToWorkerMessage(ctx, worker.Worker, message)
 			if err != nil {
 				return errors.Wrap(err, "could not publish message")

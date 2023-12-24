@@ -2,9 +2,7 @@ package worker
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
@@ -18,77 +16,52 @@ type internalPassword struct {
 }
 
 type remoteBruteforceProvider struct {
-	remoteURL string
-	authToken string
-	task      Task
+	client generated.ClientWithResponsesInterface
+	task   Task
 }
 
 type remotePasswordProvider struct {
-	remoteURL string
-	authToken string
-	task      Task
+	client generated.ClientWithResponsesInterface
+	task   Task
 
 	context context.Context
 
-	nextURL      string
+	hasNext      bool
 	count        int
 	currentBatch []internalPassword
 }
 
 func (p *remotePasswordProvider) readBatch() error {
-	if len(p.currentBatch) > 1 {
+	if len(p.currentBatch) > 1 || !p.hasNext {
 		return nil
 	}
 
-	var remoteURL string
-	if p.nextURL != "" {
-		remoteURL = p.remoteURL + p.nextURL
-	} else {
-		remoteURL = p.remoteURL + "/api/v1/project/" + strconv.Itoa(int(p.task.PostgresScan.Database.ID)) + "/bruteforce-passwords/"
+	lastID := int32(-1)
+	if len(p.currentBatch) > 0 {
+		lastID = int32(p.currentBatch[len(p.currentBatch)-1].ID)
 	}
+	response, err := p.client.GetProjectProjectidBruteforcePasswordsWithResponse(p.context, p.task.PostgresScan.Database.ID, &generated.GetProjectProjectidBruteforcePasswordsParams{
+		LastId: &lastID,
+	})
 
-	req, err := http.NewRequest("GET", remoteURL, nil)
 	if err != nil {
 		return err
 	}
 
-	req = req.WithContext(p.context)
-	req.Header.Set("X-Worker-Token", p.authToken)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != 200 {
+	switch response.StatusCode() {
+	case http.StatusOK:
+		for _, password := range response.JSON200.Results {
+			p.currentBatch = append(p.currentBatch, internalPassword{
+				Password: password.Password,
+				ID:       password.Id,
+			})
+		}
+		p.count = response.JSON200.Count
+		p.hasNext = response.JSON200.Next != nil
+		return nil
+	default:
 		return errors.New("error getting passwords")
 	}
-
-	var response generated.GetProjectProjectidBruteforcePasswords200JSONResponse
-	err = json.NewDecoder(resp.Body).Decode(&response)
-	if err != nil {
-		return err
-	}
-
-	if !response.Success {
-		return errors.New("error getting passwords")
-	}
-
-	p.count = response.Count
-	if response.Next == nil {
-		p.nextURL = ""
-	} else {
-		p.nextURL = *response.Next
-	}
-
-	for _, password := range response.Results {
-		p.currentBatch = append(p.currentBatch, internalPassword{
-			Password: password.Password,
-			ID:       password.Id,
-		})
-	}
-
-	return nil
 }
 
 func (p *remotePasswordProvider) GetCount() (int, error) {
@@ -112,7 +85,7 @@ func (p *remotePasswordProvider) Next() bool {
 
 	p.currentBatch = p.currentBatch[1:]
 
-	return len(p.currentBatch) != 0 && p.nextURL != ""
+	return len(p.currentBatch) != 0 || p.hasNext
 }
 
 func (p *remotePasswordProvider) Error() error {
@@ -141,10 +114,9 @@ func (p *remotePasswordProvider) GetPasswordByHash(username, hash string) (strin
 
 func (p *remoteBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc bruteforce.StatusFunc, projectID int) (bruteforce.Bruteforcer, error) {
 	return bruteforce.NewBruteforcer(&remotePasswordProvider{
-		remoteURL: p.remoteURL,
-		authToken: p.authToken,
-		task:      p.task,
-		context:   ctx,
+		client:  p.client,
+		task:    p.task,
+		context: ctx,
 	}, sc, statusFunc), nil
 }
 

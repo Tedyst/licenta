@@ -218,6 +218,8 @@ CREATE TABLE postgres_scan_results(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE INDEX postgres_scan_results_postgres_scan_id_idx ON postgres_scan_results(postgres_scan_id);
+
 CREATE TABLE postgres_scan_bruteforce_results(
   id bigserial PRIMARY KEY,
   postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,

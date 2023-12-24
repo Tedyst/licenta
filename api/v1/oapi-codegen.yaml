@@ -4,6 +4,7 @@ generate:
   strict-server: true
   models: true
   embedded-spec: true
+  client: true
 output-options:
   skip-prune: true
 output: generated/gen.go

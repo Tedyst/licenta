@@ -43,7 +43,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, err
 	}
 
-	if scan.WorkerID.Valid {
+	if scan.PostgresScan.WorkerID.Valid {
 		return generated.GetWorkerGetTask204JSONResponse{
 			Success: false,
 			Message: "Task already taken",
@@ -58,7 +58,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, err
 	}
 
-	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
+	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresScan.PostgresDatabaseID)
 	if err != nil {
 		return nil, err
 	}
@@ -72,22 +72,22 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 				Scan             *generated.PostgresScan     "json:\"scan,omitempty\""
 			}{
 				Scan: &generated.PostgresScan{
-					CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
-					EndedAt:   scan.EndedAt.Time.Format(time.RFC3339),
-					Error:     scan.Error.String,
-					Id:        int(scan.ID),
-					Status:    int(scan.Status),
+					CreatedAt: scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
+					EndedAt:   scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
+					Error:     scan.PostgresScan.Error.String,
+					Id:        int(scan.PostgresScan.ID),
+					Status:    int(scan.PostgresScan.Status),
 				},
 				PostgresDatabase: &generated.PostgresDatabase{
-					CreatedAt:    database.CreatedAt.Time.Format(time.RFC3339),
-					DatabaseName: database.DatabaseName,
-					Host:         database.Host,
-					Id:           int(database.ID),
-					Password:     database.Password,
-					Port:         int(database.Port),
-					ProjectId:    int(database.ProjectID),
-					Remote:       database.Remote,
-					Username:     database.Username,
+					CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
+					DatabaseName: database.PostgresDatabase.DatabaseName,
+					Host:         database.PostgresDatabase.Host,
+					Id:           int(database.PostgresDatabase.ID),
+					Password:     database.PostgresDatabase.Password,
+					Port:         int(database.PostgresDatabase.Port),
+					ProjectId:    int(database.PostgresDatabase.ProjectID),
+					Remote:       database.PostgresDatabase.Remote,
+					Username:     database.PostgresDatabase.Username,
 				},
 			},
 		},

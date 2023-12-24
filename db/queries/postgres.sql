@@ -30,19 +30,33 @@ WHERE
 
 -- name: GetPostgresScan :one
 SELECT
-    *
+    sqlc.embed(postgres_scan),
+(
+        SELECT
+            MAX(postgres_scan_results.severity)::integer
+        FROM
+            postgres_scan_results
+        WHERE
+            postgres_scan_id = postgres_scan.id) AS maximum_severity
 FROM
     postgres_scan
 WHERE
-    id = $1;
+    postgres_scan.id = $1;
 
 -- name: GetPostgresDatabase :one
 SELECT
-    *
+    sqlc.embed(postgres_databases),
+(
+        SELECT
+            COUNT(*)
+        FROM
+            postgres_scan
+        WHERE
+            postgres_scan.postgres_database_id = postgres_databases.id) AS scan_count
 FROM
     postgres_databases
 WHERE
-    id = $1;
+    postgres_databases.id = $1;
 
 -- name: CreatePostgresScanBruteforceResult :one
 INSERT INTO postgres_scan_bruteforce_results(postgres_scan_id, username, PASSWORD, tried, total)
@@ -59,4 +73,44 @@ SET
     total = $4
 WHERE
     id = $1;
+
+-- name: GetPostgresScansForProject :many
+SELECT
+    sqlc.embed(postgres_scan),
+(
+        SELECT
+            MAX(postgres_scan_results.severity)::integer
+        FROM
+            postgres_scan_results
+        WHERE
+            postgres_scan_id = postgres_scan.id) AS maximum_severity
+FROM
+    postgres_scan
+WHERE
+    postgres_scan.postgres_database_id IN (
+        SELECT
+            postgres_databases.id
+        FROM
+            postgres_databases
+        WHERE
+            postgres_databases.project_id = $1)
+ORDER BY
+    postgres_scan.id DESC;
+
+-- name: GetPostgresScansForDatabase :many
+SELECT
+    sqlc.embed(postgres_scan),
+(
+        SELECT
+            COALESCE(MAX(postgres_scan_results.severity), 0)::integer
+        FROM
+            postgres_scan_results
+        WHERE
+            postgres_scan_id = postgres_scan.id) AS maximum_severity
+FROM
+    postgres_scan
+WHERE
+    postgres_scan.postgres_database_id = $1
+ORDER BY
+    postgres_scan.id DESC;
 

@@ -6,7 +6,9 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -14,9 +16,20 @@ import (
 
 const bruteforcePasswordsPerPage = 10000
 
-func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Context, request generated.PostProjectProjectidScannerPostgresRequestObject) (generated.PostProjectProjectidScannerPostgresResponseObject, error) {
+func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.PostScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.PostScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
+	_, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, err
+	}
+	if err == pgx.ErrNoRows {
+		return generated.PostScannerPostgresDatabasePostgresDatabaseId404JSONResponse{
+			Success: false,
+			Message: "Database not found",
+		}, nil
+	}
+
 	scan, err := server.Queries.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
-		PostgresDatabaseID: 1,
+		PostgresDatabaseID: request.PostgresDatabaseId,
 		Status:             int32(models.SCAN_QUEUED),
 	})
 	if err != nil {
@@ -34,7 +47,7 @@ func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Con
 	if scan.EndedAt.Valid {
 		endedTime = scan.EndedAt.Time.Format(time.RFC3339)
 	}
-	return generated.PostProjectProjectidScannerPostgres200JSONResponse{
+	return generated.PostScannerPostgresDatabasePostgresDatabaseId200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScan{
 			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
@@ -46,19 +59,19 @@ func (server *serverHandler) PostProjectProjectidScannerPostgres(ctx context.Con
 	}, nil
 }
 
-func (server *serverHandler) GetProjectProjectidScannerPostgresScanid(ctx context.Context, request generated.GetProjectProjectidScannerPostgresScanidRequestObject) (generated.GetProjectProjectidScannerPostgresScanidResponseObject, error) {
+func (server *serverHandler) GetScannerPostgresScanScanid(ctx context.Context, request generated.GetScannerPostgresScanScanidRequestObject) (generated.GetScannerPostgresScanScanidResponseObject, error) {
 	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 	if err == sql.ErrNoRows {
-		return generated.GetProjectProjectidScannerPostgresScanid404JSONResponse{
+		return generated.GetScannerPostgresScanScanid404JSONResponse{
 			Success: false,
 			Message: "Scan not found",
 		}, nil
 	}
 
-	scanResults, err := server.Queries.GetPostgresScanResults(ctx, scan.ID)
+	scanResults, err := server.Queries.GetPostgresScanResults(ctx, scan.PostgresScan.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,41 +86,36 @@ func (server *serverHandler) GetProjectProjectidScannerPostgresScanid(ctx contex
 		}
 	}
 
-	return generated.GetProjectProjectidScannerPostgresScanid200JSONResponse{
+	return generated.GetScannerPostgresScanScanid200JSONResponse{
 		Success: true,
 		Scan: generated.PostgresScan{
-			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:   scan.EndedAt.Time.Format(time.RFC3339),
-			Error:     scan.Error.String,
-			Id:        int(scan.ID),
-			Status:    int(scan.Status),
+			CreatedAt: scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:   scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
+			Error:     scan.PostgresScan.Error.String,
+			Id:        int(scan.PostgresScan.ID),
+			Status:    int(scan.PostgresScan.Status),
 		},
-		Results: results,
+		MaximumSeverity: int(scan.MaximumSeverity),
+		Results:         results,
 	}, nil
 }
 
-func (server *serverHandler) PatchProjectProjectidScannerPostgresScanid(ctx context.Context, request generated.PatchProjectProjectidScannerPostgresScanidRequestObject) (generated.PatchProjectProjectidScannerPostgresScanidResponseObject, error) {
+func (server *serverHandler) PatchScannerPostgresScanScanid(ctx context.Context, request generated.PatchScannerPostgresScanScanidRequestObject) (generated.PatchScannerPostgresScanScanidResponseObject, error) {
 	if request.Body == nil {
-		return generated.PatchProjectProjectidScannerPostgresScanid401JSONResponse{
+		return generated.PatchScannerPostgresScanScanid400JSONResponse{
 			Success: false,
 			Message: "Invalid request",
 		}, nil
 	}
 
 	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
-	if err != nil {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
-
-	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
-	if err != nil {
-		return nil, err
-	}
-
-	if database.ProjectID != int64(request.Projectid) {
-		return generated.PatchProjectProjectidScannerPostgresScanid401JSONResponse{
+	if err == pgx.ErrNoRows {
+		return generated.PatchScannerPostgresScanScanid404JSONResponse{
 			Success: false,
-			Message: "Invalid request",
+			Message: "Scan not found",
 		}, nil
 	}
 
@@ -130,40 +138,37 @@ func (server *serverHandler) PatchProjectProjectidScannerPostgresScanid(ctx cont
 		return nil, err
 	}
 
-	return generated.PatchProjectProjectidScannerPostgresScanid200JSONResponse{
+	return generated.PatchScannerPostgresScanScanid200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScan{
-			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:   scan.EndedAt.Time.Format(time.RFC3339),
-			Error:     scan.Error.String,
-			Id:        int(scan.ID),
-			Status:    int(scan.Status),
+			CreatedAt: scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:   scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
+			Error:     scan.PostgresScan.Error.String,
+			Id:        int(scan.PostgresScan.ID),
+			Status:    int(scan.PostgresScan.Status),
 		},
 	}, nil
 }
 
-func (server *serverHandler) PostProjectProjectidScannerPostgresScanidResult(ctx context.Context, request generated.PostProjectProjectidScannerPostgresScanidResultRequestObject) (generated.PostProjectProjectidScannerPostgresScanidResultResponseObject, error) {
+func (server *serverHandler) PostScannerPostgresScanScanidResult(ctx context.Context, request generated.PostScannerPostgresScanScanidResultRequestObject) (generated.PostScannerPostgresScanScanidResultResponseObject, error) {
 	if request.Body == nil {
-		return generated.PostProjectProjectidScannerPostgresScanidResult400JSONResponse{
+		return generated.PostScannerPostgresScanScanidResult400JSONResponse{
 			Success: false,
 			Message: "Invalid request",
 		}, nil
 	}
 
-	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
+	_, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
 	if err != nil {
 		return nil, err
 	}
-
-	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
-	if err != nil {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
-
-	if database.ProjectID != int64(request.Projectid) {
-		return generated.PostProjectProjectidScannerPostgresScanidResult400JSONResponse{
+	if err == pgx.ErrNoRows {
+		return generated.PostScannerPostgresScanScanidResult404JSONResponse{
 			Success: false,
-			Message: "Invalid request",
+			Message: "Scan not found",
 		}, nil
 	}
 
@@ -176,7 +181,7 @@ func (server *serverHandler) PostProjectProjectidScannerPostgresScanidResult(ctx
 		return nil, err
 	}
 
-	return generated.PostProjectProjectidScannerPostgresScanidResult200JSONResponse{
+	return generated.PostScannerPostgresScanScanidResult200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScanResult{
 			CreatedAt: scanresult.CreatedAt.Time.Format(time.RFC3339),
@@ -184,5 +189,55 @@ func (server *serverHandler) PostProjectProjectidScannerPostgresScanidResult(ctx
 			Message:   scanresult.Message,
 			Severity:  int(scanresult.Severity),
 		},
+	}, nil
+}
+
+func (server *serverHandler) GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.GetScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.GetScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
+	database, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, errors.Wrap(err, "error getting postgres database")
+	}
+	if err == pgx.ErrNoRows {
+		return generated.GetScannerPostgresDatabasePostgresDatabaseId404JSONResponse{
+			Success: false,
+			Message: "Database not found",
+		}, nil
+	}
+
+	scans, err := server.Queries.GetPostgresScansForDatabase(ctx, database.PostgresDatabase.ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting postgres scans for database")
+	}
+
+	results := make([]generated.PostgresScan, len(scans))
+	for i, scan := range scans {
+		endedTime := ""
+		if scan.PostgresScan.EndedAt.Valid {
+			endedTime = scan.PostgresScan.EndedAt.Time.Format(time.RFC3339)
+		}
+		results[i] = generated.PostgresScan{
+			CreatedAt:       scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         endedTime,
+			Error:           scan.PostgresScan.Error.String,
+			Id:              int(scan.PostgresScan.ID),
+			Status:          int(scan.PostgresScan.Status),
+			MaximumSeverity: int(scan.MaximumSeverity),
+		}
+	}
+
+	return generated.GetScannerPostgresDatabasePostgresDatabaseId200JSONResponse{
+		Success: true,
+		Database: generated.PostgresDatabase{
+			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
+			Host:         database.PostgresDatabase.Host,
+			DatabaseName: database.PostgresDatabase.DatabaseName,
+			Password:     database.PostgresDatabase.Password,
+			Remote:       database.PostgresDatabase.Remote,
+			Id:           int(database.PostgresDatabase.ID),
+			Port:         int(database.PostgresDatabase.Port),
+			Username:     database.PostgresDatabase.Username,
+		},
+		Scans:     results,
+		ScanCount: int(database.ScanCount),
 	}, nil
 }

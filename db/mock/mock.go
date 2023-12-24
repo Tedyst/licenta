@@ -1871,10 +1871,10 @@ func (c *MockTransactionQuerierGetOrganizationsByUserCall) DoAndReturn(f func(co
 }
 
 // GetPostgresDatabase mocks base method.
-func (m *MockTransactionQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*queries.PostgresDatabase, error) {
+func (m *MockTransactionQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPostgresDatabase", ctx, id)
-	ret0, _ := ret[0].(*queries.PostgresDatabase)
+	ret0, _ := ret[0].(*queries.GetPostgresDatabaseRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1892,28 +1892,28 @@ type MockTransactionQuerierGetPostgresDatabaseCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresDatabaseCall) Return(arg0 *queries.PostgresDatabase, arg1 error) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (c *MockTransactionQuerierGetPostgresDatabaseCall) Return(arg0 *queries.GetPostgresDatabaseRow, arg1 error) *MockTransactionQuerierGetPostgresDatabaseCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresDatabaseCall) Do(f func(context.Context, int64) (*queries.PostgresDatabase, error)) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (c *MockTransactionQuerierGetPostgresDatabaseCall) Do(f func(context.Context, int64) (*queries.GetPostgresDatabaseRow, error)) *MockTransactionQuerierGetPostgresDatabaseCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresDatabaseCall) DoAndReturn(f func(context.Context, int64) (*queries.PostgresDatabase, error)) *MockTransactionQuerierGetPostgresDatabaseCall {
+func (c *MockTransactionQuerierGetPostgresDatabaseCall) DoAndReturn(f func(context.Context, int64) (*queries.GetPostgresDatabaseRow, error)) *MockTransactionQuerierGetPostgresDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // GetPostgresScan mocks base method.
-func (m *MockTransactionQuerier) GetPostgresScan(ctx context.Context, id int64) (*queries.PostgresScan, error) {
+func (m *MockTransactionQuerier) GetPostgresScan(ctx context.Context, id int64) (*queries.GetPostgresScanRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPostgresScan", ctx, id)
-	ret0, _ := ret[0].(*queries.PostgresScan)
+	ret0, _ := ret[0].(*queries.GetPostgresScanRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1931,19 +1931,19 @@ type MockTransactionQuerierGetPostgresScanCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetPostgresScanCall) Return(arg0 *queries.PostgresScan, arg1 error) *MockTransactionQuerierGetPostgresScanCall {
+func (c *MockTransactionQuerierGetPostgresScanCall) Return(arg0 *queries.GetPostgresScanRow, arg1 error) *MockTransactionQuerierGetPostgresScanCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetPostgresScanCall) Do(f func(context.Context, int64) (*queries.PostgresScan, error)) *MockTransactionQuerierGetPostgresScanCall {
+func (c *MockTransactionQuerierGetPostgresScanCall) Do(f func(context.Context, int64) (*queries.GetPostgresScanRow, error)) *MockTransactionQuerierGetPostgresScanCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.PostgresScan, error)) *MockTransactionQuerierGetPostgresScanCall {
+func (c *MockTransactionQuerierGetPostgresScanCall) DoAndReturn(f func(context.Context, int64) (*queries.GetPostgresScanRow, error)) *MockTransactionQuerierGetPostgresScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1983,6 +1983,84 @@ func (c *MockTransactionQuerierGetPostgresScanResultsCall) Do(f func(context.Con
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierGetPostgresScanResultsCall) DoAndReturn(f func(context.Context, int64) ([]*queries.PostgresScanResult, error)) *MockTransactionQuerierGetPostgresScanResultsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetPostgresScansForDatabase mocks base method.
+func (m *MockTransactionQuerier) GetPostgresScansForDatabase(ctx context.Context, postgresDatabaseID int64) ([]*queries.GetPostgresScansForDatabaseRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostgresScansForDatabase", ctx, postgresDatabaseID)
+	ret0, _ := ret[0].([]*queries.GetPostgresScansForDatabaseRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPostgresScansForDatabase indicates an expected call of GetPostgresScansForDatabase.
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresScansForDatabase(ctx, postgresDatabaseID any) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresScansForDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresScansForDatabase), ctx, postgresDatabaseID)
+	return &MockTransactionQuerierGetPostgresScansForDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierGetPostgresScansForDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierGetPostgresScansForDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetPostgresScansForDatabaseCall) Return(arg0 []*queries.GetPostgresScansForDatabaseRow, arg1 error) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetPostgresScansForDatabaseCall) Do(f func(context.Context, int64) ([]*queries.GetPostgresScansForDatabaseRow, error)) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetPostgresScansForDatabaseCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForDatabaseRow, error)) *MockTransactionQuerierGetPostgresScansForDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetPostgresScansForProject mocks base method.
+func (m *MockTransactionQuerier) GetPostgresScansForProject(ctx context.Context, projectID int64) ([]*queries.GetPostgresScansForProjectRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostgresScansForProject", ctx, projectID)
+	ret0, _ := ret[0].([]*queries.GetPostgresScansForProjectRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPostgresScansForProject indicates an expected call of GetPostgresScansForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresScansForProject(ctx, projectID any) *MockTransactionQuerierGetPostgresScansForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresScansForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresScansForProject), ctx, projectID)
+	return &MockTransactionQuerierGetPostgresScansForProjectCall{Call: call}
+}
+
+// MockTransactionQuerierGetPostgresScansForProjectCall wrap *gomock.Call
+type MockTransactionQuerierGetPostgresScansForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetPostgresScansForProjectCall) Return(arg0 []*queries.GetPostgresScansForProjectRow, arg1 error) *MockTransactionQuerierGetPostgresScansForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetPostgresScansForProjectCall) Do(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *MockTransactionQuerierGetPostgresScansForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetPostgresScansForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *MockTransactionQuerierGetPostgresScansForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

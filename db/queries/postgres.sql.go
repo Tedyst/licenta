@@ -104,50 +104,76 @@ func (q *Queries) CreatePostgresScanResult(ctx context.Context, arg CreatePostgr
 
 const getPostgresDatabase = `-- name: GetPostgresDatabase :one
 SELECT
-    id, project_id, host, port, database_name, username, password, remote, created_at
+    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.remote, postgres_databases.created_at,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            postgres_scan
+        WHERE
+            postgres_scan.postgres_database_id = postgres_databases.id) AS scan_count
 FROM
     postgres_databases
 WHERE
-    id = $1
+    postgres_databases.id = $1
 `
 
-func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*PostgresDatabase, error) {
+type GetPostgresDatabaseRow struct {
+	PostgresDatabase PostgresDatabase `json:"postgres_database"`
+	ScanCount        int64            `json:"scan_count"`
+}
+
+func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgresDatabaseRow, error) {
 	row := q.db.QueryRow(ctx, getPostgresDatabase, id)
-	var i PostgresDatabase
+	var i GetPostgresDatabaseRow
 	err := row.Scan(
-		&i.ID,
-		&i.ProjectID,
-		&i.Host,
-		&i.Port,
-		&i.DatabaseName,
-		&i.Username,
-		&i.Password,
-		&i.Remote,
-		&i.CreatedAt,
+		&i.PostgresDatabase.ID,
+		&i.PostgresDatabase.ProjectID,
+		&i.PostgresDatabase.Host,
+		&i.PostgresDatabase.Port,
+		&i.PostgresDatabase.DatabaseName,
+		&i.PostgresDatabase.Username,
+		&i.PostgresDatabase.Password,
+		&i.PostgresDatabase.Remote,
+		&i.PostgresDatabase.CreatedAt,
+		&i.ScanCount,
 	)
 	return &i, err
 }
 
 const getPostgresScan = `-- name: GetPostgresScan :one
 SELECT
-    id, postgres_database_id, status, error, worker_id, created_at, ended_at
+    postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
+(
+        SELECT
+            MAX(postgres_scan_results.severity)::integer
+        FROM
+            postgres_scan_results
+        WHERE
+            postgres_scan_id = postgres_scan.id) AS maximum_severity
 FROM
     postgres_scan
 WHERE
-    id = $1
+    postgres_scan.id = $1
 `
 
-func (q *Queries) GetPostgresScan(ctx context.Context, id int64) (*PostgresScan, error) {
+type GetPostgresScanRow struct {
+	PostgresScan    PostgresScan `json:"postgres_scan"`
+	MaximumSeverity int32        `json:"maximum_severity"`
+}
+
+func (q *Queries) GetPostgresScan(ctx context.Context, id int64) (*GetPostgresScanRow, error) {
 	row := q.db.QueryRow(ctx, getPostgresScan, id)
-	var i PostgresScan
+	var i GetPostgresScanRow
 	err := row.Scan(
-		&i.ID,
-		&i.PostgresDatabaseID,
-		&i.Status,
-		&i.Error,
-		&i.WorkerID,
-		&i.CreatedAt,
-		&i.EndedAt,
+		&i.PostgresScan.ID,
+		&i.PostgresScan.PostgresDatabaseID,
+		&i.PostgresScan.Status,
+		&i.PostgresScan.Error,
+		&i.PostgresScan.WorkerID,
+		&i.PostgresScan.CreatedAt,
+		&i.PostgresScan.EndedAt,
+		&i.MaximumSeverity,
 	)
 	return &i, err
 }
@@ -176,6 +202,116 @@ func (q *Queries) GetPostgresScanResults(ctx context.Context, postgresScanID int
 			&i.Severity,
 			&i.Message,
 			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostgresScansForDatabase = `-- name: GetPostgresScansForDatabase :many
+SELECT
+    postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
+(
+        SELECT
+            COALESCE(MAX(postgres_scan_results.severity), 0)::integer
+        FROM
+            postgres_scan_results
+        WHERE
+            postgres_scan_id = postgres_scan.id) AS maximum_severity
+FROM
+    postgres_scan
+WHERE
+    postgres_scan.postgres_database_id = $1
+ORDER BY
+    postgres_scan.id DESC
+`
+
+type GetPostgresScansForDatabaseRow struct {
+	PostgresScan    PostgresScan `json:"postgres_scan"`
+	MaximumSeverity int32        `json:"maximum_severity"`
+}
+
+func (q *Queries) GetPostgresScansForDatabase(ctx context.Context, postgresDatabaseID int64) ([]*GetPostgresScansForDatabaseRow, error) {
+	rows, err := q.db.Query(ctx, getPostgresScansForDatabase, postgresDatabaseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetPostgresScansForDatabaseRow
+	for rows.Next() {
+		var i GetPostgresScansForDatabaseRow
+		if err := rows.Scan(
+			&i.PostgresScan.ID,
+			&i.PostgresScan.PostgresDatabaseID,
+			&i.PostgresScan.Status,
+			&i.PostgresScan.Error,
+			&i.PostgresScan.WorkerID,
+			&i.PostgresScan.CreatedAt,
+			&i.PostgresScan.EndedAt,
+			&i.MaximumSeverity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostgresScansForProject = `-- name: GetPostgresScansForProject :many
+SELECT
+    postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
+(
+        SELECT
+            MAX(postgres_scan_results.severity)::integer
+        FROM
+            postgres_scan_results
+        WHERE
+            postgres_scan_id = postgres_scan.id) AS maximum_severity
+FROM
+    postgres_scan
+WHERE
+    postgres_scan.postgres_database_id IN (
+        SELECT
+            postgres_databases.id
+        FROM
+            postgres_databases
+        WHERE
+            postgres_databases.project_id = $1)
+ORDER BY
+    postgres_scan.id DESC
+`
+
+type GetPostgresScansForProjectRow struct {
+	PostgresScan    PostgresScan `json:"postgres_scan"`
+	MaximumSeverity int32        `json:"maximum_severity"`
+}
+
+func (q *Queries) GetPostgresScansForProject(ctx context.Context, projectID int64) ([]*GetPostgresScansForProjectRow, error) {
+	rows, err := q.db.Query(ctx, getPostgresScansForProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetPostgresScansForProjectRow
+	for rows.Next() {
+		var i GetPostgresScansForProjectRow
+		if err := rows.Scan(
+			&i.PostgresScan.ID,
+			&i.PostgresScan.PostgresDatabaseID,
+			&i.PostgresScan.Status,
+			&i.PostgresScan.Error,
+			&i.PostgresScan.WorkerID,
+			&i.PostgresScan.CreatedAt,
+			&i.PostgresScan.EndedAt,
+			&i.MaximumSeverity,
 		); err != nil {
 			return nil, err
 		}

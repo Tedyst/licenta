@@ -338,7 +338,6 @@ paths:
       summary: Get all bruteforce passwords associated with a project
       security:
         - workerAuth: []
-        - sessionAuth: []
       tags:
         - worker
       parameters:
@@ -371,18 +370,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{projectid}/scanner/postgres:
-    post:
-      summary: Create a new postgres scan
+  /scanner/postgres/database/{postgresDatabaseId}:
+    get:
+      summary: Get all postgres scans associated with a database
       security:
-        - workerAuth: []
         - sessionAuth: []
       tags:
-        - worker
+        - scanner
+        - postgres
       parameters:
-        - name: projectid
+        - name: postgresDatabaseId
           in: path
-          description: The ID of the project
+          description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - scans
+                  - scan_count
+                  - database
+                properties:
+                  success:
+                    type: boolean
+                    description: The success status
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostgresScan'
+                    description: The list of scans
+                  database:
+                    $ref: '#/components/schemas/PostgresDatabase'
+                  scan_count:
+                    type: integer
+                    description: The number of scans
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new postgres scan associated with a database
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+        - postgres
+      parameters:
+        - name: postgresDatabaseId
+          in: path
+          description: The ID of the postgres database
           required: true
           schema:
             type: integer
@@ -402,34 +454,27 @@ paths:
                     type: boolean
                   scan:
                     $ref: '#/components/schemas/PostgresScan'
-        "400":
-          description: Invalid body
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{projectid}/scanner/postgres/{scanid}:
+        "404":
+          description: Database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /scanner/postgres/scan/{scanid}:
     get:
-      summary: Get the postgres scan associated with a project
+      summary: Get a postgres scan by ID
       security:
-        - workerAuth: []
         - sessionAuth: []
       tags:
-        - worker
+        - scanner
+        - postgres
       parameters:
-        - name: projectid
-          in: path
-          description: The ID of the project
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: scanid
           in: path
           description: The ID of the scan
@@ -448,6 +493,7 @@ paths:
                   - success
                   - scan
                   - results
+                  - maximum_severity
                 properties:
                   success:
                     type: boolean
@@ -457,33 +503,21 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/PostgresScanResult'
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                  maximum_severity:
+                    type: integer
         "404":
-          description: Unauthorized
+          description: Scan not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
-      summary: Update the postgres scan associated with a project
+      summary: Update a postgres scan by ID
       security:
         - workerAuth: []
-        - sessionAuth: []
       tags:
         - worker
       parameters:
-        - name: projectid
-          in: path
-          description: The ID of the project
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: scanid
           in: path
           description: The ID of the scan
@@ -525,22 +559,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{projectid}/scanner/postgres/{scanid}/result:
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /scanner/postgres/scan/{scanid}/result:
     post:
       summary: Create a new postgres scan result
       security:
         - workerAuth: []
-        - sessionAuth: []
       tags:
         - worker
       parameters:
-        - name: projectid
-          in: path
-          description: The ID of the project
-          required: true
-          schema:
-            type: integer
-            format: int64
         - name: scanid
           in: path
           description: The ID of the scan
@@ -578,6 +610,12 @@ paths:
                 $ref: '#/components/schemas/Error'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
           content:
             application/json:
               schema:
@@ -661,6 +699,7 @@ components:
         - created_at
         - ended_at
         - error
+        - maximum_severity
       type: object
       properties:
         id:
@@ -673,6 +712,8 @@ components:
           type: string
         ended_at:
           type: string
+        maximum_severity:
+          type: integer
     WorkerTask:
       required:
         - type
