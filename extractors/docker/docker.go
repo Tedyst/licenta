@@ -19,6 +19,10 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
+type fileScanner interface {
+	ExtractFromReader(ctx context.Context, fileName string, reader io.Reader) ([]file.ExtractResult, error)
+}
+
 type LayerResult struct {
 	Layer    string
 	FileName string
@@ -30,15 +34,14 @@ type DockerScan struct {
 	reference     name.Reference
 	scannedLayers []v1.Layer
 	errorChannel  chan error
+	fileScanner   fileScanner
 }
 
 func (scanner *DockerScan) scanFile(ctx context.Context, reader io.Reader, header tar.Header, layer string) error {
-	results, err := file.ExtractFromReader(ctx, header.Name, reader, scanner.options.fileScannerOptions...)
+	results, err := scanner.fileScanner.ExtractFromReader(ctx, header.Name, reader)
 	if err != nil {
 		return err
 	}
-
-	results = file.FilterExtractResultsByProbability(ctx, results, scanner.options.probability)
 
 	if len(results) > 0 {
 		err := scanner.options.callbackResult(scanner, &LayerResult{
@@ -106,14 +109,13 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 		}()
 
 		_, err = io.Copy(w, &archive)
-		defer func() {
-			err := w.Close()
-			if err != nil {
-				scanner.errorChannel <- err
-			}
-		}()
 		if err != nil && !errors.Is(err, io.ErrClosedPipe) {
-			return errors.Wrap(err, "scanTarArchive: failed to read file from archive using Copy")
+			err2 := w.Close()
+			return errorss.Join(errors.Wrap(err, "scanTarArchive: failed to read file from archive using Copy"), err2)
+		}
+		err = w.Close()
+		if err != nil {
+			return errors.Wrap(err, "scanTarArchive: failed to close writer")
 		}
 
 		select {
@@ -176,6 +178,11 @@ func NewScanner(ctx context.Context, imageName string, opts ...Option) (*DockerS
 	scanner.reference = ref
 
 	scanner.errorChannel = make(chan error)
+
+	scanner.fileScanner, err = file.NewScanner(o.fileScannerOptions...)
+	if err != nil {
+		return nil, errors.Wrap(err, "NewScanner: cannot create file scanner")
+	}
 
 	slog.InfoContext(ctx, "NewScanner: finished creating new scanner", "image", imageName)
 	return scanner, nil

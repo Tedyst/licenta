@@ -5,9 +5,7 @@ go 1.21
 toolchain go1.21.5
 
 require (
-	github.com/deckarep/golang-set/v2 v2.5.0
 	github.com/deepmap/oapi-codegen v1.16.2
-	github.com/dghubble/trie v0.0.0-20230729160116-2bc358f28a8b
 	github.com/djherbis/buffer v1.2.0
 	github.com/djherbis/nio/v3 v3.0.1
 	github.com/exaring/otelpgx v0.5.2

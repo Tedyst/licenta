@@ -53,6 +53,21 @@
                 "-d"
             ],
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Docker extract",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "args": [
+                "extract",
+                "docker",
+                "test",
+                "--local",
+                "-d"
+            ],
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

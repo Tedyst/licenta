@@ -14,25 +14,31 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
+const maxPreviousLines = 5
+
 func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Commit, to diff.File) (results []file.ExtractResult, err error) {
+	scanner.mutex.Lock()
 	content, err := commit.File(to.Path())
 	if err == object.ErrFileNotFound {
+		scanner.mutex.Unlock()
 		// File was renamed, this is not supported yet by go-git
 		return nil, nil
 	}
 	if err != nil {
-		println(commit.Hash.String())
+		scanner.mutex.Unlock()
 		return nil, errors.Wrap(err, "inspectBinaryFile: cannot get file contents")
 	}
 	rd, err := content.Blob.Reader()
 	if err != nil {
+		scanner.mutex.Unlock()
 		return nil, errors.Wrap(err, "inspectBinaryFile: cannot open reader")
 	}
 	defer func() {
 		err = errorss.Join(err, rd.Close())
 	}()
+	scanner.mutex.Unlock()
 
-	results, err = file.ExtractFromReader(ctx, to.Path(), rd, scanner.options.fileScannerOptions...)
+	results, err = scanner.fileScanner.ExtractFromReader(ctx, to.Path(), rd)
 	if err != nil {
 		return nil, errors.Wrap(err, "inspectBinaryFile: cannot extract from reader")
 	}
@@ -42,22 +48,28 @@ func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Co
 func (scanner *GitScan) inspectTextFile(ctx context.Context, filePatch diff.FilePatch) ([]file.ExtractResult, error) {
 	var results []file.ExtractResult
 	var lineNumber int = 0
+	var previousLines []string
 	for _, chunk := range filePatch.Chunks() {
 		switch chunk.Type() {
 		case diff.Equal:
 			lineNumber += strings.Count(chunk.Content(), "\n")
 		case diff.Add:
-			var scanner = bufio.NewScanner(strings.NewReader(chunk.Content()))
-			for scanner.Scan() {
+			var sc = bufio.NewScanner(strings.NewReader(chunk.Content()))
+			for sc.Scan() {
 				lineNumber++
-				line := scanner.Text()
+				line := sc.Text()
 				_, toFile := filePatch.Files()
-				fileResults, err := file.ExtractFromLine(ctx, toFile.Path(), lineNumber, line)
+				fileResults, err := scanner.fileScanner.ExtractFromLine(ctx, toFile.Path(), lineNumber, line, strings.Join(previousLines, "\n"))
 				if err != nil {
 					return nil, errors.Wrap(err, "inspectTextFile: cannot extract from line")
 				}
 				results = append(results, fileResults...)
 			}
+		}
+
+		previousLines = append(previousLines, strings.Split(chunk.Content(), "\n")...)
+		if len(previousLines) > maxPreviousLines {
+			previousLines = previousLines[len(previousLines)-maxPreviousLines:]
 		}
 	}
 	return results, nil
@@ -79,7 +91,8 @@ func (scanner *GitScan) inspectFilePatch(ctx context.Context, commit *object.Com
 		return err
 	}
 
-	results = file.FilterExtractResultsByProbability(ctx, results, scanner.options.probability)
+	scanner.mutex.Lock()
+	defer scanner.mutex.Unlock()
 
 	if len(results) > 0 {
 		foundResults.Add(ctx, int64(len(results)))
@@ -164,6 +177,7 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 
 	batch := []BatchItem{}
 
+	scanner.mutex.Lock()
 	err = objIter.ForEach(func(c *object.Commit) error {
 		parentIter := c.Parents()
 		hasParent := false
@@ -215,6 +229,7 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 		return nil
 	})
 	if err != nil {
+		scanner.mutex.Unlock()
 		return errors.Wrap(err, "sad")
 	}
 
@@ -232,6 +247,8 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 			}
 		}()
 	}
+
+	scanner.mutex.Unlock()
 
 	go func() {
 		wg.Wait()

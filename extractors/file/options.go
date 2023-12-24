@@ -11,6 +11,8 @@ type options struct {
 	probabilityIncreaseMultiplier float64
 	entropyThresholdMidpoint      int
 	logisticGrowthRate            float64
+
+	minimumProbability float64
 }
 
 func WithWordsReduceProbability(useDefault bool, names ...string) Option {
@@ -81,6 +83,13 @@ func WithLogisticGrowthRate(logisticGrowthRate float64) Option {
 	}
 }
 
+func WithMinimumProbability(minimumProbability float64) Option {
+	return func(o *options) error {
+		o.minimumProbability = minimumProbability
+		return nil
+	}
+}
+
 func makeOptions(opts ...Option) (*options, error) {
 	o := &options{
 		wordsReduceProbability:        defaultWordsReduceProbability[:],
@@ -91,6 +100,7 @@ func makeOptions(opts ...Option) (*options, error) {
 		probabilityIncreaseMultiplier: defaultProbabilityIncreaseMultiplier,
 		entropyThresholdMidpoint:      defaultEntropyThresholdMidpoint,
 		logisticGrowthRate:            defaultLogisticGrowthRate,
+		minimumProbability:            0.7,
 	}
 	for _, opt := range opts {
 		if err := opt(o); err != nil {

@@ -7,8 +7,6 @@ import (
 	"math"
 	"regexp"
 	"strings"
-
-	"github.com/dghubble/trie"
 )
 
 const defaultProbabilityDecreaseMultiplier = 0.7
@@ -16,29 +14,22 @@ const defaultProbabilityIncreaseMultiplier = 2.0
 const defaultEntropyThresholdMidpoint = 40
 const defaultLogisticGrowthRate = 0.2
 
-func getSecretTypes(
-	increaseProbabilityTrie *trie.PathTrie,
-	reduceProbabilityTrie *trie.PathTrie,
-	logisticGrowthRate float64,
-	entropyThresholdMidpoint int,
-	probabilityDecreaseMultiplier float64,
-	probabilityIncreaseMultiplier float64,
-) []secretType {
+func (fs *fileScanner) getSecretTypes() []secretType {
 	calculateProbabilityCommonWithMultiplier := func(multiplier float64) func(string, string) float64 {
 		return func(line string, match string) float64 {
 			entropy := shannonEntropy(match)
-			probability := 1.0 / (1.0 + math.Exp(-logisticGrowthRate*float64(entropy-entropyThresholdMidpoint)))
+			probability := 1.0 / (1.0 + math.Exp(-fs.options.logisticGrowthRate*float64(entropy-fs.options.entropyThresholdMidpoint)))
 
 			scanner := bufio.NewScanner(strings.NewReader(strings.ToLower(match)))
 			scanner.Split(bufio.ScanWords)
 
 			for scanner.Scan() {
 				lower := strings.ToLower(scanner.Text())
-				if reduceProbabilityTrie.Get(lower) != nil {
-					probability *= probabilityDecreaseMultiplier
+				if _, ok := fs.wordsIncreaseProbability[lower]; ok {
+					probability *= fs.options.probabilityDecreaseMultiplier
 				}
-				if increaseProbabilityTrie.Get(lower) != nil {
-					probability *= probabilityIncreaseMultiplier
+				if _, ok := fs.wordsIncreaseProbability[lower]; ok {
+					probability *= fs.options.probabilityIncreaseMultiplier
 				}
 			}
 			return math.Min(probability*multiplier, 1.0)
@@ -65,7 +56,7 @@ func getSecretTypes(
 			name:  "MongoDB Connection String",
 		},
 		{
-			regex: regexp.MustCompile(`(?i)(?P<username>(?:\b|_)([a-zA-Z0-9_]*(?:api|key|token)[a-zA-Z0-9_]*))(=|:)("|')?(?P<password>[a-zA-Z0-9_\-\.]*)(?:\b|_)("|')?`),
+			regex: regexp.MustCompile(`(?i)(?P<username>(?:\b|_)([a-zA-Z0-9_]*(?:api|key|token)[a-zA-Z0-9_]*))(=|:)("|')?(?P<password>[a-zA-Z0-9_\-\.]+)(?:\b|_)("|')?`),
 			name:  "Generic Environment Variable",
 		},
 		{

@@ -9,9 +9,11 @@ import (
 
 	"log/slog"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/pkg/errors"
 )
+
+const maxMatchesPerLine = 100
+const keepPreviousLines = 5
 
 type secretType struct {
 	regex          *regexp.Regexp
@@ -21,114 +23,125 @@ type secretType struct {
 }
 
 type fileScanner struct {
-	wordsReduceProbabilityTrie    mapset.Set[string]
-	wordsIncreaseProbabilityTrie  mapset.Set[string]
-	passwordsCompletelyIgnoreTrie mapset.Set[string]
-	usernamesCompletelyIgnoreTrie mapset.Set[string]
+	wordsReduceProbability    map[string]struct{}
+	wordsIncreaseProbability  map[string]struct{}
+	passwordsCompletelyIgnore map[string]struct{}
+	usernamesCompletelyIgnore map[string]struct{}
 
 	options options
 
 	secretTypes []secretType
 }
 
-func NewFileScanner(opts ...Option) (*fileScanner, error) {
+func stringsToMap(str []string) map[string]struct{} {
+	m := make(map[string]struct{})
+	for _, s := range str {
+		m[s] = struct{}{}
+	}
+	return m
+}
+
+func NewScanner(opts ...Option) (*fileScanner, error) {
 	o, err := makeOptions(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &fileScanner{
-		wordsReduceProbabilityTrie:    mapset.NewSet[string](),
-		wordsIncreaseProbabilityTrie:  mapset.NewSet[string](),
-		passwordsCompletelyIgnoreTrie: mapset.NewSet[string](),
-		usernamesCompletelyIgnoreTrie: mapset.NewSet[string](),
+	fs := &fileScanner{
+		wordsReduceProbability:    stringsToMap(o.wordsReduceProbability),
+		wordsIncreaseProbability:  stringsToMap(o.wordsIncreaseProbability),
+		passwordsCompletelyIgnore: stringsToMap(o.passwordsCompletelyIgnore),
+		usernamesCompletelyIgnore: stringsToMap(o.usernamesCompletelyIgnore),
 
 		options: *o,
 
 		secretTypes: []secretType{},
-	}, nil
-}
-
-func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, opts ...Option) ([]ExtractResult, error) {
-	o, err := makeOptions(opts...)
-	if err != nil {
-		return nil, err
 	}
 
+	fs.secretTypes = fs.getSecretTypes()
+	return fs, nil
+}
+
+func (fs *fileScanner) createResult(ctx context.Context, secretType secretType, match string, fileName string, lineNumber int, line string, previousLines string) (ExtractResult, bool, error) {
+	result := ExtractResult{
+		Name:          secretType.name,
+		Line:          line,
+		LineNumber:    lineNumber,
+		PreviousLines: previousLines,
+		FileName:      fileName,
+	}
+
+	if secretType.postProcessing != nil {
+		postProcessed, err := secretType.postProcessing(match)
+		if err != nil {
+			return ExtractResult{}, false, nil
+		}
+		match = postProcessed
+	}
+
+	if len(secretType.regex.SubexpNames()) > 0 {
+		for i, name := range secretType.regex.SubexpNames() {
+			if i != 0 && name != "" {
+				switch name {
+				case "username":
+					result.Username = secretType.regex.FindStringSubmatch(line)[i]
+				case "password":
+					result.Password = secretType.regex.FindStringSubmatch(line)[i]
+				}
+			}
+		}
+	}
+
+	result.Match = strings.TrimSpace(match)
+
+	if secretType.probability != nil {
+		if result.Password != "" {
+			result.Probability = secretType.probability(result.Line, result.Password)
+		} else {
+			result.Probability = secretType.probability(result.Line, result.Match)
+		}
+	} else {
+		result.Probability = 1.0
+	}
+
+	if result.Probability < fs.options.minimumProbability {
+		slog.DebugContext(ctx, "Probability too low", "probability", result.Probability, "fileName", fileName, "lineNumber", lineNumber)
+		return ExtractResult{}, false, nil
+	}
+
+	if result.Password != "" {
+		if len(result.Password) < 4 {
+			slog.DebugContext(ctx, "Password too short", "password", result.Password, "fileName", fileName, "lineNumber", lineNumber)
+			return ExtractResult{}, false, nil
+		}
+		if _, ok := fs.passwordsCompletelyIgnore[result.Password]; ok {
+			slog.DebugContext(ctx, "Password completely ignored", "password", result.Password, "fileName", fileName, "lineNumber", lineNumber)
+			return ExtractResult{}, false, nil
+		}
+	}
+
+	if result.Username != "" {
+		if _, ok := fs.usernamesCompletelyIgnore[result.Username]; ok {
+			slog.DebugContext(ctx, "Username completely ignored", "username", result.Username, "fileName", fileName, "lineNumber", lineNumber)
+			return ExtractResult{}, false, nil
+		}
+	}
+
+	return result, true, nil
+}
+
+func (fs *fileScanner) ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, previousLines string) ([]ExtractResult, error) {
 	var results []ExtractResult
-	wordsReduceProbabilityTrie := GetTrie(o.wordsReduceProbability)
-	wordsIncreaseProbabilityTrie := GetTrie(o.wordsIncreaseProbability)
-	passwordsCompletelyIgnoreTrie := GetTrie(o.passwordsCompletelyIgnore)
-	usernamesCompletelyIgnoreTrie := GetTrie(o.usernamesCompletelyIgnore)
 
-	secretTypes := getSecretTypes(
-		wordsReduceProbabilityTrie,
-		wordsIncreaseProbabilityTrie,
-		o.logisticGrowthRate,
-		o.entropyThresholdMidpoint,
-		o.probabilityDecreaseMultiplier,
-		o.probabilityIncreaseMultiplier,
-	)
-
-	for _, secretType := range secretTypes {
-		for _, match := range secretType.regex.FindAllString(line, 100) {
-			result := ExtractResult{
-				Name:       secretType.name,
-				Line:       strings.TrimSpace(line),
-				LineNumber: lineNumber,
-				Match:      match,
-				FileName:   fileName,
-			}
-			if secretType.postProcessing != nil {
-				postProcessed, err := secretType.postProcessing(match)
-				if err != nil {
-					continue
-				}
-				result.Match = postProcessed
-			}
-			result.Match = strings.TrimSpace(result.Match)
-			if len(secretType.regex.SubexpNames()) > 0 {
-				for i, name := range secretType.regex.SubexpNames() {
-					if i != 0 && name != "" {
-						switch name {
-						case "username":
-							result.Username = secretType.regex.FindStringSubmatch(line)[i]
-						case "password":
-							result.Password = secretType.regex.FindStringSubmatch(line)[i]
-						}
-					}
-				}
+	for _, secretType := range fs.secretTypes {
+		for _, match := range secretType.regex.FindAllString(line, maxMatchesPerLine) {
+			result, ok, err := fs.createResult(ctx, secretType, match, fileName, lineNumber, line, previousLines)
+			if err != nil {
+				return nil, err
 			}
 
-			if result.Username == "" && result.Password == "" {
+			if !ok {
 				continue
-			}
-
-			if secretType.probability != nil {
-				if result.Password != "" {
-					result.Probability = secretType.probability(result.Line, result.Password)
-				} else {
-					result.Probability = secretType.probability(result.Line, result.Match)
-				}
-			} else {
-				result.Probability = 1.0
-			}
-
-			if result.Password != "" {
-				if len(result.Password) < 4 {
-					slog.DebugContext(ctx, "Password too short", "password", result.Password, "fileName", fileName, "lineNumber", lineNumber)
-					continue
-				}
-				if passwordsCompletelyIgnoreTrie.Get(strings.ToLower(result.Password)) != nil {
-					slog.DebugContext(ctx, "Password completely ignored", "password", result.Password, "fileName", fileName, "lineNumber", lineNumber)
-					continue
-				}
-			}
-			if result.Username != "" {
-				if usernamesCompletelyIgnoreTrie.Get(strings.ToLower(result.Username)) != nil {
-					slog.DebugContext(ctx, "Username completely ignored", "username", result.Username, "fileName", fileName, "lineNumber", lineNumber)
-					continue
-				}
 			}
 
 			results = append(results, result)
@@ -139,25 +152,33 @@ func ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line 
 			}
 		}
 	}
+
 	return results, nil
 }
 
-func ExtractFromReader(ctx context.Context, fileName string, rd io.Reader, opts ...Option) ([]ExtractResult, error) {
+func (fs *fileScanner) ExtractFromReader(ctx context.Context, fileName string, rd io.Reader) ([]ExtractResult, error) {
 	var results []ExtractResult
 	var lineNumber int
 
 	slog.DebugContext(ctx, "Extracting from reader", "fileName", fileName)
 
+	previousLines := []string{}
 	scanner := bufio.NewScanner(rd)
 	for scanner.Scan() {
+		if lineNumber > keepPreviousLines {
+			previousLines = previousLines[1:]
+		}
 		line := scanner.Text()
 		lineNumber++
 
-		extracted, err := ExtractFromLine(ctx, fileName, lineNumber, line, opts...)
+		extracted, err := fs.ExtractFromLine(ctx, fileName, lineNumber, line, strings.Join(previousLines, "\n"))
 		if err != nil {
 			return nil, err
 		}
+
 		results = append(results, extracted...)
+		previousLines = append(previousLines, line)
+
 		select {
 		case <-ctx.Done():
 			return nil, errors.Wrap(ctx.Err(), "ExtractFromReader")

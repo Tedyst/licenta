@@ -1,7 +1,6 @@
 package file
 
 import (
-	"context"
 	"math"
 )
 
@@ -31,28 +30,4 @@ func isASCII(s []byte) bool {
 		}
 	}
 	return true
-}
-
-func FilterDuplicateExtractResults(originalResults []ExtractResult) []ExtractResult {
-	var results map[string]ExtractResult = make(map[string]ExtractResult)
-	for _, result := range originalResults {
-		if result.Probability > results[result.Hash()].Probability {
-			results[result.Hash()] = result
-		}
-	}
-	var filteredResults []ExtractResult
-	for _, result := range results {
-		filteredResults = append(filteredResults, result)
-	}
-	return filteredResults
-}
-
-func FilterExtractResultsByProbability(ctx context.Context, originalResults []ExtractResult, probability float64) []ExtractResult {
-	var results []ExtractResult
-	for _, result := range originalResults {
-		if result.Probability >= probability {
-			results = append(results, result)
-		}
-	}
-	return results
 }

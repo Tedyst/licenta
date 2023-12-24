@@ -17,7 +17,7 @@ func NewNvdCmd() *cobra.Command {
 func init() {
 	nvdCmd.PersistentFlags().String("database", "", "Database connection string")
 
-	if err := nvdCmd.MarkFlagRequired("database"); err != nil {
+	if err := nvdCmd.MarkPersistentFlagRequired("database"); err != nil {
 		panic(err)
 	}
 }
