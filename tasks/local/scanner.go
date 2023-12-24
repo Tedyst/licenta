@@ -15,6 +15,7 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/scanner"
 	"github.com/tedyst/licenta/scanner/postgres"
 )
@@ -36,6 +37,7 @@ type postgresQuerier interface {
 	CreatePostgresScanBruteforceResult(ctx context.Context, arg queries.CreatePostgresScanBruteforceResultParams) (*models.PostgresScanBruteforceResult, error)
 	UpdatePostgresScanBruteforceResult(ctx context.Context, params queries.UpdatePostgresScanBruteforceResultParams) error
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.GetWorkersForProjectRow, error)
+	GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)
 }
 
 func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider, exchange messages.Exchange) *scannerRunner {
@@ -142,6 +144,29 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	_, err = sc.GetUsers(ctx)
 	if err != nil {
 		return notifyError(errors.Wrap(err, "could not get users"))
+	}
+
+	version, err := sc.GetVersion(ctx)
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not get version"))
+	}
+
+	cves, err := runner.queries.GetCvesByProductAndVersion(ctx, queries.GetCvesByProductAndVersionParams{
+		DatabaseType: int32(nvd.POSTGRESQL),
+		Version:      version,
+	})
+	if err != nil {
+		return notifyError(errors.Wrap(err, "could not get cves"))
+	}
+
+	for _, cve := range cves {
+		if _, err := runner.queries.CreatePostgresScanResult(ctx, queries.CreatePostgresScanResultParams{
+			PostgresScanID: scan.ID,
+			Severity:       int32(scanner.SEVERITY_HIGH),
+			Message:        fmt.Sprintf("Vulnerability %s found. Please update the PostgreSQL version", cve.NvdCfe.CveID),
+		}); err != nil {
+			return errors.Wrap(err, "could not insert scan result")
+		}
 	}
 
 	logger.DebugContext(ctx, "Got users")

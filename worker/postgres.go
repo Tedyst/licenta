@@ -96,6 +96,10 @@ func (q *remotePostgresQuerier) GetWorkersForProject(ctx context.Context, projec
 	return []*queries.GetWorkersForProjectRow{}, nil
 }
 
+func (q *remotePostgresQuerier) GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error) {
+	return []*queries.GetCvesByProductAndVersionRow{}, nil
+}
+
 func ScanPostgresDB(ctx context.Context, client generated.ClientWithResponsesInterface, task Task) error {
 	localexchange := localmessages.NewLocalExchange()
 	runner := local.NewScannerRunner(&remotePostgresQuerier{

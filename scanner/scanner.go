@@ -17,6 +17,7 @@ type Scanner interface {
 	CheckPermissions(context.Context) error
 	ScanConfig(ctx context.Context) ([]ScanResult, error)
 	GetUsers(ctx context.Context) ([]User, error)
+	GetVersion(ctx context.Context) (string, error)
 }
 
 type ScanResult interface {
