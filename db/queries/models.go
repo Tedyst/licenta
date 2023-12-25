@@ -201,16 +201,17 @@ type ProjectMember struct {
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
+type RememberMeToken struct {
+	ID        int64              `json:"id"`
+	UserID    int64              `json:"user_id"`
+	Token     string             `json:"token"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
 type ResetPasswordToken struct {
 	ID        uuid.UUID          `json:"id"`
 	UserID    sql.NullInt64      `json:"user_id"`
 	Valid     bool               `json:"valid"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-}
-
-type Session struct {
-	ID        uuid.UUID          `json:"id"`
-	UserID    sql.NullInt64      `json:"user_id"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 
@@ -223,11 +224,13 @@ type TotpSecretToken struct {
 }
 
 type User struct {
-	ID        int64              `json:"id"`
-	Username  string             `json:"username"`
-	Password  string             `json:"password"`
-	Email     string             `json:"email"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID            int64              `json:"id"`
+	Username      string             `json:"username"`
+	Password      string             `json:"password"`
+	Email         string             `json:"email"`
+	RecoveryCodes sql.NullString     `json:"recovery_codes"`
+	TotpSecret    sql.NullString     `json:"totp_secret"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type Worker struct {

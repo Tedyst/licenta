@@ -3,20 +3,14 @@ CREATE TABLE users(
   username text NOT NULL UNIQUE,
   password TEXT NOT NULL,
   email text NOT NULL UNIQUE,
+  recovery_codes text,
+  totp_secret text,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE INDEX users_username_idx ON users(username);
 
 CREATE INDEX users_email_idx ON users(email);
-
-CREATE TABLE sessions(
-  id uuid PRIMARY KEY,
-  user_id bigint REFERENCES users(id),
-  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX sessions_user_id_idx ON sessions(user_id);
 
 CREATE TABLE reset_password_tokens(
   id uuid PRIMARY KEY,
@@ -250,6 +244,13 @@ CREATE TABLE worker_projects(
   id bigserial PRIMARY KEY,
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   worker_id bigint NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE remember_me_tokens(
+  id bigserial PRIMARY KEY,
+  user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  token text NOT NULL UNIQUE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

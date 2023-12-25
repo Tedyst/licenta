@@ -28,7 +28,7 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, PASSWORD, email)
   VALUES ($1, $2, $3)
 RETURNING
-  id, username, password, email, created_at
+  id, username, password, email, recovery_codes, totp_secret, created_at
 `
 
 type CreateUserParams struct {
@@ -45,6 +45,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, 
 		&i.Username,
 		&i.Password,
 		&i.Email,
+		&i.RecoveryCodes,
+		&i.TotpSecret,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -62,7 +64,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-  id, username, password, email, created_at
+  id, username, password, email, recovery_codes, totp_secret, created_at
 FROM
   users
 WHERE
@@ -78,6 +80,8 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 		&i.Username,
 		&i.Password,
 		&i.Email,
+		&i.RecoveryCodes,
+		&i.TotpSecret,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -85,7 +89,7 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
 SELECT
-  id, username, password, email, created_at
+  id, username, password, email, recovery_codes, totp_secret, created_at
 FROM
   users
 WHERE
@@ -107,6 +111,8 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUse
 		&i.Username,
 		&i.Password,
 		&i.Email,
+		&i.RecoveryCodes,
+		&i.TotpSecret,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -114,7 +120,7 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUse
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-  id, username, password, email, created_at
+  id, username, password, email, recovery_codes, totp_secret, created_at
 FROM
   users
 WHERE
@@ -157,6 +163,8 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 			&i.Username,
 			&i.Password,
 			&i.Email,
+			&i.RecoveryCodes,
+			&i.TotpSecret,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -171,7 +179,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 
 const listUsersPaginated = `-- name: ListUsersPaginated :many
 SELECT
-  id, username, password, email, created_at
+  id, username, password, email, recovery_codes, totp_secret, created_at
 FROM
   users
 ORDER BY
@@ -198,6 +206,8 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 			&i.Username,
 			&i.Password,
 			&i.Email,
+			&i.RecoveryCodes,
+			&i.TotpSecret,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -216,16 +226,20 @@ UPDATE
 SET
   username = coalesce($1, username),
   PASSWORD = coalesce($2, PASSWORD),
-  email = coalesce($3, email)
+  email = coalesce($3, email),
+  recovery_codes = coalesce($4, recovery_codes),
+  totp_secret = coalesce($5, totp_secret)
 WHERE
-  id = $4
+  id = $6
 `
 
 type UpdateUserParams struct {
-	Username sql.NullString `json:"username"`
-	Password sql.NullString `json:"password"`
-	Email    sql.NullString `json:"email"`
-	ID       int64          `json:"id"`
+	Username      sql.NullString `json:"username"`
+	Password      sql.NullString `json:"password"`
+	Email         sql.NullString `json:"email"`
+	RecoveryCodes sql.NullString `json:"recovery_codes"`
+	TotpSecret    sql.NullString `json:"totp_secret"`
+	ID            int64          `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
@@ -233,6 +247,8 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.Username,
 		arg.Password,
 		arg.Email,
+		arg.RecoveryCodes,
+		arg.TotpSecret,
 		arg.ID,
 	)
 	return err

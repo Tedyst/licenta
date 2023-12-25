@@ -42,10 +42,12 @@ func (a *authbossStorer) Load(ctx context.Context, key string) (authboss.User, e
 
 func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
 	return a.querier.UpdateUser(ctx, queries.UpdateUserParams{
-		Username: sql.NullString{String: user.(*authbossUser).user.Username, Valid: user.(*authbossUser).user.Username != ""},
-		Email:    sql.NullString{String: user.(*authbossUser).user.Email, Valid: user.(*authbossUser).user.Email != ""},
-		Password: sql.NullString{String: user.(*authbossUser).user.Password, Valid: user.(*authbossUser).user.Password != ""},
-		ID:       user.(*authbossUser).user.ID,
+		Username:      sql.NullString{String: user.(*authbossUser).user.Username, Valid: user.(*authbossUser).user.Username != ""},
+		Email:         sql.NullString{String: user.(*authbossUser).user.Email, Valid: user.(*authbossUser).user.Email != ""},
+		Password:      sql.NullString{String: user.(*authbossUser).user.Password, Valid: user.(*authbossUser).user.Password != ""},
+		ID:            user.(*authbossUser).user.ID,
+		RecoveryCodes: user.(*authbossUser).user.RecoveryCodes,
+		TotpSecret:    user.(*authbossUser).user.TotpSecret,
 	})
 }
 
@@ -56,6 +58,10 @@ func (a *authbossStorer) New(ctx context.Context) authboss.User {
 }
 
 func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
+	if user.(*authbossUser).user.Username == "" || user.(*authbossUser).user.Email == "" || user.(*authbossUser).user.Password == "" {
+		return authboss.ErrUserNotFound
+	}
+
 	_, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
 		Username: user.(*authbossUser).user.Username,
 		Email:    user.(*authbossUser).user.Email,
@@ -73,4 +79,44 @@ func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
 		Password: user.(*authbossUser).user.Password,
 	})
 	return err
+}
+
+func (a *authbossStorer) AddRememberToken(ctx context.Context, pid, token string) error {
+	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
+		Username: pid,
+		Email:    pid,
+	})
+	if err != nil {
+		return err
+	}
+	_, err = a.querier.CreateRememberMeToken(ctx, queries.CreateRememberMeTokenParams{
+		UserID: user.ID,
+		Token:  token,
+	})
+	return err
+}
+
+func (a *authbossStorer) DelRememberTokens(ctx context.Context, pid string) error {
+	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
+		Username: pid,
+		Email:    pid,
+	})
+	if err != nil {
+		return err
+	}
+	return a.querier.DeleteRememberMeTokensForUser(ctx, user.ID)
+}
+
+func (a *authbossStorer) UseRememberToken(ctx context.Context, pid, token string) error {
+	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
+		Username: pid,
+		Email:    pid,
+	})
+	if err != nil {
+		return err
+	}
+	return a.querier.DeleteRememberMeTokenByUserAndToken(ctx, queries.DeleteRememberMeTokenByUserAndTokenParams{
+		UserID: user.ID,
+		Token:  token,
+	})
 }

@@ -39,3 +39,29 @@ func (a *authbossUser) PutArbitrary(values map[string]string) {
 		a.user.Email = val
 	}
 }
+
+func (a *authbossUser) GetEmail() string {
+	return a.user.Email
+}
+
+func (a *authbossUser) PutEmail(email string) {
+	a.user.Email = email
+}
+
+func (a *authbossUser) GetRecoveryCodes() string {
+	return a.user.RecoveryCodes.String
+}
+
+func (a *authbossUser) PutRecoveryCodes(codes string) {
+	a.user.RecoveryCodes.String = codes
+	a.user.RecoveryCodes.Valid = true
+}
+
+func (a *authbossUser) GetTOTPSecretKey() string {
+	return a.user.TotpSecret.String
+}
+
+func (a *authbossUser) PutTOTPSecretKey(key string) {
+	a.user.TotpSecret.String = key
+	a.user.TotpSecret.Valid = true
+}

@@ -26,8 +26,7 @@
                 "git",
                 "."
             ],
-            "program": "${workspaceFolder}",
-            "envFile": "${workspaceFolder}/.env"
+            "program": "${workspaceFolder}"
         },
         {
             "name": "Runlocal",
@@ -37,8 +36,7 @@
             "program": ".",
             "args": [
                 "servelocal"
-            ],
-            "envFile": "${workspaceFolder}/.env"
+            ]
         },
         {
             "name": "Worker",
@@ -51,8 +49,7 @@
                 "--worker-token",
                 "asdasd",
                 "-d"
-            ],
-            "envFile": "${workspaceFolder}/.env"
+            ]
         },
         {
             "name": "Docker extract",
@@ -66,8 +63,7 @@
                 "test",
                 "--local",
                 "-d"
-            ],
-            "envFile": "${workspaceFolder}/.env"
+            ]
         },
         {
             "name": "CI",
@@ -82,8 +78,7 @@
                 "--worker-token",
                 "asdasd",
                 "-d"
-            ],
-            "envFile": "${workspaceFolder}/.env"
+            ]
         }
     ]
 }

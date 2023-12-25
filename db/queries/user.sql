@@ -62,7 +62,9 @@ UPDATE
 SET
   username = coalesce(sqlc.narg(username), username),
   PASSWORD = coalesce(sqlc.narg(PASSWORD), PASSWORD),
-  email = coalesce(sqlc.narg(email), email)
+  email = coalesce(sqlc.narg(email), email),
+  recovery_codes = coalesce(sqlc.narg(recovery_codes), recovery_codes),
+  totp_secret = coalesce(sqlc.narg(totp_secret), totp_secret)
 WHERE
   id = sqlc.arg(id);
 

@@ -627,6 +627,45 @@ func (c *TransactionQuerierCreatePostgresScanResultCall) DoAndReturn(f func(cont
 	return c
 }
 
+// CreateRememberMeToken mocks base method.
+func (m *MockTransactionQuerier) CreateRememberMeToken(ctx context.Context, arg queries.CreateRememberMeTokenParams) (*queries.RememberMeToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRememberMeToken", ctx, arg)
+	ret0, _ := ret[0].(*queries.RememberMeToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateRememberMeToken indicates an expected call of CreateRememberMeToken.
+func (mr *MockTransactionQuerierMockRecorder) CreateRememberMeToken(ctx, arg any) *TransactionQuerierCreateRememberMeTokenCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRememberMeToken", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateRememberMeToken), ctx, arg)
+	return &TransactionQuerierCreateRememberMeTokenCall{Call: call}
+}
+
+// TransactionQuerierCreateRememberMeTokenCall wrap *gomock.Call
+type TransactionQuerierCreateRememberMeTokenCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateRememberMeTokenCall) Return(arg0 *queries.RememberMeToken, arg1 error) *TransactionQuerierCreateRememberMeTokenCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateRememberMeTokenCall) Do(f func(context.Context, queries.CreateRememberMeTokenParams) (*queries.RememberMeToken, error)) *TransactionQuerierCreateRememberMeTokenCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateRememberMeTokenCall) DoAndReturn(f func(context.Context, queries.CreateRememberMeTokenParams) (*queries.RememberMeToken, error)) *TransactionQuerierCreateRememberMeTokenCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateResetPasswordToken mocks base method.
 func (m *MockTransactionQuerier) CreateResetPasswordToken(ctx context.Context, arg queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error) {
 	m.ctrl.T.Helper()
@@ -662,45 +701,6 @@ func (c *TransactionQuerierCreateResetPasswordTokenCall) Do(f func(context.Conte
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierCreateResetPasswordTokenCall) DoAndReturn(f func(context.Context, queries.CreateResetPasswordTokenParams) (*queries.ResetPasswordToken, error)) *TransactionQuerierCreateResetPasswordTokenCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// CreateSession mocks base method.
-func (m *MockTransactionQuerier) CreateSession(ctx context.Context, arg queries.CreateSessionParams) (*queries.Session, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateSession", ctx, arg)
-	ret0, _ := ret[0].(*queries.Session)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateSession indicates an expected call of CreateSession.
-func (mr *MockTransactionQuerierMockRecorder) CreateSession(ctx, arg any) *TransactionQuerierCreateSessionCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateSession), ctx, arg)
-	return &TransactionQuerierCreateSessionCall{Call: call}
-}
-
-// TransactionQuerierCreateSessionCall wrap *gomock.Call
-type TransactionQuerierCreateSessionCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierCreateSessionCall) Return(arg0 *queries.Session, arg1 error) *TransactionQuerierCreateSessionCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierCreateSessionCall) Do(f func(context.Context, queries.CreateSessionParams) (*queries.Session, error)) *TransactionQuerierCreateSessionCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierCreateSessionCall) DoAndReturn(f func(context.Context, queries.CreateSessionParams) (*queries.Session, error)) *TransactionQuerierCreateSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -897,78 +897,78 @@ func (c *TransactionQuerierDeleteNvdCveByNameCall) DoAndReturn(f func(context.Co
 	return c
 }
 
-// DeleteSession mocks base method.
-func (m *MockTransactionQuerier) DeleteSession(ctx context.Context, id uuid.UUID) error {
+// DeleteRememberMeTokenByUserAndToken mocks base method.
+func (m *MockTransactionQuerier) DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg queries.DeleteRememberMeTokenByUserAndTokenParams) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSession", ctx, id)
+	ret := m.ctrl.Call(m, "DeleteRememberMeTokenByUserAndToken", ctx, arg)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteSession indicates an expected call of DeleteSession.
-func (mr *MockTransactionQuerierMockRecorder) DeleteSession(ctx, id any) *TransactionQuerierDeleteSessionCall {
+// DeleteRememberMeTokenByUserAndToken indicates an expected call of DeleteRememberMeTokenByUserAndToken.
+func (mr *MockTransactionQuerierMockRecorder) DeleteRememberMeTokenByUserAndToken(ctx, arg any) *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSession", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteSession), ctx, id)
-	return &TransactionQuerierDeleteSessionCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRememberMeTokenByUserAndToken", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteRememberMeTokenByUserAndToken), ctx, arg)
+	return &TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall{Call: call}
 }
 
-// TransactionQuerierDeleteSessionCall wrap *gomock.Call
-type TransactionQuerierDeleteSessionCall struct {
+// TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall wrap *gomock.Call
+type TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierDeleteSessionCall) Return(arg0 error) *TransactionQuerierDeleteSessionCall {
+func (c *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall) Return(arg0 error) *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierDeleteSessionCall) Do(f func(context.Context, uuid.UUID) error) *TransactionQuerierDeleteSessionCall {
+func (c *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall) Do(f func(context.Context, queries.DeleteRememberMeTokenByUserAndTokenParams) error) *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierDeleteSessionCall) DoAndReturn(f func(context.Context, uuid.UUID) error) *TransactionQuerierDeleteSessionCall {
+func (c *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall) DoAndReturn(f func(context.Context, queries.DeleteRememberMeTokenByUserAndTokenParams) error) *TransactionQuerierDeleteRememberMeTokenByUserAndTokenCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
-// DeleteSessionsByUserID mocks base method.
-func (m *MockTransactionQuerier) DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error {
+// DeleteRememberMeTokensForUser mocks base method.
+func (m *MockTransactionQuerier) DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteSessionsByUserID", ctx, userID)
+	ret := m.ctrl.Call(m, "DeleteRememberMeTokensForUser", ctx, userID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteSessionsByUserID indicates an expected call of DeleteSessionsByUserID.
-func (mr *MockTransactionQuerierMockRecorder) DeleteSessionsByUserID(ctx, userID any) *TransactionQuerierDeleteSessionsByUserIDCall {
+// DeleteRememberMeTokensForUser indicates an expected call of DeleteRememberMeTokensForUser.
+func (mr *MockTransactionQuerierMockRecorder) DeleteRememberMeTokensForUser(ctx, userID any) *TransactionQuerierDeleteRememberMeTokensForUserCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSessionsByUserID", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteSessionsByUserID), ctx, userID)
-	return &TransactionQuerierDeleteSessionsByUserIDCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRememberMeTokensForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteRememberMeTokensForUser), ctx, userID)
+	return &TransactionQuerierDeleteRememberMeTokensForUserCall{Call: call}
 }
 
-// TransactionQuerierDeleteSessionsByUserIDCall wrap *gomock.Call
-type TransactionQuerierDeleteSessionsByUserIDCall struct {
+// TransactionQuerierDeleteRememberMeTokensForUserCall wrap *gomock.Call
+type TransactionQuerierDeleteRememberMeTokensForUserCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierDeleteSessionsByUserIDCall) Return(arg0 error) *TransactionQuerierDeleteSessionsByUserIDCall {
+func (c *TransactionQuerierDeleteRememberMeTokensForUserCall) Return(arg0 error) *TransactionQuerierDeleteRememberMeTokensForUserCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierDeleteSessionsByUserIDCall) Do(f func(context.Context, sql.NullInt64) error) *TransactionQuerierDeleteSessionsByUserIDCall {
+func (c *TransactionQuerierDeleteRememberMeTokensForUserCall) Do(f func(context.Context, int64) error) *TransactionQuerierDeleteRememberMeTokensForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierDeleteSessionsByUserIDCall) DoAndReturn(f func(context.Context, sql.NullInt64) error) *TransactionQuerierDeleteSessionsByUserIDCall {
+func (c *TransactionQuerierDeleteRememberMeTokensForUserCall) DoAndReturn(f func(context.Context, int64) error) *TransactionQuerierDeleteRememberMeTokensForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2452,45 +2452,6 @@ func (c *TransactionQuerierGetResetPasswordTokenCall) DoAndReturn(f func(context
 	return c
 }
 
-// GetSession mocks base method.
-func (m *MockTransactionQuerier) GetSession(ctx context.Context, id uuid.UUID) (*queries.Session, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSession", ctx, id)
-	ret0, _ := ret[0].(*queries.Session)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetSession indicates an expected call of GetSession.
-func (mr *MockTransactionQuerierMockRecorder) GetSession(ctx, id any) *TransactionQuerierGetSessionCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockTransactionQuerier)(nil).GetSession), ctx, id)
-	return &TransactionQuerierGetSessionCall{Call: call}
-}
-
-// TransactionQuerierGetSessionCall wrap *gomock.Call
-type TransactionQuerierGetSessionCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierGetSessionCall) Return(arg0 *queries.Session, arg1 error) *TransactionQuerierGetSessionCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierGetSessionCall) Do(f func(context.Context, uuid.UUID) (*queries.Session, error)) *TransactionQuerierGetSessionCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierGetSessionCall) DoAndReturn(f func(context.Context, uuid.UUID) (*queries.Session, error)) *TransactionQuerierGetSessionCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // GetTOTPSecretForUser mocks base method.
 func (m *MockTransactionQuerier) GetTOTPSecretForUser(ctx context.Context, userID int64) (*queries.TotpSecretToken, error) {
 	m.ctrl.T.Helper()
@@ -3219,44 +3180,6 @@ func (c *TransactionQuerierUpdatePostgresVersionCall) Do(f func(context.Context,
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierUpdatePostgresVersionCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresVersionParams) error) *TransactionQuerierUpdatePostgresVersionCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// UpdateSession mocks base method.
-func (m *MockTransactionQuerier) UpdateSession(ctx context.Context, arg queries.UpdateSessionParams) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateSession", ctx, arg)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateSession indicates an expected call of UpdateSession.
-func (mr *MockTransactionQuerierMockRecorder) UpdateSession(ctx, arg any) *TransactionQuerierUpdateSessionCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSession", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateSession), ctx, arg)
-	return &TransactionQuerierUpdateSessionCall{Call: call}
-}
-
-// TransactionQuerierUpdateSessionCall wrap *gomock.Call
-type TransactionQuerierUpdateSessionCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierUpdateSessionCall) Return(arg0 error) *TransactionQuerierUpdateSessionCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierUpdateSessionCall) Do(f func(context.Context, queries.UpdateSessionParams) error) *TransactionQuerierUpdateSessionCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierUpdateSessionCall) DoAndReturn(f func(context.Context, queries.UpdateSessionParams) error) *TransactionQuerierUpdateSessionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

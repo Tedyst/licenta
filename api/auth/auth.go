@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"net/http"
+	"os"
 
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/models"
@@ -10,7 +11,10 @@ import (
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
 	"github.com/volatiletech/authboss/v3/defaults"
+	"github.com/volatiletech/authboss/v3/otp/twofactor"
+	"github.com/volatiletech/authboss/v3/otp/twofactor/totp2fa"
 	_ "github.com/volatiletech/authboss/v3/register"
+	"github.com/volatiletech/authboss/v3/remember"
 )
 
 const sessionCookieName = "session"
@@ -30,13 +34,54 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	ab.Config.Storage.CookieState = abclientstate.NewCookieStorer(authKey, sessionKey)
 
 	ab.Config.Core.ViewRenderer = defaults.JSONRenderer{}
+	ab.Config.Core.MailRenderer = defaults.JSONRenderer{}
+	ab.Config.Core.Logger = &authbossLogger{}
+	ab.Config.Core.Router = defaults.NewRouter()
+	ab.Config.Core.ErrorHandler = &authbossErrorHandler{LogWriter: ab.Config.Core.Logger}
+	ab.Config.Core.Responder = defaults.NewResponder(ab.Config.Core.ViewRenderer)
+	ab.Config.Core.Redirector = defaults.NewRedirector(ab.Config.Core.ViewRenderer, authboss.FormValueRedirect)
+	ab.Config.Core.Mailer = defaults.NewLogMailer(os.Stdout)
+
+	ab.Config.Modules.TwoFactorEmailAuthRequired = false
+	ab.Config.Modules.RoutesRedirectOnUnauthed = false
+
+	bodyreader := defaults.NewHTTPBodyReader(true, true)
+	bodyreader.Rulesets["register"] = []defaults.Rules{
+		{
+			FieldName:       "username",
+			Required:        true,
+			MinLength:       3,
+			MaxLength:       32,
+			AllowWhitespace: false,
+		},
+		{
+			FieldName:       "email",
+			Required:        true,
+			MinLength:       3,
+			MaxLength:       64,
+			AllowWhitespace: false,
+		},
+	}
+	ab.Config.Core.BodyReader = bodyreader
 
 	ab.Config.Paths.Mount = "/auth"
 	ab.Config.Paths.RootURL = baseurl
 
-	defaults.SetCore(&ab.Config, true, true)
+	ab.Events.Before(authboss.EventRegister, func(w http.ResponseWriter, r *http.Request, handled bool) (bool, error) {
+		return true, nil
+	})
 
-	ab.Config.Core.Logger = &authbossLogger{}
+	tf := twofactor.Recovery{Authboss: ab}
+	if err := tf.Setup(); err != nil {
+		return nil, err
+	}
+
+	ab.Config.Modules.TOTP2FAIssuer = "licenta"
+
+	totp := totp2fa.TOTP{Authboss: ab}
+	if err := totp.Setup(); err != nil {
+		return nil, err
+	}
 
 	if err := ab.Init(); err != nil {
 		return nil, err
@@ -49,12 +94,16 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 }
 
 func (auth *authenticationProvider) Middleware(next http.Handler) http.Handler {
+	rememberMiddleware := remember.Middleware(auth.authboss)
+	next = rememberMiddleware(next)
+	loadClientStateMiddleware := auth.authboss.LoadClientStateMiddleware(next)
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, requestStorer{}, r)
 		r = r.WithContext(ctx)
 
-		auth.authboss.LoadClientStateMiddleware(next).ServeHTTP(w, r)
+		loadClientStateMiddleware.ServeHTTP(w, r)
 	})
 }
 

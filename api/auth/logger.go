@@ -33,7 +33,7 @@ func (*authbossLogger) Error(msg string) {
 }
 
 func (*authbossLogger) Info(msg string) {
-	slog.Info(msg)
+	slog.Debug(msg)
 }
 
 var _ authboss.Logger = (*contextAuthbossLogger)(nil)

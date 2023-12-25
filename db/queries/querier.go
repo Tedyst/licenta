@@ -27,15 +27,15 @@ type Querier interface {
 	CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error)
 	CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error)
 	CreatePostgresScanResult(ctx context.Context, arg CreatePostgresScanResultParams) (*PostgresScanResult, error)
+	CreateRememberMeToken(ctx context.Context, arg CreateRememberMeTokenParams) (*RememberMeToken, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
-	CreateSession(ctx context.Context, arg CreateSessionParams) (*Session, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
-	DeleteSession(ctx context.Context, id uuid.UUID) error
-	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
+	DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg DeleteRememberMeTokenByUserAndTokenParams) error
+	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
 	GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error)
@@ -72,7 +72,6 @@ type Querier interface {
 	GetProjectUser(ctx context.Context, arg GetProjectUserParams) (*ProjectMember, error)
 	GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
-	GetSession(ctx context.Context, id uuid.UUID) (*Session, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
@@ -91,7 +90,6 @@ type Querier interface {
 	UpdatePostgresScanBruteforceResult(ctx context.Context, arg UpdatePostgresScanBruteforceResultParams) error
 	UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
-	UpdateSession(ctx context.Context, arg UpdateSessionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 	ValidateTOTPSecretForUser(ctx context.Context, userID int64) error
