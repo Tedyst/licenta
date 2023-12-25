@@ -17,7 +17,6 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/google/go-containerregistry v0.17.0
 	github.com/google/uuid v1.4.0
-	github.com/gorilla/securecookie v1.1.1
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/jackc/pgx/v5 v5.5.1
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
@@ -97,6 +96,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/cel-go v0.18.2 // indirect
+	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

@@ -36,6 +36,8 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 
 	defaults.SetCore(&ab.Config, true, true)
 
+	ab.Config.Core.Logger = &authbossLogger{}
+
 	if err := ab.Init(); err != nil {
 		return nil, err
 	}
