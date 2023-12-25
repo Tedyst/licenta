@@ -142,6 +142,46 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgr
 	return &i, err
 }
 
+const getPostgresDatabasesForProject = `-- name: GetPostgresDatabasesForProject :many
+SELECT
+    id, project_id, host, port, database_name, username, password, remote, version, created_at
+FROM
+    postgres_databases
+WHERE
+    project_id = $1
+`
+
+func (q *Queries) GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*PostgresDatabase, error) {
+	rows, err := q.db.Query(ctx, getPostgresDatabasesForProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*PostgresDatabase
+	for rows.Next() {
+		var i PostgresDatabase
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProjectID,
+			&i.Host,
+			&i.Port,
+			&i.DatabaseName,
+			&i.Username,
+			&i.Password,
+			&i.Remote,
+			&i.Version,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPostgresScan = `-- name: GetPostgresScan :one
 SELECT
     postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,

@@ -136,3 +136,11 @@ SET
 WHERE
     id = $1;
 
+-- name: GetPostgresDatabasesForProject :many
+SELECT
+    *
+FROM
+    postgres_databases
+WHERE
+    project_id = $1;
+

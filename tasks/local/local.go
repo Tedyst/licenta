@@ -14,6 +14,8 @@ type localRunner struct {
 	gitRunner
 	emailRunner
 	dockerRunner
+
+	queries db.TransactionQuerier
 }
 
 func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *localRunner {
@@ -23,6 +25,7 @@ func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.Transa
 		gitRunner:     *NewGitRunner(queries),
 		emailRunner:   *NewEmailRunner(queries, emailSender),
 		dockerRunner:  *NewDockerRunner(queries),
+		queries:       queries,
 	}
 }
 

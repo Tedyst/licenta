@@ -723,8 +723,130 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /project/{projectid}/run:
+    post:
+      summary: Run all extractors and scanners for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - postgres_scans
+                properties:
+                  success:
+                    type: boolean
+                  postgres_scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostgresScan'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /project/{projectid}:
+    get:
+      summary: Get project by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - project
+      parameters:
+        - name: projectid
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - project
+                  - postgres_databases
+                properties:
+                  success:
+                    type: boolean
+                  project:
+                    $ref: '#/components/schemas/Project'
+                  postgres_databases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostgresDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
+    Project:
+      required:
+        - id
+        - name
+        - organization_id
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the project
+          example: 1
+        name:
+          type: string
+          description: The name of the project
+          example: My Project
+        organization_id:
+          type: integer
+          format: int64
+          description: The internal ID of the organization
+          example: 1
+        created_at:
+          type: string
+          description: The date the project was created
+          example: 2019-01-23T16:00:00Z
     CVE:
       required:
         - id

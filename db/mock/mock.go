@@ -1908,6 +1908,45 @@ func (c *TransactionQuerierGetPostgresDatabaseCall) DoAndReturn(f func(context.C
 	return c
 }
 
+// GetPostgresDatabasesForProject mocks base method.
+func (m *MockTransactionQuerier) GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.PostgresDatabase, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPostgresDatabasesForProject", ctx, projectID)
+	ret0, _ := ret[0].([]*queries.PostgresDatabase)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPostgresDatabasesForProject indicates an expected call of GetPostgresDatabasesForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetPostgresDatabasesForProject(ctx, projectID any) *TransactionQuerierGetPostgresDatabasesForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPostgresDatabasesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetPostgresDatabasesForProject), ctx, projectID)
+	return &TransactionQuerierGetPostgresDatabasesForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetPostgresDatabasesForProjectCall wrap *gomock.Call
+type TransactionQuerierGetPostgresDatabasesForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetPostgresDatabasesForProjectCall) Return(arg0 []*queries.PostgresDatabase, arg1 error) *TransactionQuerierGetPostgresDatabasesForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetPostgresDatabasesForProjectCall) Do(f func(context.Context, int64) ([]*queries.PostgresDatabase, error)) *TransactionQuerierGetPostgresDatabasesForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetPostgresDatabasesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.PostgresDatabase, error)) *TransactionQuerierGetPostgresDatabasesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetPostgresScan mocks base method.
 func (m *MockTransactionQuerier) GetPostgresScan(ctx context.Context, id int64) (*queries.GetPostgresScanRow, error) {
 	m.ctrl.T.Helper()
@@ -2060,6 +2099,45 @@ func (c *TransactionQuerierGetPostgresScansForProjectCall) Do(f func(context.Con
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetPostgresScansForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetPostgresScansForProjectRow, error)) *TransactionQuerierGetPostgresScansForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetProjectByID mocks base method.
+func (m *MockTransactionQuerier) GetProjectByID(ctx context.Context, id int64) (*queries.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjectByID", ctx, id)
+	ret0, _ := ret[0].(*queries.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjectByID indicates an expected call of GetProjectByID.
+func (mr *MockTransactionQuerierMockRecorder) GetProjectByID(ctx, id any) *TransactionQuerierGetProjectByIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectByID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectByID), ctx, id)
+	return &TransactionQuerierGetProjectByIDCall{Call: call}
+}
+
+// TransactionQuerierGetProjectByIDCall wrap *gomock.Call
+type TransactionQuerierGetProjectByIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetProjectByIDCall) Return(arg0 *queries.Project, arg1 error) *TransactionQuerierGetProjectByIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetProjectByIDCall) Do(f func(context.Context, int64) (*queries.Project, error)) *TransactionQuerierGetProjectByIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetProjectByIDCall) DoAndReturn(f func(context.Context, int64) (*queries.Project, error)) *TransactionQuerierGetProjectByIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

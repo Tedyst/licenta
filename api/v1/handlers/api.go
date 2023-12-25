@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/api/v1/middleware/session"
 	"github.com/tedyst/licenta/api/v1/middleware/workerauth"
 	"github.com/tedyst/licenta/db"
@@ -25,3 +26,5 @@ func NewServerHandler(queries db.TransactionQuerier, sessionStore session.Sessio
 		workerauth:      workerAuth,
 	}
 }
+
+var _ generated.StrictServerInterface = (*serverHandler)(nil)

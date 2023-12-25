@@ -175,6 +175,21 @@ type PostgresScanResult struct {
 	Severity  int    `json:"severity"`
 }
 
+// Project defines model for Project.
+type Project struct {
+	// CreatedAt The date the project was created
+	CreatedAt string `json:"created_at"`
+
+	// Id The internal ID of the project
+	Id int64 `json:"id"`
+
+	// Name The name of the project
+	Name string `json:"name"`
+
+	// OrganizationId The internal ID of the organization
+	OrganizationId int64 `json:"organization_id"`
+}
+
 // RegisterUser defines model for RegisterUser.
 type RegisterUser struct {
 	// Email The email of the user
@@ -385,8 +400,14 @@ type ClientInterface interface {
 	// PostLogout request
 	PostLogout(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetProjectProjectid request
+	GetProjectProjectid(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetProjectProjectidBruteforcePasswords request
 	GetProjectProjectidBruteforcePasswords(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostProjectProjectidRun request
+	PostProjectProjectidRun(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostRegisterWithBody request with any body
 	PostRegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -519,8 +540,32 @@ func (c *Client) PostLogout(ctx context.Context, reqEditors ...RequestEditorFn) 
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetProjectProjectid(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectProjectidRequest(c.Server, projectid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetProjectProjectidBruteforcePasswords(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetProjectProjectidBruteforcePasswordsRequest(c.Server, projectid, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostProjectProjectidRun(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectProjectidRunRequest(c.Server, projectid)
 	if err != nil {
 		return nil, err
 	}
@@ -910,6 +955,40 @@ func NewPostLogoutRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetProjectProjectidRequest generates requests for GetProjectProjectid
+func NewGetProjectProjectidRequest(server string, projectid int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "projectid", runtime.ParamLocationPath, projectid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/project/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetProjectProjectidBruteforcePasswordsRequest generates requests for GetProjectProjectidBruteforcePasswords
 func NewGetProjectProjectidBruteforcePasswordsRequest(server string, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams) (*http.Request, error) {
 	var err error
@@ -959,6 +1038,40 @@ func NewGetProjectProjectidBruteforcePasswordsRequest(server string, projectid i
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostProjectProjectidRunRequest generates requests for PostProjectProjectidRun
+func NewPostProjectProjectidRunRequest(server string, projectid int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "projectid", runtime.ParamLocationPath, projectid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/project/%s/run", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1536,8 +1649,14 @@ type ClientWithResponsesInterface interface {
 	// PostLogoutWithResponse request
 	PostLogoutWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostLogoutResponse, error)
 
+	// GetProjectProjectidWithResponse request
+	GetProjectProjectidWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*GetProjectProjectidResponse, error)
+
 	// GetProjectProjectidBruteforcePasswordsWithResponse request
 	GetProjectProjectidBruteforcePasswordsWithResponse(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectProjectidBruteforcePasswordsResponse, error)
+
+	// PostProjectProjectidRunWithResponse request
+	PostProjectProjectidRunWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*PostProjectProjectidRunResponse, error)
 
 	// PostRegisterWithBodyWithResponse request with any body
 	PostRegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error)
@@ -1711,6 +1830,34 @@ func (r PostLogoutResponse) StatusCode() int {
 	return 0
 }
 
+type GetProjectProjectidResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		PostgresDatabases []PostgresDatabase `json:"postgres_databases"`
+		Project           Project            `json:"project"`
+		Success           bool               `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetProjectProjectidResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetProjectProjectidResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetProjectProjectidBruteforcePasswordsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1728,6 +1875,34 @@ func (r GetProjectProjectidBruteforcePasswordsResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetProjectProjectidBruteforcePasswordsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostProjectProjectidRunResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		PostgresScans []PostgresScan `json:"postgres_scans"`
+		Success       bool           `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostProjectProjectidRunResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostProjectProjectidRunResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2120,6 +2295,15 @@ func (c *ClientWithResponses) PostLogoutWithResponse(ctx context.Context, reqEdi
 	return ParsePostLogoutResponse(rsp)
 }
 
+// GetProjectProjectidWithResponse request returning *GetProjectProjectidResponse
+func (c *ClientWithResponses) GetProjectProjectidWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*GetProjectProjectidResponse, error) {
+	rsp, err := c.GetProjectProjectid(ctx, projectid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetProjectProjectidResponse(rsp)
+}
+
 // GetProjectProjectidBruteforcePasswordsWithResponse request returning *GetProjectProjectidBruteforcePasswordsResponse
 func (c *ClientWithResponses) GetProjectProjectidBruteforcePasswordsWithResponse(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectProjectidBruteforcePasswordsResponse, error) {
 	rsp, err := c.GetProjectProjectidBruteforcePasswords(ctx, projectid, params, reqEditors...)
@@ -2127,6 +2311,15 @@ func (c *ClientWithResponses) GetProjectProjectidBruteforcePasswordsWithResponse
 		return nil, err
 	}
 	return ParseGetProjectProjectidBruteforcePasswordsResponse(rsp)
+}
+
+// PostProjectProjectidRunWithResponse request returning *PostProjectProjectidRunResponse
+func (c *ClientWithResponses) PostProjectProjectidRunWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*PostProjectProjectidRunResponse, error) {
+	rsp, err := c.PostProjectProjectidRun(ctx, projectid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostProjectProjectidRunResponse(rsp)
 }
 
 // PostRegisterWithBodyWithResponse request with arbitrary body returning *PostRegisterResponse
@@ -2464,6 +2657,50 @@ func ParsePostLogoutResponse(rsp *http.Response) (*PostLogoutResponse, error) {
 	return response, nil
 }
 
+// ParseGetProjectProjectidResponse parses an HTTP response from a GetProjectProjectidWithResponse call
+func ParseGetProjectProjectidResponse(rsp *http.Response) (*GetProjectProjectidResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetProjectProjectidResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			PostgresDatabases []PostgresDatabase `json:"postgres_databases"`
+			Project           Project            `json:"project"`
+			Success           bool               `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetProjectProjectidBruteforcePasswordsResponse parses an HTTP response from a GetProjectProjectidBruteforcePasswordsWithResponse call
 func ParseGetProjectProjectidBruteforcePasswordsResponse(rsp *http.Response) (*GetProjectProjectidBruteforcePasswordsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2491,6 +2728,56 @@ func ParseGetProjectProjectidBruteforcePasswordsResponse(rsp *http.Response) (*G
 			return nil, err
 		}
 		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostProjectProjectidRunResponse parses an HTTP response from a PostProjectProjectidRunWithResponse call
+func ParsePostProjectProjectidRunResponse(rsp *http.Response) (*PostProjectProjectidRunResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostProjectProjectidRunResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			PostgresScans []PostgresScan `json:"postgres_scans"`
+			Success       bool           `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -3031,9 +3318,15 @@ type ServerInterface interface {
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(w http.ResponseWriter, r *http.Request)
+	// Get project by ID
+	// (GET /project/{projectid})
+	GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64)
 	// Get all bruteforce passwords associated with a project
 	// (GET /project/{projectid}/bruteforce-passwords)
 	GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams)
+	// Run all extractors and scanners for a project
+	// (POST /project/{projectid}/run)
+	PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64)
 	// Creates a new user
 	// (POST /register)
 	PostRegister(w http.ResponseWriter, r *http.Request)
@@ -3106,9 +3399,21 @@ func (_ Unimplemented) PostLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get project by ID
+// (GET /project/{projectid})
+func (_ Unimplemented) GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get all bruteforce passwords associated with a project
 // (GET /project/{projectid}/bruteforce-passwords)
 func (_ Unimplemented) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Run all extractors and scanners for a project
+// (POST /project/{projectid}/run)
+func (_ Unimplemented) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -3302,6 +3607,34 @@ func (siw *ServerInterfaceWrapper) PostLogout(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetProjectProjectid operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectProjectid(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "projectid" -------------
+	var projectid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetProjectProjectid(w, r, projectid)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetProjectProjectidBruteforcePasswords operation middleware
 func (siw *ServerInterfaceWrapper) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3332,6 +3665,34 @@ func (siw *ServerInterfaceWrapper) GetProjectProjectidBruteforcePasswords(w http
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetProjectProjectidBruteforcePasswords(w, r, projectid, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostProjectProjectidRun operation middleware
+func (siw *ServerInterfaceWrapper) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "projectid" -------------
+	var projectid int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostProjectProjectidRun(w, r, projectid)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3794,7 +4155,13 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/logout", wrapper.PostLogout)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/project/{projectid}", wrapper.GetProjectProjectid)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/project/{projectid}/bruteforce-passwords", wrapper.GetProjectProjectidBruteforcePasswords)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/project/{projectid}/run", wrapper.PostProjectProjectidRun)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/register", wrapper.PostRegister)
@@ -3991,6 +4358,45 @@ func (response PostLogout200JSONResponse) VisitPostLogoutResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetProjectProjectidRequestObject struct {
+	Projectid int64 `json:"projectid"`
+}
+
+type GetProjectProjectidResponseObject interface {
+	VisitGetProjectProjectidResponse(w http.ResponseWriter) error
+}
+
+type GetProjectProjectid200JSONResponse struct {
+	PostgresDatabases []PostgresDatabase `json:"postgres_databases"`
+	Project           Project            `json:"project"`
+	Success           bool               `json:"success"`
+}
+
+func (response GetProjectProjectid200JSONResponse) VisitGetProjectProjectidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectProjectid401JSONResponse Error
+
+func (response GetProjectProjectid401JSONResponse) VisitGetProjectProjectidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectProjectid404JSONResponse Error
+
+func (response GetProjectProjectid404JSONResponse) VisitGetProjectProjectidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetProjectProjectidBruteforcePasswordsRequestObject struct {
 	Projectid int64 `json:"projectid"`
 	Params    GetProjectProjectidBruteforcePasswordsParams
@@ -4014,6 +4420,53 @@ type GetProjectProjectidBruteforcePasswords401JSONResponse Error
 func (response GetProjectProjectidBruteforcePasswords401JSONResponse) VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidRunRequestObject struct {
+	Projectid int64 `json:"projectid"`
+}
+
+type PostProjectProjectidRunResponseObject interface {
+	VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error
+}
+
+type PostProjectProjectidRun200JSONResponse struct {
+	PostgresScans []PostgresScan `json:"postgres_scans"`
+	Success       bool           `json:"success"`
+}
+
+func (response PostProjectProjectidRun200JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidRun400JSONResponse Error
+
+func (response PostProjectProjectidRun400JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidRun401JSONResponse Error
+
+func (response PostProjectProjectidRun401JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectProjectidRun404JSONResponse Error
+
+func (response PostProjectProjectidRun404JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -4493,9 +4946,15 @@ type StrictServerInterface interface {
 	// Logs out current logged in user session
 	// (POST /logout)
 	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
+	// Get project by ID
+	// (GET /project/{projectid})
+	GetProjectProjectid(ctx context.Context, request GetProjectProjectidRequestObject) (GetProjectProjectidResponseObject, error)
 	// Get all bruteforce passwords associated with a project
 	// (GET /project/{projectid}/bruteforce-passwords)
 	GetProjectProjectidBruteforcePasswords(ctx context.Context, request GetProjectProjectidBruteforcePasswordsRequestObject) (GetProjectProjectidBruteforcePasswordsResponseObject, error)
+	// Run all extractors and scanners for a project
+	// (POST /project/{projectid}/run)
+	PostProjectProjectidRun(ctx context.Context, request PostProjectProjectidRunRequestObject) (PostProjectProjectidRunResponseObject, error)
 	// Creates a new user
 	// (POST /register)
 	PostRegister(ctx context.Context, request PostRegisterRequestObject) (PostRegisterResponseObject, error)
@@ -4700,6 +5159,32 @@ func (sh *strictHandler) PostLogout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetProjectProjectid operation middleware
+func (sh *strictHandler) GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64) {
+	var request GetProjectProjectidRequestObject
+
+	request.Projectid = projectid
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectProjectid(ctx, request.(GetProjectProjectidRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectProjectid")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectProjectidResponseObject); ok {
+		if err := validResponse.VisitGetProjectProjectidResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetProjectProjectidBruteforcePasswords operation middleware
 func (sh *strictHandler) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams) {
 	var request GetProjectProjectidBruteforcePasswordsRequestObject
@@ -4720,6 +5205,32 @@ func (sh *strictHandler) GetProjectProjectidBruteforcePasswords(w http.ResponseW
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetProjectProjectidBruteforcePasswordsResponseObject); ok {
 		if err := validResponse.VisitGetProjectProjectidBruteforcePasswordsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostProjectProjectidRun operation middleware
+func (sh *strictHandler) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64) {
+	var request PostProjectProjectidRunRequestObject
+
+	request.Projectid = projectid
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjectProjectidRun(ctx, request.(PostProjectProjectidRunRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjectProjectidRun")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostProjectProjectidRunResponseObject); ok {
+		if err := validResponse.VisitPostProjectProjectidRunResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -5069,59 +5580,62 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"4i2OnfXN+r8BAAD//+qGHq7iUwAA",
+	"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",
+	"///tyaU0Ll0AAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

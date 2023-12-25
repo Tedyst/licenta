@@ -9,6 +9,28 @@ import (
 	"context"
 )
 
+const getProjectByID = `-- name: GetProjectByID :one
+SELECT
+    id, name, organization_id, created_at
+FROM
+    projects
+WHERE
+    id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetProjectByID(ctx context.Context, id int64) (*Project, error) {
+	row := q.db.QueryRow(ctx, getProjectByID, id)
+	var i Project
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.OrganizationID,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getProjectByOrganizationAndName = `-- name: GetProjectByOrganizationAndName :one
 SELECT
     id, name, organization_id, created_at
