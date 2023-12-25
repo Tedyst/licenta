@@ -100,6 +100,16 @@ func (q *Queries) CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams
 	return &i, err
 }
 
+const deleteNvdCveByName = `-- name: DeleteNvdCveByName :exec
+DELETE FROM nvd_cves
+WHERE cve_id = $1
+`
+
+func (q *Queries) DeleteNvdCveByName(ctx context.Context, cveID string) error {
+	_, err := q.db.Exec(ctx, deleteNvdCveByName, cveID)
+	return err
+}
+
 const getCPEByProductAndVersion = `-- name: GetCPEByProductAndVersion :one
 SELECT
     id, cpe, database_type, version, last_modified, created_at

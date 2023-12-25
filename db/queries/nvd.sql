@@ -79,3 +79,7 @@ WHERE
     nvd_cpes.database_type = $1
     AND nvd_cpes.version = $2;
 
+-- name: DeleteNvdCveByName :exec
+DELETE FROM nvd_cves
+WHERE cve_id = $1;
+

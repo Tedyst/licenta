@@ -33,6 +33,7 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
+	DeleteNvdCveByName(ctx context.Context, cveID string) error
 	DeleteSession(ctx context.Context, id uuid.UUID) error
 	DeleteSessionsByUserID(ctx context.Context, userID sql.NullInt64) error
 	DeleteUser(ctx context.Context, id int64) error

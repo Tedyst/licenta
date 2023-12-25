@@ -859,6 +859,44 @@ func (c *TransactionQuerierDeleteGitRepositoryForProjectCall) DoAndReturn(f func
 	return c
 }
 
+// DeleteNvdCveByName mocks base method.
+func (m *MockTransactionQuerier) DeleteNvdCveByName(ctx context.Context, cveID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteNvdCveByName", ctx, cveID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteNvdCveByName indicates an expected call of DeleteNvdCveByName.
+func (mr *MockTransactionQuerierMockRecorder) DeleteNvdCveByName(ctx, cveID any) *TransactionQuerierDeleteNvdCveByNameCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteNvdCveByName", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteNvdCveByName), ctx, cveID)
+	return &TransactionQuerierDeleteNvdCveByNameCall{Call: call}
+}
+
+// TransactionQuerierDeleteNvdCveByNameCall wrap *gomock.Call
+type TransactionQuerierDeleteNvdCveByNameCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierDeleteNvdCveByNameCall) Return(arg0 error) *TransactionQuerierDeleteNvdCveByNameCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierDeleteNvdCveByNameCall) Do(f func(context.Context, string) error) *TransactionQuerierDeleteNvdCveByNameCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierDeleteNvdCveByNameCall) DoAndReturn(f func(context.Context, string) error) *TransactionQuerierDeleteNvdCveByNameCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteSession mocks base method.
 func (m *MockTransactionQuerier) DeleteSession(ctx context.Context, id uuid.UUID) error {
 	m.ctrl.T.Helper()
