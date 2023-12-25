@@ -1,29 +1,48 @@
 package handlers
 
 import (
+	"context"
+
 	"github.com/tedyst/licenta/api/v1/generated"
-	"github.com/tedyst/licenta/api/v1/middleware/session"
-	"github.com/tedyst/licenta/api/v1/middleware/workerauth"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/messages"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks"
 )
 
 type serverHandler struct {
-	Queries         db.TransactionQuerier
-	SessionStore    session.SessionStore
-	TaskRunner      tasks.TaskRunner
-	MessageExchange messages.Exchange
-	workerauth      workerauth.WorkerAuth
+	DatabaseProvider db.TransactionQuerier
+	TaskRunner       tasks.TaskRunner
+	MessageExchange  messages.Exchange
+
+	workerauth  workerAuth
+	sessionAuth userAuth
 }
 
-func NewServerHandler(queries db.TransactionQuerier, sessionStore session.SessionStore, messageExchange messages.Exchange, taskRunner tasks.TaskRunner, workerAuth workerauth.WorkerAuth) *serverHandler {
+type workerAuth interface {
+	GetWorker(ctx context.Context) (*models.Worker, error)
+}
+
+type userAuth interface {
+	GetUser(ctx context.Context) (*models.User, error)
+}
+
+type HandlerConfig struct {
+	DatabaseProvider db.TransactionQuerier
+	TaskRunner       tasks.TaskRunner
+	MessageExchange  messages.Exchange
+
+	WorkerAuth workerAuth
+	UserAuth   userAuth
+}
+
+func NewServerHandler(config HandlerConfig) *serverHandler {
 	return &serverHandler{
-		Queries:         queries,
-		SessionStore:    sessionStore,
-		MessageExchange: messageExchange,
-		TaskRunner:      taskRunner,
-		workerauth:      workerAuth,
+		DatabaseProvider: config.DatabaseProvider,
+		MessageExchange:  config.MessageExchange,
+		TaskRunner:       config.TaskRunner,
+		workerauth:       config.WorkerAuth,
+		sessionAuth:      config.UserAuth,
 	}
 }
 

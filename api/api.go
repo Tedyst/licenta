@@ -25,22 +25,27 @@ type ApiConfig struct {
 	Debug  bool
 	Origin string
 
-	TaskRunner tasks.TaskRunner
+	TaskRunner      tasks.TaskRunner
+	MessageExchange messages.Exchange
+
+	WorkerAuth workerAuth
+	UserAuth   userAuth
+
+	Database db.TransactionQuerier
 }
 
 type workerAuth interface {
 	Handler(next http.Handler) http.Handler
-	GetWorker(ctx context.Context) *models.Worker
+	GetWorker(ctx context.Context) (*models.Worker, error)
 }
 
-type sessionStore interface {
-	GetUser(ctx context.Context) *models.User
-	SetUser(ctx context.Context, user *models.User)
-	ClearSession(ctx context.Context)
-	Handler(next http.Handler) http.Handler
+type userAuth interface {
+	Middleware(next http.Handler) http.Handler
+	Handler() http.Handler
+	GetUser(ctx context.Context) (*models.User, error)
 }
 
-func Initialize(database db.TransactionQuerier, sessionStore sessionStore, config ApiConfig, messageExchange messages.Exchange, workerAuth workerAuth) http.Handler {
+func Initialize(config ApiConfig) (http.Handler, error) {
 	app := chi.NewRouter()
 	app.Use(middleware.RealIP)
 	app.Use(slogchi.New(slog.Default()))
@@ -56,8 +61,10 @@ func Initialize(database db.TransactionQuerier, sessionStore sessionStore, confi
 	if !config.Debug {
 		app.Use(middleware.Timeout(30 * time.Second))
 	}
-	app.Use(sessionStore.Handler)
-	app.Use(workerAuth.Handler)
+	app.Use(config.WorkerAuth.Handler)
+
+	app.Use(config.UserAuth.Middleware)
+	app.Mount("/auth", http.StripPrefix("/auth", config.UserAuth.Handler()))
 
 	app.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
@@ -67,9 +74,14 @@ func Initialize(database db.TransactionQuerier, sessionStore sessionStore, confi
 		}
 	})
 
-	v1.RegisterHandler(app, database, sessionStore, v1.ApiV1Config{
-		Debug:   config.Debug,
-		BaseURL: "/api/v1",
-	}, messageExchange, config.TaskRunner, workerAuth)
-	return otelhttp.NewHandler(app, "api")
+	v1.RegisterHandler(app, v1.ApiV1Config{
+		Debug:            config.Debug,
+		BaseURL:          "/api/v1",
+		TaskRunner:       config.TaskRunner,
+		MessageExchange:  config.MessageExchange,
+		WorkerAuth:       config.WorkerAuth,
+		UserAuth:         config.UserAuth,
+		DatabaseProvider: config.Database,
+	})
+	return otelhttp.NewHandler(app, "api"), nil
 }

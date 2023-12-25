@@ -17,22 +17,33 @@ import (
 type ApiV1Config struct {
 	Debug   bool
 	BaseURL string
+
+	TaskRunner      tasks.TaskRunner
+	MessageExchange messages.Exchange
+
+	WorkerAuth workerAuth
+	UserAuth   userAuth
+
+	DatabaseProvider db.TransactionQuerier
 }
 
 type workerAuth interface {
-	Handler(next http.Handler) http.Handler
-	GetWorker(ctx context.Context) *models.Worker
+	GetWorker(ctx context.Context) (*models.Worker, error)
 }
 
-type sessionStore interface {
-	GetUser(ctx context.Context) *models.User
-	SetUser(ctx context.Context, user *models.User)
-	ClearSession(ctx context.Context)
-	Handler(next http.Handler) http.Handler
+type userAuth interface {
+	GetUser(ctx context.Context) (*models.User, error)
 }
 
-func RegisterHandler(app *chi.Mux, database db.TransactionQuerier, sessionStore sessionStore, config ApiV1Config, messageExchange messages.Exchange, taskRunner tasks.TaskRunner, workerAuth workerAuth) http.Handler {
-	api := generated.NewStrictHandlerWithOptions(handlers.NewServerHandler(database, sessionStore, messageExchange, taskRunner, workerAuth), nil, generated.StrictHTTPServerOptions{
+func RegisterHandler(app *chi.Mux, config ApiV1Config) http.Handler {
+	serverHandler := handlers.NewServerHandler(handlers.HandlerConfig{
+		DatabaseProvider: config.DatabaseProvider,
+		TaskRunner:       config.TaskRunner,
+		MessageExchange:  config.MessageExchange,
+		WorkerAuth:       config.WorkerAuth,
+		UserAuth:         config.UserAuth,
+	})
+	api := generated.NewStrictHandlerWithOptions(serverHandler, nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			var message = "Invalid request"
 			if config.Debug {

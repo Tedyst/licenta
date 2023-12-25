@@ -9,7 +9,11 @@ import (
 )
 
 func (server *serverHandler) GetCvesDatabaseTypeVersion(ctx context.Context, request generated.GetCvesDatabaseTypeVersionRequestObject) (generated.GetCvesDatabaseTypeVersionResponseObject, error) {
-	if worker := server.workerauth.GetWorker(ctx); worker == nil {
+	worker, err := server.workerauth.GetWorker(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if worker == nil {
 		return generated.GetCvesDatabaseTypeVersion401JSONResponse{
 			Message: "Unauthorized",
 			Success: false,
@@ -24,7 +28,7 @@ func (server *serverHandler) GetCvesDatabaseTypeVersion(ctx context.Context, req
 		}, nil
 	}
 
-	cves, err := server.Queries.GetCvesByProductAndVersion(ctx, queries.GetCvesByProductAndVersionParams{
+	cves, err := server.DatabaseProvider.GetCvesByProductAndVersion(ctx, queries.GetCvesByProductAndVersionParams{
 		DatabaseType: int32(product),
 		Version:      request.Version,
 	})

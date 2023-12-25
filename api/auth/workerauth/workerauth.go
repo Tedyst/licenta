@@ -11,11 +11,6 @@ import (
 
 const workerAuthHeader = "X-Worker-Token"
 
-type WorkerAuth interface {
-	Handler(next http.Handler) http.Handler
-	GetWorker(ctx context.Context) *models.Worker
-}
-
 type workerAuthQuerier interface {
 	GetWorkerByToken(ctx context.Context, token string) (*models.Worker, error)
 }
@@ -72,11 +67,11 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 	})
 }
 
-func (wa *workerAuth) GetWorker(ctx context.Context) *models.Worker {
-	return wa.getWorkerAuthData(ctx)
+func (wa *workerAuth) GetWorker(ctx context.Context) (*models.Worker, error) {
+	return wa.getWorkerAuthData(ctx), nil
 }
 
-func NewWorkerAuth(cache cache.CacheProvider[models.Worker], querier workerAuthQuerier) WorkerAuth {
+func NewWorkerAuth(cache cache.CacheProvider[models.Worker], querier workerAuthQuerier) *workerAuth {
 	return &workerAuth{
 		cache:   cache,
 		querier: querier,

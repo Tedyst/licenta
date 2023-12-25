@@ -287,15 +287,6 @@ type GetUsersParams struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty"`
 }
 
-// Post2faTotpSecondStepJSONRequestBody defines body for Post2faTotpSecondStep for application/json ContentType.
-type Post2faTotpSecondStepJSONRequestBody = TOTPSecondStep
-
-// PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
-type PostLoginJSONRequestBody = LoginUser
-
-// PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
-type PostRegisterJSONRequestBody = RegisterUser
-
 // PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody defines body for PatchScannerPostgresDatabasePostgresDatabaseId for application/json ContentType.
 type PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody = PatchPostgresDatabase
 
@@ -381,24 +372,8 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// Post2faTotpFirstStep request
-	Post2faTotpFirstStep(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// Post2faTotpSecondStepWithBody request with any body
-	Post2faTotpSecondStepWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	Post2faTotpSecondStep(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetCvesDatabaseTypeVersion request
 	GetCvesDatabaseTypeVersion(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostLoginWithBody request with any body
-	PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	PostLogin(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostLogout request
-	PostLogout(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetProjectProjectid request
 	GetProjectProjectid(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -408,11 +383,6 @@ type ClientInterface interface {
 
 	// PostProjectProjectidRun request
 	PostProjectProjectidRun(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// PostRegisterWithBody request with any body
-	PostRegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	PostRegister(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetScannerPostgresDatabasePostgresDatabaseId request
 	GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -456,80 +426,8 @@ type ClientInterface interface {
 	GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) Post2faTotpFirstStep(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPost2faTotpFirstStepRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) Post2faTotpSecondStepWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPost2faTotpSecondStepRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) Post2faTotpSecondStep(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPost2faTotpSecondStepRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) GetCvesDatabaseTypeVersion(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetCvesDatabaseTypeVersionRequest(c.Server, databaseType, version)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostLoginRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostLogin(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostLoginRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostLogout(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostLogoutRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -566,30 +464,6 @@ func (c *Client) GetProjectProjectidBruteforcePasswords(ctx context.Context, pro
 
 func (c *Client) PostProjectProjectidRun(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostProjectProjectidRunRequest(c.Server, projectid)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostRegisterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostRegisterRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostRegister(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostRegisterRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -780,73 +654,6 @@ func (c *Client) GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEdit
 	return c.Client.Do(req)
 }
 
-// NewPost2faTotpFirstStepRequest generates requests for Post2faTotpFirstStep
-func NewPost2faTotpFirstStepRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/2fa/totp-first-step")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewPost2faTotpSecondStepRequest calls the generic Post2faTotpSecondStep builder with application/json body
-func NewPost2faTotpSecondStepRequest(server string, body Post2faTotpSecondStepJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewPost2faTotpSecondStepRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewPost2faTotpSecondStepRequestWithBody generates requests for Post2faTotpSecondStep with any type of body
-func NewPost2faTotpSecondStepRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/2fa/totp-second-step")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewGetCvesDatabaseTypeVersionRequest generates requests for GetCvesDatabaseTypeVersion
 func NewGetCvesDatabaseTypeVersionRequest(server string, databaseType string, version string) (*http.Request, error) {
 	var err error
@@ -881,73 +688,6 @@ func NewGetCvesDatabaseTypeVersionRequest(server string, databaseType string, ve
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewPostLoginRequest calls the generic PostLogin builder with application/json body
-func NewPostLoginRequest(server string, body PostLoginJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewPostLoginRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewPostLoginRequestWithBody generates requests for PostLogin with any type of body
-func NewPostLoginRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/login")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewPostLogoutRequest generates requests for PostLogout
-func NewPostLogoutRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/logout")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1075,46 +815,6 @@ func NewPostProjectProjectidRunRequest(server string, projectid int64) (*http.Re
 	if err != nil {
 		return nil, err
 	}
-
-	return req, nil
-}
-
-// NewPostRegisterRequest calls the generic PostRegister builder with application/json body
-func NewPostRegisterRequest(server string, body PostRegisterJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewPostRegisterRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewPostRegisterRequestWithBody generates requests for PostRegister with any type of body
-func NewPostRegisterRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/register")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -1630,24 +1330,8 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// Post2faTotpFirstStepWithResponse request
-	Post2faTotpFirstStepWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*Post2faTotpFirstStepResponse, error)
-
-	// Post2faTotpSecondStepWithBodyWithResponse request with any body
-	Post2faTotpSecondStepWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*Post2faTotpSecondStepResponse, error)
-
-	Post2faTotpSecondStepWithResponse(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*Post2faTotpSecondStepResponse, error)
-
 	// GetCvesDatabaseTypeVersionWithResponse request
 	GetCvesDatabaseTypeVersionWithResponse(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDatabaseTypeVersionResponse, error)
-
-	// PostLoginWithBodyWithResponse request with any body
-	PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
-
-	PostLoginWithResponse(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostLoginResponse, error)
-
-	// PostLogoutWithResponse request
-	PostLogoutWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostLogoutResponse, error)
 
 	// GetProjectProjectidWithResponse request
 	GetProjectProjectidWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*GetProjectProjectidResponse, error)
@@ -1657,11 +1341,6 @@ type ClientWithResponsesInterface interface {
 
 	// PostProjectProjectidRunWithResponse request
 	PostProjectProjectidRunWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*PostProjectProjectidRunResponse, error)
-
-	// PostRegisterWithBodyWithResponse request with any body
-	PostRegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error)
-
-	PostRegisterWithResponse(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error)
 
 	// GetScannerPostgresDatabasePostgresDatabaseIdWithResponse request
 	GetScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*GetScannerPostgresDatabasePostgresDatabaseIdResponse, error)
@@ -1705,55 +1384,6 @@ type ClientWithResponsesInterface interface {
 	GetWorkerGetTaskWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetWorkerGetTaskResponse, error)
 }
 
-type Post2faTotpFirstStepResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *TOTPFirstStep
-	JSON401      *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r Post2faTotpFirstStepResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r Post2faTotpFirstStepResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type Post2faTotpSecondStepResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Success bool `json:"success"`
-	}
-	JSON400 *Error
-	JSON401 *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r Post2faTotpSecondStepResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r Post2faTotpSecondStepResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type GetCvesDatabaseTypeVersionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1775,55 +1405,6 @@ func (r GetCvesDatabaseTypeVersionResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetCvesDatabaseTypeVersionResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PostLoginResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Success bool `json:"success"`
-		User    User `json:"user"`
-	}
-	JSON400 *Error
-	JSON401 *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r PostLoginResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostLoginResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PostLogoutResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *Success
-}
-
-// Status returns HTTPResponse.Status
-func (r PostLogoutResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostLogoutResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1903,33 +1484,6 @@ func (r PostProjectProjectidRunResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PostProjectProjectidRunResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PostRegisterResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Success bool `json:"success"`
-		User    User `json:"user"`
-	}
-	JSON400 *Error
-	JSON409 *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r PostRegisterResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostRegisterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2233,32 +1787,6 @@ func (r GetWorkerGetTaskResponse) StatusCode() int {
 	return 0
 }
 
-// Post2faTotpFirstStepWithResponse request returning *Post2faTotpFirstStepResponse
-func (c *ClientWithResponses) Post2faTotpFirstStepWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*Post2faTotpFirstStepResponse, error) {
-	rsp, err := c.Post2faTotpFirstStep(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePost2faTotpFirstStepResponse(rsp)
-}
-
-// Post2faTotpSecondStepWithBodyWithResponse request with arbitrary body returning *Post2faTotpSecondStepResponse
-func (c *ClientWithResponses) Post2faTotpSecondStepWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*Post2faTotpSecondStepResponse, error) {
-	rsp, err := c.Post2faTotpSecondStepWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePost2faTotpSecondStepResponse(rsp)
-}
-
-func (c *ClientWithResponses) Post2faTotpSecondStepWithResponse(ctx context.Context, body Post2faTotpSecondStepJSONRequestBody, reqEditors ...RequestEditorFn) (*Post2faTotpSecondStepResponse, error) {
-	rsp, err := c.Post2faTotpSecondStep(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePost2faTotpSecondStepResponse(rsp)
-}
-
 // GetCvesDatabaseTypeVersionWithResponse request returning *GetCvesDatabaseTypeVersionResponse
 func (c *ClientWithResponses) GetCvesDatabaseTypeVersionWithResponse(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDatabaseTypeVersionResponse, error) {
 	rsp, err := c.GetCvesDatabaseTypeVersion(ctx, databaseType, version, reqEditors...)
@@ -2266,32 +1794,6 @@ func (c *ClientWithResponses) GetCvesDatabaseTypeVersionWithResponse(ctx context
 		return nil, err
 	}
 	return ParseGetCvesDatabaseTypeVersionResponse(rsp)
-}
-
-// PostLoginWithBodyWithResponse request with arbitrary body returning *PostLoginResponse
-func (c *ClientWithResponses) PostLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
-	rsp, err := c.PostLoginWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostLoginResponse(rsp)
-}
-
-func (c *ClientWithResponses) PostLoginWithResponse(ctx context.Context, body PostLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostLoginResponse, error) {
-	rsp, err := c.PostLogin(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostLoginResponse(rsp)
-}
-
-// PostLogoutWithResponse request returning *PostLogoutResponse
-func (c *ClientWithResponses) PostLogoutWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostLogoutResponse, error) {
-	rsp, err := c.PostLogout(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostLogoutResponse(rsp)
 }
 
 // GetProjectProjectidWithResponse request returning *GetProjectProjectidResponse
@@ -2319,23 +1821,6 @@ func (c *ClientWithResponses) PostProjectProjectidRunWithResponse(ctx context.Co
 		return nil, err
 	}
 	return ParsePostProjectProjectidRunResponse(rsp)
-}
-
-// PostRegisterWithBodyWithResponse request with arbitrary body returning *PostRegisterResponse
-func (c *ClientWithResponses) PostRegisterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error) {
-	rsp, err := c.PostRegisterWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostRegisterResponse(rsp)
-}
-
-func (c *ClientWithResponses) PostRegisterWithResponse(ctx context.Context, body PostRegisterJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRegisterResponse, error) {
-	rsp, err := c.PostRegister(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostRegisterResponse(rsp)
 }
 
 // GetScannerPostgresDatabasePostgresDatabaseIdWithResponse request returning *GetScannerPostgresDatabasePostgresDatabaseIdResponse
@@ -2469,81 +1954,6 @@ func (c *ClientWithResponses) GetWorkerGetTaskWithResponse(ctx context.Context, 
 	return ParseGetWorkerGetTaskResponse(rsp)
 }
 
-// ParsePost2faTotpFirstStepResponse parses an HTTP response from a Post2faTotpFirstStepWithResponse call
-func ParsePost2faTotpFirstStepResponse(rsp *http.Response) (*Post2faTotpFirstStepResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &Post2faTotpFirstStepResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest TOTPFirstStep
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePost2faTotpSecondStepResponse parses an HTTP response from a Post2faTotpSecondStepWithResponse call
-func ParsePost2faTotpSecondStepResponse(rsp *http.Response) (*Post2faTotpSecondStepResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &Post2faTotpSecondStepResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Success bool `json:"success"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseGetCvesDatabaseTypeVersionResponse parses an HTTP response from a GetCvesDatabaseTypeVersionWithResponse call
 func ParseGetCvesDatabaseTypeVersionResponse(rsp *http.Response) (*GetCvesDatabaseTypeVersionResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2581,75 +1991,6 @@ func ParseGetCvesDatabaseTypeVersionResponse(rsp *http.Response) (*GetCvesDataba
 			return nil, err
 		}
 		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePostLoginResponse parses an HTTP response from a PostLoginWithResponse call
-func ParsePostLoginResponse(rsp *http.Response) (*PostLoginResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostLoginResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Success bool `json:"success"`
-			User    User `json:"user"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePostLogoutResponse parses an HTTP response from a PostLogoutWithResponse call
-func ParsePostLogoutResponse(rsp *http.Response) (*PostLogoutResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostLogoutResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Success
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
 
 	}
 
@@ -2777,49 +2118,6 @@ func ParsePostProjectProjectidRunResponse(rsp *http.Response) (*PostProjectProje
 			return nil, err
 		}
 		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePostRegisterResponse parses an HTTP response from a PostRegisterWithResponse call
-func ParsePostRegisterResponse(rsp *http.Response) (*PostRegisterResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostRegisterResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Success bool `json:"success"`
-			User    User `json:"user"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON409 = &dest
 
 	}
 
@@ -3301,21 +2599,9 @@ func ParseGetWorkerGetTaskResponse(rsp *http.Response) (*GetWorkerGetTaskRespons
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// First step of the TOTP authentication process
-	// (POST /2fa/totp-first-step)
-	Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request)
-	// Second step of the TOTP authentication process
-	// (POST /2fa/totp-second-step)
-	Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request)
 	// Get all CVEs for a database type and version
 	// (GET /cves/{databaseType}/{version})
 	GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string)
-	// Logs user into the system
-	// (POST /login)
-	PostLogin(w http.ResponseWriter, r *http.Request)
-	// Logs out current logged in user session
-	// (POST /logout)
-	PostLogout(w http.ResponseWriter, r *http.Request)
 	// Get project by ID
 	// (GET /project/{projectid})
 	GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64)
@@ -3325,9 +2611,6 @@ type ServerInterface interface {
 	// Run all extractors and scanners for a project
 	// (POST /project/{projectid}/run)
 	PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64)
-	// Creates a new user
-	// (POST /register)
-	PostRegister(w http.ResponseWriter, r *http.Request)
 	// Get all postgres scans associated with a database
 	// (GET /scanner/postgres/database/{postgresDatabaseId})
 	GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
@@ -3367,33 +2650,9 @@ type ServerInterface interface {
 
 type Unimplemented struct{}
 
-// First step of the TOTP authentication process
-// (POST /2fa/totp-first-step)
-func (_ Unimplemented) Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Second step of the TOTP authentication process
-// (POST /2fa/totp-second-step)
-func (_ Unimplemented) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
 // Get all CVEs for a database type and version
 // (GET /cves/{databaseType}/{version})
 func (_ Unimplemented) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Logs user into the system
-// (POST /login)
-func (_ Unimplemented) PostLogin(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Logs out current logged in user session
-// (POST /logout)
-func (_ Unimplemented) PostLogout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -3412,12 +2671,6 @@ func (_ Unimplemented) GetProjectProjectidBruteforcePasswords(w http.ResponseWri
 // Run all extractors and scanners for a project
 // (POST /project/{projectid}/run)
 func (_ Unimplemented) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Creates a new user
-// (POST /register)
-func (_ Unimplemented) PostRegister(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -3496,44 +2749,6 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// Post2faTotpFirstStep operation middleware
-func (siw *ServerInterfaceWrapper) Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
-
-	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.Post2faTotpFirstStep(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// Post2faTotpSecondStep operation middleware
-func (siw *ServerInterfaceWrapper) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
-
-	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.Post2faTotpSecondStep(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
 // GetCvesDatabaseTypeVersion operation middleware
 func (siw *ServerInterfaceWrapper) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3562,40 +2777,6 @@ func (siw *ServerInterfaceWrapper) GetCvesDatabaseTypeVersion(w http.ResponseWri
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCvesDatabaseTypeVersion(w, r, databaseType, version)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// PostLogin operation middleware
-func (siw *ServerInterfaceWrapper) PostLogin(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostLogin(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// PostLogout operation middleware
-func (siw *ServerInterfaceWrapper) PostLogout(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
-
-	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostLogout(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3691,21 +2872,6 @@ func (siw *ServerInterfaceWrapper) PostProjectProjectidRun(w http.ResponseWriter
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostProjectProjectidRun(w, r, projectid)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// PostRegister operation middleware
-func (siw *ServerInterfaceWrapper) PostRegister(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostRegister(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4138,19 +3304,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/2fa/totp-first-step", wrapper.Post2faTotpFirstStep)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/2fa/totp-second-step", wrapper.Post2faTotpSecondStep)
-	})
-	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/cves/{databaseType}/{version}", wrapper.GetCvesDatabaseTypeVersion)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/login", wrapper.PostLogin)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/logout", wrapper.PostLogout)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/project/{projectid}", wrapper.GetProjectProjectid)
@@ -4160,9 +3314,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/project/{projectid}/run", wrapper.PostProjectProjectidRun)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/register", wrapper.PostRegister)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.GetScannerPostgresDatabasePostgresDatabaseId)
@@ -4201,68 +3352,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	return r
 }
 
-type Post2faTotpFirstStepRequestObject struct {
-}
-
-type Post2faTotpFirstStepResponseObject interface {
-	VisitPost2faTotpFirstStepResponse(w http.ResponseWriter) error
-}
-
-type Post2faTotpFirstStep200JSONResponse TOTPFirstStep
-
-func (response Post2faTotpFirstStep200JSONResponse) VisitPost2faTotpFirstStepResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type Post2faTotpFirstStep401JSONResponse Error
-
-func (response Post2faTotpFirstStep401JSONResponse) VisitPost2faTotpFirstStepResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type Post2faTotpSecondStepRequestObject struct {
-	Body *Post2faTotpSecondStepJSONRequestBody
-}
-
-type Post2faTotpSecondStepResponseObject interface {
-	VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error
-}
-
-type Post2faTotpSecondStep200JSONResponse struct {
-	Success bool `json:"success"`
-}
-
-func (response Post2faTotpSecondStep200JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type Post2faTotpSecondStep400JSONResponse Error
-
-func (response Post2faTotpSecondStep400JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type Post2faTotpSecondStep401JSONResponse Error
-
-func (response Post2faTotpSecondStep401JSONResponse) VisitPost2faTotpSecondStepResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetCvesDatabaseTypeVersionRequestObject struct {
 	DatabaseType string `json:"databaseType"`
 	Version      string `json:"version"`
@@ -4298,60 +3387,6 @@ type GetCvesDatabaseTypeVersion404JSONResponse Error
 func (response GetCvesDatabaseTypeVersion404JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLoginRequestObject struct {
-	Body *PostLoginJSONRequestBody
-}
-
-type PostLoginResponseObject interface {
-	VisitPostLoginResponse(w http.ResponseWriter) error
-}
-
-type PostLogin200JSONResponse struct {
-	Success bool `json:"success"`
-	User    User `json:"user"`
-}
-
-func (response PostLogin200JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLogin400JSONResponse Error
-
-func (response PostLogin400JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLogin401JSONResponse Error
-
-func (response PostLogin401JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostLogoutRequestObject struct {
-}
-
-type PostLogoutResponseObject interface {
-	VisitPostLogoutResponse(w http.ResponseWriter) error
-}
-
-type PostLogout200JSONResponse Success
-
-func (response PostLogout200JSONResponse) VisitPostLogoutResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -4465,44 +3500,6 @@ type PostProjectProjectidRun404JSONResponse Error
 func (response PostProjectProjectidRun404JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostRegisterRequestObject struct {
-	Body *PostRegisterJSONRequestBody
-}
-
-type PostRegisterResponseObject interface {
-	VisitPostRegisterResponse(w http.ResponseWriter) error
-}
-
-type PostRegister200JSONResponse struct {
-	Success bool `json:"success"`
-	User    User `json:"user"`
-}
-
-func (response PostRegister200JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostRegister400JSONResponse Error
-
-func (response PostRegister400JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostRegister409JSONResponse Error
-
-func (response PostRegister409JSONResponse) VisitPostRegisterResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -4928,21 +3925,9 @@ func (response GetWorkerGetTask401JSONResponse) VisitGetWorkerGetTaskResponse(w 
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// First step of the TOTP authentication process
-	// (POST /2fa/totp-first-step)
-	Post2faTotpFirstStep(ctx context.Context, request Post2faTotpFirstStepRequestObject) (Post2faTotpFirstStepResponseObject, error)
-	// Second step of the TOTP authentication process
-	// (POST /2fa/totp-second-step)
-	Post2faTotpSecondStep(ctx context.Context, request Post2faTotpSecondStepRequestObject) (Post2faTotpSecondStepResponseObject, error)
 	// Get all CVEs for a database type and version
 	// (GET /cves/{databaseType}/{version})
 	GetCvesDatabaseTypeVersion(ctx context.Context, request GetCvesDatabaseTypeVersionRequestObject) (GetCvesDatabaseTypeVersionResponseObject, error)
-	// Logs user into the system
-	// (POST /login)
-	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
-	// Logs out current logged in user session
-	// (POST /logout)
-	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
 	// Get project by ID
 	// (GET /project/{projectid})
 	GetProjectProjectid(ctx context.Context, request GetProjectProjectidRequestObject) (GetProjectProjectidResponseObject, error)
@@ -4952,9 +3937,6 @@ type StrictServerInterface interface {
 	// Run all extractors and scanners for a project
 	// (POST /project/{projectid}/run)
 	PostProjectProjectidRun(ctx context.Context, request PostProjectProjectidRunRequestObject) (PostProjectProjectidRunResponseObject, error)
-	// Creates a new user
-	// (POST /register)
-	PostRegister(ctx context.Context, request PostRegisterRequestObject) (PostRegisterResponseObject, error)
 	// Get all postgres scans associated with a database
 	// (GET /scanner/postgres/database/{postgresDatabaseId})
 	GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request GetScannerPostgresDatabasePostgresDatabaseIdRequestObject) (GetScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
@@ -5019,61 +4001,6 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// Post2faTotpFirstStep operation middleware
-func (sh *strictHandler) Post2faTotpFirstStep(w http.ResponseWriter, r *http.Request) {
-	var request Post2faTotpFirstStepRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.Post2faTotpFirstStep(ctx, request.(Post2faTotpFirstStepRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Post2faTotpFirstStep")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(Post2faTotpFirstStepResponseObject); ok {
-		if err := validResponse.VisitPost2faTotpFirstStepResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// Post2faTotpSecondStep operation middleware
-func (sh *strictHandler) Post2faTotpSecondStep(w http.ResponseWriter, r *http.Request) {
-	var request Post2faTotpSecondStepRequestObject
-
-	var body Post2faTotpSecondStepJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.Post2faTotpSecondStep(ctx, request.(Post2faTotpSecondStepRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "Post2faTotpSecondStep")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(Post2faTotpSecondStepResponseObject); ok {
-		if err := validResponse.VisitPost2faTotpSecondStepResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
 // GetCvesDatabaseTypeVersion operation middleware
 func (sh *strictHandler) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string) {
 	var request GetCvesDatabaseTypeVersionRequestObject
@@ -5094,61 +4021,6 @@ func (sh *strictHandler) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *ht
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetCvesDatabaseTypeVersionResponseObject); ok {
 		if err := validResponse.VisitGetCvesDatabaseTypeVersionResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostLogin operation middleware
-func (sh *strictHandler) PostLogin(w http.ResponseWriter, r *http.Request) {
-	var request PostLoginRequestObject
-
-	var body PostLoginJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogin(ctx, request.(PostLoginRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostLogin")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostLoginResponseObject); ok {
-		if err := validResponse.VisitPostLoginResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostLogout operation middleware
-func (sh *strictHandler) PostLogout(w http.ResponseWriter, r *http.Request) {
-	var request PostLogoutRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostLogout(ctx, request.(PostLogoutRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostLogout")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostLogoutResponseObject); ok {
-		if err := validResponse.VisitPostLogoutResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -5228,37 +4100,6 @@ func (sh *strictHandler) PostProjectProjectidRun(w http.ResponseWriter, r *http.
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostProjectProjectidRunResponseObject); ok {
 		if err := validResponse.VisitPostProjectProjectidRunResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostRegister operation middleware
-func (sh *strictHandler) PostRegister(w http.ResponseWriter, r *http.Request) {
-	var request PostRegisterRequestObject
-
-	var body PostRegisterJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostRegister(ctx, request.(PostRegisterRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostRegister")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostRegisterResponseObject); ok {
-		if err := validResponse.VisitPostRegisterResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -5577,62 +4418,57 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"9VwAAA==",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

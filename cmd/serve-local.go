@@ -1,14 +1,17 @@
 package cmd
 
 import (
+	"encoding/hex"
+	"fmt"
 	"log/slog"
 	"net/http"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
-	"github.com/tedyst/licenta/api/v1/middleware/session"
-	"github.com/tedyst/licenta/api/v1/middleware/workerauth"
+	"github.com/tedyst/licenta/api/auth"
+	"github.com/tedyst/licenta/api/auth/workerauth"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/cache"
 	database "github.com/tedyst/licenta/db"
@@ -22,10 +25,30 @@ import (
 var serveLocalCmd = &cobra.Command{
 	Use:   "servelocal",
 	Short: "Run the server using the development configuration",
-	Long:  `This command starts the API server and waits for requests. It uses the local runner for async tasks, to allow easier debugging. It also uses the console email sender, to allow easier debugging.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:  `This command starts the API server and waits for requests. It uses all of the local implementations of the dependencies.`,
+	RunE: func(cmd *cobra.Command, args []string) error {
 		db := database.InitDatabase(viper.GetString("database"))
-		sessionStore := session.New(db, viper.GetBool("debug"))
+
+		hashKey, err := hex.DecodeString(viper.GetString("hash-key"))
+		if err != nil {
+			return errors.Wrap(err, "hash key must be a hex string")
+		}
+		if len(hashKey) != 32 {
+			return fmt.Errorf("hash key must be 32 bytes long (64 hex characters)")
+		}
+
+		encryptKey, err := hex.DecodeString(viper.GetString("encrypt-key"))
+		if err != nil {
+			return errors.Wrap(err, "encrypt key must be a hex string")
+		}
+		if len(encryptKey) != 32 {
+			return fmt.Errorf("encrypt key must be 32 bytes long (64 hex characters)")
+		}
+
+		userAuth, err := auth.NewAuthenticationProvider("", db, hashKey, encryptKey)
+		if err != nil {
+			return errors.Wrap(err, "failed to initialize user authentication")
+		}
 
 		localExchange := localExchange.NewLocalExchange()
 		brutefroceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
@@ -46,21 +69,31 @@ var serveLocalCmd = &cobra.Command{
 
 		waCacheProvider, err := cache.NewLocalCacheProvider[queries.Worker]()
 		if err != nil {
-			panic(err)
+			return err
 		}
+
 		workerAuth := workerauth.NewWorkerAuth(waCacheProvider, db)
 
-		app := api.Initialize(db, sessionStore, api.ApiConfig{
-			Debug:      viper.GetBool("debug"),
-			Origin:     viper.GetString("baseurl"),
-			TaskRunner: taskRunner,
-		}, localExchange, workerAuth)
+		app, err := api.Initialize(api.ApiConfig{
+			Debug:           viper.GetBool("debug"),
+			Origin:          viper.GetString("baseurl"),
+			TaskRunner:      taskRunner,
+			MessageExchange: localExchange,
+			WorkerAuth:      workerAuth,
+			UserAuth:        userAuth,
+			Database:        db,
+		})
+		if err != nil {
+			return err
+		}
 
 		slog.Info("Started web server", "port", viper.GetString("port"), "baseurl", viper.GetString("baseurl"))
 		err = http.ListenAndServe(":"+viper.GetString("port"), app)
 		if err != nil {
-			panic(err)
+			return err
 		}
+
+		return nil
 	},
 }
 
@@ -72,13 +105,18 @@ func init() {
 
 	serveLocalCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
 
-	// serveCmd.Flags().Bool("telemetry.metrics.enabled", false, "Enable metrics")
-	// serveCmd.Flags().Bool("telemetry.tracing.enabled", false, "Enable tracing")
-	// serveCmd.Flags().String("telemetry.tracing.jaeger", "", "Jaeger URL")
-
 	serveLocalCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
 	serveLocalCmd.Flags().String("database", "", "Database connection string")
+
+	serveLocalCmd.Flags().String("hash-key", "", "Hash key used for signing Cookies")
+	if err := serveLocalCmd.MarkFlagRequired("hash-key"); err != nil {
+		panic(err)
+	}
+	serveLocalCmd.Flags().String("encrypt-key", "", "Encrypt key used for signing Cookies")
+	if err := serveLocalCmd.MarkFlagRequired("encrypt-key"); err != nil {
+		panic(err)
+	}
 
 	rootCmd.AddCommand(serveLocalCmd)
 }

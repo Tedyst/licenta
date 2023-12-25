@@ -11,12 +11,12 @@ import (
 )
 
 func (server *serverHandler) GetProjectProjectid(ctx context.Context, request generated.GetProjectProjectidRequestObject) (generated.GetProjectProjectidResponseObject, error) {
-	project, err := server.Queries.GetProjectByID(ctx, request.Projectid)
+	project, err := server.DatabaseProvider.GetProjectByID(ctx, request.Projectid)
 	if err != nil {
 		return nil, err
 	}
 
-	postgres_databases_q, err := server.Queries.GetPostgresDatabasesForProject(ctx, request.Projectid)
+	postgres_databases_q, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Projectid)
 	if err != nil {
 		return nil, err
 	}
@@ -49,14 +49,14 @@ func (server *serverHandler) GetProjectProjectid(ctx context.Context, request ge
 }
 
 func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, request generated.PostProjectProjectidRunRequestObject) (generated.PostProjectProjectidRunResponseObject, error) {
-	postgres_databases, err := server.Queries.GetPostgresDatabasesForProject(ctx, request.Projectid)
+	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Projectid)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting postgres databases for project")
 	}
 
 	var postgresScans []generated.PostgresScan
 	for _, db := range postgres_databases {
-		scan, err := server.Queries.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
+		scan, err := server.DatabaseProvider.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
 			PostgresDatabaseID: int64(db.ID),
 			Status:             models.SCAN_NOT_STARTED,
 		})

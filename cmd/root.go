@@ -74,8 +74,14 @@ func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 
 func initConfig(cmd *cobra.Command) {
 	v := viper.New()
+
+	v.AddConfigPath(".")
+	v.SetConfigName("config")
+	v.SetConfigType("env")
+	v.ReadInConfig()
+
 	v.SetEnvPrefix("")
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	v.AutomaticEnv()
 	bindFlags(cmd, v)
 }

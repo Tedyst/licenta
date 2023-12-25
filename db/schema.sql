@@ -2,7 +2,7 @@ CREATE TABLE users(
   id bigserial PRIMARY KEY,
   username text NOT NULL UNIQUE,
   password TEXT NOT NULL,
-  email text NOT NULL,
+  email text NOT NULL UNIQUE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

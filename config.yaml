@@ -1,9 +1,0 @@
-database: postgres://postgres:postgres@localhost:1001/postgres
-debug: true
-help: false
-models:
-  user:
-    password_pepper: pepper
-telemetry:
-  collector_endpoint: ""
-  enabled: false

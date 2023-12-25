@@ -14,7 +14,7 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 		lastid = int(*request.Params.LastId)
 	}
 
-	count, err := server.Queries.GetBruteforcePasswordsForProjectCount(ctx, request.Projectid)
+	count, err := server.DatabaseProvider.GetBruteforcePasswordsForProjectCount(ctx, request.Projectid)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 	total := bruteforcePasswordsPerPage
 
 	if lastid < 0 {
-		specificPasswords, err := server.Queries.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)
+		specificPasswords, err := server.DatabaseProvider.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +38,7 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 	}
 
 	if total > 0 {
-		genericPasswords, err := server.Queries.GetBruteforcePasswordsPaginated(ctx, queries.GetBruteforcePasswordsPaginatedParams{
+		genericPasswords, err := server.DatabaseProvider.GetBruteforcePasswordsPaginated(ctx, queries.GetBruteforcePasswordsPaginatedParams{
 			LastID: int64(lastid),
 			Limit:  int32(total),
 		})

@@ -30,7 +30,10 @@ var createadminCmd = &cobra.Command{
 			err = errors.Join(err, database.EndTransaction(context.Background(), err))
 		}()
 
-		_, err = database.GetUserByUsernameOrEmail(context.Background(), args[0])
+		_, err = database.GetUserByUsernameOrEmail(context.Background(), queries.GetUserByUsernameOrEmailParams{
+			Username: args[2],
+			Email:    args[0],
+		})
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return err
 		}

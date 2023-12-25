@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
 )
 
 var deleteCmd = &cobra.Command{
@@ -28,7 +29,10 @@ var deleteCmd = &cobra.Command{
 			err = errors.Join(err, database.EndTransaction(context.Background(), err))
 		}()
 
-		user, err := database.GetUserByUsernameOrEmail(context.Background(), args[0])
+		user, err := database.GetUserByUsernameOrEmail(context.Background(), queries.GetUserByUsernameOrEmailParams{
+			Username: args[0],
+			Email:    args[0],
+		})
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				return fmt.Errorf("user not found")

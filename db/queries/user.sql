@@ -73,7 +73,7 @@ FROM
   users
 WHERE
   username = $1
-  OR email = $1
+  OR email = $2
 LIMIT 1;
 
 -- name: UpdateUserPassword :exec

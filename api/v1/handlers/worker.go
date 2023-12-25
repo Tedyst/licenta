@@ -13,7 +13,10 @@ import (
 )
 
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
-	w := server.workerauth.GetWorker(ctx)
+	w, err := server.workerauth.GetWorker(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if w == nil {
 		return generated.GetWorkerGetTask401JSONResponse{
 			Success: false,
@@ -40,7 +43,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, errors.New("invalid scan type")
 	}
 
-	scan, err := server.Queries.GetPostgresScan(ctx, int64(message.PostgresScanID))
+	scan, err := server.DatabaseProvider.GetPostgresScan(ctx, int64(message.PostgresScanID))
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +55,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		}, nil
 	}
 
-	err = server.Queries.BindPostgresScanToWorker(ctx, queries.BindPostgresScanToWorkerParams{
+	err = server.DatabaseProvider.BindPostgresScanToWorker(ctx, queries.BindPostgresScanToWorkerParams{
 		ID:       int64(message.PostgresScanID),
 		WorkerID: sql.NullInt64{Int64: int64(w.ID), Valid: true},
 	})
@@ -60,7 +63,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, err
 	}
 
-	database, err := server.Queries.GetPostgresDatabase(ctx, scan.PostgresScan.PostgresDatabaseID)
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, scan.PostgresScan.PostgresDatabaseID)
 	if err != nil {
 		return nil, err
 	}

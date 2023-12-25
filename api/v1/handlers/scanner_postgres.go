@@ -18,7 +18,10 @@ import (
 const bruteforcePasswordsPerPage = 10000
 
 func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.PostScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.PostScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
-	w := server.workerauth.GetWorker(ctx)
+	w, err := server.workerauth.GetWorker(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if w == nil {
 		return generated.PostScannerPostgresDatabasePostgresDatabaseId401JSONResponse{
 			Success: false,
@@ -26,7 +29,7 @@ func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx c
 		}, nil
 	}
 
-	_, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
+	_, err = server.DatabaseProvider.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
@@ -37,7 +40,7 @@ func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx c
 		}, nil
 	}
 
-	scan, err := server.Queries.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
+	scan, err := server.DatabaseProvider.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
 		PostgresDatabaseID: request.PostgresDatabaseId,
 		Status:             int32(models.SCAN_QUEUED),
 	})
@@ -71,7 +74,7 @@ func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx c
 }
 
 func (server *serverHandler) GetScannerPostgresScanScanid(ctx context.Context, request generated.GetScannerPostgresScanScanidRequestObject) (response generated.GetScannerPostgresScanScanidResponseObject, err error) {
-	transaction, err := server.Queries.StartTransaction(ctx)
+	transaction, err := server.DatabaseProvider.StartTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +130,7 @@ func (server *serverHandler) PatchScannerPostgresScanScanid(ctx context.Context,
 		}, nil
 	}
 
-	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
+	scan, err := server.DatabaseProvider.GetPostgresScan(ctx, request.Scanid)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
@@ -143,7 +146,7 @@ func (server *serverHandler) PatchScannerPostgresScanScanid(ctx context.Context,
 		return nil, err
 	}
 
-	err = server.Queries.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
+	err = server.DatabaseProvider.UpdatePostgresScanStatus(ctx, queries.UpdatePostgresScanStatusParams{
 		ID:     int64(request.Scanid),
 		Status: int32(request.Body.Status),
 		Error:  sql.NullString{String: request.Body.Error, Valid: request.Body.Error != ""},
@@ -178,7 +181,7 @@ func (server *serverHandler) PostScannerPostgresScanScanidResult(ctx context.Con
 		}, nil
 	}
 
-	_, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
+	_, err := server.DatabaseProvider.GetPostgresScan(ctx, request.Scanid)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +195,7 @@ func (server *serverHandler) PostScannerPostgresScanScanidResult(ctx context.Con
 		}, nil
 	}
 
-	scanresult, err := server.Queries.CreatePostgresScanResult(ctx, queries.CreatePostgresScanResultParams{
+	scanresult, err := server.DatabaseProvider.CreatePostgresScanResult(ctx, queries.CreatePostgresScanResultParams{
 		PostgresScanID: int64(request.Scanid),
 		Severity:       int32(request.Body.Severity),
 		Message:        request.Body.Message,
@@ -213,7 +216,7 @@ func (server *serverHandler) PostScannerPostgresScanScanidResult(ctx context.Con
 }
 
 func (server *serverHandler) GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.GetScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.GetScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
-	database, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, errors.Wrap(err, "error getting postgres database")
 	}
@@ -224,7 +227,7 @@ func (server *serverHandler) GetScannerPostgresDatabasePostgresDatabaseId(ctx co
 		}, nil
 	}
 
-	scans, err := server.Queries.GetPostgresScansForDatabase(ctx, database.PostgresDatabase.ID)
+	scans, err := server.DatabaseProvider.GetPostgresScansForDatabase(ctx, database.PostgresDatabase.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting postgres scans for database")
 	}
@@ -265,7 +268,7 @@ func (server *serverHandler) GetScannerPostgresDatabasePostgresDatabaseId(ctx co
 }
 
 func (server *serverHandler) PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request generated.PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject) (generated.PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject, error) {
-	database, err := server.Queries.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.PostgresDatabaseId)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, errors.Wrap(err, "error getting postgres database")
 	}
@@ -305,7 +308,7 @@ func (server *serverHandler) PatchScannerPostgresDatabasePostgresDatabaseId(ctx 
 		version = sql.NullString{String: *request.Body.Version, Valid: true}
 	}
 
-	err = server.Queries.UpdatePostgresDatabase(ctx, queries.UpdatePostgresDatabaseParams{
+	err = server.DatabaseProvider.UpdatePostgresDatabase(ctx, queries.UpdatePostgresDatabaseParams{
 		ID:           int64(request.PostgresDatabaseId),
 		Host:         host,
 		Username:     username,

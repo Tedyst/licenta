@@ -2570,18 +2570,18 @@ func (c *TransactionQuerierGetUserCall) DoAndReturn(f func(context.Context, int6
 }
 
 // GetUserByUsernameOrEmail mocks base method.
-func (m *MockTransactionQuerier) GetUserByUsernameOrEmail(ctx context.Context, username string) (*queries.User, error) {
+func (m *MockTransactionQuerier) GetUserByUsernameOrEmail(ctx context.Context, arg queries.GetUserByUsernameOrEmailParams) (*queries.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByUsernameOrEmail", ctx, username)
+	ret := m.ctrl.Call(m, "GetUserByUsernameOrEmail", ctx, arg)
 	ret0, _ := ret[0].(*queries.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetUserByUsernameOrEmail indicates an expected call of GetUserByUsernameOrEmail.
-func (mr *MockTransactionQuerierMockRecorder) GetUserByUsernameOrEmail(ctx, username any) *TransactionQuerierGetUserByUsernameOrEmailCall {
+func (mr *MockTransactionQuerierMockRecorder) GetUserByUsernameOrEmail(ctx, arg any) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsernameOrEmail", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByUsernameOrEmail), ctx, username)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsernameOrEmail", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByUsernameOrEmail), ctx, arg)
 	return &TransactionQuerierGetUserByUsernameOrEmailCall{Call: call}
 }
 
@@ -2597,13 +2597,13 @@ func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Return(arg0 *queries.Us
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Do(f func(context.Context, string) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
+func (c *TransactionQuerierGetUserByUsernameOrEmailCall) Do(f func(context.Context, queries.GetUserByUsernameOrEmailParams) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(context.Context, string) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
+func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(context.Context, queries.GetUserByUsernameOrEmailParams) (*queries.User, error)) *TransactionQuerierGetUserByUsernameOrEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -90,12 +90,17 @@ FROM
   users
 WHERE
   username = $1
-  OR email = $1
+  OR email = $2
 LIMIT 1
 `
 
-func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, username string) (*User, error) {
-	row := q.db.QueryRow(ctx, getUserByUsernameOrEmail, username)
+type GetUserByUsernameOrEmailParams struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsernameOrEmail, arg.Username, arg.Email)
 	var i User
 	err := row.Scan(
 		&i.ID,

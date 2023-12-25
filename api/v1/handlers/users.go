@@ -12,7 +12,10 @@ import (
 )
 
 func (server *serverHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
-	user := server.SessionStore.GetUser(ctx)
+	user, err := server.sessionAuth.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUsers: error getting user")
+	}
 	if user == nil {
 		return generated.GetUsers401JSONResponse{
 			Message: Unauthorized,
@@ -20,7 +23,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 		}, nil
 	}
 
-	count, err := server.Queries.CountUsers(ctx)
+	count, err := server.DatabaseProvider.CountUsers(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsers: error cou7nting users")
 	}
@@ -34,7 +37,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 		offset = *request.Params.Offset
 	}
 
-	users, err := server.Queries.ListUsersPaginated(ctx, queries.ListUsersPaginatedParams{
+	users, err := server.DatabaseProvider.ListUsersPaginated(ctx, queries.ListUsersPaginatedParams{
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -64,7 +67,10 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 }
 
 func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
-	user := server.SessionStore.GetUser(ctx)
+	user, err := server.sessionAuth.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUsersMe: error getting user")
+	}
 	if user == nil {
 		return generated.GetUsersMe401JSONResponse{
 			Message: Unauthorized,
@@ -83,7 +89,10 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 }
 
 func (server *serverHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
-	user := server.SessionStore.GetUser(ctx)
+	user, err := server.sessionAuth.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetUsersId: error getting user")
+	}
 	if user == nil {
 		return generated.GetUsersId401JSONResponse{
 			Message: Unauthorized,
@@ -91,7 +100,7 @@ func (server *serverHandler) GetUsersId(ctx context.Context, request generated.G
 		}, nil
 	}
 
-	u, err := server.Queries.GetUser(ctx, request.Id)
+	u, err := server.DatabaseProvider.GetUser(ctx, request.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsersId: error getting user")
 	}
@@ -109,7 +118,10 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error validating request")
 	}
 
-	user := server.SessionStore.GetUser(ctx)
+	user, err := server.sessionAuth.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error getting user")
+	}
 	if user == nil {
 		return generated.PostUsersMeChangePassword401JSONResponse{
 			Message: Unauthorized,
@@ -133,7 +145,7 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error setting password")
 	}
 
-	err = server.Queries.UpdateUser(ctx, queries.UpdateUserParams{
+	err = server.DatabaseProvider.UpdateUser(ctx, queries.UpdateUserParams{
 		ID:       user.ID,
 		Password: sql.NullString{Valid: true, String: user.Password},
 	})

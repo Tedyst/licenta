@@ -29,7 +29,10 @@ var changepasswordCmd = &cobra.Command{
 			err = errors.Join(err, database.EndTransaction(context.Background(), err))
 		}()
 
-		user, err := database.GetUserByUsernameOrEmail(context.Background(), args[0])
+		user, err := database.GetUserByUsernameOrEmail(context.Background(), queries.GetUserByUsernameOrEmailParams{
+			Username: args[0],
+			Email:    args[0],
+		})
 		if err != nil {
 			return err
 		}
