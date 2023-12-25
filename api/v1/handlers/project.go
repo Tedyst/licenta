@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -50,7 +51,7 @@ func (server *serverHandler) GetProjectProjectid(ctx context.Context, request ge
 func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, request generated.PostProjectProjectidRunRequestObject) (generated.PostProjectProjectidRunResponseObject, error) {
 	postgres_databases, err := server.Queries.GetPostgresDatabasesForProject(ctx, request.Projectid)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error getting postgres databases for project")
 	}
 
 	var postgresScans []generated.PostgresScan
@@ -60,7 +61,7 @@ func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, reques
 			Status:             models.SCAN_NOT_STARTED,
 		})
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "error creating postgres scan")
 		}
 
 		go func() {
@@ -72,11 +73,12 @@ func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, reques
 		}()
 
 		postgresScans = append(postgresScans, generated.PostgresScan{
-			CreatedAt: db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-			EndedAt:   db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-			Error:     "",
-			Id:        int(scan.ID),
-			Status:    int(scan.Status),
+			CreatedAt:       db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			EndedAt:         db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			Error:           "",
+			Id:              int(scan.ID),
+			Status:          int(scan.Status),
+			MaximumSeverity: 0,
 		})
 	}
 

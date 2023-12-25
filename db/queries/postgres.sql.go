@@ -187,7 +187,7 @@ SELECT
     postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
 (
         SELECT
-            MAX(postgres_scan_results.severity)::integer
+            COALESCE(MAX(postgres_scan_results.severity), 0)::integer
         FROM
             postgres_scan_results
         WHERE

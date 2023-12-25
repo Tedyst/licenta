@@ -68,6 +68,22 @@
                 "-d"
             ],
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "CI",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "args": [
+                "ci",
+                "--project",
+                "1",
+                "--worker-token",
+                "asdasd",
+                "-d"
+            ],
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

@@ -33,7 +33,7 @@ SELECT
     sqlc.embed(postgres_scan),
 (
         SELECT
-            MAX(postgres_scan_results.severity)::integer
+            COALESCE(MAX(postgres_scan_results.severity), 0)::integer
         FROM
             postgres_scan_results
         WHERE

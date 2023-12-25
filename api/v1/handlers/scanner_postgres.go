@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	errs "errors"
 	"log/slog"
 	"time"
 
@@ -59,19 +60,28 @@ func (server *serverHandler) PostScannerPostgresDatabasePostgresDatabaseId(ctx c
 	return generated.PostScannerPostgresDatabasePostgresDatabaseId200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScan{
-			CreatedAt: scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:   endedTime,
-			Error:     scan.Error.String,
-			Id:        int(scan.ID),
-			Status:    int(scan.Status),
+			CreatedAt:       scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         endedTime,
+			Error:           scan.Error.String,
+			Id:              int(scan.ID),
+			Status:          int(scan.Status),
+			MaximumSeverity: 0,
 		},
 	}, nil
 }
 
-func (server *serverHandler) GetScannerPostgresScanScanid(ctx context.Context, request generated.GetScannerPostgresScanScanidRequestObject) (generated.GetScannerPostgresScanScanidResponseObject, error) {
-	scan, err := server.Queries.GetPostgresScan(ctx, request.Scanid)
-	if err != nil && err != sql.ErrNoRows {
+func (server *serverHandler) GetScannerPostgresScanScanid(ctx context.Context, request generated.GetScannerPostgresScanScanidRequestObject) (response generated.GetScannerPostgresScanScanidResponseObject, err error) {
+	transaction, err := server.Queries.StartTransaction(ctx)
+	if err != nil {
 		return nil, err
+	}
+	defer func() {
+		err = errs.Join(err, transaction.EndTransaction(ctx, err))
+	}()
+
+	scan, err := transaction.GetPostgresScan(ctx, request.Scanid)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan")
 	}
 	if err == sql.ErrNoRows {
 		return generated.GetScannerPostgresScanScanid404JSONResponse{
@@ -80,9 +90,9 @@ func (server *serverHandler) GetScannerPostgresScanScanid(ctx context.Context, r
 		}, nil
 	}
 
-	scanResults, err := server.Queries.GetPostgresScanResults(ctx, scan.PostgresScan.ID)
+	scanResults, err := transaction.GetPostgresScanResults(ctx, scan.PostgresScan.ID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan results")
 	}
 
 	results := make([]generated.PostgresScanResult, len(scanResults))
@@ -98,14 +108,14 @@ func (server *serverHandler) GetScannerPostgresScanScanid(ctx context.Context, r
 	return generated.GetScannerPostgresScanScanid200JSONResponse{
 		Success: true,
 		Scan: generated.PostgresScan{
-			CreatedAt: scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:   scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
-			Error:     scan.PostgresScan.Error.String,
-			Id:        int(scan.PostgresScan.ID),
-			Status:    int(scan.PostgresScan.Status),
+			CreatedAt:       scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
+			Error:           scan.PostgresScan.Error.String,
+			Id:              int(scan.PostgresScan.ID),
+			Status:          int(scan.PostgresScan.Status),
+			MaximumSeverity: int(scan.MaximumSeverity),
 		},
-		MaximumSeverity: int(scan.MaximumSeverity),
-		Results:         results,
+		Results: results,
 	}, nil
 }
 
@@ -150,11 +160,12 @@ func (server *serverHandler) PatchScannerPostgresScanScanid(ctx context.Context,
 	return generated.PatchScannerPostgresScanScanid200JSONResponse{
 		Success: true,
 		Scan: &generated.PostgresScan{
-			CreatedAt: scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:   scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
-			Error:     scan.PostgresScan.Error.String,
-			Id:        int(scan.PostgresScan.ID),
-			Status:    int(scan.PostgresScan.Status),
+			CreatedAt:       scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
+			Error:           scan.PostgresScan.Error.String,
+			Id:              int(scan.PostgresScan.ID),
+			Status:          int(scan.PostgresScan.Status),
+			MaximumSeverity: int(scan.MaximumSeverity),
 		},
 	}, nil
 }

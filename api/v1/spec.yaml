@@ -547,7 +547,6 @@ paths:
                   - success
                   - scan
                   - results
-                  - maximum_severity
                 properties:
                   success:
                     type: boolean
@@ -557,8 +556,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/PostgresScanResult'
-                  maximum_severity:
-                    type: integer
         "404":
           description: Scan not found
           content:
