@@ -146,3 +146,15 @@ func (a *authbossUser) PutConfirmVerifier(confirmVerifier string) {
 	a.user.ConfirmVerifier.String = confirmVerifier
 	a.user.ConfirmVerifier.Valid = confirmVerifier != ""
 }
+
+func (a *authbossUser) GetName() string {
+	return a.user.Username
+}
+
+func (a *authbossUser) GetDisplayName() string {
+	return a.user.Username
+}
+
+func (a *authbossUser) GetIcon() string {
+	return ""
+}

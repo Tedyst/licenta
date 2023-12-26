@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/httprate"
 	"github.com/go-http-utils/etag"
 	"github.com/justinas/nosurf"
 	slogchi "github.com/samber/slog-chi"
@@ -63,6 +64,7 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	app.Use(middleware.GetHead)
 	app.Use(options.HandleOptions(config.Origin))
 	app.Use(requestid.RequestIDMiddleware)
+	app.Use(httprate.LimitByIP(100, 1*time.Minute))
 
 	if !config.Debug {
 		app.Use(middleware.Timeout(30 * time.Second))

@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/models"
 	abclientstate "github.com/volatiletech/authboss-clientstate"
@@ -88,6 +91,21 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 
 	totp := totp2fa.TOTP{Authboss: ab}
 	if err := totp.Setup(); err != nil {
+		return nil, err
+	}
+
+	webn, err := webauthn.New(&webauthn.Config{
+		RPDisplayName:         "Licenta",
+		RPID:                  "localhost",
+		RPOrigins:             []string{"http://localhost:3000"},
+		AttestationPreference: protocol.PreferDirectAttestation,
+	})
+	if err != nil {
+		return nil, err
+	}
+	wa := authbosswebauthn.New(ab, webn, nil)
+
+	if err := wa.Setup(); err != nil {
 		return nil, err
 	}
 

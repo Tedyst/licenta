@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -168,4 +169,12 @@ func (a *authbossStorer) LoadByConfirmSelector(ctx context.Context, selector str
 	return &authbossUser{
 		user: user,
 	}, nil
+}
+
+func (a *authbossStorer) GetWebauthnCredentials(ctx context.Context, pid string) ([]authbosswebauthn.Credential, error) {
+	return nil, nil
+}
+
+func (a *authbossStorer) CreateWebauthnCredential(ctx context.Context, pid string, credential authbosswebauthn.Credential) error {
+	return nil
 }
