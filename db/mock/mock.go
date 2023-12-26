@@ -2530,6 +2530,45 @@ func (c *TransactionQuerierGetUserCall) DoAndReturn(f func(context.Context, int6
 	return c
 }
 
+// GetUserByConfirmSelector mocks base method.
+func (m *MockTransactionQuerier) GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*queries.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByConfirmSelector", ctx, confirmSelector)
+	ret0, _ := ret[0].(*queries.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByConfirmSelector indicates an expected call of GetUserByConfirmSelector.
+func (mr *MockTransactionQuerierMockRecorder) GetUserByConfirmSelector(ctx, confirmSelector any) *TransactionQuerierGetUserByConfirmSelectorCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByConfirmSelector", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByConfirmSelector), ctx, confirmSelector)
+	return &TransactionQuerierGetUserByConfirmSelectorCall{Call: call}
+}
+
+// TransactionQuerierGetUserByConfirmSelectorCall wrap *gomock.Call
+type TransactionQuerierGetUserByConfirmSelectorCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetUserByConfirmSelectorCall) Return(arg0 *queries.User, arg1 error) *TransactionQuerierGetUserByConfirmSelectorCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetUserByConfirmSelectorCall) Do(f func(context.Context, sql.NullString) (*queries.User, error)) *TransactionQuerierGetUserByConfirmSelectorCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetUserByConfirmSelectorCall) DoAndReturn(f func(context.Context, sql.NullString) (*queries.User, error)) *TransactionQuerierGetUserByConfirmSelectorCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetUserByRecoverSelector mocks base method.
 func (m *MockTransactionQuerier) GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*queries.User, error) {
 	m.ctrl.T.Helper()
@@ -3257,44 +3296,6 @@ func (c *TransactionQuerierUpdateUserCall) Do(f func(context.Context, queries.Up
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierUpdateUserCall) DoAndReturn(f func(context.Context, queries.UpdateUserParams) error) *TransactionQuerierUpdateUserCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// UpdateUserPassword mocks base method.
-func (m *MockTransactionQuerier) UpdateUserPassword(ctx context.Context, arg queries.UpdateUserPasswordParams) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateUserPassword", ctx, arg)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateUserPassword indicates an expected call of UpdateUserPassword.
-func (mr *MockTransactionQuerierMockRecorder) UpdateUserPassword(ctx, arg any) *TransactionQuerierUpdateUserPasswordCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPassword", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateUserPassword), ctx, arg)
-	return &TransactionQuerierUpdateUserPasswordCall{Call: call}
-}
-
-// TransactionQuerierUpdateUserPasswordCall wrap *gomock.Call
-type TransactionQuerierUpdateUserPasswordCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierUpdateUserPasswordCall) Return(arg0 error) *TransactionQuerierUpdateUserPasswordCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierUpdateUserPasswordCall) Do(f func(context.Context, queries.UpdateUserPasswordParams) error) *TransactionQuerierUpdateUserPasswordCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierUpdateUserPasswordCall) DoAndReturn(f func(context.Context, queries.UpdateUserPasswordParams) error) *TransactionQuerierUpdateUserPasswordCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

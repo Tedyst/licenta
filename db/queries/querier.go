@@ -74,6 +74,7 @@ type Querier interface {
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
+	GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error)
 	GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
@@ -92,7 +93,6 @@ type Querier interface {
 	UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
-	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error
 	ValidateTOTPSecretForUser(ctx context.Context, userID int64) error
 }
 

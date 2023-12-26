@@ -5,14 +5,14 @@ CREATE TABLE users(
   email text NOT NULL UNIQUE,
   recovery_codes text,
   totp_secret text,
-  recover_selector text UNIQUE NULLS NOT DISTINCT,
-  recover_verifier text UNIQUE NULLS NOT DISTINCT,
+  recover_selector text UNIQUE,
+  recover_verifier text UNIQUE,
   recover_expiry timestamp with time zone,
   login_attempt_count integer NOT NULL DEFAULT 0,
   login_last_attempt timestamp with time zone,
   locked timestamp with time zone,
-  confirm_selector text UNIQUE NULLS NOT DISTINCT,
-  confirm_verifier text UNIQUE NULLS NOT DISTINCT,
+  confirm_selector text UNIQUE,
+  confirm_verifier text UNIQUE,
   confirmed boolean NOT NULL DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );

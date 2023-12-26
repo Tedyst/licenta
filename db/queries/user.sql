@@ -47,8 +47,8 @@ FROM
   users;
 
 -- name: CreateUser :one
-INSERT INTO users(username, PASSWORD, email)
-  VALUES ($1, $2, $3)
+INSERT INTO users(username, PASSWORD, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, LOCKED, confirm_selector, confirm_verifier, confirmed)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 RETURNING
   *;
 
@@ -94,5 +94,14 @@ FROM
   users
 WHERE
   recover_selector = $1
+LIMIT 1;
+
+-- name: GetUserByConfirmSelector :one
+SELECT
+  *
+FROM
+  users
+WHERE
+  confirm_selector = $1
 LIMIT 1;
 

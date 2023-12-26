@@ -120,3 +120,29 @@ func (a *authbossUser) PutLocked(locked time.Time) {
 	a.user.Locked.Time = locked
 	a.user.Locked.Valid = locked != time.Time{}
 }
+
+func (a *authbossUser) GetConfirmed() bool {
+	return a.user.Confirmed
+}
+
+func (a *authbossUser) PutConfirmed(confirmed bool) {
+	a.user.Confirmed = confirmed
+}
+
+func (a *authbossUser) GetConfirmSelector() string {
+	return a.user.ConfirmSelector.String
+}
+
+func (a *authbossUser) PutConfirmSelector(confirmSelector string) {
+	a.user.ConfirmSelector.String = confirmSelector
+	a.user.ConfirmSelector.Valid = confirmSelector != ""
+}
+
+func (a *authbossUser) GetConfirmVerifier() string {
+	return a.user.ConfirmVerifier.String
+}
+
+func (a *authbossUser) PutConfirmVerifier(confirmVerifier string) {
+	a.user.ConfirmVerifier.String = confirmVerifier
+	a.user.ConfirmVerifier.Valid = confirmVerifier != ""
+}

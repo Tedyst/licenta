@@ -10,7 +10,7 @@ import (
 	abclientstate "github.com/volatiletech/authboss-clientstate"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
-	_ "github.com/volatiletech/authboss/v3/confirm"
+	"github.com/volatiletech/authboss/v3/confirm"
 	"github.com/volatiletech/authboss/v3/defaults"
 	"github.com/volatiletech/authboss/v3/lock"
 	_ "github.com/volatiletech/authboss/v3/logout"
@@ -118,13 +118,14 @@ func (auth *authenticationProvider) Middleware(next http.Handler) http.Handler {
 func (auth *authenticationProvider) APIMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		lockMiddleware := lock.Middleware(auth.authboss)(next)
+		confirmMiddleware := confirm.Middleware(auth.authboss)(lockMiddleware)
 		user, err := auth.authboss.CurrentUser(r)
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
 		}
 		if user != nil {
-			lockMiddleware.ServeHTTP(w, r)
+			confirmMiddleware.ServeHTTP(w, r)
 		} else {
 			next.ServeHTTP(w, r)
 		}

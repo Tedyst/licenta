@@ -27,20 +27,46 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users(username, PASSWORD, email)
-  VALUES ($1, $2, $3)
+INSERT INTO users(username, PASSWORD, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, LOCKED, confirm_selector, confirm_verifier, confirmed)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 RETURNING
   id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 `
 
 type CreateUserParams struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
+	Username          string             `json:"username"`
+	Password          string             `json:"password"`
+	Email             string             `json:"email"`
+	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
+	TotpSecret        sql.NullString     `json:"totp_secret"`
+	RecoverSelector   sql.NullString     `json:"recover_selector"`
+	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
+	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
+	LoginAttemptCount int32              `json:"login_attempt_count"`
+	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
+	Locked            pgtype.Timestamptz `json:"locked"`
+	ConfirmSelector   sql.NullString     `json:"confirm_selector"`
+	ConfirmVerifier   sql.NullString     `json:"confirm_verifier"`
+	Confirmed         bool               `json:"confirmed"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Password, arg.Email)
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Username,
+		arg.Password,
+		arg.Email,
+		arg.RecoveryCodes,
+		arg.TotpSecret,
+		arg.RecoverSelector,
+		arg.RecoverVerifier,
+		arg.RecoverExpiry,
+		arg.LoginAttemptCount,
+		arg.LoginLastAttempt,
+		arg.Locked,
+		arg.ConfirmSelector,
+		arg.ConfirmVerifier,
+		arg.Confirmed,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -85,6 +111,40 @@ LIMIT 1
 
 func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.RecoveryCodes,
+		&i.TotpSecret,
+		&i.RecoverSelector,
+		&i.RecoverVerifier,
+		&i.RecoverExpiry,
+		&i.LoginAttemptCount,
+		&i.LoginLastAttempt,
+		&i.Locked,
+		&i.ConfirmSelector,
+		&i.ConfirmVerifier,
+		&i.Confirmed,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getUserByConfirmSelector = `-- name: GetUserByConfirmSelector :one
+SELECT
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
+FROM
+  users
+WHERE
+  confirm_selector = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error) {
+	row := q.db.QueryRow(ctx, getUserByConfirmSelector, confirmSelector)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -359,24 +419,5 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.ConfirmVerifier,
 		arg.Confirmed,
 	)
-	return err
-}
-
-const updateUserPassword = `-- name: UpdateUserPassword :exec
-UPDATE
-  users
-SET
-  PASSWORD = $2
-WHERE
-  id = $1
-`
-
-type UpdateUserPasswordParams struct {
-	ID       int64  `json:"id"`
-	Password string `json:"password"`
-}
-
-func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
-	_, err := q.db.Exec(ctx, updateUserPassword, arg.ID, arg.Password)
 	return err
 }

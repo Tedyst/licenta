@@ -82,11 +82,23 @@ func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
 		return authboss.ErrUserFound
 	}
 
-	_, err = a.querier.CreateUser(ctx, queries.CreateUserParams{
-		Username: user.(*authbossUser).user.Username,
-		Email:    user.(*authbossUser).user.Email,
-		Password: user.(*authbossUser).user.Password,
+	newUser, err := a.querier.CreateUser(ctx, queries.CreateUserParams{
+		Username:          user.(*authbossUser).user.Username,
+		Email:             user.(*authbossUser).user.Email,
+		Password:          user.(*authbossUser).user.Password,
+		RecoveryCodes:     user.(*authbossUser).user.RecoveryCodes,
+		TotpSecret:        user.(*authbossUser).user.TotpSecret,
+		RecoverSelector:   user.(*authbossUser).user.RecoverSelector,
+		RecoverVerifier:   user.(*authbossUser).user.RecoverVerifier,
+		RecoverExpiry:     user.(*authbossUser).user.RecoverExpiry,
+		LoginAttemptCount: user.(*authbossUser).user.LoginAttemptCount,
+		LoginLastAttempt:  user.(*authbossUser).user.LoginLastAttempt,
+		Locked:            user.(*authbossUser).user.Locked,
+		ConfirmSelector:   user.(*authbossUser).user.ConfirmSelector,
+		ConfirmVerifier:   user.(*authbossUser).user.ConfirmVerifier,
+		Confirmed:         user.(*authbossUser).user.Confirmed,
 	})
+	user.(*authbossUser).user = newUser
 	return err
 }
 
@@ -132,6 +144,20 @@ func (a *authbossStorer) UseRememberToken(ctx context.Context, pid, token string
 
 func (a *authbossStorer) LoadByRecoverSelector(ctx context.Context, selector string) (authboss.RecoverableUser, error) {
 	user, err := a.querier.GetUserByRecoverSelector(ctx, sql.NullString{String: selector, Valid: true})
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, err
+	}
+	if err == pgx.ErrNoRows {
+		return nil, authboss.ErrUserNotFound
+	}
+
+	return &authbossUser{
+		user: user,
+	}, nil
+}
+
+func (a *authbossStorer) LoadByConfirmSelector(ctx context.Context, selector string) (authboss.ConfirmableUser, error) {
+	user, err := a.querier.GetUserByConfirmSelector(ctx, sql.NullString{String: selector, Valid: true})
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
