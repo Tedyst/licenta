@@ -2,15 +2,12 @@ package user
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"log"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tedyst/licenta/api/auth"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 )
 
 var changepasswordCmd = &cobra.Command{
@@ -18,16 +15,13 @@ var changepasswordCmd = &cobra.Command{
 	Short: "Change the password of a user",
 	Long:  `Change the password of a user. This command is intended only for recovery/initial setup. For the normal use, use the web interface.`,
 	Args:  cobra.ExactArgs(2),
-	RunE: func(cmd *cobra.Command, args []string) (err error) {
-		var database db.TransactionQuerier
-		database = db.InitDatabase(viper.GetString("database"))
-		database, err = database.StartTransaction(context.Background())
+	RunE: func(cmd *cobra.Command, args []string) error {
+		database := db.InitDatabase(viper.GetString("database"))
+
+		userAuth, err := auth.NewAuthenticationProvider("", database, nil, nil)
 		if err != nil {
 			return err
 		}
-		defer func() {
-			err = errors.Join(err, database.EndTransaction(context.Background(), err))
-		}()
 
 		user, err := database.GetUserByUsernameOrEmail(context.Background(), queries.GetUserByUsernameOrEmailParams{
 			Username: args[0],
@@ -36,23 +30,9 @@ var changepasswordCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if user == nil {
-			return nil
-		}
 
-		hash, err := models.GenerateHash(context.Background(), args[1])
-		if err != nil {
-			return err
-		}
+		userAuth.UpdatePassword(cmd.Context(), user, args[1])
 
-		err = database.UpdateUser(context.Background(), queries.UpdateUserParams{
-			ID:       user.ID,
-			Password: sql.NullString{Valid: true, String: hash},
-		})
-		if err != nil {
-			return err
-		}
-		log.Println("Password changed.")
 		return nil
 	},
 }

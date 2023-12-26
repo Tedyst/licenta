@@ -236,6 +236,9 @@ type User struct {
 	LoginAttemptCount int32              `json:"login_attempt_count"`
 	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
 	Locked            pgtype.Timestamptz `json:"locked"`
+	ConfirmSelector   sql.NullString     `json:"confirm_selector"`
+	ConfirmVerifier   sql.NullString     `json:"confirm_verifier"`
+	Confirmed         bool               `json:"confirmed"`
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 }
 

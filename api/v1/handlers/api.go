@@ -15,8 +15,8 @@ type serverHandler struct {
 	TaskRunner       tasks.TaskRunner
 	MessageExchange  messages.Exchange
 
-	workerauth  workerAuth
-	sessionAuth userAuth
+	workerauth workerAuth
+	userAuth   userAuth
 }
 
 type workerAuth interface {
@@ -25,6 +25,8 @@ type workerAuth interface {
 
 type userAuth interface {
 	GetUser(ctx context.Context) (*models.User, error)
+	VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error)
+	UpdatePassword(ctx context.Context, user *models.User, newPassword string) error
 }
 
 type HandlerConfig struct {
@@ -42,7 +44,7 @@ func NewServerHandler(config HandlerConfig) *serverHandler {
 		MessageExchange:  config.MessageExchange,
 		TaskRunner:       config.TaskRunner,
 		workerauth:       config.WorkerAuth,
-		sessionAuth:      config.UserAuth,
+		userAuth:         config.UserAuth,
 	}
 }
 

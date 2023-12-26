@@ -60,19 +60,22 @@ WHERE id = $1;
 UPDATE
   users
 SET
-  username = coalesce(sqlc.narg(username), username),
-  PASSWORD = coalesce(sqlc.narg(PASSWORD), PASSWORD),
-  email = coalesce(sqlc.narg(email), email),
-  recovery_codes = coalesce(sqlc.narg(recovery_codes), recovery_codes),
-  totp_secret = coalesce(sqlc.narg(totp_secret), totp_secret),
-  recover_selector = coalesce(sqlc.narg(recover_selector), recover_selector),
-  recover_verifier = coalesce(sqlc.narg(recover_verifier), recover_verifier),
-  recover_expiry = coalesce(sqlc.narg(recover_expiry), recover_expiry),
-  login_attempt_count = coalesce(sqlc.narg(login_attempt_count), login_attempt_count),
-  login_last_attempt = coalesce(sqlc.narg(login_last_attempt), login_last_attempt),
-  LOCKED = coalesce(sqlc.narg(LOCKED), LOCKED)
+  username = $2,
+  PASSWORD = $3,
+  email = $4,
+  recovery_codes = $5,
+  totp_secret = $6,
+  recover_selector = $7,
+  recover_verifier = $8,
+  recover_expiry = $9,
+  login_attempt_count = $10,
+  login_last_attempt = $11,
+  LOCKED = $12,
+  confirm_selector = $13,
+  confirm_verifier = $14,
+  confirmed = $15
 WHERE
-  id = sqlc.arg(id);
+  id = $1;
 
 -- name: GetUserByUsernameOrEmail :one
 SELECT
@@ -83,14 +86,6 @@ WHERE
   username = $1
   OR email = $2
 LIMIT 1;
-
--- name: UpdateUserPassword :exec
-UPDATE
-  users
-SET
-  PASSWORD = $2
-WHERE
-  id = $1;
 
 -- name: GetUserByRecoverSelector :one
 SELECT

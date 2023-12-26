@@ -45,6 +45,8 @@ type userAuth interface {
 	APIMiddleware(next http.Handler) http.Handler
 	Handler() http.Handler
 	GetUser(ctx context.Context) (*models.User, error)
+	VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error)
+	UpdatePassword(ctx context.Context, user *models.User, newPassword string) error
 }
 
 func Initialize(config ApiConfig) (http.Handler, error) {

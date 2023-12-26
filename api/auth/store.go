@@ -42,18 +42,21 @@ func (a *authbossStorer) Load(ctx context.Context, key string) (authboss.User, e
 
 func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
 	return a.querier.UpdateUser(ctx, queries.UpdateUserParams{
-		Username:          sql.NullString{String: user.(*authbossUser).user.Username, Valid: user.(*authbossUser).user.Username != ""},
-		Email:             sql.NullString{String: user.(*authbossUser).user.Email, Valid: user.(*authbossUser).user.Email != ""},
-		Password:          sql.NullString{String: user.(*authbossUser).user.Password, Valid: user.(*authbossUser).user.Password != ""},
 		ID:                user.(*authbossUser).user.ID,
+		Username:          user.(*authbossUser).user.Username,
+		Email:             user.(*authbossUser).user.Email,
+		Password:          user.(*authbossUser).user.Password,
 		RecoveryCodes:     user.(*authbossUser).user.RecoveryCodes,
 		TotpSecret:        user.(*authbossUser).user.TotpSecret,
 		RecoverSelector:   user.(*authbossUser).user.RecoverSelector,
 		RecoverVerifier:   user.(*authbossUser).user.RecoverVerifier,
 		RecoverExpiry:     user.(*authbossUser).user.RecoverExpiry,
-		LoginAttemptCount: sql.NullInt32{Int32: user.(*authbossUser).user.LoginAttemptCount, Valid: true},
+		LoginAttemptCount: user.(*authbossUser).user.LoginAttemptCount,
 		LoginLastAttempt:  user.(*authbossUser).user.LoginLastAttempt,
 		Locked:            user.(*authbossUser).user.Locked,
+		ConfirmSelector:   user.(*authbossUser).user.ConfirmSelector,
+		ConfirmVerifier:   user.(*authbossUser).user.ConfirmVerifier,
+		Confirmed:         user.(*authbossUser).user.Confirmed,
 	})
 }
 

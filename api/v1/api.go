@@ -33,6 +33,8 @@ type workerAuth interface {
 
 type userAuth interface {
 	GetUser(ctx context.Context) (*models.User, error)
+	VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error)
+	UpdatePassword(ctx context.Context, user *models.User, newPassword string) error
 }
 
 func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {

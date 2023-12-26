@@ -30,7 +30,7 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, PASSWORD, email)
   VALUES ($1, $2, $3)
 RETURNING
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 `
 
 type CreateUserParams struct {
@@ -55,6 +55,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, 
 		&i.LoginAttemptCount,
 		&i.LoginLastAttempt,
 		&i.Locked,
+		&i.ConfirmSelector,
+		&i.ConfirmVerifier,
+		&i.Confirmed,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -72,7 +75,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 FROM
   users
 WHERE
@@ -96,6 +99,9 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 		&i.LoginAttemptCount,
 		&i.LoginLastAttempt,
 		&i.Locked,
+		&i.ConfirmSelector,
+		&i.ConfirmVerifier,
+		&i.Confirmed,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -103,7 +109,7 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 
 const getUserByRecoverSelector = `-- name: GetUserByRecoverSelector :one
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 FROM
   users
 WHERE
@@ -127,6 +133,9 @@ func (q *Queries) GetUserByRecoverSelector(ctx context.Context, recoverSelector 
 		&i.LoginAttemptCount,
 		&i.LoginLastAttempt,
 		&i.Locked,
+		&i.ConfirmSelector,
+		&i.ConfirmVerifier,
+		&i.Confirmed,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -134,7 +143,7 @@ func (q *Queries) GetUserByRecoverSelector(ctx context.Context, recoverSelector 
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 FROM
   users
 WHERE
@@ -164,6 +173,9 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUse
 		&i.LoginAttemptCount,
 		&i.LoginLastAttempt,
 		&i.Locked,
+		&i.ConfirmSelector,
+		&i.ConfirmVerifier,
+		&i.Confirmed,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -171,7 +183,7 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUse
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 FROM
   users
 WHERE
@@ -222,6 +234,9 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 			&i.LoginAttemptCount,
 			&i.LoginLastAttempt,
 			&i.Locked,
+			&i.ConfirmSelector,
+			&i.ConfirmVerifier,
+			&i.Confirmed,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -236,7 +251,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 
 const listUsersPaginated = `-- name: ListUsersPaginated :many
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 FROM
   users
 ORDER BY
@@ -271,6 +286,9 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 			&i.LoginAttemptCount,
 			&i.LoginLastAttempt,
 			&i.Locked,
+			&i.ConfirmSelector,
+			&i.ConfirmVerifier,
+			&i.Confirmed,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -287,38 +305,45 @@ const updateUser = `-- name: UpdateUser :exec
 UPDATE
   users
 SET
-  username = coalesce($1, username),
-  PASSWORD = coalesce($2, PASSWORD),
-  email = coalesce($3, email),
-  recovery_codes = coalesce($4, recovery_codes),
-  totp_secret = coalesce($5, totp_secret),
-  recover_selector = coalesce($6, recover_selector),
-  recover_verifier = coalesce($7, recover_verifier),
-  recover_expiry = coalesce($8, recover_expiry),
-  login_attempt_count = coalesce($9, login_attempt_count),
-  login_last_attempt = coalesce($10, login_last_attempt),
-  LOCKED = coalesce($11, LOCKED)
+  username = $2,
+  PASSWORD = $3,
+  email = $4,
+  recovery_codes = $5,
+  totp_secret = $6,
+  recover_selector = $7,
+  recover_verifier = $8,
+  recover_expiry = $9,
+  login_attempt_count = $10,
+  login_last_attempt = $11,
+  LOCKED = $12,
+  confirm_selector = $13,
+  confirm_verifier = $14,
+  confirmed = $15
 WHERE
-  id = $12
+  id = $1
 `
 
 type UpdateUserParams struct {
-	Username          sql.NullString     `json:"username"`
-	Password          sql.NullString     `json:"password"`
-	Email             sql.NullString     `json:"email"`
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Password          string             `json:"password"`
+	Email             string             `json:"email"`
 	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
 	TotpSecret        sql.NullString     `json:"totp_secret"`
 	RecoverSelector   sql.NullString     `json:"recover_selector"`
 	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
 	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
-	LoginAttemptCount sql.NullInt32      `json:"login_attempt_count"`
+	LoginAttemptCount int32              `json:"login_attempt_count"`
 	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
 	Locked            pgtype.Timestamptz `json:"locked"`
-	ID                int64              `json:"id"`
+	ConfirmSelector   sql.NullString     `json:"confirm_selector"`
+	ConfirmVerifier   sql.NullString     `json:"confirm_verifier"`
+	Confirmed         bool               `json:"confirmed"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 	_, err := q.db.Exec(ctx, updateUser,
+		arg.ID,
 		arg.Username,
 		arg.Password,
 		arg.Email,
@@ -330,7 +355,9 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.LoginAttemptCount,
 		arg.LoginLastAttempt,
 		arg.Locked,
-		arg.ID,
+		arg.ConfirmSelector,
+		arg.ConfirmVerifier,
+		arg.Confirmed,
 	)
 	return err
 }

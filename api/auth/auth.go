@@ -10,8 +10,10 @@ import (
 	abclientstate "github.com/volatiletech/authboss-clientstate"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
+	_ "github.com/volatiletech/authboss/v3/confirm"
 	"github.com/volatiletech/authboss/v3/defaults"
 	"github.com/volatiletech/authboss/v3/lock"
+	_ "github.com/volatiletech/authboss/v3/logout"
 	"github.com/volatiletech/authboss/v3/otp/twofactor"
 	"github.com/volatiletech/authboss/v3/otp/twofactor/totp2fa"
 	_ "github.com/volatiletech/authboss/v3/recover"
@@ -141,4 +143,20 @@ func (auth *authenticationProvider) GetUser(ctx context.Context) (*models.User, 
 	}
 
 	return user.(*authbossUser).user, nil
+}
+
+func (auth *authenticationProvider) UpdatePassword(ctx context.Context, user *models.User, newPassword string) error {
+	return auth.authboss.UpdatePassword(ctx, &authbossUser{
+		user: user,
+	}, newPassword)
+}
+
+func (auth *authenticationProvider) VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error) {
+	err := auth.authboss.VerifyPassword(&authbossUser{
+		user: user,
+	}, password)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

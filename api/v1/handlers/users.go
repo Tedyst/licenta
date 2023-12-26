@@ -2,17 +2,15 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 )
 
 func (server *serverHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
-	user, err := server.sessionAuth.GetUser(ctx)
+	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsers: error getting user")
 	}
@@ -67,7 +65,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 }
 
 func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
-	user, err := server.sessionAuth.GetUser(ctx)
+	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsersMe: error getting user")
 	}
@@ -89,7 +87,7 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 }
 
 func (server *serverHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
-	user, err := server.sessionAuth.GetUser(ctx)
+	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsersId: error getting user")
 	}
@@ -118,7 +116,7 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error validating request")
 	}
 
-	user, err := server.sessionAuth.GetUser(ctx)
+	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error getting user")
 	}
@@ -129,28 +127,17 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 		}, nil
 	}
 
-	ok, err := models.VerifyPassword(ctx, user, request.Body.OldPassword)
+	_, err = server.userAuth.VerifyPassword(ctx, user, request.Body.OldPassword)
 	if err != nil {
-		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error verifying password")
-	}
-	if !ok {
 		return generated.PostUsersMeChangePassword401JSONResponse{
-			Message: InvalidCredentials,
+			Message: "Old password is incorrect",
 			Success: false,
 		}, nil
 	}
 
-	err = models.SetPassword(ctx, user, request.Body.NewPassword)
+	err = server.userAuth.UpdatePassword(ctx, user, request.Body.NewPassword)
 	if err != nil {
 		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error setting password")
-	}
-
-	err = server.DatabaseProvider.UpdateUser(ctx, queries.UpdateUserParams{
-		ID:       user.ID,
-		Password: sql.NullString{Valid: true, String: user.Password},
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error updating user")
 	}
 
 	return generated.PostUsersMeChangePassword200JSONResponse{
