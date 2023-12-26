@@ -71,7 +71,7 @@ func ProjectRunAndWaitResults(ctx context.Context, client generated.ClientWithRe
 		return 0, err
 	}
 
-	slog.InfoContext(ctx, "Submitted project run request", "project", projectID, "postgres_scans", len(response.JSON200.PostgresScans))
+	slog.InfoContext(ctx, "Submitted project run request", "project", projectID)
 
 	maximumSeverity := 0
 

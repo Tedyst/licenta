@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"log/slog"
+	"net/http"
+	"net/http/cookiejar"
+	"net/url"
 	"os"
 
 	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
@@ -12,6 +15,45 @@ import (
 	"github.com/tedyst/licenta/ci"
 )
 
+type csrfClient struct {
+	httpClient *http.Client
+	csrfToken  string
+}
+
+func (c *csrfClient) Do(req *http.Request) (*http.Response, error) {
+	req.Header.Set("X-CSRF-Token", c.csrfToken)
+	return c.httpClient.Do(req)
+}
+
+func initHttpCsrfClient() (*csrfClient, error) {
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating cookie jar")
+	}
+	httpClient := csrfClient{
+		httpClient: &http.Client{
+			Jar: jar,
+		},
+		csrfToken: "",
+	}
+
+	url, err := url.Parse(viper.GetString("api") + "/api/v1")
+	if err != nil {
+		return nil, errors.Wrap(err, "error parsing url")
+	}
+	optionsRequest, err := httpClient.httpClient.Do(&http.Request{
+		Method: "OPTIONS",
+		URL:    url,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "error doing options request")
+	}
+
+	httpClient.csrfToken = optionsRequest.Header.Get("X-CSRF-Token")
+
+	return &httpClient, nil
+}
+
 var ciCmd = &cobra.Command{
 	Use:   "ci",
 	Short: "Signal the Server that a build should be started and wait for it to finish",
@@ -21,7 +63,13 @@ var ciCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "error creating security provider")
 		}
-		client, err := generated.NewClientWithResponses(viper.GetString("api")+"/api/v1", generated.WithRequestEditorFn(apiKeyProvider.Intercept))
+
+		httpClient, err := initHttpCsrfClient()
+		if err != nil {
+			return errors.Wrap(err, "error creating http client")
+		}
+
+		client, err := generated.NewClientWithResponses(viper.GetString("api")+"/api/v1", generated.WithRequestEditorFn(apiKeyProvider.Intercept), generated.WithHTTPClient(httpClient))
 		if err != nil {
 			return errors.Wrap(err, "error creating client")
 		}
