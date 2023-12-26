@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-http-utils/etag"
+	"github.com/justinas/nosurf"
 	slogchi "github.com/samber/slog-chi"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/api/v1/middleware/cache"
@@ -41,6 +42,7 @@ type workerAuth interface {
 
 type userAuth interface {
 	Middleware(next http.Handler) http.Handler
+	APIMiddleware(next http.Handler) http.Handler
 	Handler() http.Handler
 	GetUser(ctx context.Context) (*models.User, error)
 }
@@ -54,10 +56,12 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	app.Use(func(h http.Handler) http.Handler {
 		return etag.Handler(h, false)
 	})
+	app.Use(nosurf.NewPure)
 	app.Use(middleware.CleanPath)
 	app.Use(middleware.GetHead)
 	app.Use(options.HandleOptions(config.Origin))
 	app.Use(requestid.RequestIDMiddleware)
+
 	if !config.Debug {
 		app.Use(middleware.Timeout(30 * time.Second))
 	}
@@ -74,9 +78,13 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 		}
 	})
 
-	v1.RegisterHandler(app, v1.ApiV1Config{
+	apiRouter := app.Route("/api/v1/", func(r chi.Router) {
+		r.Use(config.UserAuth.APIMiddleware)
+	})
+
+	v1.RegisterHandler(apiRouter, v1.ApiV1Config{
 		Debug:            config.Debug,
-		BaseURL:          "/api/v1",
+		BaseURL:          "",
 		TaskRunner:       config.TaskRunner,
 		MessageExchange:  config.MessageExchange,
 		WorkerAuth:       config.WorkerAuth,

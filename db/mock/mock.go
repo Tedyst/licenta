@@ -2530,6 +2530,45 @@ func (c *TransactionQuerierGetUserCall) DoAndReturn(f func(context.Context, int6
 	return c
 }
 
+// GetUserByRecoverSelector mocks base method.
+func (m *MockTransactionQuerier) GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*queries.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByRecoverSelector", ctx, recoverSelector)
+	ret0, _ := ret[0].(*queries.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByRecoverSelector indicates an expected call of GetUserByRecoverSelector.
+func (mr *MockTransactionQuerierMockRecorder) GetUserByRecoverSelector(ctx, recoverSelector any) *TransactionQuerierGetUserByRecoverSelectorCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByRecoverSelector", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByRecoverSelector), ctx, recoverSelector)
+	return &TransactionQuerierGetUserByRecoverSelectorCall{Call: call}
+}
+
+// TransactionQuerierGetUserByRecoverSelectorCall wrap *gomock.Call
+type TransactionQuerierGetUserByRecoverSelectorCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetUserByRecoverSelectorCall) Return(arg0 *queries.User, arg1 error) *TransactionQuerierGetUserByRecoverSelectorCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetUserByRecoverSelectorCall) Do(f func(context.Context, sql.NullString) (*queries.User, error)) *TransactionQuerierGetUserByRecoverSelectorCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetUserByRecoverSelectorCall) DoAndReturn(f func(context.Context, sql.NullString) (*queries.User, error)) *TransactionQuerierGetUserByRecoverSelectorCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetUserByUsernameOrEmail mocks base method.
 func (m *MockTransactionQuerier) GetUserByUsernameOrEmail(ctx context.Context, arg queries.GetUserByUsernameOrEmailParams) (*queries.User, error) {
 	m.ctrl.T.Helper()

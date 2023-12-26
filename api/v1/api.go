@@ -35,7 +35,7 @@ type userAuth interface {
 	GetUser(ctx context.Context) (*models.User, error)
 }
 
-func RegisterHandler(app *chi.Mux, config ApiV1Config) http.Handler {
+func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
 	serverHandler := handlers.NewServerHandler(handlers.HandlerConfig{
 		DatabaseProvider: config.DatabaseProvider,
 		TaskRunner:       config.TaskRunner,

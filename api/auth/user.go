@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"time"
+
 	"github.com/tedyst/licenta/models"
 	"github.com/volatiletech/authboss/v3"
 )
@@ -54,7 +56,7 @@ func (a *authbossUser) GetRecoveryCodes() string {
 
 func (a *authbossUser) PutRecoveryCodes(codes string) {
 	a.user.RecoveryCodes.String = codes
-	a.user.RecoveryCodes.Valid = true
+	a.user.RecoveryCodes.Valid = codes != ""
 }
 
 func (a *authbossUser) GetTOTPSecretKey() string {
@@ -63,5 +65,58 @@ func (a *authbossUser) GetTOTPSecretKey() string {
 
 func (a *authbossUser) PutTOTPSecretKey(key string) {
 	a.user.TotpSecret.String = key
-	a.user.TotpSecret.Valid = true
+	a.user.TotpSecret.Valid = key != ""
+}
+
+func (a *authbossUser) GetRecoverSelector() string {
+	return a.user.RecoverSelector.String
+}
+
+func (a *authbossUser) PutRecoverSelector(selector string) {
+	a.user.RecoverSelector.String = selector
+	a.user.RecoverSelector.Valid = selector != ""
+}
+
+func (a *authbossUser) GetRecoverVerifier() string {
+	return a.user.RecoverVerifier.String
+}
+
+func (a *authbossUser) PutRecoverVerifier(verifier string) {
+	a.user.RecoverVerifier.String = verifier
+	a.user.RecoverVerifier.Valid = verifier != ""
+}
+
+func (a *authbossUser) GetRecoverExpiry() time.Time {
+	return a.user.RecoverExpiry.Time
+}
+
+func (a *authbossUser) PutRecoverExpiry(expiry time.Time) {
+	a.user.RecoverExpiry.Time = expiry
+	a.user.RecoverExpiry.Valid = expiry != time.Time{}
+}
+
+func (a *authbossUser) GetAttemptCount() (attempts int) {
+	return int(a.user.LoginAttemptCount)
+}
+
+func (a *authbossUser) PutAttemptCount(attempts int) {
+	a.user.LoginAttemptCount = int32(attempts)
+}
+
+func (a *authbossUser) GetLastAttempt() (last time.Time) {
+	return a.user.LoginLastAttempt.Time
+}
+
+func (a *authbossUser) PutLastAttempt(last time.Time) {
+	a.user.LoginLastAttempt.Time = last
+	a.user.LoginLastAttempt.Valid = last != time.Time{}
+}
+
+func (a *authbossUser) GetLocked() (locked time.Time) {
+	return a.user.Locked.Time
+}
+
+func (a *authbossUser) PutLocked(locked time.Time) {
+	a.user.Locked.Time = locked
+	a.user.Locked.Valid = locked != time.Time{}
 }

@@ -8,6 +8,8 @@ package queries
 import (
 	"context"
 	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const countUsers = `-- name: CountUsers :one
@@ -28,7 +30,7 @@ const createUser = `-- name: CreateUser :one
 INSERT INTO users(username, PASSWORD, email)
   VALUES ($1, $2, $3)
 RETURNING
-  id, username, password, email, recovery_codes, totp_secret, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
 `
 
 type CreateUserParams struct {
@@ -47,6 +49,12 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (*User, 
 		&i.Email,
 		&i.RecoveryCodes,
 		&i.TotpSecret,
+		&i.RecoverSelector,
+		&i.RecoverVerifier,
+		&i.RecoverExpiry,
+		&i.LoginAttemptCount,
+		&i.LoginLastAttempt,
+		&i.Locked,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -64,7 +72,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 
 const getUser = `-- name: GetUser :one
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
 FROM
   users
 WHERE
@@ -82,6 +90,43 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 		&i.Email,
 		&i.RecoveryCodes,
 		&i.TotpSecret,
+		&i.RecoverSelector,
+		&i.RecoverVerifier,
+		&i.RecoverExpiry,
+		&i.LoginAttemptCount,
+		&i.LoginLastAttempt,
+		&i.Locked,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getUserByRecoverSelector = `-- name: GetUserByRecoverSelector :one
+SELECT
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
+FROM
+  users
+WHERE
+  recover_selector = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*User, error) {
+	row := q.db.QueryRow(ctx, getUserByRecoverSelector, recoverSelector)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.RecoveryCodes,
+		&i.TotpSecret,
+		&i.RecoverSelector,
+		&i.RecoverVerifier,
+		&i.RecoverExpiry,
+		&i.LoginAttemptCount,
+		&i.LoginLastAttempt,
+		&i.Locked,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -89,7 +134,7 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (*User, error) {
 
 const getUserByUsernameOrEmail = `-- name: GetUserByUsernameOrEmail :one
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
 FROM
   users
 WHERE
@@ -113,6 +158,12 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUse
 		&i.Email,
 		&i.RecoveryCodes,
 		&i.TotpSecret,
+		&i.RecoverSelector,
+		&i.RecoverVerifier,
+		&i.RecoverExpiry,
+		&i.LoginAttemptCount,
+		&i.LoginLastAttempt,
+		&i.Locked,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -120,7 +171,7 @@ func (q *Queries) GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUse
 
 const listUsers = `-- name: ListUsers :many
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
 FROM
   users
 WHERE
@@ -165,6 +216,12 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 			&i.Email,
 			&i.RecoveryCodes,
 			&i.TotpSecret,
+			&i.RecoverSelector,
+			&i.RecoverVerifier,
+			&i.RecoverExpiry,
+			&i.LoginAttemptCount,
+			&i.LoginLastAttempt,
+			&i.Locked,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -179,7 +236,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]*User, 
 
 const listUsersPaginated = `-- name: ListUsersPaginated :many
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, created_at
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, created_at
 FROM
   users
 ORDER BY
@@ -208,6 +265,12 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 			&i.Email,
 			&i.RecoveryCodes,
 			&i.TotpSecret,
+			&i.RecoverSelector,
+			&i.RecoverVerifier,
+			&i.RecoverExpiry,
+			&i.LoginAttemptCount,
+			&i.LoginLastAttempt,
+			&i.Locked,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -228,18 +291,30 @@ SET
   PASSWORD = coalesce($2, PASSWORD),
   email = coalesce($3, email),
   recovery_codes = coalesce($4, recovery_codes),
-  totp_secret = coalesce($5, totp_secret)
+  totp_secret = coalesce($5, totp_secret),
+  recover_selector = coalesce($6, recover_selector),
+  recover_verifier = coalesce($7, recover_verifier),
+  recover_expiry = coalesce($8, recover_expiry),
+  login_attempt_count = coalesce($9, login_attempt_count),
+  login_last_attempt = coalesce($10, login_last_attempt),
+  LOCKED = coalesce($11, LOCKED)
 WHERE
-  id = $6
+  id = $12
 `
 
 type UpdateUserParams struct {
-	Username      sql.NullString `json:"username"`
-	Password      sql.NullString `json:"password"`
-	Email         sql.NullString `json:"email"`
-	RecoveryCodes sql.NullString `json:"recovery_codes"`
-	TotpSecret    sql.NullString `json:"totp_secret"`
-	ID            int64          `json:"id"`
+	Username          sql.NullString     `json:"username"`
+	Password          sql.NullString     `json:"password"`
+	Email             sql.NullString     `json:"email"`
+	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
+	TotpSecret        sql.NullString     `json:"totp_secret"`
+	RecoverSelector   sql.NullString     `json:"recover_selector"`
+	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
+	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
+	LoginAttemptCount sql.NullInt32      `json:"login_attempt_count"`
+	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
+	Locked            pgtype.Timestamptz `json:"locked"`
+	ID                int64              `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
@@ -249,6 +324,12 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.Email,
 		arg.RecoveryCodes,
 		arg.TotpSecret,
+		arg.RecoverSelector,
+		arg.RecoverVerifier,
+		arg.RecoverExpiry,
+		arg.LoginAttemptCount,
+		arg.LoginLastAttempt,
+		arg.Locked,
 		arg.ID,
 	)
 	return err

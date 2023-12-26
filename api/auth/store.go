@@ -42,12 +42,18 @@ func (a *authbossStorer) Load(ctx context.Context, key string) (authboss.User, e
 
 func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
 	return a.querier.UpdateUser(ctx, queries.UpdateUserParams{
-		Username:      sql.NullString{String: user.(*authbossUser).user.Username, Valid: user.(*authbossUser).user.Username != ""},
-		Email:         sql.NullString{String: user.(*authbossUser).user.Email, Valid: user.(*authbossUser).user.Email != ""},
-		Password:      sql.NullString{String: user.(*authbossUser).user.Password, Valid: user.(*authbossUser).user.Password != ""},
-		ID:            user.(*authbossUser).user.ID,
-		RecoveryCodes: user.(*authbossUser).user.RecoveryCodes,
-		TotpSecret:    user.(*authbossUser).user.TotpSecret,
+		Username:          sql.NullString{String: user.(*authbossUser).user.Username, Valid: user.(*authbossUser).user.Username != ""},
+		Email:             sql.NullString{String: user.(*authbossUser).user.Email, Valid: user.(*authbossUser).user.Email != ""},
+		Password:          sql.NullString{String: user.(*authbossUser).user.Password, Valid: user.(*authbossUser).user.Password != ""},
+		ID:                user.(*authbossUser).user.ID,
+		RecoveryCodes:     user.(*authbossUser).user.RecoveryCodes,
+		TotpSecret:        user.(*authbossUser).user.TotpSecret,
+		RecoverSelector:   user.(*authbossUser).user.RecoverSelector,
+		RecoverVerifier:   user.(*authbossUser).user.RecoverVerifier,
+		RecoverExpiry:     user.(*authbossUser).user.RecoverExpiry,
+		LoginAttemptCount: sql.NullInt32{Int32: user.(*authbossUser).user.LoginAttemptCount, Valid: true},
+		LoginLastAttempt:  user.(*authbossUser).user.LoginLastAttempt,
+		Locked:            user.(*authbossUser).user.Locked,
 	})
 }
 
@@ -119,4 +125,18 @@ func (a *authbossStorer) UseRememberToken(ctx context.Context, pid, token string
 		UserID: user.ID,
 		Token:  token,
 	})
+}
+
+func (a *authbossStorer) LoadByRecoverSelector(ctx context.Context, selector string) (authboss.RecoverableUser, error) {
+	user, err := a.querier.GetUserByRecoverSelector(ctx, sql.NullString{String: selector, Valid: true})
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, err
+	}
+	if err == pgx.ErrNoRows {
+		return nil, authboss.ErrUserNotFound
+	}
+
+	return &authbossUser{
+		user: user,
+	}, nil
 }

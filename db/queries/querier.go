@@ -74,6 +74,7 @@ type Querier interface {
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
+	GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
 	GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error)

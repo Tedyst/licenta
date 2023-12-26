@@ -1,6 +1,10 @@
 package options
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/justinas/nosurf"
+)
 
 func HandleOptions(origin string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -12,6 +16,7 @@ func HandleOptions(origin string) func(http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("X-CSRF-Token", nosurf.Token(r))
 			w.WriteHeader(http.StatusOK)
 		})
 	}

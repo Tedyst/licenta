@@ -11,8 +11,10 @@ import (
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
 	"github.com/volatiletech/authboss/v3/defaults"
+	"github.com/volatiletech/authboss/v3/lock"
 	"github.com/volatiletech/authboss/v3/otp/twofactor"
 	"github.com/volatiletech/authboss/v3/otp/twofactor/totp2fa"
+	_ "github.com/volatiletech/authboss/v3/recover"
 	_ "github.com/volatiletech/authboss/v3/register"
 	"github.com/volatiletech/authboss/v3/remember"
 )
@@ -33,13 +35,17 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	ab.Config.Storage.SessionState = abclientstate.NewSessionStorer(sessionCookieName, authKey, sessionKey)
 	ab.Config.Storage.CookieState = abclientstate.NewCookieStorer(authKey, sessionKey)
 
-	ab.Config.Core.ViewRenderer = defaults.JSONRenderer{}
+	ab.Config.Core.ViewRenderer = jsonRenderer{}
 	ab.Config.Core.MailRenderer = defaults.JSONRenderer{}
 	ab.Config.Core.Logger = &authbossLogger{}
 	ab.Config.Core.Router = defaults.NewRouter()
 	ab.Config.Core.ErrorHandler = &authbossErrorHandler{LogWriter: ab.Config.Core.Logger}
 	ab.Config.Core.Responder = defaults.NewResponder(ab.Config.Core.ViewRenderer)
-	ab.Config.Core.Redirector = defaults.NewRedirector(ab.Config.Core.ViewRenderer, authboss.FormValueRedirect)
+
+	redirector := defaults.NewRedirector(ab.Config.Core.ViewRenderer, authboss.FormValueRedirect)
+	redirector.CorceRedirectTo200 = true
+	ab.Config.Core.Redirector = redirector
+
 	ab.Config.Core.Mailer = defaults.NewLogMailer(os.Stdout)
 
 	ab.Config.Modules.TwoFactorEmailAuthRequired = false
@@ -104,6 +110,22 @@ func (auth *authenticationProvider) Middleware(next http.Handler) http.Handler {
 		r = r.WithContext(ctx)
 
 		loadClientStateMiddleware.ServeHTTP(w, r)
+	})
+}
+
+func (auth *authenticationProvider) APIMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lockMiddleware := lock.Middleware(auth.authboss)(next)
+		user, err := auth.authboss.CurrentUser(r)
+		if err != nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if user != nil {
+			lockMiddleware.ServeHTTP(w, r)
+		} else {
+			next.ServeHTTP(w, r)
+		}
 	})
 }
 

@@ -224,13 +224,19 @@ type TotpSecretToken struct {
 }
 
 type User struct {
-	ID            int64              `json:"id"`
-	Username      string             `json:"username"`
-	Password      string             `json:"password"`
-	Email         string             `json:"email"`
-	RecoveryCodes sql.NullString     `json:"recovery_codes"`
-	TotpSecret    sql.NullString     `json:"totp_secret"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID                int64              `json:"id"`
+	Username          string             `json:"username"`
+	Password          string             `json:"password"`
+	Email             string             `json:"email"`
+	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
+	TotpSecret        sql.NullString     `json:"totp_secret"`
+	RecoverSelector   sql.NullString     `json:"recover_selector"`
+	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
+	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
+	LoginAttemptCount int32              `json:"login_attempt_count"`
+	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
+	Locked            pgtype.Timestamptz `json:"locked"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 }
 
 type Worker struct {
