@@ -26,7 +26,7 @@
 
 		loading = true;
 
-		fetch('/api/v1/login', {
+		fetch('/api/auth/login', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'

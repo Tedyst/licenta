@@ -242,6 +242,23 @@ type User struct {
 	CreatedAt         pgtype.Timestamptz `json:"created_at"`
 }
 
+type WebauthnCredential struct {
+	ID              int64    `json:"id"`
+	UserID          int64    `json:"user_id"`
+	CredentialID    []byte   `json:"credential_id"`
+	PublicKey       []byte   `json:"public_key"`
+	AttestationType string   `json:"attestation_type"`
+	Transport       []string `json:"transport"`
+	UserPresent     bool     `json:"user_present"`
+	UserVerified    bool     `json:"user_verified"`
+	BackupEligible  bool     `json:"backup_eligible"`
+	BackupState     bool     `json:"backup_state"`
+	AaGuid          []byte   `json:"aa_guid"`
+	SignCount       int32    `json:"sign_count"`
+	CloneWarning    bool     `json:"clone_warning"`
+	Attachment      string   `json:"attachment"`
+}
+
 type Worker struct {
 	ID        int64              `json:"id"`
 	Token     string             `json:"token"`

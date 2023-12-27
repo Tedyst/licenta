@@ -67,3 +67,16 @@ func (w *webauthnUser) WebAuthnIcon() string {
 func (w *webauthnUser) WebAuthnCredentials() []webauthn.Credential {
 	return w.credentials
 }
+
+type WebauthnUserValuer interface {
+	authboss.Validator
+
+	GetPID() string
+}
+
+func MustBeWebauthnUserValuer(validator authboss.Validator) WebauthnUserValuer {
+	if au, ok := validator.(WebauthnUserValuer); ok {
+		return au
+	}
+	panic(fmt.Sprintf("could not upgrade validator to an authable validator, type: %T", validator))
+}

@@ -9,8 +9,6 @@ services:
       - licenta-network
     depends_on:
       - db
-    env_file:
-      - .env
 
   swagger:
     image: swaggerapi/swagger-ui

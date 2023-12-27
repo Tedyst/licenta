@@ -56,24 +56,7 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	ab.Config.Modules.TwoFactorEmailAuthRequired = false
 	ab.Config.Modules.RoutesRedirectOnUnauthed = false
 
-	bodyreader := defaults.NewHTTPBodyReader(true, true)
-	bodyreader.Rulesets["register"] = []defaults.Rules{
-		{
-			FieldName:       "username",
-			Required:        true,
-			MinLength:       3,
-			MaxLength:       32,
-			AllowWhitespace: false,
-		},
-		{
-			FieldName:       "email",
-			Required:        true,
-			MinLength:       3,
-			MaxLength:       64,
-			AllowWhitespace: false,
-		},
-	}
-	ab.Config.Core.BodyReader = bodyreader
+	ab.Config.Core.BodyReader = newAuthbossBodyReader()
 
 	ab.Config.Paths.Mount = "/auth"
 	ab.Config.Paths.RootURL = baseurl
@@ -96,9 +79,9 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 
 	webn, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         "Licenta",
-		RPID:                  "localhost",
-		RPOrigins:             []string{"http://localhost:3000"},
-		AttestationPreference: protocol.PreferDirectAttestation,
+		RPID:                  "laptop.tedyst.ro",
+		RPOrigins:             []string{"https://laptop.tedyst.ro"},
+		AttestationPreference: protocol.PreferNoAttestation,
 	})
 	if err != nil {
 		return nil, err

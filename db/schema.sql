@@ -263,3 +263,20 @@ CREATE TABLE remember_me_tokens(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE webauthn_credentials(
+  id bigserial PRIMARY KEY,
+  user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  credential_id bytea NOT NULL UNIQUE,
+  public_key bytea NOT NULL,
+  attestation_type text NOT NULL,
+  transport text[] NOT NULL,
+  user_present boolean NOT NULL,
+  user_verified boolean NOT NULL,
+  backup_eligible boolean NOT NULL,
+  backup_state boolean NOT NULL,
+  aa_guid bytea NOT NULL,
+  sign_count integer NOT NULL,
+  clone_warning boolean NOT NULL,
+  attachment text NOT NULL
+);
+

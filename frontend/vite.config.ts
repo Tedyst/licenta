@@ -7,6 +7,7 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},
 	server: {
+		host: true,
 		proxy: {
 			'/api': 'http://localhost:5000'
 		}

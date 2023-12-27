@@ -31,6 +31,7 @@ type Querier interface {
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
+	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
 	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
@@ -77,6 +78,7 @@ type Querier interface {
 	GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error)
 	GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
+	GetWebauthnCredentialsByUserID(ctx context.Context, userID int64) ([]*WebauthnCredential, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
 	GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*GetWorkersForProjectRow, error)

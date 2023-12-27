@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/tedyst/licenta/db"
@@ -172,9 +174,77 @@ func (a *authbossStorer) LoadByConfirmSelector(ctx context.Context, selector str
 }
 
 func (a *authbossStorer) GetWebauthnCredentials(ctx context.Context, pid string) ([]authbosswebauthn.Credential, error) {
-	return nil, nil
+	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
+		Username: pid,
+		Email:    pid,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	creds, err := a.querier.GetWebauthnCredentialsByUserID(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	credentials := make([]authbosswebauthn.Credential, len(creds))
+	for i, cred := range creds {
+		transport := make([]protocol.AuthenticatorTransport, len(cred.Transport))
+		for i, t := range cred.Transport {
+			transport[i] = protocol.AuthenticatorTransport(t)
+		}
+
+		credentials[i] = authbosswebauthn.Credential{
+			ID:              cred.CredentialID,
+			PublicKey:       cred.PublicKey,
+			AttestationType: cred.AttestationType,
+			Transport:       transport,
+			Flags: webauthn.CredentialFlags{
+				UserPresent:    cred.UserPresent,
+				UserVerified:   cred.UserVerified,
+				BackupEligible: cred.BackupEligible,
+				BackupState:    cred.BackupState,
+			},
+			Authenticator: webauthn.Authenticator{
+				AAGUID:       cred.AaGuid,
+				SignCount:    uint32(cred.SignCount),
+				CloneWarning: cred.CloneWarning,
+				Attachment:   protocol.AuthenticatorAttachment(cred.Attachment),
+			},
+		}
+	}
+
+	return credentials, nil
 }
 
 func (a *authbossStorer) CreateWebauthnCredential(ctx context.Context, pid string, credential authbosswebauthn.Credential) error {
-	return nil
+	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
+		Username: pid,
+		Email:    pid,
+	})
+	if err != nil {
+		return err
+	}
+
+	transports := make([]string, len(credential.Transport))
+	for i, transport := range credential.Transport {
+		transports[i] = string(transport)
+	}
+
+	_, err = a.querier.CreateWebauthnCredential(ctx, queries.CreateWebauthnCredentialParams{
+		UserID:          user.ID,
+		CredentialID:    credential.ID,
+		PublicKey:       credential.PublicKey,
+		AttestationType: credential.AttestationType,
+		Transport:       transports,
+		UserPresent:     credential.Flags.UserPresent,
+		UserVerified:    credential.Flags.UserVerified,
+		BackupEligible:  credential.Flags.BackupEligible,
+		BackupState:     credential.Flags.BackupState,
+		AaGuid:          credential.Authenticator.AAGUID,
+		SignCount:       int32(credential.Authenticator.SignCount),
+		CloneWarning:    credential.Authenticator.CloneWarning,
+		Attachment:      string(credential.Authenticator.Attachment),
+	})
+	return err
 }
