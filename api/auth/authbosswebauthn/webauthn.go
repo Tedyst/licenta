@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	PageWebauthn             = "webauthn"
-	PageWebauthnSetup        = "webauthn_setup"
-	PageWebauthnSetupSuccess = "webauthn_setup_success"
-	PageWebauthnLogin        = "webauthn_login"
+	PageWebauthn            = "webauthn"
+	PageWebauthnSetup       = "webauthn_setup"
+	PageWebauthnSetupFinish = "webauthn_setup_finish"
+	PageWebauthnLogin       = "webauthn_login"
+	PageWebauthnLoginFinish = "webauthn_login_finish"
 
 	WebauthnSetupResponseKey = "response"
 	WebauthnLoginResponseKey = "response"
@@ -28,6 +29,11 @@ type webAuthn struct {
 	WebAuthn *webauthn.WebAuthn
 
 	RegisterOptions []webauthn.RegistrationOption
+}
+
+type saveSessionStruct struct {
+	Discoverable bool                  `json:"discoverable"`
+	Data         *webauthn.SessionData `json:"data"`
 }
 
 func New(ab *authboss.Authboss, webauthn *webauthn.WebAuthn, registrationOptions []webauthn.RegistrationOption) *webAuthn {
@@ -60,6 +66,9 @@ func (a *webAuthn) Setup() (err error) {
 
 	a.Authboss.Config.Core.Router.Get("/webauthn/login/begin", a.Authboss.Core.ErrorHandler.Wrap(a.BeginLoginGet))
 	a.Authboss.Config.Core.Router.Post("/webauthn/login/begin", a.Authboss.Core.ErrorHandler.Wrap(a.BeginLoginPost))
+
+	a.Authboss.Config.Core.Router.Get("/webauthn/login/finish", a.Authboss.Core.ErrorHandler.Wrap(a.FinishLoginGet))
+	a.Authboss.Config.Core.Router.Post("/webauthn/login/finish", a.Authboss.Core.ErrorHandler.Wrap(a.FinishLoginPost))
 
 	return nil
 }
@@ -101,7 +110,7 @@ func (webn *webAuthn) BeginRegistrationPost(w http.ResponseWriter, r *http.Reque
 	}
 
 	webAuthnUser := &webauthnUser{user: authUser, credentials: nil}
-	options, session, err := webn.WebAuthn.BeginRegistration(webAuthnUser, webauthn.WithExclusions(excludeCreds))
+	options, session, err := webn.WebAuthn.BeginRegistration(webAuthnUser, webauthn.WithExclusions(excludeCreds), webauthn.WithResidentKeyRequirement(protocol.ResidentKeyRequirementPreferred))
 	if err != nil {
 		return err
 	}
@@ -123,7 +132,7 @@ func (webn *webAuthn) BeginRegistrationPost(w http.ResponseWriter, r *http.Reque
 // FinishRegistrationGet renders the webauthn success page
 func (webn *webAuthn) FinishRegistrationGet(w http.ResponseWriter, r *http.Request) error {
 	data := authboss.HTMLData{}
-	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnSetupSuccess, data)
+	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnSetupFinish, data)
 }
 
 // FinishRegistrationPost finishes the webauthn registration process
@@ -153,7 +162,7 @@ func (webn *webAuthn) FinishRegistrationPost(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		return err
 	}
-	wnReader := MustBeWebauthnCreationUserValuer(reader)
+	wnReader := MustBeFinishWebauthnCreationUserValuer(reader)
 	creationCredential := wnReader.GetCreationCredential()
 
 	credential, err := webn.WebAuthn.CreateCredential(&webauthnUser{user: authUser, credentials: nil}, session, &creationCredential)
@@ -171,7 +180,7 @@ func (webn *webAuthn) FinishRegistrationPost(w http.ResponseWriter, r *http.Requ
 	logger.Infof("Finished registration using webauthn for %s", authUser.GetPID())
 
 	data := authboss.HTMLData{}
-	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnSetupSuccess, data)
+	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnSetupFinish, data)
 }
 
 func (webn *webAuthn) BeginLoginGet(w http.ResponseWriter, r *http.Request) error {
@@ -196,7 +205,10 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 			return err
 		}
 
-		sessionData, err := json.Marshal(&session)
+		sessionData, err := json.Marshal(&saveSessionStruct{
+			Discoverable: true,
+			Data:         session,
+		})
 		if err != nil {
 			return err
 		}
@@ -234,6 +246,7 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 	}
 
 	authboss.PutSession(w, WebauthnSessionKey, string(sessionData))
+	authboss.DelSession(w, WebauthnSessionKey)
 
 	data := authboss.HTMLData{
 		WebauthnLoginResponseKey: assertion.Response,
@@ -249,6 +262,62 @@ func (webn *webAuthn) FinishLoginGet(w http.ResponseWriter, r *http.Request) err
 	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnLogin, data)
 }
 
-// func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) error {
-// 	webn.WebAuthn.FinishDiscoverableLogin()
-// }
+func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) error {
+	validatable, err := webn.Authboss.Core.BodyReader.Read(PageWebauthnSetupFinish, r)
+	if err != nil {
+		return err
+	}
+
+	userValuer := MustBeFinishWebauthnLoginUserValuer(validatable)
+	credential := userValuer.GetCredentialAssertion()
+
+	abSession, ok := authboss.GetSession(r, WebauthnSessionKey)
+	if !ok {
+		return errors.New("webauthn session not found")
+	}
+
+	var session saveSessionStruct
+	if err := json.Unmarshal([]byte(abSession), &session); err != nil {
+		return err
+	}
+
+	storer := MustBeWebauthnStorer(webn.Authboss.Config.Storage.Server)
+
+	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
+		user, err := webn.Authboss.Config.Storage.Server.Load(r.Context(), string(userHandle))
+		if err != nil {
+			return nil, err
+		}
+
+		creds, err := storer.GetWebauthnCredentials(r.Context(), user.GetPID())
+		if err != nil {
+			return nil, err
+		}
+
+		return &webauthnUser{
+			user:        MustBeWebauthnUser(user),
+			credentials: creds,
+		}, nil
+	}
+
+	foundCred, err := webn.WebAuthn.ValidateDiscoverableLogin(discoverableUserHandler, *session.Data, &credential)
+	if err != nil {
+		return err
+	}
+
+	user, err := storer.GetUserByCredentialID(r.Context(), foundCred.ID)
+	if err != nil {
+		return err
+	}
+
+	authboss.PutSession(w, authboss.SessionKey, user.GetPID())
+	authboss.DelSession(w, authboss.SessionHalfAuthKey)
+	authboss.DelSession(w, WebauthnSessionKey)
+
+	ro := authboss.RedirectOptions{
+		Code:             http.StatusTemporaryRedirect,
+		RedirectPath:     webn.Authboss.Paths.AuthLoginOK,
+		FollowRedirParam: true,
+	}
+	return webn.Authboss.Core.Redirector.Redirect(w, r, ro)
+}

@@ -12,3 +12,34 @@ FROM
 WHERE
     user_id = $1;
 
+-- name: GetUserByWebauthnCredentialID :one
+SELECT
+    sqlc.embed(users)
+FROM
+    webauthn_credentials
+    JOIN users ON webauthn_credentials.user_id = users.id
+WHERE
+    webauthn_credentials.credential_id = $1;
+
+-- name: UpdateWebauthnCredential :one
+UPDATE
+    webauthn_credentials
+SET
+    user_id = $1,
+    credential_id = $2,
+    public_key = $3,
+    attestation_type = $4,
+    transport = $5,
+    user_present = $6,
+    user_verified = $7,
+    backup_eligible = $8,
+    backup_state = $9,
+    aa_guid = $10,
+    sign_count = $11,
+    clone_warning = $12,
+    attachment = $13
+WHERE
+    id = $14
+RETURNING
+    *;
+

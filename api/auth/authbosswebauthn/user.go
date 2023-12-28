@@ -25,6 +25,7 @@ type WebauthnStorer interface {
 
 	GetWebauthnCredentials(ctx context.Context, pid string) ([]Credential, error)
 	CreateWebauthnCredential(ctx context.Context, pid string, credential Credential) error
+	GetUserByCredentialID(ctx context.Context, credentialID []byte) (authboss.User, error)
 }
 
 func MustBeWebauthnUser(user authboss.User) WebauthnUser {
@@ -82,14 +83,27 @@ func MustBeWebauthnUserValuer(validator authboss.Validator) WebauthnUserValuer {
 	panic(fmt.Sprintf("could not upgrade validator to an authable validator, type: %T", validator))
 }
 
-type WebauthnCreationUserValuer interface {
+type FinishWebauthnCreationUserValuer interface {
 	authboss.Validator
 
 	GetCreationCredential() protocol.ParsedCredentialCreationData
 }
 
-func MustBeWebauthnCreationUserValuer(validator authboss.Validator) WebauthnCreationUserValuer {
-	if au, ok := validator.(WebauthnCreationUserValuer); ok {
+func MustBeFinishWebauthnCreationUserValuer(validator authboss.Validator) FinishWebauthnCreationUserValuer {
+	if au, ok := validator.(FinishWebauthnCreationUserValuer); ok {
+		return au
+	}
+	panic(fmt.Sprintf("could not upgrade validator to an authable validator, type: %T", validator))
+}
+
+type FinishWebauthnLoginUserValuer interface {
+	authboss.Validator
+
+	GetCredentialAssertion() protocol.ParsedCredentialAssertionData
+}
+
+func MustBeFinishWebauthnLoginUserValuer(validator authboss.Validator) FinishWebauthnLoginUserValuer {
+	if au, ok := validator.(FinishWebauthnLoginUserValuer); ok {
 		return au
 	}
 	panic(fmt.Sprintf("could not upgrade validator to an authable validator, type: %T", validator))

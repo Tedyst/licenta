@@ -2686,6 +2686,45 @@ func (c *TransactionQuerierGetUserByUsernameOrEmailCall) DoAndReturn(f func(cont
 	return c
 }
 
+// GetUserByWebauthnCredentialID mocks base method.
+func (m *MockTransactionQuerier) GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*queries.GetUserByWebauthnCredentialIDRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByWebauthnCredentialID", ctx, credentialID)
+	ret0, _ := ret[0].(*queries.GetUserByWebauthnCredentialIDRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByWebauthnCredentialID indicates an expected call of GetUserByWebauthnCredentialID.
+func (mr *MockTransactionQuerierMockRecorder) GetUserByWebauthnCredentialID(ctx, credentialID any) *TransactionQuerierGetUserByWebauthnCredentialIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByWebauthnCredentialID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByWebauthnCredentialID), ctx, credentialID)
+	return &TransactionQuerierGetUserByWebauthnCredentialIDCall{Call: call}
+}
+
+// TransactionQuerierGetUserByWebauthnCredentialIDCall wrap *gomock.Call
+type TransactionQuerierGetUserByWebauthnCredentialIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetUserByWebauthnCredentialIDCall) Return(arg0 *queries.GetUserByWebauthnCredentialIDRow, arg1 error) *TransactionQuerierGetUserByWebauthnCredentialIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetUserByWebauthnCredentialIDCall) Do(f func(context.Context, []byte) (*queries.GetUserByWebauthnCredentialIDRow, error)) *TransactionQuerierGetUserByWebauthnCredentialIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetUserByWebauthnCredentialIDCall) DoAndReturn(f func(context.Context, []byte) (*queries.GetUserByWebauthnCredentialIDRow, error)) *TransactionQuerierGetUserByWebauthnCredentialIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetWebauthnCredentialsByUserID mocks base method.
 func (m *MockTransactionQuerier) GetWebauthnCredentialsByUserID(ctx context.Context, userID int64) ([]*queries.WebauthnCredential, error) {
 	m.ctrl.T.Helper()
@@ -3374,6 +3413,45 @@ func (c *TransactionQuerierUpdateUserCall) Do(f func(context.Context, queries.Up
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierUpdateUserCall) DoAndReturn(f func(context.Context, queries.UpdateUserParams) error) *TransactionQuerierUpdateUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateWebauthnCredential mocks base method.
+func (m *MockTransactionQuerier) UpdateWebauthnCredential(ctx context.Context, arg queries.UpdateWebauthnCredentialParams) (*queries.WebauthnCredential, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateWebauthnCredential", ctx, arg)
+	ret0, _ := ret[0].(*queries.WebauthnCredential)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateWebauthnCredential indicates an expected call of UpdateWebauthnCredential.
+func (mr *MockTransactionQuerierMockRecorder) UpdateWebauthnCredential(ctx, arg any) *TransactionQuerierUpdateWebauthnCredentialCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWebauthnCredential", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateWebauthnCredential), ctx, arg)
+	return &TransactionQuerierUpdateWebauthnCredentialCall{Call: call}
+}
+
+// TransactionQuerierUpdateWebauthnCredentialCall wrap *gomock.Call
+type TransactionQuerierUpdateWebauthnCredentialCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierUpdateWebauthnCredentialCall) Return(arg0 *queries.WebauthnCredential, arg1 error) *TransactionQuerierUpdateWebauthnCredentialCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierUpdateWebauthnCredentialCall) Do(f func(context.Context, queries.UpdateWebauthnCredentialParams) (*queries.WebauthnCredential, error)) *TransactionQuerierUpdateWebauthnCredentialCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierUpdateWebauthnCredentialCall) DoAndReturn(f func(context.Context, queries.UpdateWebauthnCredentialParams) (*queries.WebauthnCredential, error)) *TransactionQuerierUpdateWebauthnCredentialCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

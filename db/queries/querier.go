@@ -78,6 +78,7 @@ type Querier interface {
 	GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error)
 	GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
+	GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*GetUserByWebauthnCredentialIDRow, error)
 	GetWebauthnCredentialsByUserID(ctx context.Context, userID int64) ([]*WebauthnCredential, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
 	GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error)
@@ -95,6 +96,7 @@ type Querier interface {
 	UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	UpdateWebauthnCredential(ctx context.Context, arg UpdateWebauthnCredentialParams) (*WebauthnCredential, error)
 	ValidateTOTPSecretForUser(ctx context.Context, userID int64) error
 }
 

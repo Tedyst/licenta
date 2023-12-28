@@ -248,3 +248,17 @@ func (a *authbossStorer) CreateWebauthnCredential(ctx context.Context, pid strin
 	})
 	return err
 }
+
+func (a *authbossStorer) GetUserByCredentialID(ctx context.Context, credentialID []byte) (authboss.User, error) {
+	user, err := a.querier.GetUserByWebauthnCredentialID(ctx, credentialID)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, err
+	}
+	if err == pgx.ErrNoRows {
+		return nil, authboss.ErrUserNotFound
+	}
+
+	return &authbossUser{
+		user: &user.User,
+	}, nil
+}

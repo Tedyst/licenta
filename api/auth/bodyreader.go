@@ -31,8 +31,9 @@ const (
 type WebauthnValues struct {
 	defaults.HTTPFormValidator
 
-	PID                string
-	CreationCredential *protocol.ParsedCredentialCreationData
+	PID                 string
+	CreationCredential  *protocol.ParsedCredentialCreationData
+	CredentialAssertion *protocol.ParsedCredentialAssertionData
 }
 
 // GetPID from the values
@@ -42,6 +43,10 @@ func (u WebauthnValues) GetPID() string {
 
 func (u WebauthnValues) GetCreationCredential() protocol.ParsedCredentialCreationData {
 	return *u.CreationCredential
+}
+
+func (u WebauthnValues) GetCredentialAssertion() protocol.ParsedCredentialAssertionData {
+	return *u.CredentialAssertion
 }
 
 // authbossBodyReader reads forms from various pages and decodes
@@ -123,6 +128,27 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 
 		return WebauthnValues{
 			CreationCredential: creds,
+		}, nil
+	} else if page == authbosswebauthn.PageWebauthnSetupFinish {
+		var values protocol.CredentialAssertionResponse
+
+		b, err := io.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to read http body")
+		}
+
+		if err = json.Unmarshal(b, &values); err != nil {
+			return nil, errors.Wrap(err, "failed to parse json http body")
+		}
+
+		creds, err := values.Parse()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse credential creation response")
+		}
+
+		return WebauthnValues{
+			CredentialAssertion: creds,
 		}, nil
 	}
 

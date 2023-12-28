@@ -24,7 +24,20 @@
 		return data;
 	};
 
-	const test = async () => {
+	const fetchWebauthnLogin = async () => {
+		const response = await fetch('/api/auth/webauthn/login/begin', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRF-Token': await getCSRFToken()
+			},
+			body: '{}'
+		});
+		const data = await response.json();
+		return data;
+	};
+
+	const testRegister = async () => {
 		const data = await fetchWebauthnRegistration();
 
 		console.log(data);
@@ -35,7 +48,7 @@
 
 		asd.publicKey.challenge = Base64Binary.decode(asd.publicKey.challenge, null);
 		asd.publicKey.user.id = Base64Binary.decode(asd.publicKey.user.id, null);
-		asd.publicKey?.excludeCredentials.forEach((cred: any) => {
+		asd.publicKey?.excludeCredentials?.forEach((cred: any) => {
 			cred.id = Base64Binary.decode(cred.id, null);
 		});
 
@@ -63,6 +76,48 @@
 			})
 		});
 	};
+
+	const testLogin = async () => {
+		const data = await fetchWebauthnLogin();
+
+		console.log(data);
+
+		const asd = {
+			publicKey: data.response
+		};
+
+		asd.publicKey.challenge = Base64Binary.decode(asd.publicKey.challenge, null);
+		asd.publicKey?.allowCredentials?.forEach((cred: any) => {
+			cred.id = Base64Binary.decode(cred.id, null);
+		});
+
+		console.log(asd);
+		let credential: any = await navigator.credentials.get(asd);
+
+		console.log(credential);
+		if (!credential) {
+			return;
+		}
+		fetch('/api/auth/webauthn/login/finish', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-CSRF-Token': await getCSRFToken()
+			},
+			body: JSON.stringify({
+				id: credential.id,
+				rawId: Base64Binary.encode(credential.rawId),
+				type: credential.type,
+				response: {
+					authenticatorData: Base64Binary.encode(credential.response.authenticatorData),
+					clientDataJSON: Base64Binary.encode(credential.response.clientDataJSON),
+					signature: Base64Binary.encode(credential.response.signature),
+					userHandle: Base64Binary.encode(credential.response.userHandle)
+				}
+			})
+		});
+	};
 </script>
 
-<button on:click={test}>Register</button>
+<button on:click={testRegister}>Register</button>
+<button on:click={testLogin}>Login</button>

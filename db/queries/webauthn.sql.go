@@ -68,6 +68,44 @@ func (q *Queries) CreateWebauthnCredential(ctx context.Context, arg CreateWebaut
 	return &i, err
 }
 
+const getUserByWebauthnCredentialID = `-- name: GetUserByWebauthnCredentialID :one
+SELECT
+    users.id, users.username, users.password, users.email, users.recovery_codes, users.totp_secret, users.recover_selector, users.recover_verifier, users.recover_expiry, users.login_attempt_count, users.login_last_attempt, users.locked, users.confirm_selector, users.confirm_verifier, users.confirmed, users.created_at
+FROM
+    webauthn_credentials
+    JOIN users ON webauthn_credentials.user_id = users.id
+WHERE
+    webauthn_credentials.credential_id = $1
+`
+
+type GetUserByWebauthnCredentialIDRow struct {
+	User User `json:"user"`
+}
+
+func (q *Queries) GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*GetUserByWebauthnCredentialIDRow, error) {
+	row := q.db.QueryRow(ctx, getUserByWebauthnCredentialID, credentialID)
+	var i GetUserByWebauthnCredentialIDRow
+	err := row.Scan(
+		&i.User.ID,
+		&i.User.Username,
+		&i.User.Password,
+		&i.User.Email,
+		&i.User.RecoveryCodes,
+		&i.User.TotpSecret,
+		&i.User.RecoverSelector,
+		&i.User.RecoverVerifier,
+		&i.User.RecoverExpiry,
+		&i.User.LoginAttemptCount,
+		&i.User.LoginLastAttempt,
+		&i.User.Locked,
+		&i.User.ConfirmSelector,
+		&i.User.ConfirmVerifier,
+		&i.User.Confirmed,
+		&i.User.CreatedAt,
+	)
+	return &i, err
+}
+
 const getWebauthnCredentialsByUserID = `-- name: GetWebauthnCredentialsByUserID :many
 SELECT
     id, user_id, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
@@ -110,4 +148,81 @@ func (q *Queries) GetWebauthnCredentialsByUserID(ctx context.Context, userID int
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateWebauthnCredential = `-- name: UpdateWebauthnCredential :one
+UPDATE
+    webauthn_credentials
+SET
+    user_id = $1,
+    credential_id = $2,
+    public_key = $3,
+    attestation_type = $4,
+    transport = $5,
+    user_present = $6,
+    user_verified = $7,
+    backup_eligible = $8,
+    backup_state = $9,
+    aa_guid = $10,
+    sign_count = $11,
+    clone_warning = $12,
+    attachment = $13
+WHERE
+    id = $14
+RETURNING
+    id, user_id, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
+`
+
+type UpdateWebauthnCredentialParams struct {
+	UserID          int64    `json:"user_id"`
+	CredentialID    []byte   `json:"credential_id"`
+	PublicKey       []byte   `json:"public_key"`
+	AttestationType string   `json:"attestation_type"`
+	Transport       []string `json:"transport"`
+	UserPresent     bool     `json:"user_present"`
+	UserVerified    bool     `json:"user_verified"`
+	BackupEligible  bool     `json:"backup_eligible"`
+	BackupState     bool     `json:"backup_state"`
+	AaGuid          []byte   `json:"aa_guid"`
+	SignCount       int32    `json:"sign_count"`
+	CloneWarning    bool     `json:"clone_warning"`
+	Attachment      string   `json:"attachment"`
+	ID              int64    `json:"id"`
+}
+
+func (q *Queries) UpdateWebauthnCredential(ctx context.Context, arg UpdateWebauthnCredentialParams) (*WebauthnCredential, error) {
+	row := q.db.QueryRow(ctx, updateWebauthnCredential,
+		arg.UserID,
+		arg.CredentialID,
+		arg.PublicKey,
+		arg.AttestationType,
+		arg.Transport,
+		arg.UserPresent,
+		arg.UserVerified,
+		arg.BackupEligible,
+		arg.BackupState,
+		arg.AaGuid,
+		arg.SignCount,
+		arg.CloneWarning,
+		arg.Attachment,
+		arg.ID,
+	)
+	var i WebauthnCredential
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.CredentialID,
+		&i.PublicKey,
+		&i.AttestationType,
+		&i.Transport,
+		&i.UserPresent,
+		&i.UserVerified,
+		&i.BackupEligible,
+		&i.BackupState,
+		&i.AaGuid,
+		&i.SignCount,
+		&i.CloneWarning,
+		&i.Attachment,
+	)
+	return &i, err
 }
