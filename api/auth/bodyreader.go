@@ -8,6 +8,8 @@ import (
 	"regexp"
 
 	"github.com/friendsofgo/errors"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/defaults"
 )
@@ -29,12 +31,17 @@ const (
 type WebauthnValues struct {
 	defaults.HTTPFormValidator
 
-	PID string
+	PID                string
+	CreationCredential *protocol.ParsedCredentialCreationData
 }
 
 // GetPID from the values
 func (u WebauthnValues) GetPID() string {
 	return u.PID
+}
+
+func (u WebauthnValues) GetCreationCredential() protocol.ParsedCredentialCreationData {
+	return *u.CreationCredential
 }
 
 // authbossBodyReader reads forms from various pages and decodes
@@ -96,6 +103,29 @@ func newAuthbossBodyReader() *authbossBodyReader {
 
 // Read the form pages
 func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validator, error) {
+	if page == authbosswebauthn.PageWebauthnSetup {
+		var values protocol.CredentialCreationResponse
+
+		b, err := io.ReadAll(r.Body)
+		r.Body.Close()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to read http body")
+		}
+
+		if err = json.Unmarshal(b, &values); err != nil {
+			return nil, errors.Wrap(err, "failed to parse json http body")
+		}
+
+		creds, err := values.Parse()
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse credential creation response")
+		}
+
+		return WebauthnValues{
+			CreationCredential: creds,
+		}, nil
+	}
+
 	var values map[string]string
 
 	b, err := io.ReadAll(r.Body)

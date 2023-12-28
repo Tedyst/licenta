@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/volatiletech/authboss/v3"
 )
@@ -82,9 +83,25 @@ func (webn *webAuthn) BeginRegistrationPost(w http.ResponseWriter, r *http.Reque
 	}
 
 	authUser := MustBeWebauthnUser(abUser)
+	storer := MustBeWebauthnStorer(webn.Authboss.Config.Storage.Server)
+
+	currentCreds, err := storer.GetWebauthnCredentials(r.Context(), authUser.GetPID())
+	if err != nil {
+		return err
+	}
+
+	excludeCreds := make([]protocol.CredentialDescriptor, len(currentCreds))
+	for i, cred := range currentCreds {
+		excludeCreds[i] = protocol.CredentialDescriptor{
+			Type:            protocol.PublicKeyCredentialType,
+			CredentialID:    cred.ID,
+			Transport:       cred.Transport,
+			AttestationType: cred.AttestationType,
+		}
+	}
 
 	webAuthnUser := &webauthnUser{user: authUser, credentials: nil}
-	options, session, err := webn.WebAuthn.BeginRegistration(webAuthnUser)
+	options, session, err := webn.WebAuthn.BeginRegistration(webAuthnUser, webauthn.WithExclusions(excludeCreds))
 	if err != nil {
 		return err
 	}
@@ -132,7 +149,14 @@ func (webn *webAuthn) FinishRegistrationPost(w http.ResponseWriter, r *http.Requ
 		return err
 	}
 
-	credential, err := webn.WebAuthn.FinishRegistration(&webauthnUser{user: authUser, credentials: nil}, session, r)
+	reader, err := webn.Authboss.Core.BodyReader.Read(PageWebauthnSetup, r)
+	if err != nil {
+		return err
+	}
+	wnReader := MustBeWebauthnCreationUserValuer(reader)
+	creationCredential := wnReader.GetCreationCredential()
+
+	credential, err := webn.WebAuthn.CreateCredential(&webauthnUser{user: authUser, credentials: nil}, session, &creationCredential)
 	if err != nil {
 		return err
 	}
@@ -216,3 +240,15 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 	}
 	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnLogin, data)
 }
+
+func (webn *webAuthn) FinishLoginGet(w http.ResponseWriter, r *http.Request) error {
+	data := authboss.HTMLData{}
+	if redir := r.URL.Query().Get(authboss.FormValueRedirect); len(redir) != 0 {
+		data[authboss.FormValueRedirect] = redir
+	}
+	return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnLogin, data)
+}
+
+// func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) error {
+// 	webn.WebAuthn.FinishDiscoverableLogin()
+// }

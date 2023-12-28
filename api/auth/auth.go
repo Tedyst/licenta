@@ -79,8 +79,8 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 
 	webn, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         "Licenta",
-		RPID:                  "laptop.tedyst.ro",
-		RPOrigins:             []string{"https://laptop.tedyst.ro"},
+		RPID:                  "localhost",
+		RPOrigins:             []string{"http://localhost:5173", "https://localhost:5000"},
 		AttestationPreference: protocol.PreferNoAttestation,
 	})
 	if err != nil {

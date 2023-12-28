@@ -35,6 +35,9 @@
 
 		asd.publicKey.challenge = Base64Binary.decode(asd.publicKey.challenge, null);
 		asd.publicKey.user.id = Base64Binary.decode(asd.publicKey.user.id, null);
+		asd.publicKey?.excludeCredentials.forEach((cred: any) => {
+			cred.id = Base64Binary.decode(cred.id, null);
+		});
 
 		console.log(asd);
 		let credential: any = await navigator.credentials.create(asd);

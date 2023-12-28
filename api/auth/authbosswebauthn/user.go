@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/volatiletech/authboss/v3"
 )
@@ -76,6 +77,19 @@ type WebauthnUserValuer interface {
 
 func MustBeWebauthnUserValuer(validator authboss.Validator) WebauthnUserValuer {
 	if au, ok := validator.(WebauthnUserValuer); ok {
+		return au
+	}
+	panic(fmt.Sprintf("could not upgrade validator to an authable validator, type: %T", validator))
+}
+
+type WebauthnCreationUserValuer interface {
+	authboss.Validator
+
+	GetCreationCredential() protocol.ParsedCredentialCreationData
+}
+
+func MustBeWebauthnCreationUserValuer(validator authboss.Validator) WebauthnCreationUserValuer {
+	if au, ok := validator.(WebauthnCreationUserValuer); ok {
 		return au
 	}
 	panic(fmt.Sprintf("could not upgrade validator to an authable validator, type: %T", validator))
