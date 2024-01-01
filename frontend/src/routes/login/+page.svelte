@@ -4,22 +4,26 @@
 	import { username, validateUsername } from '$lib/login/login';
 
 	import Login from '$lib/login/login.svelte';
+	import { goto } from '$app/navigation';
 
 	let error: string | null = null;
 	const validate = (e: SubmitEvent) => {
 		const formData = new FormData(e.target as HTMLFormElement);
-		let username = formData.get('username');
+		let u = formData.get('username');
 
-		if (!username) {
+		if (!u) {
 			return 'Please enter a username';
 		}
-		if (validateUsername(username as string)) {
-			error = validateUsername(username as string);
+		if (validateUsername(u as string)) {
+			error = validateUsername(u as string);
 		}
 
 		console.log(error);
 
-		if (error) return e.preventDefault();
+		if (!error) {
+			$username = u as string;
+			goto('/login/password');
+		}
 	};
 </script>
 

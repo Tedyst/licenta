@@ -21,4 +21,4 @@ export function validateTOTPToken(token: string): string | null {
 	return null;
 }
 
-export const username = writable('');
+export const username = writable<string | null>(null);

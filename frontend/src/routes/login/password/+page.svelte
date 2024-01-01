@@ -1,26 +1,25 @@
 <script lang="ts">
-	export const passwordError: string | null = null;
+	import { quartInOut } from 'svelte/easing';
+	import { flyabsolute } from '$lib/animations';
+	import LoginPassword from '$lib/login/login-password.svelte';
+	import { username } from '$lib/login/login';
 </script>
 
-<label class="label" for="password">
-	<span class="label-text">Password</span>
-</label>
-<input
-	type="password"
-	placeholder="password"
-	class="input input-bordered {passwordError
-		? 'wiggle input-error'
-		: ''} transition-colors duration-300 ease-in-out"
-	id="password"
-	name="password"
-	autocomplete="current-password"
-/>
-{#if passwordError}
-	<div class="label text-error text-xs">
-		{passwordError}
-	</div>
-{/if}
-
-<div class="label">
-	<a href="/login/forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
+<div
+	in:flyabsolute={{
+		delay: 0,
+		duration: 500,
+		easing: quartInOut,
+		x: 300,
+		otherStyling: 'text-align: center; padding: 2rem;'
+	}}
+	out:flyabsolute={{
+		delay: 0,
+		duration: 500,
+		easing: quartInOut,
+		x: 300,
+		otherStyling: 'text-align: center; padding: 2rem;'
+	}}
+>
+	<LoginPassword username={$username} />
 </div>

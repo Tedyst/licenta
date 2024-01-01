@@ -327,6 +327,11 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 			return err
 		}
 
+		user, err = webn.Authboss.Config.Storage.Server.Load(r.Context(), session.PID)
+		if err != nil {
+			return err
+		}
+
 		foundCred, err := webn.WebAuthn.ValidateLogin(&webauthnUser{
 			user:        MustBeWebauthnUser(user),
 			credentials: creds,
@@ -337,11 +342,6 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 
 		if foundCred == nil {
 			return errors.New("no credential found")
-		}
-
-		user, err = storer.GetUserByCredentialID(r.Context(), foundCred.ID)
-		if err != nil {
-			return err
 		}
 	}
 

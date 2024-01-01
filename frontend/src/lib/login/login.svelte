@@ -1,7 +1,6 @@
 <script lang="ts">
-	export let username: string;
+	export let username: string | null = null;
 	export let error: string | null = null;
-	export let loading: boolean = false;
 </script>
 
 <form on:submit|preventDefault on:input>
@@ -37,9 +36,6 @@
 			class="btn {!error ? 'btn-primary' : 'btn-error'} transition-colors duration-300 ease-in-out"
 			type="submit"
 		>
-			{#if loading}
-				<span class="loading loading-spinner" />
-			{/if}
 			Login
 		</button>
 	</div>
