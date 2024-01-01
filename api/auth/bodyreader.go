@@ -31,7 +31,8 @@ const (
 type WebauthnValues struct {
 	defaults.HTTPFormValidator
 
-	PID                 string
+	PID string
+
 	CreationCredential  *protocol.ParsedCredentialCreationData
 	CredentialAssertion *protocol.ParsedCredentialAssertionData
 }
@@ -47,6 +48,11 @@ func (u WebauthnValues) GetCreationCredential() protocol.ParsedCredentialCreatio
 
 func (u WebauthnValues) GetCredentialAssertion() protocol.ParsedCredentialAssertionData {
 	return *u.CredentialAssertion
+}
+
+func (u WebauthnValues) GetShouldRemember() bool {
+	rm, ok := u.Values[authboss.CookieRemember]
+	return ok && rm == "true"
 }
 
 // authbossBodyReader reads forms from various pages and decodes
@@ -108,7 +114,7 @@ func newAuthbossBodyReader() *authbossBodyReader {
 
 // Read the form pages
 func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validator, error) {
-	if page == authbosswebauthn.PageWebauthnSetup {
+	if page == authbosswebauthn.PageWebauthnSetupFinish {
 		var values protocol.CredentialCreationResponse
 
 		b, err := io.ReadAll(r.Body)
@@ -129,7 +135,7 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 		return WebauthnValues{
 			CreationCredential: creds,
 		}, nil
-	} else if page == authbosswebauthn.PageWebauthnSetupFinish {
+	} else if page == authbosswebauthn.PageWebauthnLoginFinish {
 		var values protocol.CredentialAssertionResponse
 
 		b, err := io.ReadAll(r.Body)

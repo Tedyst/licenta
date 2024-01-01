@@ -34,6 +34,7 @@ type webAuthn struct {
 type saveSessionStruct struct {
 	Discoverable bool                  `json:"discoverable"`
 	Data         *webauthn.SessionData `json:"data"`
+	PID          string                `json:"pid"`
 }
 
 func New(ab *authboss.Authboss, webauthn *webauthn.WebAuthn, registrationOptions []webauthn.RegistrationOption) *webAuthn {
@@ -158,7 +159,7 @@ func (webn *webAuthn) FinishRegistrationPost(w http.ResponseWriter, r *http.Requ
 		return err
 	}
 
-	reader, err := webn.Authboss.Core.BodyReader.Read(PageWebauthnSetup, r)
+	reader, err := webn.Authboss.Core.BodyReader.Read(PageWebauthnSetupFinish, r)
 	if err != nil {
 		return err
 	}
@@ -222,6 +223,17 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 		return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnLogin, data)
 	}
 
+	sessionData, err := json.Marshal(&saveSessionStruct{
+		Discoverable: false,
+		Data:         session,
+		PID:          userValuer.GetPID(),
+	})
+	if err != nil {
+		return err
+	}
+
+	authboss.PutSession(w, WebauthnSessionKey, string(sessionData))
+
 	user, err := webn.Authboss.Config.Storage.Server.Load(r.Context(), userValuer.GetPID())
 	if err != nil {
 		return err
@@ -263,9 +275,16 @@ func (webn *webAuthn) FinishLoginGet(w http.ResponseWriter, r *http.Request) err
 }
 
 func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) error {
-	validatable, err := webn.Authboss.Core.BodyReader.Read(PageWebauthnSetupFinish, r)
+	validatable, err := webn.Authboss.Core.BodyReader.Read(PageWebauthnLoginFinish, r)
 	if err != nil {
 		return err
+	}
+
+	handled, err := webn.Authboss.Events.FireBefore(authboss.EventAuth, w, r)
+	if err != nil {
+		return err
+	} else if handled {
+		return nil
 	}
 
 	userValuer := MustBeFinishWebauthnLoginUserValuer(validatable)
@@ -283,36 +302,72 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 
 	storer := MustBeWebauthnStorer(webn.Authboss.Config.Storage.Server)
 
-	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
-		user, err := webn.Authboss.Config.Storage.Server.Load(r.Context(), string(userHandle))
-		if err != nil {
-			return nil, err
+	var user authboss.User
+	if session.Discoverable {
+		discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
+			user, err := webn.Authboss.Config.Storage.Server.Load(r.Context(), string(userHandle))
+			if err != nil {
+				return nil, err
+			}
+
+			creds, err := storer.GetWebauthnCredentials(r.Context(), user.GetPID())
+			if err != nil {
+				return nil, err
+			}
+
+			return &webauthnUser{
+				user:        MustBeWebauthnUser(user),
+				credentials: creds,
+			}, nil
 		}
 
-		creds, err := storer.GetWebauthnCredentials(r.Context(), user.GetPID())
+		foundCred, err := webn.WebAuthn.ValidateDiscoverableLogin(discoverableUserHandler, *session.Data, &credential)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		return &webauthnUser{
+		if foundCred == nil {
+			return errors.New("no credential found")
+		}
+
+		user, err = storer.GetUserByCredentialID(r.Context(), foundCred.ID)
+		if err != nil {
+			return err
+		}
+	} else {
+		creds, err := storer.GetWebauthnCredentials(r.Context(), session.PID)
+		if err != nil {
+			return err
+		}
+
+		foundCred, err := webn.WebAuthn.ValidateLogin(&webauthnUser{
 			user:        MustBeWebauthnUser(user),
 			credentials: creds,
-		}, nil
-	}
+		}, *session.Data, &credential)
+		if err != nil {
+			return err
+		}
 
-	foundCred, err := webn.WebAuthn.ValidateDiscoverableLogin(discoverableUserHandler, *session.Data, &credential)
-	if err != nil {
-		return err
-	}
+		if foundCred == nil {
+			return errors.New("no credential found")
+		}
 
-	user, err := storer.GetUserByCredentialID(r.Context(), foundCred.ID)
-	if err != nil {
-		return err
+		user, err = storer.GetUserByCredentialID(r.Context(), foundCred.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	authboss.PutSession(w, authboss.SessionKey, user.GetPID())
 	authboss.DelSession(w, authboss.SessionHalfAuthKey)
 	authboss.DelSession(w, WebauthnSessionKey)
+
+	handled, err = webn.Authboss.Events.FireAfter(authboss.EventAuth, w, r)
+	if err != nil {
+		return err
+	} else if handled {
+		return nil
+	}
 
 	ro := authboss.RedirectOptions{
 		Code:             http.StatusTemporaryRedirect,
