@@ -20,7 +20,8 @@ const (
 	WebauthnSetupResponseKey = "response"
 	WebauthnLoginResponseKey = "response"
 
-	WebauthnSessionKey = "webauthn"
+	WebauthnSessionKey      = "webauthn"
+	WebauthnLoginSessionKey = "webauthn_login"
 )
 
 // webAuthn module
@@ -214,7 +215,7 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 			return err
 		}
 
-		authboss.PutSession(w, WebauthnSessionKey, string(sessionData))
+		authboss.PutSession(w, WebauthnLoginSessionKey, string(sessionData))
 
 		data := authboss.HTMLData{
 			WebauthnLoginResponseKey: assertion.Response,
@@ -222,17 +223,6 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 
 		return webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageWebauthnLogin, data)
 	}
-
-	sessionData, err := json.Marshal(&saveSessionStruct{
-		Discoverable: false,
-		Data:         session,
-		PID:          userValuer.GetPID(),
-	})
-	if err != nil {
-		return err
-	}
-
-	authboss.PutSession(w, WebauthnSessionKey, string(sessionData))
 
 	user, err := webn.Authboss.Config.Storage.Server.Load(r.Context(), userValuer.GetPID())
 	if err != nil {
@@ -252,12 +242,16 @@ func (webn *webAuthn) BeginLoginPost(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 
-	sessionData, err := json.Marshal(&session)
+	sessionData, err := json.Marshal(&saveSessionStruct{
+		Discoverable: false,
+		Data:         session,
+		PID:          userValuer.GetPID(),
+	})
 	if err != nil {
 		return err
 	}
 
-	authboss.PutSession(w, WebauthnSessionKey, string(sessionData))
+	authboss.PutSession(w, WebauthnLoginSessionKey, string(sessionData))
 	authboss.DelSession(w, WebauthnSessionKey)
 
 	data := authboss.HTMLData{
@@ -290,7 +284,7 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 	userValuer := MustBeFinishWebauthnLoginUserValuer(validatable)
 	credential := userValuer.GetCredentialAssertion()
 
-	abSession, ok := authboss.GetSession(r, WebauthnSessionKey)
+	abSession, ok := authboss.GetSession(r, WebauthnLoginSessionKey)
 	if !ok {
 		return errors.New("webauthn session not found")
 	}
@@ -361,6 +355,7 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 	authboss.PutSession(w, authboss.SessionKey, user.GetPID())
 	authboss.DelSession(w, authboss.SessionHalfAuthKey)
 	authboss.DelSession(w, WebauthnSessionKey)
+	authboss.DelSession(w, WebauthnLoginSessionKey)
 
 	handled, err = webn.Authboss.Events.FireAfter(authboss.EventAuth, w, r)
 	if err != nil {
