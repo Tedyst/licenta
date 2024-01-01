@@ -60,3 +60,55 @@ export function PublicKeyCredentialToJSON(credential: any): PublicKeyCredentialJ
 		}
 	};
 }
+
+export type PublicKeyCredentialRequestOptionsJSON = {
+	challenge: string;
+	timeout: number;
+	allowCredentials: {
+		id: string;
+		type: PublicKeyCredentialType;
+		transports?: AuthenticatorTransport[];
+	}[];
+	userVerification: UserVerificationRequirement;
+};
+
+export function JSONtoPublicKeyCredentialRequestOptions(
+	request: PublicKeyCredentialRequestOptionsJSON
+): PublicKeyCredentialRequestOptions {
+	return {
+		...request,
+		challenge: Base64Binary.decode(request.challenge, null),
+		allowCredentials: request?.allowCredentials?.map((credential) => {
+			return {
+				...credential,
+				id: Base64Binary.decode(credential.id, null)
+			};
+		})
+	};
+}
+
+export type LoginPublickeyCredentialJSON = {
+	id: string;
+	rawId: string;
+	response: {
+		clientDataJSON: string;
+		authenticatorData: string;
+		signature: string;
+		userHandle: string;
+	};
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function LoginPublicKeyCredentialToJSON(credential: any): LoginPublickeyCredentialJSON {
+	return {
+		...credential,
+		rawId: Base64Binary.encode(new Uint8Array(credential.rawId)),
+		response: {
+			...credential.response,
+			clientDataJSON: Base64Binary.encode(new Uint8Array(credential.response.clientDataJSON)),
+			authenticatorData: Base64Binary.encode(new Uint8Array(credential.response.authenticatorData)),
+			signature: Base64Binary.encode(new Uint8Array(credential.response.signature)),
+			userHandle: Base64Binary.encode(new Uint8Array(credential.response.userHandle))
+		}
+	};
+}

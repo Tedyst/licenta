@@ -1,64 +1,25 @@
 <script lang="ts">
 	import { quartInOut } from 'svelte/easing';
 	import { flyabsolute } from '$lib/animations';
-	import { validatePassword, validateUsername } from '$lib/login/login';
-	import { username } from '$lib/login/login';
-	import { user } from '$lib/stores';
+	import { username, validateUsername } from '$lib/login/login';
 
 	import Login from '$lib/login/login.svelte';
-	import { goto } from '$app/navigation';
 
-	let loading = false;
+	let error: string | null = null;
+	const validate = (e: SubmitEvent) => {
+		const formData = new FormData(e.target as HTMLFormElement);
+		let username = formData.get('username');
 
-	let errors: {
-		username: string | null;
-		password: string | null;
-	};
-
-	let onSubmit = (data: { username: string; password: string }) => {
-		errors = {
-			password: validatePassword(data.password),
-			username: validateUsername(data.username)
-		};
-		if (errors.password || errors.username) {
-			return;
+		if (!username) {
+			return 'Please enter a username';
+		}
+		if (validateUsername(username as string)) {
+			error = validateUsername(username as string);
 		}
 
-		loading = true;
+		console.log(error);
 
-		fetch('/api/auth/login', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(data)
-		})
-			.catch((err) => {
-				console.error(err);
-				errors = {
-					username: null,
-					password: 'An error occurred'
-				};
-			})
-			.then((result) => result?.json())
-			.then((data) => {
-				if (!data?.success) {
-					if (data?.message === '2fa required') {
-						return;
-					}
-					goto('/goto/2fa');
-					errors = {
-						username: null,
-						password: data?.message || 'An error occurred'
-					};
-					return;
-				}
-				$user = data?.user;
-				goto('/dashboard');
-			})
-			.finally(() => {
-				loading = false;
-			});
+		if (error) return e.preventDefault();
 	};
 </script>
 
@@ -77,5 +38,5 @@
 		otherStyling: 'text-align: center; padding: 2rem;'
 	}}
 >
-	<Login {onSubmit} bind:errors bind:loading bind:username={$username} />
+	<Login bind:username={$username} on:submit={validate} {error} />
 </div>

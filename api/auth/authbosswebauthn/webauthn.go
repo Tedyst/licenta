@@ -274,13 +274,6 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	handled, err := webn.Authboss.Events.FireBefore(authboss.EventAuth, w, r)
-	if err != nil {
-		return err
-	} else if handled {
-		return nil
-	}
-
 	userValuer := MustBeFinishWebauthnLoginUserValuer(validatable)
 	credential := userValuer.GetCredentialAssertion()
 
@@ -356,13 +349,6 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 	authboss.DelSession(w, authboss.SessionHalfAuthKey)
 	authboss.DelSession(w, WebauthnSessionKey)
 	authboss.DelSession(w, WebauthnLoginSessionKey)
-
-	handled, err = webn.Authboss.Events.FireAfter(authboss.EventAuth, w, r)
-	if err != nil {
-		return err
-	} else if handled {
-		return nil
-	}
 
 	ro := authboss.RedirectOptions{
 		Code:             http.StatusTemporaryRedirect,

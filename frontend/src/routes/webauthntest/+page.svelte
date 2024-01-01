@@ -8,23 +8,26 @@
 	let error: string | null = null;
 
 	const registerWebauthn = async () => {
-		try {
-			const registerData = await webauthnRegisterBegin();
-			const options = JSONtoPublicKeyCredentialCreationOptions(registerData.response);
-			const credential = await navigator.credentials.create({ publicKey: options });
-			if (!credential) {
-				return;
-			}
-			const credentialJSON = PublicKeyCredentialToJSON(credential);
-			const registerResponse = await webauthnRegisterFinish(JSON.stringify(credentialJSON));
-			console.log(registerResponse);
-		} catch (e) {
-			if (e instanceof Error) {
-				error = e.message;
-			} else {
-				error = 'Unknown error';
-			}
+		const registerData = await webauthnRegisterBegin().catch((e) => {
+			error = e.message;
+		});
+		if (!registerData) {
+			return;
 		}
+		const options = JSONtoPublicKeyCredentialCreationOptions(registerData.response);
+		const credential = await navigator.credentials.create({ publicKey: options }).catch((e) => {
+			error = e.message;
+		});
+		if (!credential) {
+			return;
+		}
+		const credentialJSON = PublicKeyCredentialToJSON(credential);
+		const registerResponse = await webauthnRegisterFinish(JSON.stringify(credentialJSON)).catch(
+			(e) => {
+				error = e.message;
+			}
+		);
+		console.log(registerResponse);
 	};
 
 	// const testLogin = async () => {

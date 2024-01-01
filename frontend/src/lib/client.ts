@@ -1,6 +1,9 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './api/v1';
-import type { PublicKeyCredentialCreationOptionsJSON } from './webauthn';
+import type {
+	PublicKeyCredentialCreationOptionsJSON,
+	PublicKeyCredentialRequestOptionsJSON
+} from './webauthn';
 
 let token: string | null = null;
 
@@ -67,22 +70,44 @@ export async function webauthnRegisterFinish(
 	});
 }
 
-export async function webauthnLoginBegin() {
+type webauthnLoginBeginResponse = {
+	success: true;
+	response: PublicKeyCredentialRequestOptionsJSON;
+};
+
+export async function webauthnLoginBegin(
+	username: string | null = null
+): Promise<webauthnLoginBeginResponse> {
 	return await csrfFetch('/api/auth/webauthn/login/begin', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ username: username })
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<webauthnLoginBeginResponse>;
 		}
+		throw new Error('Failed to fetch');
 	});
 }
 
-export async function webauthnLoginFinish(body: string) {
+type webauthnLoginFinishResponse = {
+	success: true;
+};
+
+export async function webauthnLoginFinish(body: string): Promise<webauthnLoginFinishResponse> {
 	return await csrfFetch('/api/auth/webauthn/login/finish', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<webauthnLoginFinishResponse>;
+		}
+		throw new Error('Failed to fetch');
 	});
 }
 

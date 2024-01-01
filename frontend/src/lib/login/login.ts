@@ -8,8 +8,8 @@ export function validateUsername(username: string): string | null {
 	if (username.length < 3) {
 		return 'Username must be at least 3 characters long';
 	}
-	if (!/^[a-zA-Z0-9@.]+$/.test(username)) {
-		return 'Username can only contain letters, numbers, @ and .';
+	if (!/^[a-zA-Z0-9]+$/.test(username)) {
+		return 'Username can only contain letters and numbers';
 	}
 	return null;
 }
