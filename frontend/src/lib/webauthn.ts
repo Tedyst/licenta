@@ -48,6 +48,7 @@ export type PublicKeyCredentialJSON = {
 	};
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function PublicKeyCredentialToJSON(credential: any): PublicKeyCredentialJSON {
 	return {
 		...credential,
