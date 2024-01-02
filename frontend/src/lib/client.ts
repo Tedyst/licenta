@@ -111,6 +111,126 @@ export async function webauthnLoginFinish(body: string): Promise<webauthnLoginFi
 	});
 }
 
+type LoginResponse = {
+	success: boolean;
+	totp?: boolean;
+	webauthn?: boolean;
+	error?: string;
+};
+
+export async function login(
+	username: string,
+	password: string,
+	remember: boolean
+): Promise<LoginResponse> {
+	return await csrfFetch('/api/auth/login', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ username, password, rm: String(remember) })
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<LoginResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+type RegisterTOTPBeginResponse = {
+	success: true;
+};
+
+export async function registerTOTPBegin(): Promise<RegisterTOTPBeginResponse> {
+	return await csrfFetch('/api/auth/2fa/totp/setup', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<RegisterTOTPBeginResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+type RegisterTOTPGetSecretResponse = {
+	success: true;
+	totp_secret: string;
+};
+
+export async function registerTOTPGetSecret(): Promise<RegisterTOTPGetSecretResponse> {
+	return await csrfFetch('/api/auth/2fa/totp/confirm', {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<RegisterTOTPGetSecretResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+type RegisterTOTPFinishResponse = {
+	success: true;
+	recovery_codes: string[];
+};
+
+export async function registerTOTPFinish(code: string): Promise<RegisterTOTPFinishResponse> {
+	return await csrfFetch('/api/auth/2fa/totp/confirm', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ code })
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<RegisterTOTPFinishResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+export async function logout(): Promise<void> {
+	return await csrfFetch('/api/auth/logout', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then((response) => {
+		if (response.ok) {
+			return;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+type LoginTOTPResponse = {
+	success: boolean;
+	errors?: {
+		code?: string[];
+	};
+	message?: string;
+};
+
+export async function loginTOTP(code: string): Promise<LoginTOTPResponse> {
+	return await csrfFetch('/api/auth/2fa/totp/validate', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ code })
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<LoginTOTPResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
 const client = createClient<paths>({ fetch: csrfFetch, baseUrl: '/api/v1' });
 
 export default client;

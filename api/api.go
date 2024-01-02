@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
 	"github.com/go-http-utils/etag"
+	"github.com/justinas/nosurf"
 	slogchi "github.com/samber/slog-chi"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/api/v1/middleware/cache"
@@ -58,7 +59,7 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	app.Use(func(h http.Handler) http.Handler {
 		return etag.Handler(h, false)
 	})
-	// app.Use(nosurf.NewPure)
+	app.Use(nosurf.NewPure)
 	app.Use(middleware.CleanPath)
 	app.Use(middleware.GetHead)
 	app.Use(options.HandleOptions(config.Origin))

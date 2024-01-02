@@ -8,7 +8,7 @@
 			</p>
 		</div>
 		<div
-			class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100 overflow-hidden h-[350px]"
+			class="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100 overflow-hidden h-[400px]"
 			id="/"
 		>
 			<div class="card-body absolute justify-center m-0 left-0 right-0 top-0 bottom-0 text-center">

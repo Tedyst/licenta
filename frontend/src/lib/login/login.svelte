@@ -1,6 +1,13 @@
 <script lang="ts">
 	export let username: string | null = null;
 	export let error: string | null = null;
+	import { onMount } from 'svelte';
+
+	let elm: HTMLInputElement;
+
+	onMount(() => {
+		elm.focus();
+	});
 </script>
 
 <form on:submit|preventDefault on:input>
@@ -24,6 +31,7 @@
 			name="username"
 			autocomplete="username"
 			bind:value={username}
+			bind:this={elm}
 		/>
 	</div>
 	<div class="form-control">

@@ -183,8 +183,11 @@ func (a *authbossStorer) GetWebauthnCredentials(ctx context.Context, pid string)
 	}
 
 	creds, err := a.querier.GetWebauthnCredentialsByUserID(ctx, user.ID)
-	if err != nil {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
+	}
+	if err == pgx.ErrNoRows {
+		return nil, authboss.ErrUserNotFound
 	}
 
 	credentials := make([]authbosswebauthn.Credential, len(creds))

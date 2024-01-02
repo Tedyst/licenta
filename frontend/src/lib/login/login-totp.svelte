@@ -1,11 +1,9 @@
 <script lang="ts">
-	export let errors: {
-		token: string | null;
-	};
+	export let error: string;
 	export let loading: boolean = false;
 </script>
 
-<form on:submit|preventDefault on:input={() => (errors = { token: null })}>
+<form on:submit|preventDefault on:input={() => (error = '')}>
 	<div class="form-control">
 		<label class="label" for="token">
 			<span class="label-text">2FA Token</span>
@@ -13,15 +11,15 @@
 		<input
 			type="number"
 			placeholder="token"
-			class="input input-bordered {errors.token
+			class="input input-bordered {error
 				? 'wiggle input-error'
 				: ''} transition-colors duration-300 ease-in-out"
 			id="token"
 			name="token"
 		/>
-		{#if errors.token}
+		{#if error}
 			<div class="label text-error text-xs">
-				{errors.token}
+				{error}
 			</div>
 		{/if}
 
@@ -36,9 +34,7 @@
 			<span class="loading loading-spinner" />
 		{/if}
 		<button
-			class="btn {!errors.token
-				? 'btn-primary'
-				: 'btn-error'} transition-colors duration-300 ease-in-out"
+			class="btn {!error ? 'btn-primary' : 'btn-error'} transition-colors duration-300 ease-in-out"
 			type="submit">Login</button
 		>
 	</div>

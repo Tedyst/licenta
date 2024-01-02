@@ -8,6 +8,7 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/volatiletech/authboss/v3"
+	"github.com/volatiletech/authboss/v3/otp/twofactor/totp2fa"
 )
 
 const (
@@ -16,6 +17,8 @@ const (
 	PageWebauthnSetupFinish = "webauthn_setup_finish"
 	PageWebauthnLogin       = "webauthn_login"
 	PageWebauthnLoginFinish = "webauthn_login_finish"
+
+	PageChoose2FA = "choose_2fa"
 
 	WebauthnSetupResponseKey = "response"
 	WebauthnLoginResponseKey = "response"
@@ -71,6 +74,8 @@ func (a *webAuthn) Setup() (err error) {
 
 	a.Authboss.Config.Core.Router.Get("/webauthn/login/finish", a.Authboss.Core.ErrorHandler.Wrap(a.FinishLoginGet))
 	a.Authboss.Config.Core.Router.Post("/webauthn/login/finish", a.Authboss.Core.ErrorHandler.Wrap(a.FinishLoginPost))
+
+	a.Authboss.Events.Before(authboss.EventAuthHijack, a.HijackAuth)
 
 	return nil
 }
@@ -356,4 +361,32 @@ func (webn *webAuthn) FinishLoginPost(w http.ResponseWriter, r *http.Request) er
 		FollowRedirParam: true,
 	}
 	return webn.Authboss.Core.Redirector.Redirect(w, r, ro)
+}
+
+// HijackAuth stores the user's pid in a special temporary session variable
+// and redirects them to the validation endpoint.
+func (webn *webAuthn) HijackAuth(w http.ResponseWriter, r *http.Request, handled bool) (bool, error) {
+	if handled {
+		return false, nil
+	}
+
+	storer := MustBeWebauthnStorer(webn.Authboss.Config.Storage.Server)
+	user := r.Context().Value(authboss.CTXKeyUser).(authboss.User).(totp2fa.User)
+
+	creds, err := storer.GetWebauthnCredentials(r.Context(), user.GetPID())
+	if err != nil && err != authboss.ErrUserNotFound {
+		return false, err
+	}
+
+	if len(creds) == 0 && user.GetTOTPSecretKey() == "" {
+		return false, nil
+	}
+
+	data := authboss.HTMLData{
+		"totp":     user.GetTOTPSecretKey() != "",
+		"webauthn": len(creds) != 0,
+		"status":   "not validated",
+	}
+
+	return true, webn.Authboss.Core.Responder.Respond(w, r, http.StatusOK, PageChoose2FA, data)
 }

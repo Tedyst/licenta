@@ -1,11 +1,24 @@
 <script lang="ts">
-	export const error: string | null = null;
-	export let username: string;
+	import { onMount } from 'svelte';
+
+	export let error: string | null = null;
+	export let username: string | null;
+
+	let elm: HTMLInputElement;
+
+	onMount(() => {
+		elm.focus();
+	});
 </script>
 
-<form on:submit|preventDefault on:input>
+<form
+	on:submit|preventDefault
+	on:input={() => {
+		error = null;
+	}}
+>
 	<div class="form-control">
-		Logging in as <span class="label-text-alt text-lg">{username}</span>
+		Logging in as <span class="label-text-alt text-lg font-bold">{username}</span>
 	</div>
 	<div class="form-control mt-5">
 		{#if error}
@@ -26,7 +39,14 @@
 			id="password"
 			name="password"
 			autocomplete="current-password"
+			bind:this={elm}
 		/>
+		<div class="form-control">
+			<label class="label cursor-pointer">
+				<span class="label-text">Remember me</span>
+				<input type="checkbox" checked={true} class="checkbox" id="remember" name="remember" />
+			</label>
+		</div>
 	</div>
 	<div class="label mt-3">
 		<a href="/login/forgot-password" class="label-text-alt link link-hover">Forgot password?</a>

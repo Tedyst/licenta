@@ -51,6 +51,8 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	redirector.CorceRedirectTo200 = true
 	ab.Config.Core.Redirector = redirector
 
+	ab.Config.Modules.LogoutMethod = "POST"
+
 	ab.Config.Core.Mailer = defaults.NewLogMailer(os.Stdout)
 
 	ab.Config.Modules.TwoFactorEmailAuthRequired = false
@@ -61,9 +63,21 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	ab.Config.Paths.Mount = "/auth"
 	ab.Config.Paths.RootURL = baseurl
 
-	ab.Events.Before(authboss.EventRegister, func(w http.ResponseWriter, r *http.Request, handled bool) (bool, error) {
-		return true, nil
+	webn, err := webauthn.New(&webauthn.Config{
+		RPDisplayName:         "Licenta",
+		RPID:                  "laptop.tedyst.ro",
+		RPOrigins:             []string{"http://localhost:5173", "https://localhost:5000", "https://laptop.tedyst.ro"},
+		AttestationPreference: protocol.PreferNoAttestation,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	wa := authbosswebauthn.New(ab, webn, nil)
+
+	if err := wa.Setup(); err != nil {
+		return nil, err
+	}
 
 	tf := twofactor.Recovery{Authboss: ab}
 	if err := tf.Setup(); err != nil {
@@ -74,21 +88,6 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 
 	totp := totp2fa.TOTP{Authboss: ab}
 	if err := totp.Setup(); err != nil {
-		return nil, err
-	}
-
-	webn, err := webauthn.New(&webauthn.Config{
-		RPDisplayName:         "Licenta",
-		RPID:                  "laptop.tedyst.ro",
-		RPOrigins:             []string{"http://localhost:5173", "https://localhost:5000", "https://laptop.tedyst.ro"},
-		AttestationPreference: protocol.PreferNoAttestation,
-	})
-	if err != nil {
-		return nil, err
-	}
-	wa := authbosswebauthn.New(ab, webn, nil)
-
-	if err := wa.Setup(); err != nil {
 		return nil, err
 	}
 
