@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -27,6 +29,16 @@ type innerAuthbossErrorHandler struct {
 func (e *innerAuthbossErrorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	err := e.Handler(w, r)
 	if err == nil {
+		return
+	}
+
+	if errors.Is(err, authboss.ErrUserNotFound) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Not Found"))
+		return
+	} else if errors.Is(err, &json.UnmarshalTypeError{}) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad Request"))
 		return
 	}
 

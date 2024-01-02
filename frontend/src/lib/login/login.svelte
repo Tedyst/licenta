@@ -34,9 +34,12 @@
 			bind:this={elm}
 		/>
 	</div>
-	<div class="form-control">
+	<div class="form-control mt-4">
 		<div class="label">
 			<a href="/login/webauthn" class="label-text-alt link link-hover"> Sign in using a passkey </a>
+		</div>
+		<div class="label pt-0 mt-0">
+			<a href="/register" class="label-text-alt link link-hover"> Register an account </a>
 		</div>
 	</div>
 	<div class="form-control mt-6">

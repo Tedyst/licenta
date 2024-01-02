@@ -1,42 +1,56 @@
 <script lang="ts">
-	import { validateUsername } from '$lib/login/login';
 	import { goto } from '$app/navigation';
 	import ForgotPassword from '$lib/login/forgot-password.svelte';
-	import { username as usernameStore } from '$lib/login/login';
+	import { username } from '$lib/login/login';
+	import { requestResetPassword } from '$lib/client';
 
-	let loading = false;
-	let sent = false;
-	let errors: {
-		username: string | null;
-	} = {
-		username: null
-	};
+	let error: string | null = null;
+
+	let promise: Promise<void> | null = null;
 
 	let onSubmit = (e: SubmitEvent) => {
-		const formData = new FormData(e.target as HTMLFormElement);
-		let username = formData.get('username');
-		if (typeof username !== 'string') {
-			throw new Error('username must be a string');
-		}
-
-		errors = {
-			username: validateUsername(username)
-		};
-		if (errors.username) {
+		if ($username === null) {
 			return;
 		}
-
-		loading = true;
-
-		setTimeout(() => {
-			sent = true;
-			loading = false;
-		}, 1000);
-
-		setTimeout(() => {
-			goto('/login');
-		}, 3000);
+		promise = requestResetPassword($username)
+			.then((response) => {
+				if (response.success) {
+					setTimeout(() => {
+						goto('/login');
+					}, 2000);
+				}
+			})
+			.catch((e) => {
+				console.log(e);
+				error = e.message;
+			});
 	};
 </script>
 
-<ForgotPassword {errors} on:submit={onSubmit} {loading} {sent} bind:username={$usernameStore} />
+{#if promise == null}
+	<ForgotPassword
+		{error}
+		on:submit={onSubmit}
+		loading={false}
+		sent={false}
+		bind:username={$username}
+	/>
+{:else}
+	{#await promise}
+		<ForgotPassword
+			{error}
+			on:submit={onSubmit}
+			loading={true}
+			sent={false}
+			bind:username={$username}
+		/>
+	{:then}
+		<ForgotPassword
+			{error}
+			on:submit={onSubmit}
+			loading={false}
+			sent={true}
+			bind:username={$username}
+		/>
+	{/await}
+{/if}

@@ -27,6 +27,7 @@
 			}
 		} catch (e) {
 			goto('/login/webauthn/failed');
+			console.log(e);
 		}
 	});
 </script>

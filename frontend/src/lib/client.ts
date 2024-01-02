@@ -231,6 +231,27 @@ export async function loginTOTP(code: string): Promise<LoginTOTPResponse> {
 	});
 }
 
+export type RequestResetPasswordResponse = {
+	success: boolean;
+};
+
+export async function requestResetPassword(
+	username: string
+): Promise<RequestResetPasswordResponse> {
+	return await csrfFetch('/api/auth/recover', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ username })
+	}).then((response) => {
+		if (response.ok) {
+			return response.json() as Promise<RequestResetPasswordResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
 const client = createClient<paths>({ fetch: csrfFetch, baseUrl: '/api/v1' });
 
 export default client;
