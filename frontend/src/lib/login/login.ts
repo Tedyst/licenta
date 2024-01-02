@@ -4,8 +4,8 @@ export function validatePassword(password: string): string | null {
 	return password.length >= 8 ? null : 'Password must be at least 8 characters long';
 }
 
-export function validateUsername(username: string): string | null {
-	if (username.length < 3) {
+export function validateUsername(username: string | null): string | null {
+	if (username === null || username.length < 3) {
 		return 'Username must be at least 3 characters long';
 	}
 	if (!/^[a-zA-Z0-9]+$/.test(username)) {

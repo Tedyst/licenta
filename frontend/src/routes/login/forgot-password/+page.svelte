@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { quartInOut } from 'svelte/easing';
-	import { flyabsolute } from '$lib/animations';
 	import { validateUsername } from '$lib/login/login';
 	import { goto } from '$app/navigation';
 	import ForgotPassword from '$lib/login/forgot-password.svelte';
@@ -41,21 +39,4 @@
 	};
 </script>
 
-<div
-	in:flyabsolute={{
-		delay: 0,
-		duration: 500,
-		easing: quartInOut,
-		x: 300,
-		otherStyling: 'text-align: center; padding: 2rem;'
-	}}
-	out:flyabsolute={{
-		delay: 0,
-		duration: 500,
-		easing: quartInOut,
-		x: 300,
-		otherStyling: 'text-align: center; padding: 2rem;'
-	}}
->
-	<ForgotPassword {errors} on:submit={onSubmit} {loading} {sent} bind:username={$usernameStore} />
-</div>
+<ForgotPassword {errors} on:submit={onSubmit} {loading} {sent} bind:username={$usernameStore} />

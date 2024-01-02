@@ -9,7 +9,7 @@
 			<span class="label-text">2FA Token</span>
 		</label>
 		<input
-			type="number"
+			type="text"
 			placeholder="token"
 			class="input input-bordered {error
 				? 'wiggle input-error'

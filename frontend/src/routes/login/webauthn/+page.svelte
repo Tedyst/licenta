@@ -1,7 +1,5 @@
 <script>
-	import { flyabsolute } from '$lib/animations';
 	import LoginWebauthn from '$lib/login/login-webauthn.svelte';
-	import { quartInOut } from 'svelte/easing';
 	import { username } from '$lib/login/login';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
@@ -29,7 +27,6 @@
 			}
 		} catch (e) {
 			goto('/login/webauthn/failed');
-			console.log(e);
 		}
 	});
 </script>
