@@ -9,6 +9,8 @@ services:
       - licenta-network
     depends_on:
       - db
+    env_file:
+      - docker.env
 
   swagger:
     image: swaggerapi/swagger-ui
@@ -37,7 +39,7 @@ services:
       context: .
       dockerfile: nginx/Dockerfile
     ports:
-      - "5002:80"
+      - "5003:80"
     networks:
       - licenta-network
     depends_on:

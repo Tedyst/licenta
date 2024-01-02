@@ -382,6 +382,8 @@ func (webn *webAuthn) HijackAuth(w http.ResponseWriter, r *http.Request, handled
 		return false, nil
 	}
 
+	authboss.PutSession(w, totp2fa.SessionTOTPPendingPID, user.GetPID())
+
 	data := authboss.HTMLData{
 		"totp":     user.GetTOTPSecretKey() != "",
 		"webauthn": len(creds) != 0,
