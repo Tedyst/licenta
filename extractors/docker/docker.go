@@ -19,7 +19,7 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
-type fileScanner interface {
+type FileScanner interface {
 	ExtractFromReader(ctx context.Context, fileName string, reader io.Reader) ([]file.ExtractResult, error)
 }
 
@@ -34,7 +34,7 @@ type DockerScan struct {
 	reference     name.Reference
 	scannedLayers []v1.Layer
 	errorChannel  chan error
-	fileScanner   fileScanner
+	fileScanner   FileScanner
 }
 
 func (scanner *DockerScan) scanFile(ctx context.Context, reader io.Reader, header tar.Header, layer string) error {
@@ -158,10 +158,12 @@ func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) (er
 	return scanner.scanTarArchive(ctx, *tarReader, layer)
 }
 
-func NewScanner(ctx context.Context, imageName string, opts ...Option) (*DockerScan, error) {
+func NewScanner(ctx context.Context, fileScanner FileScanner, imageName string, opts ...Option) (*DockerScan, error) {
 	slog.InfoContext(ctx, "NewScanner: creating new scanner", "image", imageName)
 
-	scanner := &DockerScan{}
+	scanner := &DockerScan{
+		fileScanner: fileScanner,
+	}
 
 	o, err := makeOptions(opts...)
 	if err != nil {
@@ -179,12 +181,6 @@ func NewScanner(ctx context.Context, imageName string, opts ...Option) (*DockerS
 
 	scanner.errorChannel = make(chan error)
 
-	scanner.fileScanner, err = file.NewScanner(o.fileScannerOptions...)
-	if err != nil {
-		return nil, errors.Wrap(err, "NewScanner: cannot create file scanner")
-	}
-
-	slog.InfoContext(ctx, "NewScanner: finished creating new scanner", "image", imageName)
 	return scanner, nil
 }
 

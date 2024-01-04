@@ -14,7 +14,7 @@ const defaultProbabilityIncreaseMultiplier = 2.0
 const defaultEntropyThresholdMidpoint = 40
 const defaultLogisticGrowthRate = 0.2
 
-func (fs *fileScanner) getSecretTypes() []secretType {
+func (fs *FileScanner) getSecretTypes() []secretType {
 	calculateProbabilityCommonWithMultiplier := func(multiplier float64) func(string, string) float64 {
 		return func(line string, match string) float64 {
 			entropy := shannonEntropy(match)

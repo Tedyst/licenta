@@ -163,6 +163,10 @@ type BatchItem struct {
 }
 
 func (scanner *GitScan) Scan(ctx context.Context) error {
+	if !scanner.initiated {
+		return errors.New("not initiated")
+	}
+
 	ctx, span := tracer.Start(ctx, "GitScan.Scan")
 	defer span.End()
 

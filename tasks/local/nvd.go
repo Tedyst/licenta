@@ -11,23 +11,32 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 )
 
-type nvdRunner struct {
-	queries db.TransactionQuerier
+type nvdQuerier interface {
+	GetNvdCPEsByDBType(ctx context.Context, databaseType int32) ([]*queries.NvdCpe, error)
+	CreateNvdCPE(ctx context.Context, params queries.CreateNvdCPEParams) (*queries.NvdCpe, error)
+	UpdateNvdCPE(ctx context.Context, params queries.UpdateNvdCPEParams) error
+	GetCveByCveID(ctx context.Context, cveID string) (*models.NvdCVE, error)
+	CreateNvdCve(ctx context.Context, params queries.CreateNvdCveParams) (*models.NvdCVE, error)
+	GetCveCpeByCveAndCpe(ctx context.Context, params queries.GetCveCpeByCveAndCpeParams) (*models.NvdCVECPE, error)
+	CreateNvdCveCPE(ctx context.Context, params queries.CreateNvdCveCPEParams) (*models.NvdCVECPE, error)
 }
 
-func NewNVDRunner(queries db.TransactionQuerier) *nvdRunner {
+type nvdRunner struct {
+	queries nvdQuerier
+}
+
+func NewNVDRunner(queries nvdQuerier) *nvdRunner {
 	return &nvdRunner{
 		queries: queries,
 	}
 }
 
-func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCpeAPIResult, dbCpes []*queries.NvdCpe) error {
+func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, database nvdQuerier, result nvd.NvdCpeAPIResult, dbCpes []*queries.NvdCpe) error {
 	ctx, span := tracer.Start(ctx, "importCpesInDB")
 	defer span.End()
 
@@ -89,7 +98,7 @@ func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 	return nil
 }
 
-func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database db.TransactionQuerier, result nvd.NvdCveAPIResult, cpe *models.NvdCPE) error {
+func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database nvdQuerier, result nvd.NvdCveAPIResult, cpe *models.NvdCPE) error {
 	ctx, span := tracer.Start(ctx, "importCVEsInDB")
 	defer span.End()
 
@@ -148,7 +157,7 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 	return nil
 }
 
-func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database db.TransactionQuerier, product nvd.Product, cpe *queries.NvdCpe) (err error) {
+func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database nvdQuerier, product nvd.Product, cpe *queries.NvdCpe) (err error) {
 	ctx, span := tracer.Start(ctx, "updateCVEsForSpecificCPE")
 	defer span.End()
 
@@ -197,14 +206,6 @@ func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, prod
 	ctx, span := tracer.Start(ctx, "UpdateNVDVulnerabilitiesForProduct")
 	defer span.End()
 
-	database, err := r.queries.StartTransaction(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = errorss.Join(err, database.EndTransaction(ctx, err))
-	}()
-
 	var startIndex int64 = 0
 
 	for {
@@ -233,7 +234,7 @@ func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, prod
 			return err
 		}
 
-		err = r.importCpesInDB(ctx, product, database, result, dbCpes)
+		err = r.importCpesInDB(ctx, product, r.queries, result, dbCpes)
 		if err != nil {
 			return err
 		}

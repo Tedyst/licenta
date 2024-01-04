@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/extractors/docker"
+	"github.com/tedyst/licenta/extractors/file"
 )
 
 var extractDockerCmd = &cobra.Command{
@@ -26,7 +27,11 @@ var extractDockerCmd = &cobra.Command{
 			return nil
 		}
 		ctx := context.Background()
-		scanner, err := docker.NewScanner(ctx, args[0], docker.WithCallbackResult(callbackFunc), docker.WithProbability(0.8))
+		fileScanner, err := file.NewScanner()
+		if err != nil {
+			fmt.Printf("%+v\n", err)
+		}
+		scanner, err := docker.NewScanner(ctx, fileScanner, args[0], docker.WithCallbackResult(callbackFunc), docker.WithProbability(0.8))
 		if err != nil {
 			fmt.Printf("%+v\n", err)
 		}

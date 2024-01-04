@@ -146,7 +146,7 @@ func (q *remotePostgresQuerier) UpdatePostgresVersion(ctx context.Context, arg q
 
 func ScanPostgresDB(ctx context.Context, client generated.ClientWithResponsesInterface, task Task) error {
 	localexchange := localmessages.NewLocalExchange()
-	runner := local.NewScannerRunner(&remotePostgresQuerier{
+	runner := local.NewPostgresScanRunner(&remotePostgresQuerier{
 		client: client,
 		task:   task,
 	}, &remoteBruteforceProvider{

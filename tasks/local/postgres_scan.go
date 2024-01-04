@@ -24,7 +24,7 @@ func getPostgresConnectString(db *models.PostgresDatabases) string {
 	return fmt.Sprintf("host=%s port=%d database=%s user=%s password=%s", db.Host, db.Port, db.DatabaseName, db.Username, db.Password)
 }
 
-type scannerRunner struct {
+type postgresScanRunner struct {
 	queries            postgresQuerier
 	bruteforceProvider bruteforce.BruteforceProvider
 	messageExchange    messages.Exchange
@@ -41,15 +41,15 @@ type postgresQuerier interface {
 	UpdatePostgresVersion(ctx context.Context, arg queries.UpdatePostgresVersionParams) error
 }
 
-func NewScannerRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider, exchange messages.Exchange) *scannerRunner {
-	return &scannerRunner{
+func NewPostgresScanRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider, exchange messages.Exchange) *postgresScanRunner {
+	return &postgresScanRunner{
 		queries:            queries,
 		bruteforceProvider: bruteforceProvider,
 		messageExchange:    exchange,
 	}
 }
 
-func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) (err error) {
+func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) (err error) {
 	ctx, span := tracer.Start(ctx, "ScanPostgresDB")
 	defer span.End()
 
@@ -183,7 +183,7 @@ func (runner *scannerRunner) ScanPostgresDB(ctx context.Context, scan *models.Po
 	return errors.Wrap(runner.bruteforcePostgres(ctx, scan, sc, notifyError, insertResults, logger), "could not bruteforce passwords")
 }
 
-func (runner *scannerRunner) bruteforcePostgres(
+func (runner *postgresScanRunner) bruteforcePostgres(
 	ctx context.Context,
 	scan *models.PostgresScan,
 	sc scanner.Scanner,
@@ -260,7 +260,7 @@ func (runner *scannerRunner) bruteforcePostgres(
 	return nil
 }
 
-func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, scan *models.PostgresScan) error {
+func (runner *postgresScanRunner) ScanPostgresDBForPublicAccess(ctx context.Context, scan *models.PostgresScan) error {
 	ctx, span := tracer.Start(ctx, "ScanPostgresDBForPublicAccess")
 	defer span.End()
 
@@ -332,7 +332,7 @@ func (runner *scannerRunner) ScanPostgresDBForPublicAccess(ctx context.Context, 
 	return nil
 }
 
-func (runner *scannerRunner) SchedulePostgresScan(ctx context.Context, scan *models.PostgresScan) error {
+func (runner *postgresScanRunner) SchedulePostgresScan(ctx context.Context, scan *models.PostgresScan) error {
 	database, err := runner.queries.GetPostgresDatabase(ctx, scan.PostgresDatabaseID)
 	if err != nil {
 		return errors.Wrap(err, "could not get database")

@@ -6,18 +6,16 @@ import (
 	"log/slog"
 
 	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/tedyst/licenta/extractors/file"
 )
 
 type Option func(*options) error
 
 type options struct {
-	credentials        authn.Authenticator
-	probability        float64
-	ignoreFileNames    []string
-	fileScannerOptions []file.Option
-	timeout            time.Duration
-	callbackResult     func(scanner *DockerScan, result *LayerResult) error
+	credentials     authn.Authenticator
+	probability     float64
+	ignoreFileNames []string
+	timeout         time.Duration
+	callbackResult  func(scanner *DockerScan, result *LayerResult) error
 }
 
 func WithCallbackResult(f func(scanner *DockerScan, result *LayerResult) error) Option {
@@ -47,13 +45,6 @@ func WithIgnoreFileNames(useDefault bool, names ...string) Option {
 			o.ignoreFileNames = defaultIgnoreFileNameIncluding[:]
 		}
 		o.ignoreFileNames = append(o.ignoreFileNames, names...)
-		return nil
-	}
-}
-
-func WithFileScannerOptions(opts ...file.Option) Option {
-	return func(o *options) error {
-		o.fileScannerOptions = append(o.fileScannerOptions, opts...)
 		return nil
 	}
 }

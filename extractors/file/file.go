@@ -22,7 +22,7 @@ type secretType struct {
 	postProcessing func(string) (string, error)
 }
 
-type fileScanner struct {
+type FileScanner struct {
 	wordsReduceProbability    map[string]struct{}
 	wordsIncreaseProbability  map[string]struct{}
 	passwordsCompletelyIgnore map[string]struct{}
@@ -31,6 +31,8 @@ type fileScanner struct {
 	options options
 
 	secretTypes []secretType
+
+	initiated bool
 }
 
 func stringsToMap(str []string) map[string]struct{} {
@@ -41,13 +43,13 @@ func stringsToMap(str []string) map[string]struct{} {
 	return m
 }
 
-func NewScanner(opts ...Option) (*fileScanner, error) {
+func NewScanner(opts ...Option) (*FileScanner, error) {
 	o, err := makeOptions(opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	fs := &fileScanner{
+	fs := &FileScanner{
 		wordsReduceProbability:    stringsToMap(o.wordsReduceProbability),
 		wordsIncreaseProbability:  stringsToMap(o.wordsIncreaseProbability),
 		passwordsCompletelyIgnore: stringsToMap(o.passwordsCompletelyIgnore),
@@ -56,13 +58,15 @@ func NewScanner(opts ...Option) (*fileScanner, error) {
 		options: *o,
 
 		secretTypes: []secretType{},
+
+		initiated: true,
 	}
 
 	fs.secretTypes = fs.getSecretTypes()
 	return fs, nil
 }
 
-func (fs *fileScanner) createResult(ctx context.Context, secretType secretType, match string, fileName string, lineNumber int, line string, previousLines string) (ExtractResult, bool, error) {
+func (fs *FileScanner) createResult(ctx context.Context, secretType secretType, match string, fileName string, lineNumber int, line string, previousLines string) (ExtractResult, bool, error) {
 	result := ExtractResult{
 		Name:          secretType.name,
 		Line:          line,
@@ -130,7 +134,11 @@ func (fs *fileScanner) createResult(ctx context.Context, secretType secretType, 
 	return result, true, nil
 }
 
-func (fs *fileScanner) ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, previousLines string) ([]ExtractResult, error) {
+func (fs *FileScanner) ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, previousLines string) ([]ExtractResult, error) {
+	if !fs.initiated {
+		return nil, errors.New("FileScanner not initiated")
+	}
+
 	var results []ExtractResult
 
 	for _, secretType := range fs.secretTypes {
@@ -156,7 +164,11 @@ func (fs *fileScanner) ExtractFromLine(ctx context.Context, fileName string, lin
 	return results, nil
 }
 
-func (fs *fileScanner) ExtractFromReader(ctx context.Context, fileName string, rd io.Reader) ([]ExtractResult, error) {
+func (fs *FileScanner) ExtractFromReader(ctx context.Context, fileName string, rd io.Reader) ([]ExtractResult, error) {
+	if !fs.initiated {
+		return nil, errors.New("FileScanner not initiated")
+	}
+
 	var results []ExtractResult
 	var lineNumber int
 

@@ -10,7 +10,7 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
-type fileScanner interface {
+type FileScanner interface {
 	ExtractFromReader(ctx context.Context, fileName string, rd io.Reader) ([]file.ExtractResult, error)
 	ExtractFromLine(ctx context.Context, fileName string, lineNumber int, line string, previousLines string) ([]file.ExtractResult, error)
 }
@@ -25,17 +25,15 @@ type GitScan struct {
 	options    *options
 	repository *gitgo.Repository
 
-	fileScanner fileScanner
+	fileScanner FileScanner
 
 	mutex sync.Mutex
+
+	initiated bool
 }
 
-func NewFromRepo(repository *gitgo.Repository, options ...Option) (*GitScan, error) {
+func NewFromRepo(repository *gitgo.Repository, fileScanner FileScanner, options ...Option) (*GitScan, error) {
 	o, err := makeOptions(options...)
-	if err != nil {
-		return nil, err
-	}
-	fileScanner, err := file.NewScanner(o.fileScannerOptions...)
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +41,11 @@ func NewFromRepo(repository *gitgo.Repository, options ...Option) (*GitScan, err
 		options:     o,
 		repository:  repository,
 		fileScanner: fileScanner,
+		initiated:   true,
 	}, nil
 }
 
-func New(repoUrl string, options ...Option) (*GitScan, error) {
+func New(repoUrl string, fileScanner FileScanner, options ...Option) (*GitScan, error) {
 	o, err := makeOptions(options...)
 	if err != nil {
 		return nil, err
@@ -59,14 +58,10 @@ func New(repoUrl string, options ...Option) (*GitScan, error) {
 		return nil, err
 	}
 
-	fileScanner, err := file.NewScanner(o.fileScannerOptions...)
-	if err != nil {
-		return nil, err
-	}
-
 	return &GitScan{
 		options:     o,
 		repository:  repository,
 		fileScanner: fileScanner,
+		initiated:   true,
 	}, nil
 }

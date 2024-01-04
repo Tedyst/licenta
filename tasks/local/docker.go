@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/docker"
 	"github.com/tedyst/licenta/extractors/file"
@@ -18,12 +17,24 @@ import (
 )
 
 type dockerRunner struct {
-	queries db.TransactionQuerier
+	queries dockerQuerier
+
+	FileScannerProvider   func(opts ...file.Option) (*file.FileScanner, error)
+	DockerScannerProvider func(ctx context.Context, fileScanner docker.FileScanner, imageName string, opts ...docker.Option) (*docker.DockerScan, error)
 }
 
-func NewDockerRunner(queries db.TransactionQuerier) *dockerRunner {
+type dockerQuerier interface {
+	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
+	UpdateDockerLayerScanForProject(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)
+	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)
+	CreateDockerLayerResultsForProject(ctx context.Context, params []queries.CreateDockerLayerResultsForProjectParams) (int64, error)
+}
+
+func NewDockerRunner(queries dockerQuerier) *dockerRunner {
 	return &dockerRunner{
-		queries: queries,
+		queries:               queries,
+		FileScannerProvider:   file.NewScanner,
+		DockerScannerProvider: docker.NewScanner,
 	}
 }
 
@@ -31,14 +42,6 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 	if image == nil {
 		return errors.New("image is nil")
 	}
-
-	querier, err := r.queries.StartTransaction(ctx)
-	if err != nil {
-		return errors.Wrap(err, "ScanDockerRepository: cannot start transaction")
-	}
-	defer func() {
-		err = querier.EndTransaction(ctx, err)
-	}()
 
 	scannnedMap := map[string]bool{}
 	mutex := sync.Mutex{}
@@ -50,7 +53,7 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 		if len(scannnedMap) == len(scanner.ScannedLayers()) {
 			finished = true
 		}
-		_, err = querier.UpdateDockerLayerScanForProject(ctx, queries.UpdateDockerLayerScanForProjectParams{
+		_, err = r.queries.UpdateDockerLayerScanForProject(ctx, queries.UpdateDockerLayerScanForProjectParams{
 			ProjectID:     image.ProjectID,
 			DockerImage:   image.ID,
 			ScannedLayers: int32(len(scanner.ScannedLayers())),
@@ -59,7 +62,7 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 		if err != nil {
 			return errors.Wrap(err, "ScanDockerRepository: cannot update layer scan")
 		}
-		scannedLayer, err := querier.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
+		scannedLayer, err := r.queries.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
 			ProjectID: image.ProjectID,
 			LayerHash: result.Layer,
 		})
@@ -83,7 +86,7 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 			})
 		}
 
-		count, err := querier.CreateDockerLayerResultsForProject(ctx, layerResults)
+		count, err := r.queries.CreateDockerLayerResultsForProject(ctx, layerResults)
 		if err != nil {
 			return errors.Wrap(err, "ScanDockerRepository: cannot create layer results")
 		}
@@ -134,11 +137,12 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 		fileOptions = append(fileOptions, file.WithLogisticGrowthRate(image.LogisticGrowthRate.Float64))
 	}
 
-	if len(fileOptions) > 0 {
-		options = append(options, docker.WithFileScannerOptions(fileOptions...))
+	fs, err := r.FileScannerProvider(fileOptions...)
+	if err != nil {
+		return errors.Wrap(err, "ScanDockerRepository: cannot create file scanner")
 	}
 
-	scannedLayers, err := querier.GetDockerScannedLayersForProject(ctx, image.ProjectID)
+	scannedLayers, err := r.queries.GetDockerScannedLayersForProject(ctx, image.ProjectID)
 	if err != nil {
 		return err
 	}
@@ -147,7 +151,7 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.P
 		scannnedMap[layer] = true
 	}
 
-	scanner, err := docker.NewScanner(ctx, image.DockerImage, options...)
+	scanner, err := r.DockerScannerProvider(ctx, fs, image.DockerImage, options...)
 	if err != nil {
 		return err
 	}

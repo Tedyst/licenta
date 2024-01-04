@@ -4,19 +4,16 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
 	"github.com/tedyst/licenta/models"
 )
 
 type emailRunner struct {
-	queries     db.TransactionQuerier
 	emailSender email.EmailSender
 }
 
-func NewEmailRunner(queries db.TransactionQuerier, emailSender email.EmailSender) *emailRunner {
+func NewEmailRunner(emailSender email.EmailSender) *emailRunner {
 	return &emailRunner{
-		queries:     queries,
 		emailSender: emailSender,
 	}
 }
