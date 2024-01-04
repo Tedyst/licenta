@@ -45,11 +45,6 @@ var serveLocalCmd = &cobra.Command{
 			return fmt.Errorf("encrypt key must be 32 bytes long (64 hex characters)")
 		}
 
-		userAuth, err := auth.NewAuthenticationProvider("", db, hashKey, encryptKey)
-		if err != nil {
-			return errors.Wrap(err, "failed to initialize user authentication")
-		}
-
 		localExchange := localExchange.NewLocalExchange()
 		brutefroceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
 
@@ -65,6 +60,11 @@ var serveLocalCmd = &cobra.Command{
 				viper.GetString("email.senderName"),
 				viper.GetString("email.sender"),
 			), db, localExchange, brutefroceProvider)
+		}
+
+		userAuth, err := auth.NewAuthenticationProvider(viper.GetString("baseurl"), db, hashKey, encryptKey, taskRunner)
+		if err != nil {
+			return errors.Wrap(err, "failed to initialize user authentication")
 		}
 
 		waCacheProvider, err := cache.NewLocalCacheProvider[queries.Worker]()

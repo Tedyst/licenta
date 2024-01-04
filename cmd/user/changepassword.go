@@ -18,7 +18,7 @@ var changepasswordCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database := db.InitDatabase(viper.GetString("database"))
 
-		userAuth, err := auth.NewAuthenticationProvider("", database, nil, nil)
+		userAuth, err := auth.NewAuthenticationProvider("", database, nil, nil, nil)
 		if err != nil {
 			return err
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -33,7 +34,7 @@ type authenticationProvider struct {
 	querier  db.TransactionQuerier
 }
 
-func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, authKey []byte, sessionKey []byte) (*authenticationProvider, error) {
+func NewAuthenticationProvider(baseURL string, querier db.TransactionQuerier, authKey []byte, sessionKey []byte, emailTaskRunner emailTaskRunner) (*authenticationProvider, error) {
 	ab := authboss.New()
 
 	ab.Config.Storage.Server = newAuthbossStorer(querier)
@@ -46,6 +47,9 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	ab.Config.Core.Router = defaults.NewRouter()
 	ab.Config.Core.ErrorHandler = &authbossErrorHandler{LogWriter: ab.Config.Core.Logger}
 	ab.Config.Core.Responder = defaults.NewResponder(ab.Config.Core.ViewRenderer)
+	ab.Config.Core.Mailer = &authbossMailer{
+		runner: emailTaskRunner,
+	}
 
 	redirector := defaults.NewRedirector(ab.Config.Core.ViewRenderer, authboss.FormValueRedirect)
 	redirector.CorceRedirectTo200 = true
@@ -61,16 +65,19 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 	ab.Config.Core.BodyReader = newAuthbossBodyReader()
 
 	ab.Config.Paths.Mount = "/auth"
-	ab.Config.Paths.RootURL = baseurl
+	ab.Config.Paths.RootURL = baseURL
 
 	webn, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         "Licenta",
-		RPID:                  "laptop.tedyst.ro",
-		RPOrigins:             []string{"http://localhost:5173", "https://localhost:5000", "https://laptop.tedyst.ro"},
+		RPID:                  baseURL,
+		RPOrigins:             []string{"https://" + baseURL},
 		AttestationPreference: protocol.PreferNoAttestation,
 	})
 	if err != nil {
 		return nil, err
+	}
+	if strings.HasPrefix(baseURL, "localhost") {
+		webn.Config.RPOrigins = []string{"http://" + baseURL, "https://" + baseURL}
 	}
 
 	wa := authbosswebauthn.New(ab, webn, nil)
@@ -84,7 +91,7 @@ func NewAuthenticationProvider(baseurl string, querier db.TransactionQuerier, au
 		return nil, err
 	}
 
-	ab.Config.Modules.TOTP2FAIssuer = "licenta"
+	ab.Config.Modules.TOTP2FAIssuer = baseURL
 
 	totp := totp2fa.TOTP{Authboss: ab}
 	if err := totp.Setup(); err != nil {
