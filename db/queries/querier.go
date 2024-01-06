@@ -12,7 +12,7 @@ import (
 )
 
 type Querier interface {
-	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) error
+	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) (*Scan, error)
 	CountUsers(ctx context.Context) (int64, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
@@ -74,6 +74,7 @@ type Querier interface {
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetScan(ctx context.Context, id int64) (*GetScanRow, error)
 	GetScanResults(ctx context.Context, scanID int64) ([]*ScanResult, error)
+	GetScanResultsByScanIdAndScanSource(ctx context.Context, arg GetScanResultsByScanIdAndScanSourceParams) ([]*ScanResult, error)
 	GetScansForProject(ctx context.Context, projectID int64) ([]*GetScansForProjectRow, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)

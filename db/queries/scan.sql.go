@@ -76,26 +76,33 @@ func (q *Queries) CreateScanBruteforceResult(ctx context.Context, arg CreateScan
 }
 
 const createScanResult = `-- name: CreateScanResult :one
-INSERT INTO scan_results(scan_id, severity, message)
-    VALUES ($1, $2, $3)
+INSERT INTO scan_results(scan_id, severity, message, scan_source)
+    VALUES ($1, $2, $3, $4)
 RETURNING
-    id, scan_id, severity, message, created_at
+    id, scan_id, severity, message, scan_source, created_at
 `
 
 type CreateScanResultParams struct {
-	ScanID   int64  `json:"scan_id"`
-	Severity int32  `json:"severity"`
-	Message  string `json:"message"`
+	ScanID     int64  `json:"scan_id"`
+	Severity   int32  `json:"severity"`
+	Message    string `json:"message"`
+	ScanSource int32  `json:"scan_source"`
 }
 
 func (q *Queries) CreateScanResult(ctx context.Context, arg CreateScanResultParams) (*ScanResult, error) {
-	row := q.db.QueryRow(ctx, createScanResult, arg.ScanID, arg.Severity, arg.Message)
+	row := q.db.QueryRow(ctx, createScanResult,
+		arg.ScanID,
+		arg.Severity,
+		arg.Message,
+		arg.ScanSource,
+	)
 	var i ScanResult
 	err := row.Scan(
 		&i.ID,
 		&i.ScanID,
 		&i.Severity,
 		&i.Message,
+		&i.ScanSource,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -150,7 +157,7 @@ func (q *Queries) GetScan(ctx context.Context, id int64) (*GetScanRow, error) {
 
 const getScanResults = `-- name: GetScanResults :many
 SELECT
-    id, scan_id, severity, message, created_at
+    id, scan_id, severity, message, scan_source, created_at
 FROM
     scan_results
 WHERE
@@ -171,6 +178,49 @@ func (q *Queries) GetScanResults(ctx context.Context, scanID int64) ([]*ScanResu
 			&i.ScanID,
 			&i.Severity,
 			&i.Message,
+			&i.ScanSource,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getScanResultsByScanIdAndScanSource = `-- name: GetScanResultsByScanIdAndScanSource :many
+SELECT
+    id, scan_id, severity, message, scan_source, created_at
+FROM
+    scan_results
+WHERE
+    scan_id = $1
+    AND scan_source = $2
+`
+
+type GetScanResultsByScanIdAndScanSourceParams struct {
+	ScanID     int64 `json:"scan_id"`
+	ScanSource int32 `json:"scan_source"`
+}
+
+func (q *Queries) GetScanResultsByScanIdAndScanSource(ctx context.Context, arg GetScanResultsByScanIdAndScanSourceParams) ([]*ScanResult, error) {
+	rows, err := q.db.Query(ctx, getScanResultsByScanIdAndScanSource, arg.ScanID, arg.ScanSource)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ScanResult
+	for rows.Next() {
+		var i ScanResult
+		if err := rows.Scan(
+			&i.ID,
+			&i.ScanID,
+			&i.Severity,
+			&i.Message,
+			&i.ScanSource,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

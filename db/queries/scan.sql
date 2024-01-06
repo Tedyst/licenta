@@ -5,8 +5,8 @@ RETURNING
     *;
 
 -- name: CreateScanResult :one
-INSERT INTO scan_results(scan_id, severity, message)
-    VALUES ($1, $2, $3)
+INSERT INTO scan_results(scan_id, severity, message, scan_source)
+    VALUES ($1, $2, $3, $4)
 RETURNING
     *;
 
@@ -27,6 +27,15 @@ FROM
     scan_results
 WHERE
     scan_id = $1;
+
+-- name: GetScanResultsByScanIdAndScanSource :many
+SELECT
+    *
+FROM
+    scan_results
+WHERE
+    scan_id = $1
+    AND scan_source = $2;
 
 -- name: GetScan :one
 SELECT

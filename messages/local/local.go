@@ -27,13 +27,13 @@ func (e *localExchange) getWorkerTopic(worker models.Worker) string {
 	return "worker." + strconv.Itoa(int(worker.ID))
 }
 
-func (e *localExchange) PublishSendScanToWorkerMessage(ctx context.Context, worker models.Worker, message messages.SendScanToWorkerMessage) error {
-	return e.publish(ctx, e.getWorkerTopic(worker), message)
+func (e *localExchange) PublishSendScanToWorkerMessage(ctx context.Context, worker *models.Worker, message *messages.SendScanToWorkerMessage) error {
+	return e.publish(ctx, e.getWorkerTopic(*worker), message)
 }
 
-func (e *localExchange) ReceiveSendScanToWorkerMessage(ctx context.Context, worker models.Worker) (messages.SendScanToWorkerMessage, bool, error) {
+func (e *localExchange) ReceiveSendScanToWorkerMessage(ctx context.Context, worker *models.Worker) (messages.SendScanToWorkerMessage, bool, error) {
 	message := messages.SendScanToWorkerMessage{}
-	ok, err := e.receive(ctx, e.getWorkerTopic(worker), &message)
+	ok, err := e.receive(ctx, e.getWorkerTopic(*worker), &message)
 	return message, ok, err
 }
 

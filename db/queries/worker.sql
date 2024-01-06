@@ -7,13 +7,16 @@ FROM
 WHERE
     worker_projects.project_id = $1;
 
--- name: BindScanToWorker :exec
+-- name: BindScanToWorker :one
 UPDATE
     scans
 SET
     worker_id = $2
 WHERE
-    id = $1;
+    id = $1
+    AND worker_id IS NULL
+RETURNING
+    *;
 
 -- name: GetWorkerForScan :one
 SELECT

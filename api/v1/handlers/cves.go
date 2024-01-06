@@ -4,25 +4,26 @@ import (
 	"context"
 
 	"github.com/tedyst/licenta/api/v1/generated"
+	. "github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/nvd"
 )
 
-func (server *serverHandler) GetCvesDatabaseTypeVersion(ctx context.Context, request generated.GetCvesDatabaseTypeVersionRequestObject) (generated.GetCvesDatabaseTypeVersionResponseObject, error) {
+func (server *serverHandler) GetCvesDbTypeVersion(ctx context.Context, request GetCvesDbTypeVersionRequestObject) (GetCvesDbTypeVersionResponseObject, error) {
 	worker, err := server.workerauth.GetWorker(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if worker == nil {
-		return generated.GetCvesDatabaseTypeVersion401JSONResponse{
+		return GetCvesDbTypeVersion401JSONResponse{
 			Message: "Unauthorized",
 			Success: false,
 		}, nil
 	}
 
-	product, err := nvd.GetNvdDatabaseType(request.DatabaseType)
+	product, err := nvd.GetNvdDatabaseType(request.DbType)
 	if err != nil {
-		return generated.GetCvesDatabaseTypeVersion404JSONResponse{
+		return GetCvesDbTypeVersion404JSONResponse{
 			Message: "Database type not found",
 			Success: false,
 		}, nil
@@ -47,7 +48,7 @@ func (server *serverHandler) GetCvesDatabaseTypeVersion(ctx context.Context, req
 		})
 	}
 
-	return generated.GetCvesDatabaseTypeVersion200JSONResponse{
+	return GetCvesDbTypeVersion200JSONResponse{
 		Success: true,
 		Cves:    result,
 	}, nil

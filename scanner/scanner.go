@@ -24,10 +24,12 @@ var (
 )
 
 type Scanner interface {
+	GetScannerName() string
+	GetScannerID() int64
+
 	GetNvdProductType() nvd.Product
 	ShouldNotBePublic() bool
 
-	ScanForPublicAccess(ctx context.Context) error
 	Ping(context.Context) error
 	CheckPermissions(context.Context) error
 	ScanConfig(ctx context.Context) ([]ScanResult, error)

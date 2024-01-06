@@ -8,13 +8,13 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 )
 
-func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.Context, request generated.GetProjectProjectidBruteforcePasswordsRequestObject) (generated.GetProjectProjectidBruteforcePasswordsResponseObject, error) {
+func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context, request generated.GetProjectIdBruteforcePasswordsRequestObject) (generated.GetProjectIdBruteforcePasswordsResponseObject, error) {
 	lastid := -1
-	if request.Params.LastId != nil {
-		lastid = int(*request.Params.LastId)
+	if request.Params.LastPasswordId != nil {
+		lastid = int(*request.Params.LastPasswordId)
 	}
 
-	count, err := server.DatabaseProvider.GetBruteforcePasswordsForProjectCount(ctx, request.Projectid)
+	count, err := server.DatabaseProvider.GetBruteforcePasswordsForProjectCount(ctx, request.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 	total := bruteforcePasswordsPerPage
 
 	if lastid < 0 {
-		specificPasswords, err := server.DatabaseProvider.GetBruteforcePasswordsSpecificForProject(ctx, request.Projectid)
+		specificPasswords, err := server.DatabaseProvider.GetBruteforcePasswordsSpecificForProject(ctx, request.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -54,7 +54,7 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 		}
 	}
 	if len(results) == 0 {
-		return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
+		return generated.GetProjectIdBruteforcePasswords200JSONResponse{
 			Success: true,
 			Count:   int(count),
 			Results: []generated.BruteforcePassword{},
@@ -62,8 +62,8 @@ func (server *serverHandler) GetProjectProjectidBruteforcePasswords(ctx context.
 		}, nil
 	}
 	lastReturnedID := int(results[len(results)-1].Id)
-	nextURL := "/api/v1/project/" + strconv.Itoa(int(request.Projectid)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID)
-	return generated.GetProjectProjectidBruteforcePasswords200JSONResponse{
+	nextURL := "/api/v1/project/" + strconv.Itoa(int(request.Id)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID)
+	return generated.GetProjectIdBruteforcePasswords200JSONResponse{
 		Success: true,
 		Count:   int(count),
 		Next:    &nextURL,

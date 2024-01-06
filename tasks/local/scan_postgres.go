@@ -118,7 +118,7 @@ func (runner *postgresScanRunner) scanPostgresDB(ctx context.Context, postgresSc
 	}
 
 	if shouldOnlyScanRemote {
-		return errors.Wrap(sc.ScanForPublicAccess(ctx), "could not scan for public access")
+		return errors.Wrap(scanRunner.scanForPublicAccess(ctx), "could not scan for public access")
 	}
 
 	if err := scanRunner.run(ctx); err != nil {

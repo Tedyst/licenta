@@ -187,7 +187,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{projectid}/bruteforce-passwords:
+  /project/{id}/bruteforce-passwords:
     get:
       summary: Get all bruteforce passwords associated with a project
       security:
@@ -195,14 +195,14 @@ paths:
       tags:
         - worker
       parameters:
-        - name: projectid
+        - name: id
           in: path
           description: The ID of the project
           required: true
           schema:
             type: integer
             format: int64
-        - name: last_id
+        - name: last_password_id
           in: query
           description: The last ID of the item to return
           required: false
@@ -224,166 +224,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /scanner/postgres/database/{postgresDatabaseId}:
+  /scan/{id}:
     get:
-      summary: Get all postgres scans associated with a database
+      summary: Get a scan by ID
       security:
         - sessionAuth: []
       tags:
         - scanner
-        - postgres
       parameters:
-        - name: postgresDatabaseId
-          in: path
-          description: The ID of the postgres database
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - success
-                  - scans
-                  - scan_count
-                  - database
-                properties:
-                  success:
-                    type: boolean
-                    description: The success status
-                  scans:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PostgresScan'
-                    description: The list of scans
-                  database:
-                    $ref: '#/components/schemas/PostgresDatabase'
-                  scan_count:
-                    type: integer
-                    description: The number of scans
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      summary: Create a new postgres scan associated with a database
-      security:
-        - sessionAuth: []
-      tags:
-        - scanner
-        - postgres
-      parameters:
-        - name: postgresDatabaseId
-          in: path
-          description: The ID of the postgres database
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - success
-                  - task
-                properties:
-                  success:
-                    type: boolean
-                  scan:
-                    $ref: '#/components/schemas/PostgresScan'
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: Database not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    patch:
-      summary: Update a postgres database by ID
-      security:
-        - sessionAuth: []
-      tags:
-        - worker
-      parameters:
-        - name: postgresDatabaseId
-          in: path
-          description: The ID of the postgres database
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        description: The database object
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchPostgresDatabase'
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - success
-                  - task
-                properties:
-                  success:
-                    type: boolean
-                  database:
-                    $ref: '#/components/schemas/PostgresDatabase'
-        "400":
-          description: Invalid body
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: Database not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /scanner/postgres/scan/{scanid}:
-    get:
-      summary: Get a postgres scan by ID
-      security:
-        - sessionAuth: []
-      tags:
-        - scanner
-        - postgres
-      parameters:
-        - name: scanid
+        - name: id
           in: path
           description: The ID of the scan
           required: true
@@ -405,11 +254,11 @@ paths:
                   success:
                     type: boolean
                   scan:
-                    $ref: '#/components/schemas/PostgresScan'
+                    $ref: '#/components/schemas/Scan'
                   results:
                     type: array
                     items:
-                      $ref: '#/components/schemas/PostgresScanResult'
+                      $ref: '#/components/schemas/ScanResult'
         "404":
           description: Scan not found
           content:
@@ -417,13 +266,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     patch:
-      summary: Update a postgres scan by ID
+      summary: Update a scan by ID
       security:
         - workerAuth: []
       tags:
         - worker
       parameters:
-        - name: scanid
+        - name: id
           in: path
           description: The ID of the scan
           required: true
@@ -436,7 +285,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchPostgresScan'
+              $ref: '#/components/schemas/PatchScan'
       responses:
         "200":
           description: Successful operation
@@ -451,7 +300,7 @@ paths:
                   success:
                     type: boolean
                   scan:
-                    $ref: '#/components/schemas/PostgresScan'
+                    $ref: '#/components/schemas/Scan'
         "400":
           description: Invalid body
           content:
@@ -470,15 +319,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /scanner/postgres/scan/{scanid}/result:
+  /scan/{id}/result:
     post:
-      summary: Create a new postgres scan result
+      summary: Create a new scan result
       security:
         - workerAuth: []
       tags:
         - worker
       parameters:
-        - name: scanid
+        - name: id
           in: path
           description: The ID of the scan
           required: true
@@ -491,7 +340,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePostgresScanResult'
+              $ref: '#/components/schemas/CreateScanResult'
       responses:
         "200":
           description: Successful operation
@@ -506,7 +355,7 @@ paths:
                   success:
                     type: boolean
                   scan:
-                    $ref: '#/components/schemas/PostgresScanResult'
+                    $ref: '#/components/schemas/ScanResult'
         "400":
           description: Invalid body
           content:
@@ -525,7 +374,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /cves/{databaseType}/{version}:
+  /cves/{dbType}/{version}:
     get:
       summary: Get all CVEs for a database type and version
       security:
@@ -533,7 +382,7 @@ paths:
       tags:
         - cve
       parameters:
-        - name: databaseType
+        - name: dbType
           in: path
           description: The database type
           required: true
@@ -574,7 +423,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{projectid}/run:
+  /project/{id}/run:
     post:
       summary: Run all extractors and scanners for a project
       security:
@@ -582,7 +431,7 @@ paths:
       tags:
         - scanner
       parameters:
-        - name: projectid
+        - name: id
           in: path
           description: The ID of the project
           required: true
@@ -602,10 +451,10 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  postgres_scans:
+                  scans:
                     type: array
                     items:
-                      $ref: '#/components/schemas/PostgresScan'
+                      $ref: '#/components/schemas/Scan'
         "400":
           description: Invalid body
           content:
@@ -624,7 +473,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{projectid}:
+  /project/{id}:
     get:
       summary: Get project by ID
       security:
@@ -632,7 +481,7 @@ paths:
       tags:
         - project
       parameters:
-        - name: projectid
+        - name: id
           in: path
           description: The ID of the project
           required: true
@@ -667,6 +516,102 @@ paths:
                 $ref: '#/components/schemas/Error'
         "404":
           description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /postgres/{id}:
+    get:
+      summary: Get postgres database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - postgres
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - postgres_database
+                properties:
+                  success:
+                    type: boolean
+                  postgres_database:
+                    $ref: '#/components/schemas/PostgresDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update postgres database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - postgres
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The postgres database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchPostgresDatabase'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - postgres_database
+                properties:
+                  success:
+                    type: boolean
+                  postgres_database:
+                    $ref: '#/components/schemas/PostgresDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
           content:
             application/json:
               schema:
@@ -740,8 +685,6 @@ components:
           type: string
         password:
           type: string
-        remote:
-          type: boolean
         version:
           type: string
     PostgresDatabase:
@@ -755,7 +698,6 @@ components:
         - username
         - password
         - created_at
-        - remote
         - version
       properties:
         id: 
@@ -774,11 +716,9 @@ components:
           type: string
         created_at: 
           type: string
-        remote:
-          type: boolean
         version:
           type: string
-    PatchPostgresScan:
+    PatchScan:
       type: object
       required:
         - status
@@ -791,7 +731,7 @@ components:
           type: string
         ended_at:
           type: string
-    CreatePostgresScanResult:
+    CreateScanResult:
       type: object
       required:
         - severity
@@ -808,13 +748,14 @@ components:
       properties:
         version:
           type: string
-    PostgresScanResult:
+    ScanResult:
       type: object
       required:
         - id
         - severity
         - message
         - created_at
+        - scan_source
       properties:
         id:
           type: integer
@@ -824,7 +765,9 @@ components:
           type: string
         created_at:
           type: string
-    PostgresScan:
+        scan_source:
+          type: integer
+    Scan:
       required:
         - id
         - status
@@ -846,21 +789,30 @@ components:
           type: string
         maximum_severity:
           type: integer
+        postgres_scan:
+          $ref: "#/components/schemas/PostgresScan"
+    PostgresScan:
+      required:
+        - id
+        - database_id
+      type: object
+      properties:
+        id:
+          type: integer
+        database_id:
+          type: integer
     WorkerTask:
+      type: object
       required:
         - type
+        - scan
       properties:
         type:
           type: string
           description: The Task type
           enum: [postgres_scan]
-        postgres_scan:
-          type: object
-          properties:
-            scan:
-              $ref: "#/components/schemas/PostgresScan"
-            postgres_database:
-              $ref: "#/components/schemas/PostgresDatabase"
+        scan:
+          $ref: "#/components/schemas/Scan"
     LoginUser:
       required:
         - username

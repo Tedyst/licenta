@@ -1,0 +1,162 @@
+package handlers
+
+import (
+	"context"
+	"database/sql"
+	"time"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/pkg/errors"
+	"github.com/tedyst/licenta/api/v1/generated"
+	"github.com/tedyst/licenta/db/queries"
+)
+
+func (server *serverHandler) GetScanId(ctx context.Context, request generated.GetScanIdRequestObject) (generated.GetScanIdResponseObject, error) {
+	scan, err := server.DatabaseProvider.GetScan(ctx, request.Id)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "GetScanId: error getting scan")
+	}
+	if err == sql.ErrNoRows {
+		return generated.GetScanId404JSONResponse{
+			Success: false,
+			Message: "Scan not found",
+		}, nil
+	}
+
+	psScan, err := server.DatabaseProvider.GetPostgresScan(ctx, scan.PostgresScan)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan")
+	}
+
+	var postgresScan *generated.PostgresScan
+	if err != sql.ErrNoRows {
+		postgresScan = &generated.PostgresScan{
+			DatabaseId: int(psScan.DatabaseID),
+			Id:         int(psScan.ID),
+		}
+	}
+
+	scanResults, err := server.DatabaseProvider.GetScanResults(ctx, scan.Scan.ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan results")
+	}
+
+	results := make([]generated.ScanResult, len(scanResults))
+	for i, scanResult := range scanResults {
+		results[i] = generated.ScanResult{
+			CreatedAt:  scanResult.CreatedAt.Time.Format(time.RFC3339),
+			Id:         int(scanResult.ID),
+			Message:    scanResult.Message,
+			Severity:   int(scanResult.Severity),
+			ScanSource: int(scanResult.ScanSource),
+		}
+	}
+
+	return generated.GetScanId200JSONResponse{
+		Success: true,
+		Scan: generated.Scan{
+			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
+			Error:           scan.Scan.Error.String,
+			Id:              int(scan.Scan.ID),
+			Status:          int(scan.Scan.Status),
+			MaximumSeverity: int(scan.MaximumSeverity),
+			PostgresScan:    postgresScan,
+		},
+		Results: results,
+	}, nil
+}
+
+func (server *serverHandler) PatchScanId(ctx context.Context, request generated.PatchScanIdRequestObject) (generated.PatchScanIdResponseObject, error) {
+	if request.Body == nil {
+		return generated.PatchScanId400JSONResponse{
+			Success: false,
+			Message: "Invalid request",
+		}, nil
+	}
+
+	scan, err := server.DatabaseProvider.GetScan(ctx, request.Id)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, errors.Wrap(err, "PatchScanId: error getting scan")
+	}
+	if err == pgx.ErrNoRows {
+		return generated.PatchScanId404JSONResponse{
+			Success: false,
+			Message: "Scan not found",
+		}, nil
+	}
+
+	t, err := time.Parse(time.RFC3339, request.Body.EndedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	err = server.DatabaseProvider.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
+		ID:     int64(request.Id),
+		Status: int32(request.Body.Status),
+		Error:  sql.NullString{String: request.Body.Error, Valid: request.Body.Error != ""},
+		EndedAt: pgtype.Timestamptz{
+			Time:  t,
+			Valid: true,
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.PatchScanId200JSONResponse{
+		Success: true,
+		Scan: &generated.Scan{
+			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
+			Error:           scan.Scan.Error.String,
+			Id:              int(scan.Scan.ID),
+			Status:          int(scan.Scan.Status),
+			MaximumSeverity: int(scan.MaximumSeverity),
+		},
+	}, nil
+}
+
+func (server *serverHandler) PostScanIdResult(ctx context.Context, request generated.PostScanIdResultRequestObject) (generated.PostScanIdResultResponseObject, error) {
+	if request.Body == nil {
+		return generated.PostScanIdResult400JSONResponse{
+			Success: false,
+			Message: "Invalid request",
+		}, nil
+	}
+
+	_, err := server.DatabaseProvider.GetScan(ctx, request.Id)
+	if err != nil {
+		return nil, err
+	}
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, err
+	}
+	if err == pgx.ErrNoRows {
+		return generated.PostScanIdResult404JSONResponse{
+			Success: false,
+			Message: "Scan not found",
+		}, nil
+	}
+
+	scanresult, err := server.DatabaseProvider.CreateScanResult(ctx, queries.CreateScanResultParams{
+		ScanID:   int64(request.Id),
+		Severity: int32(request.Body.Severity),
+		Message:  request.Body.Message,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.PostScanIdResult200JSONResponse{
+		Success: true,
+		Scan: &generated.ScanResult{
+			CreatedAt: scanresult.CreatedAt.Time.Format(time.RFC3339),
+			Id:        int(scanresult.ID),
+			Message:   scanresult.Message,
+			Severity:  int(scanresult.Severity),
+		},
+	}, nil
+}

@@ -52,9 +52,10 @@ func createScanner(ctx context.Context, q scanQuerier, bruteforceProvider brutef
 	runner.insertResults = func(results []scanner.ScanResult) error {
 		for _, result := range results {
 			if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
-				ScanID:   scan.ID,
-				Severity: int32(result.Severity()),
-				Message:  result.Detail(),
+				ScanID:     scan.ID,
+				Severity:   int32(result.Severity()),
+				Message:    result.Detail(),
+				ScanSource: int32(sc.GetScannerID()),
 			}); err != nil {
 				return errors.Wrap(err, "could not insert scan result")
 			}
@@ -104,9 +105,10 @@ func (runner *baseScanRunner) run(ctx context.Context) error {
 	runner.insertResults = func(results []scanner.ScanResult) error {
 		for _, result := range results {
 			if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
-				ScanID:   runner.scan.ID,
-				Severity: int32(result.Severity()),
-				Message:  result.Detail(),
+				ScanID:     runner.scan.ID,
+				Severity:   int32(result.Severity()),
+				Message:    result.Detail(),
+				ScanSource: int32(runner.scanner.GetScannerID()),
 			}); err != nil {
 				return errors.Wrap(err, "could not insert scan result")
 			}
@@ -180,9 +182,10 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 
 		for _, cve := range cves {
 			if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
-				ScanID:   runner.scan.ID,
-				Severity: int32(scanner.SEVERITY_HIGH),
-				Message:  fmt.Sprintf("Vulnerability %s found. Please update to the latest version", cve.NvdCfe.CveID),
+				ScanID:     runner.scan.ID,
+				Severity:   int32(scanner.SEVERITY_HIGH),
+				Message:    fmt.Sprintf("Vulnerability %s found. Please update to the latest version", cve.NvdCfe.CveID),
+				ScanSource: int32(runner.scanner.GetScannerID()),
 			}); err != nil {
 				return errors.Wrap(err, "could not insert scan result")
 			}
@@ -238,9 +241,10 @@ func (runner *baseScanRunner) scanForPublicAccess(ctx context.Context) error {
 	runner.logger.DebugContext(ctx, "Pinged database from public access")
 
 	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
-		ScanID:   runner.scan.ID,
-		Severity: int32(scanner.SEVERITY_HIGH),
-		Message:  "Database is accessible from public internet",
+		ScanID:     runner.scan.ID,
+		Severity:   int32(scanner.SEVERITY_HIGH),
+		Message:    "Database is accessible from public internet",
+		ScanSource: int32(runner.scanner.GetScannerID()),
 	}); err != nil {
 		return errors.Wrap(err, "could not insert scan result")
 	}

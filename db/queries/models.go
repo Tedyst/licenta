@@ -214,11 +214,12 @@ type ScanBruteforceResult struct {
 }
 
 type ScanResult struct {
-	ID        int64              `json:"id"`
-	ScanID    int64              `json:"scan_id"`
-	Severity  int32              `json:"severity"`
-	Message   string             `json:"message"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID         int64              `json:"id"`
+	ScanID     int64              `json:"scan_id"`
+	Severity   int32              `json:"severity"`
+	Message    string             `json:"message"`
+	ScanSource int32              `json:"scan_source"`
+	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type TotpSecretToken struct {

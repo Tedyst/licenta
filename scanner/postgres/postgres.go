@@ -73,6 +73,14 @@ func (sc *postgresScanner) ShouldNotBePublic() bool {
 	return true
 }
 
+func (*postgresScanner) GetScannerID() int64 {
+	return 0
+}
+
+func (*postgresScanner) GetScannerName() string {
+	return "PostgreSQL"
+}
+
 func NewScanner(ctx context.Context, db *pgx.Conn) (scanner.Scanner, error) {
 	sc := &postgresScanner{
 		db: db,

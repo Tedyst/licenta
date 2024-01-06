@@ -68,8 +68,8 @@ type ChangePasswordLoggedIn struct {
 	OldPassword string `json:"old_password" validate:"min=8,alphanum"`
 }
 
-// CreatePostgresScanResult defines model for CreatePostgresScanResult.
-type CreatePostgresScanResult struct {
+// CreateScanResult defines model for CreateScanResult.
+type CreateScanResult struct {
 	Message  string `json:"message"`
 	Severity int    `json:"severity"`
 }
@@ -131,13 +131,12 @@ type PatchPostgresDatabase struct {
 	Host         *string `json:"host,omitempty"`
 	Password     *string `json:"password,omitempty"`
 	Port         *int    `json:"port,omitempty"`
-	Remote       *bool   `json:"remote,omitempty"`
 	Username     *string `json:"username,omitempty"`
 	Version      *string `json:"version,omitempty"`
 }
 
-// PatchPostgresScan defines model for PatchPostgresScan.
-type PatchPostgresScan struct {
+// PatchScan defines model for PatchScan.
+type PatchScan struct {
 	EndedAt string `json:"ended_at"`
 	Error   string `json:"error"`
 	Status  int    `json:"status"`
@@ -152,27 +151,14 @@ type PostgresDatabase struct {
 	Password     string `json:"password"`
 	Port         int    `json:"port"`
 	ProjectId    int    `json:"project_id"`
-	Remote       bool   `json:"remote"`
 	Username     string `json:"username"`
 	Version      string `json:"version"`
 }
 
 // PostgresScan defines model for PostgresScan.
 type PostgresScan struct {
-	CreatedAt       string `json:"created_at"`
-	EndedAt         string `json:"ended_at"`
-	Error           string `json:"error"`
-	Id              int    `json:"id"`
-	MaximumSeverity int    `json:"maximum_severity"`
-	Status          int    `json:"status"`
-}
-
-// PostgresScanResult defines model for PostgresScanResult.
-type PostgresScanResult struct {
-	CreatedAt string `json:"created_at"`
-	Id        int    `json:"id"`
-	Message   string `json:"message"`
-	Severity  int    `json:"severity"`
+	DatabaseId int `json:"database_id"`
+	Id         int `json:"id"`
 }
 
 // Project defines model for Project.
@@ -200,6 +186,26 @@ type RegisterUser struct {
 
 	// Username The user name for login
 	Username string `json:"username" validate:"alphanum,min=3,max=20"`
+}
+
+// Scan defines model for Scan.
+type Scan struct {
+	CreatedAt       string        `json:"created_at"`
+	EndedAt         string        `json:"ended_at"`
+	Error           string        `json:"error"`
+	Id              int           `json:"id"`
+	MaximumSeverity int           `json:"maximum_severity"`
+	PostgresScan    *PostgresScan `json:"postgres_scan,omitempty"`
+	Status          int           `json:"status"`
+}
+
+// ScanResult defines model for ScanResult.
+type ScanResult struct {
+	CreatedAt  string `json:"created_at"`
+	Id         int    `json:"id"`
+	Message    string `json:"message"`
+	ScanSource int    `json:"scan_source"`
+	Severity   int    `json:"severity"`
 }
 
 // Success defines model for Success.
@@ -254,10 +260,7 @@ type User struct {
 
 // WorkerTask defines model for WorkerTask.
 type WorkerTask struct {
-	PostgresScan *struct {
-		PostgresDatabase *PostgresDatabase `json:"postgres_database,omitempty"`
-		Scan             *PostgresScan     `json:"scan,omitempty"`
-	} `json:"postgres_scan,omitempty"`
+	Scan Scan `json:"scan"`
 
 	// Type The Task type
 	Type WorkerTaskType `json:"type"`
@@ -266,10 +269,10 @@ type WorkerTask struct {
 // WorkerTaskType The Task type
 type WorkerTaskType string
 
-// GetProjectProjectidBruteforcePasswordsParams defines parameters for GetProjectProjectidBruteforcePasswords.
-type GetProjectProjectidBruteforcePasswordsParams struct {
-	// LastId The last ID of the item to return
-	LastId *int32 `form:"last_id,omitempty" json:"last_id,omitempty"`
+// GetProjectIdBruteforcePasswordsParams defines parameters for GetProjectIdBruteforcePasswords.
+type GetProjectIdBruteforcePasswordsParams struct {
+	// LastPasswordId The last ID of the item to return
+	LastPasswordId *int32 `form:"last_password_id,omitempty" json:"last_password_id,omitempty"`
 }
 
 // GetUsersParams defines parameters for GetUsers.
@@ -287,14 +290,14 @@ type GetUsersParams struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty"`
 }
 
-// PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody defines body for PatchScannerPostgresDatabasePostgresDatabaseId for application/json ContentType.
-type PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody = PatchPostgresDatabase
+// PatchPostgresIdJSONRequestBody defines body for PatchPostgresId for application/json ContentType.
+type PatchPostgresIdJSONRequestBody = PatchPostgresDatabase
 
-// PatchScannerPostgresScanScanidJSONRequestBody defines body for PatchScannerPostgresScanScanid for application/json ContentType.
-type PatchScannerPostgresScanScanidJSONRequestBody = PatchPostgresScan
+// PatchScanIdJSONRequestBody defines body for PatchScanId for application/json ContentType.
+type PatchScanIdJSONRequestBody = PatchScan
 
-// PostScannerPostgresScanScanidResultJSONRequestBody defines body for PostScannerPostgresScanScanidResult for application/json ContentType.
-type PostScannerPostgresScanScanidResultJSONRequestBody = CreatePostgresScanResult
+// PostScanIdResultJSONRequestBody defines body for PostScanIdResult for application/json ContentType.
+type PostScanIdResultJSONRequestBody = CreateScanResult
 
 // PostUsersMeChangePasswordJSONRequestBody defines body for PostUsersMeChangePassword for application/json ContentType.
 type PostUsersMeChangePasswordJSONRequestBody = ChangePasswordLoggedIn
@@ -372,41 +375,38 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// GetCvesDatabaseTypeVersion request
-	GetCvesDatabaseTypeVersion(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetCvesDbTypeVersion request
+	GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectProjectid request
-	GetProjectProjectid(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetPostgresId request
+	GetPostgresId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectProjectidBruteforcePasswords request
-	GetProjectProjectidBruteforcePasswords(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PatchPostgresIdWithBody request with any body
+	PatchPostgresIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectProjectidRun request
-	PostProjectProjectidRun(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PatchPostgresId(ctx context.Context, id int64, body PatchPostgresIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetScannerPostgresDatabasePostgresDatabaseId request
-	GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetProjectId request
+	GetProjectId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchScannerPostgresDatabasePostgresDatabaseIdWithBody request with any body
-	PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetProjectIdBruteforcePasswords request
+	GetProjectIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostProjectIdRun request
+	PostProjectIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostScannerPostgresDatabasePostgresDatabaseId request
-	PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetScanId request
+	GetScanId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetScannerPostgresScanScanid request
-	GetScannerPostgresScanScanid(ctx context.Context, scanid int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PatchScanIdWithBody request with any body
+	PatchScanIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PatchScannerPostgresScanScanidWithBody request with any body
-	PatchScannerPostgresScanScanidWithBody(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PatchScanId(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PatchScannerPostgresScanScanid(ctx context.Context, scanid int64, body PatchScannerPostgresScanScanidJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostScanIdResultWithBody request with any body
+	PostScanIdResultWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostScannerPostgresScanScanidResultWithBody request with any body
-	PostScannerPostgresScanScanidResultWithBody(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	PostScannerPostgresScanScanidResult(ctx context.Context, scanid int64, body PostScannerPostgresScanScanidResultJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostScanIdResult(ctx context.Context, id int64, body PostScanIdResultJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetUsers request
 	GetUsers(ctx context.Context, params *GetUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -426,8 +426,8 @@ type ClientInterface interface {
 	GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) GetCvesDatabaseTypeVersion(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetCvesDatabaseTypeVersionRequest(c.Server, databaseType, version)
+func (c *Client) GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCvesDbTypeVersionRequest(c.Server, dbType, version)
 	if err != nil {
 		return nil, err
 	}
@@ -438,8 +438,8 @@ func (c *Client) GetCvesDatabaseTypeVersion(ctx context.Context, databaseType st
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetProjectProjectid(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProjectProjectidRequest(c.Server, projectid)
+func (c *Client) GetPostgresId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPostgresIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -450,8 +450,8 @@ func (c *Client) GetProjectProjectid(ctx context.Context, projectid int64, reqEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetProjectProjectidBruteforcePasswords(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProjectProjectidBruteforcePasswordsRequest(c.Server, projectid, params)
+func (c *Client) PatchPostgresIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchPostgresIdRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -462,8 +462,8 @@ func (c *Client) GetProjectProjectidBruteforcePasswords(ctx context.Context, pro
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostProjectProjectidRun(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostProjectProjectidRunRequest(c.Server, projectid)
+func (c *Client) PatchPostgresId(ctx context.Context, id int64, body PatchPostgresIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchPostgresIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -474,8 +474,8 @@ func (c *Client) PostProjectProjectidRun(ctx context.Context, projectid int64, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetScannerPostgresDatabasePostgresDatabaseIdRequest(c.Server, postgresDatabaseId)
+func (c *Client) GetProjectId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -486,8 +486,8 @@ func (c *Client) GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Contex
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(c.Server, postgresDatabaseId, contentType, body)
+func (c *Client) GetProjectIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectIdBruteforcePasswordsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -498,8 +498,8 @@ func (c *Client) PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx cont
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchScannerPostgresDatabasePostgresDatabaseIdRequest(c.Server, postgresDatabaseId, body)
+func (c *Client) PostProjectIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectIdRunRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -510,8 +510,8 @@ func (c *Client) PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Cont
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostScannerPostgresDatabasePostgresDatabaseIdRequest(c.Server, postgresDatabaseId)
+func (c *Client) GetScanId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetScanIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -522,8 +522,8 @@ func (c *Client) PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Conte
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetScannerPostgresScanScanid(ctx context.Context, scanid int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetScannerPostgresScanScanidRequest(c.Server, scanid)
+func (c *Client) PatchScanIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchScanIdRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -534,8 +534,8 @@ func (c *Client) GetScannerPostgresScanScanid(ctx context.Context, scanid int64,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchScannerPostgresScanScanidWithBody(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchScannerPostgresScanScanidRequestWithBody(c.Server, scanid, contentType, body)
+func (c *Client) PatchScanId(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchScanIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -546,8 +546,8 @@ func (c *Client) PatchScannerPostgresScanScanidWithBody(ctx context.Context, sca
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchScannerPostgresScanScanid(ctx context.Context, scanid int64, body PatchScannerPostgresScanScanidJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPatchScannerPostgresScanScanidRequest(c.Server, scanid, body)
+func (c *Client) PostScanIdResultWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostScanIdResultRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -558,20 +558,8 @@ func (c *Client) PatchScannerPostgresScanScanid(ctx context.Context, scanid int6
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostScannerPostgresScanScanidResultWithBody(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostScannerPostgresScanScanidResultRequestWithBody(c.Server, scanid, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostScannerPostgresScanScanidResult(ctx context.Context, scanid int64, body PostScannerPostgresScanScanidResultJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostScannerPostgresScanScanidResultRequest(c.Server, scanid, body)
+func (c *Client) PostScanIdResult(ctx context.Context, id int64, body PostScanIdResultJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostScanIdResultRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -654,13 +642,13 @@ func (c *Client) GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEdit
 	return c.Client.Do(req)
 }
 
-// NewGetCvesDatabaseTypeVersionRequest generates requests for GetCvesDatabaseTypeVersion
-func NewGetCvesDatabaseTypeVersionRequest(server string, databaseType string, version string) (*http.Request, error) {
+// NewGetCvesDbTypeVersionRequest generates requests for GetCvesDbTypeVersion
+func NewGetCvesDbTypeVersionRequest(server string, dbType string, version string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "databaseType", runtime.ParamLocationPath, databaseType)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "dbType", runtime.ParamLocationPath, dbType)
 	if err != nil {
 		return nil, err
 	}
@@ -695,13 +683,94 @@ func NewGetCvesDatabaseTypeVersionRequest(server string, databaseType string, ve
 	return req, nil
 }
 
-// NewGetProjectProjectidRequest generates requests for GetProjectProjectid
-func NewGetProjectProjectidRequest(server string, projectid int64) (*http.Request, error) {
+// NewGetPostgresIdRequest generates requests for GetPostgresId
+func NewGetPostgresIdRequest(server string, id int64) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "projectid", runtime.ParamLocationPath, projectid)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/postgres/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchPostgresIdRequest calls the generic PatchPostgresId builder with application/json body
+func NewPatchPostgresIdRequest(server string, id int64, body PatchPostgresIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchPostgresIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchPostgresIdRequestWithBody generates requests for PatchPostgresId with any type of body
+func NewPatchPostgresIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/postgres/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetProjectIdRequest generates requests for GetProjectId
+func NewGetProjectIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -729,13 +798,13 @@ func NewGetProjectProjectidRequest(server string, projectid int64) (*http.Reques
 	return req, nil
 }
 
-// NewGetProjectProjectidBruteforcePasswordsRequest generates requests for GetProjectProjectidBruteforcePasswords
-func NewGetProjectProjectidBruteforcePasswordsRequest(server string, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams) (*http.Request, error) {
+// NewGetProjectIdBruteforcePasswordsRequest generates requests for GetProjectIdBruteforcePasswords
+func NewGetProjectIdBruteforcePasswordsRequest(server string, id int64, params *GetProjectIdBruteforcePasswordsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "projectid", runtime.ParamLocationPath, projectid)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -758,9 +827,9 @@ func NewGetProjectProjectidBruteforcePasswordsRequest(server string, projectid i
 	if params != nil {
 		queryValues := queryURL.Query()
 
-		if params.LastId != nil {
+		if params.LastPasswordId != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_id", runtime.ParamLocationQuery, *params.LastId); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "last_password_id", runtime.ParamLocationQuery, *params.LastPasswordId); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -785,13 +854,13 @@ func NewGetProjectProjectidBruteforcePasswordsRequest(server string, projectid i
 	return req, nil
 }
 
-// NewPostProjectProjectidRunRequest generates requests for PostProjectProjectidRun
-func NewPostProjectProjectidRunRequest(server string, projectid int64) (*http.Request, error) {
+// NewPostProjectIdRunRequest generates requests for PostProjectIdRun
+func NewPostProjectIdRunRequest(server string, id int64) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "projectid", runtime.ParamLocationPath, projectid)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -819,13 +888,13 @@ func NewPostProjectProjectidRunRequest(server string, projectid int64) (*http.Re
 	return req, nil
 }
 
-// NewGetScannerPostgresDatabasePostgresDatabaseIdRequest generates requests for GetScannerPostgresDatabasePostgresDatabaseId
-func NewGetScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postgresDatabaseId int64) (*http.Request, error) {
+// NewGetScanIdRequest generates requests for GetScanId
+func NewGetScanIdRequest(server string, id int64) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, postgresDatabaseId)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -835,7 +904,7 @@ func NewGetScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postg
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/scanner/postgres/database/%s", pathParam0)
+	operationPath := fmt.Sprintf("/scan/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -853,24 +922,24 @@ func NewGetScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postg
 	return req, nil
 }
 
-// NewPatchScannerPostgresDatabasePostgresDatabaseIdRequest calls the generic PatchScannerPostgresDatabasePostgresDatabaseId builder with application/json body
-func NewPatchScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody) (*http.Request, error) {
+// NewPatchScanIdRequest calls the generic PatchScanId builder with application/json body
+func NewPatchScanIdRequest(server string, id int64, body PatchScanIdJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(server, postgresDatabaseId, "application/json", bodyReader)
+	return NewPatchScanIdRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody generates requests for PatchScannerPostgresDatabasePostgresDatabaseId with any type of body
-func NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(server string, postgresDatabaseId int64, contentType string, body io.Reader) (*http.Request, error) {
+// NewPatchScanIdRequestWithBody generates requests for PatchScanId with any type of body
+func NewPatchScanIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, postgresDatabaseId)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -880,7 +949,7 @@ func NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(server str
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/scanner/postgres/database/%s", pathParam0)
+	operationPath := fmt.Sprintf("/scan/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -900,92 +969,24 @@ func NewPatchScannerPostgresDatabasePostgresDatabaseIdRequestWithBody(server str
 	return req, nil
 }
 
-// NewPostScannerPostgresDatabasePostgresDatabaseIdRequest generates requests for PostScannerPostgresDatabasePostgresDatabaseId
-func NewPostScannerPostgresDatabasePostgresDatabaseIdRequest(server string, postgresDatabaseId int64) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, postgresDatabaseId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/scanner/postgres/database/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetScannerPostgresScanScanidRequest generates requests for GetScannerPostgresScanScanid
-func NewGetScannerPostgresScanScanidRequest(server string, scanid int64) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "scanid", runtime.ParamLocationPath, scanid)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/scanner/postgres/scan/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewPatchScannerPostgresScanScanidRequest calls the generic PatchScannerPostgresScanScanid builder with application/json body
-func NewPatchScannerPostgresScanScanidRequest(server string, scanid int64, body PatchScannerPostgresScanScanidJSONRequestBody) (*http.Request, error) {
+// NewPostScanIdResultRequest calls the generic PostScanIdResult builder with application/json body
+func NewPostScanIdResultRequest(server string, id int64, body PostScanIdResultJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPatchScannerPostgresScanScanidRequestWithBody(server, scanid, "application/json", bodyReader)
+	return NewPostScanIdResultRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPatchScannerPostgresScanScanidRequestWithBody generates requests for PatchScannerPostgresScanScanid with any type of body
-func NewPatchScannerPostgresScanScanidRequestWithBody(server string, scanid int64, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostScanIdResultRequestWithBody generates requests for PostScanIdResult with any type of body
+func NewPostScanIdResultRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "scanid", runtime.ParamLocationPath, scanid)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -995,54 +996,7 @@ func NewPatchScannerPostgresScanScanidRequestWithBody(server string, scanid int6
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/scanner/postgres/scan/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PATCH", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewPostScannerPostgresScanScanidResultRequest calls the generic PostScannerPostgresScanScanidResult builder with application/json body
-func NewPostScannerPostgresScanScanidResultRequest(server string, scanid int64, body PostScannerPostgresScanScanidResultJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewPostScannerPostgresScanScanidResultRequestWithBody(server, scanid, "application/json", bodyReader)
-}
-
-// NewPostScannerPostgresScanScanidResultRequestWithBody generates requests for PostScannerPostgresScanScanidResult with any type of body
-func NewPostScannerPostgresScanScanidResultRequestWithBody(server string, scanid int64, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "scanid", runtime.ParamLocationPath, scanid)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/scanner/postgres/scan/%s/result", pathParam0)
+	operationPath := fmt.Sprintf("/scan/%s/result", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1330,41 +1284,38 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// GetCvesDatabaseTypeVersionWithResponse request
-	GetCvesDatabaseTypeVersionWithResponse(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDatabaseTypeVersionResponse, error)
+	// GetCvesDbTypeVersionWithResponse request
+	GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error)
 
-	// GetProjectProjectidWithResponse request
-	GetProjectProjectidWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*GetProjectProjectidResponse, error)
+	// GetPostgresIdWithResponse request
+	GetPostgresIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetPostgresIdResponse, error)
 
-	// GetProjectProjectidBruteforcePasswordsWithResponse request
-	GetProjectProjectidBruteforcePasswordsWithResponse(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectProjectidBruteforcePasswordsResponse, error)
+	// PatchPostgresIdWithBodyWithResponse request with any body
+	PatchPostgresIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchPostgresIdResponse, error)
 
-	// PostProjectProjectidRunWithResponse request
-	PostProjectProjectidRunWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*PostProjectProjectidRunResponse, error)
+	PatchPostgresIdWithResponse(ctx context.Context, id int64, body PatchPostgresIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchPostgresIdResponse, error)
 
-	// GetScannerPostgresDatabasePostgresDatabaseIdWithResponse request
-	GetScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*GetScannerPostgresDatabasePostgresDatabaseIdResponse, error)
+	// GetProjectIdWithResponse request
+	GetProjectIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetProjectIdResponse, error)
 
-	// PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse request with any body
-	PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error)
+	// GetProjectIdBruteforcePasswordsWithResponse request
+	GetProjectIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcePasswordsResponse, error)
 
-	PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error)
+	// PostProjectIdRunWithResponse request
+	PostProjectIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectIdRunResponse, error)
 
-	// PostScannerPostgresDatabasePostgresDatabaseIdWithResponse request
-	PostScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*PostScannerPostgresDatabasePostgresDatabaseIdResponse, error)
+	// GetScanIdWithResponse request
+	GetScanIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetScanIdResponse, error)
 
-	// GetScannerPostgresScanScanidWithResponse request
-	GetScannerPostgresScanScanidWithResponse(ctx context.Context, scanid int64, reqEditors ...RequestEditorFn) (*GetScannerPostgresScanScanidResponse, error)
+	// PatchScanIdWithBodyWithResponse request with any body
+	PatchScanIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScanIdResponse, error)
 
-	// PatchScannerPostgresScanScanidWithBodyWithResponse request with any body
-	PatchScannerPostgresScanScanidWithBodyWithResponse(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScannerPostgresScanScanidResponse, error)
+	PatchScanIdWithResponse(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScanIdResponse, error)
 
-	PatchScannerPostgresScanScanidWithResponse(ctx context.Context, scanid int64, body PatchScannerPostgresScanScanidJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScannerPostgresScanScanidResponse, error)
+	// PostScanIdResultWithBodyWithResponse request with any body
+	PostScanIdResultWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScanIdResultResponse, error)
 
-	// PostScannerPostgresScanScanidResultWithBodyWithResponse request with any body
-	PostScannerPostgresScanScanidResultWithBodyWithResponse(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScannerPostgresScanScanidResultResponse, error)
-
-	PostScannerPostgresScanScanidResultWithResponse(ctx context.Context, scanid int64, body PostScannerPostgresScanScanidResultJSONRequestBody, reqEditors ...RequestEditorFn) (*PostScannerPostgresScanScanidResultResponse, error)
+	PostScanIdResultWithResponse(ctx context.Context, id int64, body PostScanIdResultJSONRequestBody, reqEditors ...RequestEditorFn) (*PostScanIdResultResponse, error)
 
 	// GetUsersWithResponse request
 	GetUsersWithResponse(ctx context.Context, params *GetUsersParams, reqEditors ...RequestEditorFn) (*GetUsersResponse, error)
@@ -1384,7 +1335,7 @@ type ClientWithResponsesInterface interface {
 	GetWorkerGetTaskWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetWorkerGetTaskResponse, error)
 }
 
-type GetCvesDatabaseTypeVersionResponse struct {
+type GetCvesDbTypeVersionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -1396,7 +1347,7 @@ type GetCvesDatabaseTypeVersionResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetCvesDatabaseTypeVersionResponse) Status() string {
+func (r GetCvesDbTypeVersionResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1404,14 +1355,69 @@ func (r GetCvesDatabaseTypeVersionResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetCvesDatabaseTypeVersionResponse) StatusCode() int {
+func (r GetCvesDbTypeVersionResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetProjectProjectidResponse struct {
+type GetPostgresIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		PostgresDatabase PostgresDatabase `json:"postgres_database"`
+		Success          bool             `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPostgresIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPostgresIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchPostgresIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		PostgresDatabase PostgresDatabase `json:"postgres_database"`
+		Success          bool             `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchPostgresIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchPostgresIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetProjectIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -1424,7 +1430,7 @@ type GetProjectProjectidResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetProjectProjectidResponse) Status() string {
+func (r GetProjectIdResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1432,14 +1438,14 @@ func (r GetProjectProjectidResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetProjectProjectidResponse) StatusCode() int {
+func (r GetProjectIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetProjectProjectidBruteforcePasswordsResponse struct {
+type GetProjectIdBruteforcePasswordsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *PaginatedBruteforcePasswords
@@ -1447,7 +1453,7 @@ type GetProjectProjectidBruteforcePasswordsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetProjectProjectidBruteforcePasswordsResponse) Status() string {
+func (r GetProjectIdBruteforcePasswordsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1455,19 +1461,19 @@ func (r GetProjectProjectidBruteforcePasswordsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetProjectProjectidBruteforcePasswordsResponse) StatusCode() int {
+func (r GetProjectIdBruteforcePasswordsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PostProjectProjectidRunResponse struct {
+type PostProjectIdRunResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		PostgresScans []PostgresScan `json:"postgres_scans"`
-		Success       bool           `json:"success"`
+		Scans   *[]Scan `json:"scans,omitempty"`
+		Success bool    `json:"success"`
 	}
 	JSON400 *Error
 	JSON401 *Error
@@ -1475,7 +1481,7 @@ type PostProjectProjectidRunResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostProjectProjectidRunResponse) Status() string {
+func (r PostProjectIdRunResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1483,34 +1489,26 @@ func (r PostProjectProjectidRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostProjectProjectidRunResponse) StatusCode() int {
+func (r PostProjectIdRunResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetScannerPostgresDatabasePostgresDatabaseIdResponse struct {
+type GetScanIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Database PostgresDatabase `json:"database"`
-
-		// ScanCount The number of scans
-		ScanCount int `json:"scan_count"`
-
-		// Scans The list of scans
-		Scans []PostgresScan `json:"scans"`
-
-		// Success The success status
-		Success bool `json:"success"`
+		Results []ScanResult `json:"results"`
+		Scan    Scan         `json:"scan"`
+		Success bool         `json:"success"`
 	}
-	JSON401 *Error
 	JSON404 *Error
 }
 
 // Status returns HTTPResponse.Status
-func (r GetScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string {
+func (r GetScanIdResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1518,19 +1516,19 @@ func (r GetScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetScannerPostgresDatabasePostgresDatabaseIdResponse) StatusCode() int {
+func (r GetScanIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseIdResponse struct {
+type PatchScanIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Database *PostgresDatabase `json:"database,omitempty"`
-		Success  bool              `json:"success"`
+		Scan    *Scan `json:"scan,omitempty"`
+		Success bool  `json:"success"`
 	}
 	JSON400 *Error
 	JSON401 *Error
@@ -1538,7 +1536,7 @@ type PatchScannerPostgresDatabasePostgresDatabaseIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PatchScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string {
+func (r PatchScanIdResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1546,73 +1544,19 @@ func (r PatchScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string 
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PatchScannerPostgresDatabasePostgresDatabaseIdResponse) StatusCode() int {
+func (r PatchScanIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PostScannerPostgresDatabasePostgresDatabaseIdResponse struct {
+type PostScanIdResultResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Scan    *PostgresScan `json:"scan,omitempty"`
-		Success bool          `json:"success"`
-	}
-	JSON401 *Error
-	JSON404 *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r PostScannerPostgresDatabasePostgresDatabaseIdResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostScannerPostgresDatabasePostgresDatabaseIdResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetScannerPostgresScanScanidResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Results []PostgresScanResult `json:"results"`
-		Scan    PostgresScan         `json:"scan"`
-		Success bool                 `json:"success"`
-	}
-	JSON404 *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r GetScannerPostgresScanScanidResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetScannerPostgresScanScanidResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PatchScannerPostgresScanScanidResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Scan    *PostgresScan `json:"scan,omitempty"`
-		Success bool          `json:"success"`
+		Scan    *ScanResult `json:"scan,omitempty"`
+		Success bool        `json:"success"`
 	}
 	JSON400 *Error
 	JSON401 *Error
@@ -1620,7 +1564,7 @@ type PatchScannerPostgresScanScanidResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PatchScannerPostgresScanScanidResponse) Status() string {
+func (r PostScanIdResultResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -1628,35 +1572,7 @@ func (r PatchScannerPostgresScanScanidResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PatchScannerPostgresScanScanidResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type PostScannerPostgresScanScanidResultResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Scan    *PostgresScanResult `json:"scan,omitempty"`
-		Success bool                `json:"success"`
-	}
-	JSON400 *Error
-	JSON401 *Error
-	JSON404 *Error
-}
-
-// Status returns HTTPResponse.Status
-func (r PostScannerPostgresScanScanidResultResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostScannerPostgresScanScanidResultResponse) StatusCode() int {
+func (r PostScanIdResultResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1787,118 +1703,109 @@ func (r GetWorkerGetTaskResponse) StatusCode() int {
 	return 0
 }
 
-// GetCvesDatabaseTypeVersionWithResponse request returning *GetCvesDatabaseTypeVersionResponse
-func (c *ClientWithResponses) GetCvesDatabaseTypeVersionWithResponse(ctx context.Context, databaseType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDatabaseTypeVersionResponse, error) {
-	rsp, err := c.GetCvesDatabaseTypeVersion(ctx, databaseType, version, reqEditors...)
+// GetCvesDbTypeVersionWithResponse request returning *GetCvesDbTypeVersionResponse
+func (c *ClientWithResponses) GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error) {
+	rsp, err := c.GetCvesDbTypeVersion(ctx, dbType, version, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetCvesDatabaseTypeVersionResponse(rsp)
+	return ParseGetCvesDbTypeVersionResponse(rsp)
 }
 
-// GetProjectProjectidWithResponse request returning *GetProjectProjectidResponse
-func (c *ClientWithResponses) GetProjectProjectidWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*GetProjectProjectidResponse, error) {
-	rsp, err := c.GetProjectProjectid(ctx, projectid, reqEditors...)
+// GetPostgresIdWithResponse request returning *GetPostgresIdResponse
+func (c *ClientWithResponses) GetPostgresIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetPostgresIdResponse, error) {
+	rsp, err := c.GetPostgresId(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetProjectProjectidResponse(rsp)
+	return ParseGetPostgresIdResponse(rsp)
 }
 
-// GetProjectProjectidBruteforcePasswordsWithResponse request returning *GetProjectProjectidBruteforcePasswordsResponse
-func (c *ClientWithResponses) GetProjectProjectidBruteforcePasswordsWithResponse(ctx context.Context, projectid int64, params *GetProjectProjectidBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectProjectidBruteforcePasswordsResponse, error) {
-	rsp, err := c.GetProjectProjectidBruteforcePasswords(ctx, projectid, params, reqEditors...)
+// PatchPostgresIdWithBodyWithResponse request with arbitrary body returning *PatchPostgresIdResponse
+func (c *ClientWithResponses) PatchPostgresIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchPostgresIdResponse, error) {
+	rsp, err := c.PatchPostgresIdWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetProjectProjectidBruteforcePasswordsResponse(rsp)
+	return ParsePatchPostgresIdResponse(rsp)
 }
 
-// PostProjectProjectidRunWithResponse request returning *PostProjectProjectidRunResponse
-func (c *ClientWithResponses) PostProjectProjectidRunWithResponse(ctx context.Context, projectid int64, reqEditors ...RequestEditorFn) (*PostProjectProjectidRunResponse, error) {
-	rsp, err := c.PostProjectProjectidRun(ctx, projectid, reqEditors...)
+func (c *ClientWithResponses) PatchPostgresIdWithResponse(ctx context.Context, id int64, body PatchPostgresIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchPostgresIdResponse, error) {
+	rsp, err := c.PatchPostgresId(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostProjectProjectidRunResponse(rsp)
+	return ParsePatchPostgresIdResponse(rsp)
 }
 
-// GetScannerPostgresDatabasePostgresDatabaseIdWithResponse request returning *GetScannerPostgresDatabasePostgresDatabaseIdResponse
-func (c *ClientWithResponses) GetScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*GetScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
-	rsp, err := c.GetScannerPostgresDatabasePostgresDatabaseId(ctx, postgresDatabaseId, reqEditors...)
+// GetProjectIdWithResponse request returning *GetProjectIdResponse
+func (c *ClientWithResponses) GetProjectIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetProjectIdResponse, error) {
+	rsp, err := c.GetProjectId(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
+	return ParseGetProjectIdResponse(rsp)
 }
 
-// PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse request with arbitrary body returning *PatchScannerPostgresDatabasePostgresDatabaseIdResponse
-func (c *ClientWithResponses) PatchScannerPostgresDatabasePostgresDatabaseIdWithBodyWithResponse(ctx context.Context, postgresDatabaseId int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
-	rsp, err := c.PatchScannerPostgresDatabasePostgresDatabaseIdWithBody(ctx, postgresDatabaseId, contentType, body, reqEditors...)
+// GetProjectIdBruteforcePasswordsWithResponse request returning *GetProjectIdBruteforcePasswordsResponse
+func (c *ClientWithResponses) GetProjectIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcePasswordsResponse, error) {
+	rsp, err := c.GetProjectIdBruteforcePasswords(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
+	return ParseGetProjectIdBruteforcePasswordsResponse(rsp)
 }
 
-func (c *ClientWithResponses) PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
-	rsp, err := c.PatchScannerPostgresDatabasePostgresDatabaseId(ctx, postgresDatabaseId, body, reqEditors...)
+// PostProjectIdRunWithResponse request returning *PostProjectIdRunResponse
+func (c *ClientWithResponses) PostProjectIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectIdRunResponse, error) {
+	rsp, err := c.PostProjectIdRun(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
+	return ParsePostProjectIdRunResponse(rsp)
 }
 
-// PostScannerPostgresDatabasePostgresDatabaseIdWithResponse request returning *PostScannerPostgresDatabasePostgresDatabaseIdResponse
-func (c *ClientWithResponses) PostScannerPostgresDatabasePostgresDatabaseIdWithResponse(ctx context.Context, postgresDatabaseId int64, reqEditors ...RequestEditorFn) (*PostScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
-	rsp, err := c.PostScannerPostgresDatabasePostgresDatabaseId(ctx, postgresDatabaseId, reqEditors...)
+// GetScanIdWithResponse request returning *GetScanIdResponse
+func (c *ClientWithResponses) GetScanIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetScanIdResponse, error) {
+	rsp, err := c.GetScanId(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostScannerPostgresDatabasePostgresDatabaseIdResponse(rsp)
+	return ParseGetScanIdResponse(rsp)
 }
 
-// GetScannerPostgresScanScanidWithResponse request returning *GetScannerPostgresScanScanidResponse
-func (c *ClientWithResponses) GetScannerPostgresScanScanidWithResponse(ctx context.Context, scanid int64, reqEditors ...RequestEditorFn) (*GetScannerPostgresScanScanidResponse, error) {
-	rsp, err := c.GetScannerPostgresScanScanid(ctx, scanid, reqEditors...)
+// PatchScanIdWithBodyWithResponse request with arbitrary body returning *PatchScanIdResponse
+func (c *ClientWithResponses) PatchScanIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScanIdResponse, error) {
+	rsp, err := c.PatchScanIdWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetScannerPostgresScanScanidResponse(rsp)
+	return ParsePatchScanIdResponse(rsp)
 }
 
-// PatchScannerPostgresScanScanidWithBodyWithResponse request with arbitrary body returning *PatchScannerPostgresScanScanidResponse
-func (c *ClientWithResponses) PatchScannerPostgresScanScanidWithBodyWithResponse(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScannerPostgresScanScanidResponse, error) {
-	rsp, err := c.PatchScannerPostgresScanScanidWithBody(ctx, scanid, contentType, body, reqEditors...)
+func (c *ClientWithResponses) PatchScanIdWithResponse(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScanIdResponse, error) {
+	rsp, err := c.PatchScanId(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchScannerPostgresScanScanidResponse(rsp)
+	return ParsePatchScanIdResponse(rsp)
 }
 
-func (c *ClientWithResponses) PatchScannerPostgresScanScanidWithResponse(ctx context.Context, scanid int64, body PatchScannerPostgresScanScanidJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScannerPostgresScanScanidResponse, error) {
-	rsp, err := c.PatchScannerPostgresScanScanid(ctx, scanid, body, reqEditors...)
+// PostScanIdResultWithBodyWithResponse request with arbitrary body returning *PostScanIdResultResponse
+func (c *ClientWithResponses) PostScanIdResultWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScanIdResultResponse, error) {
+	rsp, err := c.PostScanIdResultWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePatchScannerPostgresScanScanidResponse(rsp)
+	return ParsePostScanIdResultResponse(rsp)
 }
 
-// PostScannerPostgresScanScanidResultWithBodyWithResponse request with arbitrary body returning *PostScannerPostgresScanScanidResultResponse
-func (c *ClientWithResponses) PostScannerPostgresScanScanidResultWithBodyWithResponse(ctx context.Context, scanid int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScannerPostgresScanScanidResultResponse, error) {
-	rsp, err := c.PostScannerPostgresScanScanidResultWithBody(ctx, scanid, contentType, body, reqEditors...)
+func (c *ClientWithResponses) PostScanIdResultWithResponse(ctx context.Context, id int64, body PostScanIdResultJSONRequestBody, reqEditors ...RequestEditorFn) (*PostScanIdResultResponse, error) {
+	rsp, err := c.PostScanIdResult(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostScannerPostgresScanScanidResultResponse(rsp)
-}
-
-func (c *ClientWithResponses) PostScannerPostgresScanScanidResultWithResponse(ctx context.Context, scanid int64, body PostScannerPostgresScanScanidResultJSONRequestBody, reqEditors ...RequestEditorFn) (*PostScannerPostgresScanScanidResultResponse, error) {
-	rsp, err := c.PostScannerPostgresScanScanidResult(ctx, scanid, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostScannerPostgresScanScanidResultResponse(rsp)
+	return ParsePostScanIdResultResponse(rsp)
 }
 
 // GetUsersWithResponse request returning *GetUsersResponse
@@ -1954,15 +1861,15 @@ func (c *ClientWithResponses) GetWorkerGetTaskWithResponse(ctx context.Context, 
 	return ParseGetWorkerGetTaskResponse(rsp)
 }
 
-// ParseGetCvesDatabaseTypeVersionResponse parses an HTTP response from a GetCvesDatabaseTypeVersionWithResponse call
-func ParseGetCvesDatabaseTypeVersionResponse(rsp *http.Response) (*GetCvesDatabaseTypeVersionResponse, error) {
+// ParseGetCvesDbTypeVersionResponse parses an HTTP response from a GetCvesDbTypeVersionWithResponse call
+func ParseGetCvesDbTypeVersionResponse(rsp *http.Response) (*GetCvesDbTypeVersionResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetCvesDatabaseTypeVersionResponse{
+	response := &GetCvesDbTypeVersionResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -1997,15 +1904,108 @@ func ParseGetCvesDatabaseTypeVersionResponse(rsp *http.Response) (*GetCvesDataba
 	return response, nil
 }
 
-// ParseGetProjectProjectidResponse parses an HTTP response from a GetProjectProjectidWithResponse call
-func ParseGetProjectProjectidResponse(rsp *http.Response) (*GetProjectProjectidResponse, error) {
+// ParseGetPostgresIdResponse parses an HTTP response from a GetPostgresIdWithResponse call
+func ParseGetPostgresIdResponse(rsp *http.Response) (*GetPostgresIdResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetProjectProjectidResponse{
+	response := &GetPostgresIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			PostgresDatabase PostgresDatabase `json:"postgres_database"`
+			Success          bool             `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchPostgresIdResponse parses an HTTP response from a PatchPostgresIdWithResponse call
+func ParsePatchPostgresIdResponse(rsp *http.Response) (*PatchPostgresIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchPostgresIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			PostgresDatabase PostgresDatabase `json:"postgres_database"`
+			Success          bool             `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetProjectIdResponse parses an HTTP response from a GetProjectIdWithResponse call
+func ParseGetProjectIdResponse(rsp *http.Response) (*GetProjectIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetProjectIdResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2041,15 +2041,15 @@ func ParseGetProjectProjectidResponse(rsp *http.Response) (*GetProjectProjectidR
 	return response, nil
 }
 
-// ParseGetProjectProjectidBruteforcePasswordsResponse parses an HTTP response from a GetProjectProjectidBruteforcePasswordsWithResponse call
-func ParseGetProjectProjectidBruteforcePasswordsResponse(rsp *http.Response) (*GetProjectProjectidBruteforcePasswordsResponse, error) {
+// ParseGetProjectIdBruteforcePasswordsResponse parses an HTTP response from a GetProjectIdBruteforcePasswordsWithResponse call
+func ParseGetProjectIdBruteforcePasswordsResponse(rsp *http.Response) (*GetProjectIdBruteforcePasswordsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetProjectProjectidBruteforcePasswordsResponse{
+	response := &GetProjectIdBruteforcePasswordsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2074,15 +2074,15 @@ func ParseGetProjectProjectidBruteforcePasswordsResponse(rsp *http.Response) (*G
 	return response, nil
 }
 
-// ParsePostProjectProjectidRunResponse parses an HTTP response from a PostProjectProjectidRunWithResponse call
-func ParsePostProjectProjectidRunResponse(rsp *http.Response) (*PostProjectProjectidRunResponse, error) {
+// ParsePostProjectIdRunResponse parses an HTTP response from a PostProjectIdRunWithResponse call
+func ParsePostProjectIdRunResponse(rsp *http.Response) (*PostProjectIdRunResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostProjectProjectidRunResponse{
+	response := &PostProjectIdRunResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2090,8 +2090,8 @@ func ParsePostProjectProjectidRunResponse(rsp *http.Response) (*PostProjectProje
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			PostgresScans []PostgresScan `json:"postgres_scans"`
-			Success       bool           `json:"success"`
+			Scans   *[]Scan `json:"scans,omitempty"`
+			Success bool    `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -2124,15 +2124,15 @@ func ParsePostProjectProjectidRunResponse(rsp *http.Response) (*PostProjectProje
 	return response, nil
 }
 
-// ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse parses an HTTP response from a GetScannerPostgresDatabasePostgresDatabaseIdWithResponse call
-func ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Response) (*GetScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
+// ParseGetScanIdResponse parses an HTTP response from a GetScanIdWithResponse call
+func ParseGetScanIdResponse(rsp *http.Response) (*GetScanIdResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetScannerPostgresDatabasePostgresDatabaseIdResponse{
+	response := &GetScanIdResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2140,28 +2140,14 @@ func ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Respons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Database PostgresDatabase `json:"database"`
-
-			// ScanCount The number of scans
-			ScanCount int `json:"scan_count"`
-
-			// Scans The list of scans
-			Scans []PostgresScan `json:"scans"`
-
-			// Success The success status
-			Success bool `json:"success"`
+			Results []ScanResult `json:"results"`
+			Scan    Scan         `json:"scan"`
+			Success bool         `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
 		var dest Error
@@ -2175,15 +2161,15 @@ func ParseGetScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Respons
 	return response, nil
 }
 
-// ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse parses an HTTP response from a PatchScannerPostgresDatabasePostgresDatabaseIdWithResponse call
-func ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Response) (*PatchScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
+// ParsePatchScanIdResponse parses an HTTP response from a PatchScanIdWithResponse call
+func ParsePatchScanIdResponse(rsp *http.Response) (*PatchScanIdResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PatchScannerPostgresDatabasePostgresDatabaseIdResponse{
+	response := &PatchScanIdResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2191,8 +2177,8 @@ func ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Respo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Database *PostgresDatabase `json:"database,omitempty"`
-			Success  bool              `json:"success"`
+			Scan    *Scan `json:"scan,omitempty"`
+			Success bool  `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -2225,15 +2211,15 @@ func ParsePatchScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Respo
 	return response, nil
 }
 
-// ParsePostScannerPostgresDatabasePostgresDatabaseIdResponse parses an HTTP response from a PostScannerPostgresDatabasePostgresDatabaseIdWithResponse call
-func ParsePostScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Response) (*PostScannerPostgresDatabasePostgresDatabaseIdResponse, error) {
+// ParsePostScanIdResultResponse parses an HTTP response from a PostScanIdResultWithResponse call
+func ParsePostScanIdResultResponse(rsp *http.Response) (*PostScanIdResultResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostScannerPostgresDatabasePostgresDatabaseIdResponse{
+	response := &PostScanIdResultResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -2241,138 +2227,8 @@ func ParsePostScannerPostgresDatabasePostgresDatabaseIdResponse(rsp *http.Respon
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Scan    *PostgresScan `json:"scan,omitempty"`
-			Success bool          `json:"success"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetScannerPostgresScanScanidResponse parses an HTTP response from a GetScannerPostgresScanScanidWithResponse call
-func ParseGetScannerPostgresScanScanidResponse(rsp *http.Response) (*GetScannerPostgresScanScanidResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetScannerPostgresScanScanidResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Results []PostgresScanResult `json:"results"`
-			Scan    PostgresScan         `json:"scan"`
-			Success bool                 `json:"success"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePatchScannerPostgresScanScanidResponse parses an HTTP response from a PatchScannerPostgresScanScanidWithResponse call
-func ParsePatchScannerPostgresScanScanidResponse(rsp *http.Response) (*PatchScannerPostgresScanScanidResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PatchScannerPostgresScanScanidResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Scan    *PostgresScan `json:"scan,omitempty"`
-			Success bool          `json:"success"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
-		var dest Error
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePostScannerPostgresScanScanidResultResponse parses an HTTP response from a PostScannerPostgresScanScanidResultWithResponse call
-func ParsePostScannerPostgresScanScanidResultResponse(rsp *http.Response) (*PostScannerPostgresScanScanidResultResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostScannerPostgresScanScanidResultResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Scan    *PostgresScanResult `json:"scan,omitempty"`
-			Success bool                `json:"success"`
+			Scan    *ScanResult `json:"scan,omitempty"`
+			Success bool        `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -2600,35 +2456,32 @@ func ParseGetWorkerGetTaskResponse(rsp *http.Response) (*GetWorkerGetTaskRespons
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Get all CVEs for a database type and version
-	// (GET /cves/{databaseType}/{version})
-	GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string)
+	// (GET /cves/{dbType}/{version})
+	GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string)
+	// Get postgres database by ID
+	// (GET /postgres/{id})
+	GetPostgresId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update postgres database by ID
+	// (PATCH /postgres/{id})
+	PatchPostgresId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get project by ID
-	// (GET /project/{projectid})
-	GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64)
+	// (GET /project/{id})
+	GetProjectId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all bruteforce passwords associated with a project
-	// (GET /project/{projectid}/bruteforce-passwords)
-	GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams)
+	// (GET /project/{id}/bruteforce-passwords)
+	GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams)
 	// Run all extractors and scanners for a project
-	// (POST /project/{projectid}/run)
-	PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64)
-	// Get all postgres scans associated with a database
-	// (GET /scanner/postgres/database/{postgresDatabaseId})
-	GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
-	// Update a postgres database by ID
-	// (PATCH /scanner/postgres/database/{postgresDatabaseId})
-	PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
-	// Create a new postgres scan associated with a database
-	// (POST /scanner/postgres/database/{postgresDatabaseId})
-	PostScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64)
-	// Get a postgres scan by ID
-	// (GET /scanner/postgres/scan/{scanid})
-	GetScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request, scanid int64)
-	// Update a postgres scan by ID
-	// (PATCH /scanner/postgres/scan/{scanid})
-	PatchScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request, scanid int64)
-	// Create a new postgres scan result
-	// (POST /scanner/postgres/scan/{scanid}/result)
-	PostScannerPostgresScanScanidResult(w http.ResponseWriter, r *http.Request, scanid int64)
+	// (POST /project/{id}/run)
+	PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64)
+	// Get a scan by ID
+	// (GET /scan/{id})
+	GetScanId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update a scan by ID
+	// (PATCH /scan/{id})
+	PatchScanId(w http.ResponseWriter, r *http.Request, id int64)
+	// Create a new scan result
+	// (POST /scan/{id}/result)
+	PostScanIdResult(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all users
 	// (GET /users)
 	GetUsers(w http.ResponseWriter, r *http.Request, params GetUsersParams)
@@ -2651,62 +2504,56 @@ type ServerInterface interface {
 type Unimplemented struct{}
 
 // Get all CVEs for a database type and version
-// (GET /cves/{databaseType}/{version})
-func (_ Unimplemented) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string) {
+// (GET /cves/{dbType}/{version})
+func (_ Unimplemented) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get postgres database by ID
+// (GET /postgres/{id})
+func (_ Unimplemented) GetPostgresId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update postgres database by ID
+// (PATCH /postgres/{id})
+func (_ Unimplemented) PatchPostgresId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Get project by ID
-// (GET /project/{projectid})
-func (_ Unimplemented) GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64) {
+// (GET /project/{id})
+func (_ Unimplemented) GetProjectId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Get all bruteforce passwords associated with a project
-// (GET /project/{projectid}/bruteforce-passwords)
-func (_ Unimplemented) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams) {
+// (GET /project/{id}/bruteforce-passwords)
+func (_ Unimplemented) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Run all extractors and scanners for a project
-// (POST /project/{projectid}/run)
-func (_ Unimplemented) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64) {
+// (POST /project/{id}/run)
+func (_ Unimplemented) PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get all postgres scans associated with a database
-// (GET /scanner/postgres/database/{postgresDatabaseId})
-func (_ Unimplemented) GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
+// Get a scan by ID
+// (GET /scan/{id})
+func (_ Unimplemented) GetScanId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Update a postgres database by ID
-// (PATCH /scanner/postgres/database/{postgresDatabaseId})
-func (_ Unimplemented) PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
+// Update a scan by ID
+// (PATCH /scan/{id})
+func (_ Unimplemented) PatchScanId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Create a new postgres scan associated with a database
-// (POST /scanner/postgres/database/{postgresDatabaseId})
-func (_ Unimplemented) PostScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Get a postgres scan by ID
-// (GET /scanner/postgres/scan/{scanid})
-func (_ Unimplemented) GetScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request, scanid int64) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Update a postgres scan by ID
-// (PATCH /scanner/postgres/scan/{scanid})
-func (_ Unimplemented) PatchScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request, scanid int64) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Create a new postgres scan result
-// (POST /scanner/postgres/scan/{scanid}/result)
-func (_ Unimplemented) PostScannerPostgresScanScanidResult(w http.ResponseWriter, r *http.Request, scanid int64) {
+// Create a new scan result
+// (POST /scan/{id}/result)
+func (_ Unimplemented) PostScanIdResult(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2749,18 +2596,18 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// GetCvesDatabaseTypeVersion operation middleware
-func (siw *ServerInterfaceWrapper) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request) {
+// GetCvesDbTypeVersion operation middleware
+func (siw *ServerInterfaceWrapper) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "databaseType" -------------
-	var databaseType string
+	// ------------- Path parameter "dbType" -------------
+	var dbType string
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "databaseType", runtime.ParamLocationPath, chi.URLParam(r, "databaseType"), &databaseType)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "dbType", runtime.ParamLocationPath, chi.URLParam(r, "dbType"), &dbType)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "databaseType", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "dbType", Err: err})
 		return
 	}
 
@@ -2776,7 +2623,7 @@ func (siw *ServerInterfaceWrapper) GetCvesDatabaseTypeVersion(w http.ResponseWri
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetCvesDatabaseTypeVersion(w, r, databaseType, version)
+		siw.Handler.GetCvesDbTypeVersion(w, r, dbType, version)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2786,25 +2633,25 @@ func (siw *ServerInterfaceWrapper) GetCvesDatabaseTypeVersion(w http.ResponseWri
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// GetProjectProjectid operation middleware
-func (siw *ServerInterfaceWrapper) GetProjectProjectid(w http.ResponseWriter, r *http.Request) {
+// GetPostgresId operation middleware
+func (siw *ServerInterfaceWrapper) GetPostgresId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "projectid" -------------
-	var projectid int64
+	// ------------- Path parameter "id" -------------
+	var id int64
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
 		return
 	}
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetProjectProjectid(w, r, projectid)
+		siw.Handler.GetPostgresId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2814,36 +2661,92 @@ func (siw *ServerInterfaceWrapper) GetProjectProjectid(w http.ResponseWriter, r 
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// GetProjectProjectidBruteforcePasswords operation middleware
-func (siw *ServerInterfaceWrapper) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request) {
+// PatchPostgresId operation middleware
+func (siw *ServerInterfaceWrapper) PatchPostgresId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "projectid" -------------
-	var projectid int64
+	// ------------- Path parameter "id" -------------
+	var id int64
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchPostgresId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetProjectId operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetProjectId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetProjectIdBruteforcePasswords operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
 		return
 	}
 
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetProjectProjectidBruteforcePasswordsParams
+	var params GetProjectIdBruteforcePasswordsParams
 
-	// ------------- Optional query parameter "last_id" -------------
+	// ------------- Optional query parameter "last_password_id" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "last_id", r.URL.Query(), &params.LastId)
+	err = runtime.BindQueryParameter("form", true, false, "last_password_id", r.URL.Query(), &params.LastPasswordId)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "last_id", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "last_password_id", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetProjectProjectidBruteforcePasswords(w, r, projectid, params)
+		siw.Handler.GetProjectIdBruteforcePasswords(w, r, id, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2853,53 +2756,25 @@ func (siw *ServerInterfaceWrapper) GetProjectProjectidBruteforcePasswords(w http
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// PostProjectProjectidRun operation middleware
-func (siw *ServerInterfaceWrapper) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request) {
+// PostProjectIdRun operation middleware
+func (siw *ServerInterfaceWrapper) PostProjectIdRun(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "projectid" -------------
-	var projectid int64
+	// ------------- Path parameter "id" -------------
+	var id int64
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "projectid", runtime.ParamLocationPath, chi.URLParam(r, "projectid"), &projectid)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "projectid", Err: err})
-		return
-	}
-
-	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostProjectProjectidRun(w, r, projectid)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// GetScannerPostgresDatabasePostgresDatabaseId operation middleware
-func (siw *ServerInterfaceWrapper) GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var err error
-
-	// ------------- Path parameter "postgresDatabaseId" -------------
-	var postgresDatabaseId int64
-
-	err = runtime.BindStyledParameterWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, chi.URLParam(r, "postgresDatabaseId"), &postgresDatabaseId)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postgresDatabaseId", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
 		return
 	}
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetScannerPostgresDatabasePostgresDatabaseId(w, r, postgresDatabaseId)
+		siw.Handler.PostProjectIdRun(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2909,25 +2784,25 @@ func (siw *ServerInterfaceWrapper) GetScannerPostgresDatabasePostgresDatabaseId(
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// PatchScannerPostgresDatabasePostgresDatabaseId operation middleware
-func (siw *ServerInterfaceWrapper) PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request) {
+// GetScanId operation middleware
+func (siw *ServerInterfaceWrapper) GetScanId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "postgresDatabaseId" -------------
-	var postgresDatabaseId int64
+	// ------------- Path parameter "id" -------------
+	var id int64
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, chi.URLParam(r, "postgresDatabaseId"), &postgresDatabaseId)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postgresDatabaseId", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
 		return
 	}
 
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PatchScannerPostgresDatabasePostgresDatabaseId(w, r, postgresDatabaseId)
+		siw.Handler.GetScanId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2937,81 +2812,25 @@ func (siw *ServerInterfaceWrapper) PatchScannerPostgresDatabasePostgresDatabaseI
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// PostScannerPostgresDatabasePostgresDatabaseId operation middleware
-func (siw *ServerInterfaceWrapper) PostScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request) {
+// PatchScanId operation middleware
+func (siw *ServerInterfaceWrapper) PatchScanId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "postgresDatabaseId" -------------
-	var postgresDatabaseId int64
+	// ------------- Path parameter "id" -------------
+	var id int64
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "postgresDatabaseId", runtime.ParamLocationPath, chi.URLParam(r, "postgresDatabaseId"), &postgresDatabaseId)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "postgresDatabaseId", Err: err})
-		return
-	}
-
-	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostScannerPostgresDatabasePostgresDatabaseId(w, r, postgresDatabaseId)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// GetScannerPostgresScanScanid operation middleware
-func (siw *ServerInterfaceWrapper) GetScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var err error
-
-	// ------------- Path parameter "scanid" -------------
-	var scanid int64
-
-	err = runtime.BindStyledParameterWithLocation("simple", false, "scanid", runtime.ParamLocationPath, chi.URLParam(r, "scanid"), &scanid)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scanid", Err: err})
-		return
-	}
-
-	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetScannerPostgresScanScanid(w, r, scanid)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r.WithContext(ctx))
-}
-
-// PatchScannerPostgresScanScanid operation middleware
-func (siw *ServerInterfaceWrapper) PatchScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var err error
-
-	// ------------- Path parameter "scanid" -------------
-	var scanid int64
-
-	err = runtime.BindStyledParameterWithLocation("simple", false, "scanid", runtime.ParamLocationPath, chi.URLParam(r, "scanid"), &scanid)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scanid", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
 		return
 	}
 
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PatchScannerPostgresScanScanid(w, r, scanid)
+		siw.Handler.PatchScanId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3021,25 +2840,25 @@ func (siw *ServerInterfaceWrapper) PatchScannerPostgresScanScanid(w http.Respons
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// PostScannerPostgresScanScanidResult operation middleware
-func (siw *ServerInterfaceWrapper) PostScannerPostgresScanScanidResult(w http.ResponseWriter, r *http.Request) {
+// PostScanIdResult operation middleware
+func (siw *ServerInterfaceWrapper) PostScanIdResult(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
 
-	// ------------- Path parameter "scanid" -------------
-	var scanid int64
+	// ------------- Path parameter "id" -------------
+	var id int64
 
-	err = runtime.BindStyledParameterWithLocation("simple", false, "scanid", runtime.ParamLocationPath, chi.URLParam(r, "scanid"), &scanid)
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scanid", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
 		return
 	}
 
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostScannerPostgresScanScanidResult(w, r, scanid)
+		siw.Handler.PostScanIdResult(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3304,34 +3123,31 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/cves/{databaseType}/{version}", wrapper.GetCvesDatabaseTypeVersion)
+		r.Get(options.BaseURL+"/cves/{dbType}/{version}", wrapper.GetCvesDbTypeVersion)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/project/{projectid}", wrapper.GetProjectProjectid)
+		r.Get(options.BaseURL+"/postgres/{id}", wrapper.GetPostgresId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/project/{projectid}/bruteforce-passwords", wrapper.GetProjectProjectidBruteforcePasswords)
+		r.Patch(options.BaseURL+"/postgres/{id}", wrapper.PatchPostgresId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/project/{projectid}/run", wrapper.PostProjectProjectidRun)
+		r.Get(options.BaseURL+"/project/{id}", wrapper.GetProjectId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.GetScannerPostgresDatabasePostgresDatabaseId)
+		r.Get(options.BaseURL+"/project/{id}/bruteforce-passwords", wrapper.GetProjectIdBruteforcePasswords)
 	})
 	r.Group(func(r chi.Router) {
-		r.Patch(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.PatchScannerPostgresDatabasePostgresDatabaseId)
+		r.Post(options.BaseURL+"/project/{id}/run", wrapper.PostProjectIdRun)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/scanner/postgres/database/{postgresDatabaseId}", wrapper.PostScannerPostgresDatabasePostgresDatabaseId)
+		r.Get(options.BaseURL+"/scan/{id}", wrapper.GetScanId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/scanner/postgres/scan/{scanid}", wrapper.GetScannerPostgresScanScanid)
+		r.Patch(options.BaseURL+"/scan/{id}", wrapper.PatchScanId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Patch(options.BaseURL+"/scanner/postgres/scan/{scanid}", wrapper.PatchScannerPostgresScanScanid)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/scanner/postgres/scan/{scanid}/result", wrapper.PostScannerPostgresScanScanidResult)
+		r.Post(options.BaseURL+"/scan/{id}/result", wrapper.PostScanIdResult)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users", wrapper.GetUsers)
@@ -3352,410 +3168,364 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	return r
 }
 
-type GetCvesDatabaseTypeVersionRequestObject struct {
-	DatabaseType string `json:"databaseType"`
-	Version      string `json:"version"`
+type GetCvesDbTypeVersionRequestObject struct {
+	DbType  string `json:"dbType"`
+	Version string `json:"version"`
 }
 
-type GetCvesDatabaseTypeVersionResponseObject interface {
-	VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error
+type GetCvesDbTypeVersionResponseObject interface {
+	VisitGetCvesDbTypeVersionResponse(w http.ResponseWriter) error
 }
 
-type GetCvesDatabaseTypeVersion200JSONResponse struct {
+type GetCvesDbTypeVersion200JSONResponse struct {
 	Cves    []CVE `json:"cves"`
 	Success bool  `json:"success"`
 }
 
-func (response GetCvesDatabaseTypeVersion200JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
+func (response GetCvesDbTypeVersion200JSONResponse) VisitGetCvesDbTypeVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCvesDatabaseTypeVersion401JSONResponse Error
+type GetCvesDbTypeVersion401JSONResponse Error
 
-func (response GetCvesDatabaseTypeVersion401JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
+func (response GetCvesDbTypeVersion401JSONResponse) VisitGetCvesDbTypeVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCvesDatabaseTypeVersion404JSONResponse Error
+type GetCvesDbTypeVersion404JSONResponse Error
 
-func (response GetCvesDatabaseTypeVersion404JSONResponse) VisitGetCvesDatabaseTypeVersionResponse(w http.ResponseWriter) error {
+func (response GetCvesDbTypeVersion404JSONResponse) VisitGetCvesDbTypeVersionResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectProjectidRequestObject struct {
-	Projectid int64 `json:"projectid"`
+type GetPostgresIdRequestObject struct {
+	Id int64 `json:"id"`
 }
 
-type GetProjectProjectidResponseObject interface {
-	VisitGetProjectProjectidResponse(w http.ResponseWriter) error
+type GetPostgresIdResponseObject interface {
+	VisitGetPostgresIdResponse(w http.ResponseWriter) error
 }
 
-type GetProjectProjectid200JSONResponse struct {
+type GetPostgresId200JSONResponse struct {
+	PostgresDatabase PostgresDatabase `json:"postgres_database"`
+	Success          bool             `json:"success"`
+}
+
+func (response GetPostgresId200JSONResponse) VisitGetPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPostgresId401JSONResponse Error
+
+func (response GetPostgresId401JSONResponse) VisitGetPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPostgresId404JSONResponse Error
+
+func (response GetPostgresId404JSONResponse) VisitGetPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchPostgresIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchPostgresIdJSONRequestBody
+}
+
+type PatchPostgresIdResponseObject interface {
+	VisitPatchPostgresIdResponse(w http.ResponseWriter) error
+}
+
+type PatchPostgresId200JSONResponse struct {
+	PostgresDatabase PostgresDatabase `json:"postgres_database"`
+	Success          bool             `json:"success"`
+}
+
+func (response PatchPostgresId200JSONResponse) VisitPatchPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchPostgresId400JSONResponse Error
+
+func (response PatchPostgresId400JSONResponse) VisitPatchPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchPostgresId401JSONResponse Error
+
+func (response PatchPostgresId401JSONResponse) VisitPatchPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchPostgresId404JSONResponse Error
+
+func (response PatchPostgresId404JSONResponse) VisitPatchPostgresIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetProjectIdResponseObject interface {
+	VisitGetProjectIdResponse(w http.ResponseWriter) error
+}
+
+type GetProjectId200JSONResponse struct {
 	PostgresDatabases []PostgresDatabase `json:"postgres_databases"`
 	Project           Project            `json:"project"`
 	Success           bool               `json:"success"`
 }
 
-func (response GetProjectProjectid200JSONResponse) VisitGetProjectProjectidResponse(w http.ResponseWriter) error {
+func (response GetProjectId200JSONResponse) VisitGetProjectIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectProjectid401JSONResponse Error
+type GetProjectId401JSONResponse Error
 
-func (response GetProjectProjectid401JSONResponse) VisitGetProjectProjectidResponse(w http.ResponseWriter) error {
+func (response GetProjectId401JSONResponse) VisitGetProjectIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectProjectid404JSONResponse Error
+type GetProjectId404JSONResponse Error
 
-func (response GetProjectProjectid404JSONResponse) VisitGetProjectProjectidResponse(w http.ResponseWriter) error {
+func (response GetProjectId404JSONResponse) VisitGetProjectIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectProjectidBruteforcePasswordsRequestObject struct {
-	Projectid int64 `json:"projectid"`
-	Params    GetProjectProjectidBruteforcePasswordsParams
+type GetProjectIdBruteforcePasswordsRequestObject struct {
+	Id     int64 `json:"id"`
+	Params GetProjectIdBruteforcePasswordsParams
 }
 
-type GetProjectProjectidBruteforcePasswordsResponseObject interface {
-	VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error
+type GetProjectIdBruteforcePasswordsResponseObject interface {
+	VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error
 }
 
-type GetProjectProjectidBruteforcePasswords200JSONResponse PaginatedBruteforcePasswords
+type GetProjectIdBruteforcePasswords200JSONResponse PaginatedBruteforcePasswords
 
-func (response GetProjectProjectidBruteforcePasswords200JSONResponse) VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error {
+func (response GetProjectIdBruteforcePasswords200JSONResponse) VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectProjectidBruteforcePasswords401JSONResponse Error
+type GetProjectIdBruteforcePasswords401JSONResponse Error
 
-func (response GetProjectProjectidBruteforcePasswords401JSONResponse) VisitGetProjectProjectidBruteforcePasswordsResponse(w http.ResponseWriter) error {
+func (response GetProjectIdBruteforcePasswords401JSONResponse) VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectProjectidRunRequestObject struct {
-	Projectid int64 `json:"projectid"`
+type PostProjectIdRunRequestObject struct {
+	Id int64 `json:"id"`
 }
 
-type PostProjectProjectidRunResponseObject interface {
-	VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error
+type PostProjectIdRunResponseObject interface {
+	VisitPostProjectIdRunResponse(w http.ResponseWriter) error
 }
 
-type PostProjectProjectidRun200JSONResponse struct {
-	PostgresScans []PostgresScan `json:"postgres_scans"`
-	Success       bool           `json:"success"`
+type PostProjectIdRun200JSONResponse struct {
+	Scans   *[]Scan `json:"scans,omitempty"`
+	Success bool    `json:"success"`
 }
 
-func (response PostProjectProjectidRun200JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+func (response PostProjectIdRun200JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectProjectidRun400JSONResponse Error
+type PostProjectIdRun400JSONResponse Error
 
-func (response PostProjectProjectidRun400JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+func (response PostProjectIdRun400JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectProjectidRun401JSONResponse Error
+type PostProjectIdRun401JSONResponse Error
 
-func (response PostProjectProjectidRun401JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+func (response PostProjectIdRun401JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectProjectidRun404JSONResponse Error
+type PostProjectIdRun404JSONResponse Error
 
-func (response PostProjectProjectidRun404JSONResponse) VisitPostProjectProjectidRunResponse(w http.ResponseWriter) error {
+func (response PostProjectIdRun404JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetScannerPostgresDatabasePostgresDatabaseIdRequestObject struct {
-	PostgresDatabaseId int64 `json:"postgresDatabaseId"`
+type GetScanIdRequestObject struct {
+	Id int64 `json:"id"`
 }
 
-type GetScannerPostgresDatabasePostgresDatabaseIdResponseObject interface {
-	VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error
+type GetScanIdResponseObject interface {
+	VisitGetScanIdResponse(w http.ResponseWriter) error
 }
 
-type GetScannerPostgresDatabasePostgresDatabaseId200JSONResponse struct {
-	Database PostgresDatabase `json:"database"`
-
-	// ScanCount The number of scans
-	ScanCount int `json:"scan_count"`
-
-	// Scans The list of scans
-	Scans []PostgresScan `json:"scans"`
-
-	// Success The success status
-	Success bool `json:"success"`
+type GetScanId200JSONResponse struct {
+	Results []ScanResult `json:"results"`
+	Scan    Scan         `json:"scan"`
+	Success bool         `json:"success"`
 }
 
-func (response GetScannerPostgresDatabasePostgresDatabaseId200JSONResponse) VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response GetScanId200JSONResponse) VisitGetScanIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetScannerPostgresDatabasePostgresDatabaseId401JSONResponse Error
+type GetScanId404JSONResponse Error
 
-func (response GetScannerPostgresDatabasePostgresDatabaseId401JSONResponse) VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetScannerPostgresDatabasePostgresDatabaseId404JSONResponse Error
-
-func (response GetScannerPostgresDatabasePostgresDatabaseId404JSONResponse) VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response GetScanId404JSONResponse) VisitGetScanIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject struct {
-	PostgresDatabaseId int64 `json:"postgresDatabaseId"`
-	Body               *PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody
+type PatchScanIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchScanIdJSONRequestBody
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject interface {
-	VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error
+type PatchScanIdResponseObject interface {
+	VisitPatchScanIdResponse(w http.ResponseWriter) error
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseId200JSONResponse struct {
-	Database *PostgresDatabase `json:"database,omitempty"`
-	Success  bool              `json:"success"`
+type PatchScanId200JSONResponse struct {
+	Scan    *Scan `json:"scan,omitempty"`
+	Success bool  `json:"success"`
 }
 
-func (response PatchScannerPostgresDatabasePostgresDatabaseId200JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response PatchScanId200JSONResponse) VisitPatchScanIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseId400JSONResponse Error
+type PatchScanId400JSONResponse Error
 
-func (response PatchScannerPostgresDatabasePostgresDatabaseId400JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response PatchScanId400JSONResponse) VisitPatchScanIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseId401JSONResponse Error
+type PatchScanId401JSONResponse Error
 
-func (response PatchScannerPostgresDatabasePostgresDatabaseId401JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response PatchScanId401JSONResponse) VisitPatchScanIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchScannerPostgresDatabasePostgresDatabaseId404JSONResponse Error
+type PatchScanId404JSONResponse Error
 
-func (response PatchScannerPostgresDatabasePostgresDatabaseId404JSONResponse) VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response PatchScanId404JSONResponse) VisitPatchScanIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostScannerPostgresDatabasePostgresDatabaseIdRequestObject struct {
-	PostgresDatabaseId int64 `json:"postgresDatabaseId"`
+type PostScanIdResultRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PostScanIdResultJSONRequestBody
 }
 
-type PostScannerPostgresDatabasePostgresDatabaseIdResponseObject interface {
-	VisitPostScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error
+type PostScanIdResultResponseObject interface {
+	VisitPostScanIdResultResponse(w http.ResponseWriter) error
 }
 
-type PostScannerPostgresDatabasePostgresDatabaseId200JSONResponse struct {
-	Scan    *PostgresScan `json:"scan,omitempty"`
-	Success bool          `json:"success"`
+type PostScanIdResult200JSONResponse struct {
+	Scan    *ScanResult `json:"scan,omitempty"`
+	Success bool        `json:"success"`
 }
 
-func (response PostScannerPostgresDatabasePostgresDatabaseId200JSONResponse) VisitPostScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
+func (response PostScanIdResult200JSONResponse) VisitPostScanIdResultResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostScannerPostgresDatabasePostgresDatabaseId401JSONResponse Error
+type PostScanIdResult400JSONResponse Error
 
-func (response PostScannerPostgresDatabasePostgresDatabaseId401JSONResponse) VisitPostScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostScannerPostgresDatabasePostgresDatabaseId404JSONResponse Error
-
-func (response PostScannerPostgresDatabasePostgresDatabaseId404JSONResponse) VisitPostScannerPostgresDatabasePostgresDatabaseIdResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetScannerPostgresScanScanidRequestObject struct {
-	Scanid int64 `json:"scanid"`
-}
-
-type GetScannerPostgresScanScanidResponseObject interface {
-	VisitGetScannerPostgresScanScanidResponse(w http.ResponseWriter) error
-}
-
-type GetScannerPostgresScanScanid200JSONResponse struct {
-	Results []PostgresScanResult `json:"results"`
-	Scan    PostgresScan         `json:"scan"`
-	Success bool                 `json:"success"`
-}
-
-func (response GetScannerPostgresScanScanid200JSONResponse) VisitGetScannerPostgresScanScanidResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetScannerPostgresScanScanid404JSONResponse Error
-
-func (response GetScannerPostgresScanScanid404JSONResponse) VisitGetScannerPostgresScanScanidResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PatchScannerPostgresScanScanidRequestObject struct {
-	Scanid int64 `json:"scanid"`
-	Body   *PatchScannerPostgresScanScanidJSONRequestBody
-}
-
-type PatchScannerPostgresScanScanidResponseObject interface {
-	VisitPatchScannerPostgresScanScanidResponse(w http.ResponseWriter) error
-}
-
-type PatchScannerPostgresScanScanid200JSONResponse struct {
-	Scan    *PostgresScan `json:"scan,omitempty"`
-	Success bool          `json:"success"`
-}
-
-func (response PatchScannerPostgresScanScanid200JSONResponse) VisitPatchScannerPostgresScanScanidResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PatchScannerPostgresScanScanid400JSONResponse Error
-
-func (response PatchScannerPostgresScanScanid400JSONResponse) VisitPatchScannerPostgresScanScanidResponse(w http.ResponseWriter) error {
+func (response PostScanIdResult400JSONResponse) VisitPostScanIdResultResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchScannerPostgresScanScanid401JSONResponse Error
+type PostScanIdResult401JSONResponse Error
 
-func (response PatchScannerPostgresScanScanid401JSONResponse) VisitPatchScannerPostgresScanScanidResponse(w http.ResponseWriter) error {
+func (response PostScanIdResult401JSONResponse) VisitPostScanIdResultResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PatchScannerPostgresScanScanid404JSONResponse Error
+type PostScanIdResult404JSONResponse Error
 
-func (response PatchScannerPostgresScanScanid404JSONResponse) VisitPatchScannerPostgresScanScanidResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostScannerPostgresScanScanidResultRequestObject struct {
-	Scanid int64 `json:"scanid"`
-	Body   *PostScannerPostgresScanScanidResultJSONRequestBody
-}
-
-type PostScannerPostgresScanScanidResultResponseObject interface {
-	VisitPostScannerPostgresScanScanidResultResponse(w http.ResponseWriter) error
-}
-
-type PostScannerPostgresScanScanidResult200JSONResponse struct {
-	Scan    *PostgresScanResult `json:"scan,omitempty"`
-	Success bool                `json:"success"`
-}
-
-func (response PostScannerPostgresScanScanidResult200JSONResponse) VisitPostScannerPostgresScanScanidResultResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostScannerPostgresScanScanidResult400JSONResponse Error
-
-func (response PostScannerPostgresScanScanidResult400JSONResponse) VisitPostScannerPostgresScanScanidResultResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostScannerPostgresScanScanidResult401JSONResponse Error
-
-func (response PostScannerPostgresScanScanidResult401JSONResponse) VisitPostScannerPostgresScanScanidResultResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostScannerPostgresScanScanidResult404JSONResponse Error
-
-func (response PostScannerPostgresScanScanidResult404JSONResponse) VisitPostScannerPostgresScanScanidResultResponse(w http.ResponseWriter) error {
+func (response PostScanIdResult404JSONResponse) VisitPostScanIdResultResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -3926,35 +3696,32 @@ func (response GetWorkerGetTask401JSONResponse) VisitGetWorkerGetTaskResponse(w 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Get all CVEs for a database type and version
-	// (GET /cves/{databaseType}/{version})
-	GetCvesDatabaseTypeVersion(ctx context.Context, request GetCvesDatabaseTypeVersionRequestObject) (GetCvesDatabaseTypeVersionResponseObject, error)
+	// (GET /cves/{dbType}/{version})
+	GetCvesDbTypeVersion(ctx context.Context, request GetCvesDbTypeVersionRequestObject) (GetCvesDbTypeVersionResponseObject, error)
+	// Get postgres database by ID
+	// (GET /postgres/{id})
+	GetPostgresId(ctx context.Context, request GetPostgresIdRequestObject) (GetPostgresIdResponseObject, error)
+	// Update postgres database by ID
+	// (PATCH /postgres/{id})
+	PatchPostgresId(ctx context.Context, request PatchPostgresIdRequestObject) (PatchPostgresIdResponseObject, error)
 	// Get project by ID
-	// (GET /project/{projectid})
-	GetProjectProjectid(ctx context.Context, request GetProjectProjectidRequestObject) (GetProjectProjectidResponseObject, error)
+	// (GET /project/{id})
+	GetProjectId(ctx context.Context, request GetProjectIdRequestObject) (GetProjectIdResponseObject, error)
 	// Get all bruteforce passwords associated with a project
-	// (GET /project/{projectid}/bruteforce-passwords)
-	GetProjectProjectidBruteforcePasswords(ctx context.Context, request GetProjectProjectidBruteforcePasswordsRequestObject) (GetProjectProjectidBruteforcePasswordsResponseObject, error)
+	// (GET /project/{id}/bruteforce-passwords)
+	GetProjectIdBruteforcePasswords(ctx context.Context, request GetProjectIdBruteforcePasswordsRequestObject) (GetProjectIdBruteforcePasswordsResponseObject, error)
 	// Run all extractors and scanners for a project
-	// (POST /project/{projectid}/run)
-	PostProjectProjectidRun(ctx context.Context, request PostProjectProjectidRunRequestObject) (PostProjectProjectidRunResponseObject, error)
-	// Get all postgres scans associated with a database
-	// (GET /scanner/postgres/database/{postgresDatabaseId})
-	GetScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request GetScannerPostgresDatabasePostgresDatabaseIdRequestObject) (GetScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
-	// Update a postgres database by ID
-	// (PATCH /scanner/postgres/database/{postgresDatabaseId})
-	PatchScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject) (PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
-	// Create a new postgres scan associated with a database
-	// (POST /scanner/postgres/database/{postgresDatabaseId})
-	PostScannerPostgresDatabasePostgresDatabaseId(ctx context.Context, request PostScannerPostgresDatabasePostgresDatabaseIdRequestObject) (PostScannerPostgresDatabasePostgresDatabaseIdResponseObject, error)
-	// Get a postgres scan by ID
-	// (GET /scanner/postgres/scan/{scanid})
-	GetScannerPostgresScanScanid(ctx context.Context, request GetScannerPostgresScanScanidRequestObject) (GetScannerPostgresScanScanidResponseObject, error)
-	// Update a postgres scan by ID
-	// (PATCH /scanner/postgres/scan/{scanid})
-	PatchScannerPostgresScanScanid(ctx context.Context, request PatchScannerPostgresScanScanidRequestObject) (PatchScannerPostgresScanScanidResponseObject, error)
-	// Create a new postgres scan result
-	// (POST /scanner/postgres/scan/{scanid}/result)
-	PostScannerPostgresScanScanidResult(ctx context.Context, request PostScannerPostgresScanScanidResultRequestObject) (PostScannerPostgresScanScanidResultResponseObject, error)
+	// (POST /project/{id}/run)
+	PostProjectIdRun(ctx context.Context, request PostProjectIdRunRequestObject) (PostProjectIdRunResponseObject, error)
+	// Get a scan by ID
+	// (GET /scan/{id})
+	GetScanId(ctx context.Context, request GetScanIdRequestObject) (GetScanIdResponseObject, error)
+	// Update a scan by ID
+	// (PATCH /scan/{id})
+	PatchScanId(ctx context.Context, request PatchScanIdRequestObject) (PatchScanIdResponseObject, error)
+	// Create a new scan result
+	// (POST /scan/{id}/result)
+	PostScanIdResult(ctx context.Context, request PostScanIdResultRequestObject) (PostScanIdResultResponseObject, error)
 	// Get all users
 	// (GET /users)
 	GetUsers(ctx context.Context, request GetUsersRequestObject) (GetUsersResponseObject, error)
@@ -4001,26 +3768,26 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// GetCvesDatabaseTypeVersion operation middleware
-func (sh *strictHandler) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *http.Request, databaseType string, version string) {
-	var request GetCvesDatabaseTypeVersionRequestObject
+// GetCvesDbTypeVersion operation middleware
+func (sh *strictHandler) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string) {
+	var request GetCvesDbTypeVersionRequestObject
 
-	request.DatabaseType = databaseType
+	request.DbType = dbType
 	request.Version = version
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetCvesDatabaseTypeVersion(ctx, request.(GetCvesDatabaseTypeVersionRequestObject))
+		return sh.ssi.GetCvesDbTypeVersion(ctx, request.(GetCvesDbTypeVersionRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetCvesDatabaseTypeVersion")
+		handler = middleware(handler, "GetCvesDbTypeVersion")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetCvesDatabaseTypeVersionResponseObject); ok {
-		if err := validResponse.VisitGetCvesDatabaseTypeVersionResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetCvesDbTypeVersionResponseObject); ok {
+		if err := validResponse.VisitGetCvesDbTypeVersionResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4028,25 +3795,25 @@ func (sh *strictHandler) GetCvesDatabaseTypeVersion(w http.ResponseWriter, r *ht
 	}
 }
 
-// GetProjectProjectid operation middleware
-func (sh *strictHandler) GetProjectProjectid(w http.ResponseWriter, r *http.Request, projectid int64) {
-	var request GetProjectProjectidRequestObject
+// GetPostgresId operation middleware
+func (sh *strictHandler) GetPostgresId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetPostgresIdRequestObject
 
-	request.Projectid = projectid
+	request.Id = id
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetProjectProjectid(ctx, request.(GetProjectProjectidRequestObject))
+		return sh.ssi.GetPostgresId(ctx, request.(GetPostgresIdRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetProjectProjectid")
+		handler = middleware(handler, "GetPostgresId")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetProjectProjectidResponseObject); ok {
-		if err := validResponse.VisitGetProjectProjectidResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetPostgresIdResponseObject); ok {
+		if err := validResponse.VisitGetPostgresIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4054,26 +3821,85 @@ func (sh *strictHandler) GetProjectProjectid(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-// GetProjectProjectidBruteforcePasswords operation middleware
-func (sh *strictHandler) GetProjectProjectidBruteforcePasswords(w http.ResponseWriter, r *http.Request, projectid int64, params GetProjectProjectidBruteforcePasswordsParams) {
-	var request GetProjectProjectidBruteforcePasswordsRequestObject
+// PatchPostgresId operation middleware
+func (sh *strictHandler) PatchPostgresId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchPostgresIdRequestObject
 
-	request.Projectid = projectid
+	request.Id = id
+
+	var body PatchPostgresIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchPostgresId(ctx, request.(PatchPostgresIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchPostgresId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchPostgresIdResponseObject); ok {
+		if err := validResponse.VisitPatchPostgresIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetProjectId operation middleware
+func (sh *strictHandler) GetProjectId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetProjectIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectId(ctx, request.(GetProjectIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectIdResponseObject); ok {
+		if err := validResponse.VisitGetProjectIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetProjectIdBruteforcePasswords operation middleware
+func (sh *strictHandler) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams) {
+	var request GetProjectIdBruteforcePasswordsRequestObject
+
+	request.Id = id
 	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetProjectProjectidBruteforcePasswords(ctx, request.(GetProjectProjectidBruteforcePasswordsRequestObject))
+		return sh.ssi.GetProjectIdBruteforcePasswords(ctx, request.(GetProjectIdBruteforcePasswordsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetProjectProjectidBruteforcePasswords")
+		handler = middleware(handler, "GetProjectIdBruteforcePasswords")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetProjectProjectidBruteforcePasswordsResponseObject); ok {
-		if err := validResponse.VisitGetProjectProjectidBruteforcePasswordsResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetProjectIdBruteforcePasswordsResponseObject); ok {
+		if err := validResponse.VisitGetProjectIdBruteforcePasswordsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4081,25 +3907,25 @@ func (sh *strictHandler) GetProjectProjectidBruteforcePasswords(w http.ResponseW
 	}
 }
 
-// PostProjectProjectidRun operation middleware
-func (sh *strictHandler) PostProjectProjectidRun(w http.ResponseWriter, r *http.Request, projectid int64) {
-	var request PostProjectProjectidRunRequestObject
+// PostProjectIdRun operation middleware
+func (sh *strictHandler) PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostProjectIdRunRequestObject
 
-	request.Projectid = projectid
+	request.Id = id
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostProjectProjectidRun(ctx, request.(PostProjectProjectidRunRequestObject))
+		return sh.ssi.PostProjectIdRun(ctx, request.(PostProjectIdRunRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostProjectProjectidRun")
+		handler = middleware(handler, "PostProjectIdRun")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostProjectProjectidRunResponseObject); ok {
-		if err := validResponse.VisitPostProjectProjectidRunResponse(w); err != nil {
+	} else if validResponse, ok := response.(PostProjectIdRunResponseObject); ok {
+		if err := validResponse.VisitPostProjectIdRunResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4107,25 +3933,25 @@ func (sh *strictHandler) PostProjectProjectidRun(w http.ResponseWriter, r *http.
 	}
 }
 
-// GetScannerPostgresDatabasePostgresDatabaseId operation middleware
-func (sh *strictHandler) GetScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
-	var request GetScannerPostgresDatabasePostgresDatabaseIdRequestObject
+// GetScanId operation middleware
+func (sh *strictHandler) GetScanId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetScanIdRequestObject
 
-	request.PostgresDatabaseId = postgresDatabaseId
+	request.Id = id
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetScannerPostgresDatabasePostgresDatabaseId(ctx, request.(GetScannerPostgresDatabasePostgresDatabaseIdRequestObject))
+		return sh.ssi.GetScanId(ctx, request.(GetScanIdRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetScannerPostgresDatabasePostgresDatabaseId")
+		handler = middleware(handler, "GetScanId")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetScannerPostgresDatabasePostgresDatabaseIdResponseObject); ok {
-		if err := validResponse.VisitGetScannerPostgresDatabasePostgresDatabaseIdResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetScanIdResponseObject); ok {
+		if err := validResponse.VisitGetScanIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4133,13 +3959,13 @@ func (sh *strictHandler) GetScannerPostgresDatabasePostgresDatabaseId(w http.Res
 	}
 }
 
-// PatchScannerPostgresDatabasePostgresDatabaseId operation middleware
-func (sh *strictHandler) PatchScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
-	var request PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject
+// PatchScanId operation middleware
+func (sh *strictHandler) PatchScanId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchScanIdRequestObject
 
-	request.PostgresDatabaseId = postgresDatabaseId
+	request.Id = id
 
-	var body PatchScannerPostgresDatabasePostgresDatabaseIdJSONRequestBody
+	var body PatchScanIdJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -4147,18 +3973,18 @@ func (sh *strictHandler) PatchScannerPostgresDatabasePostgresDatabaseId(w http.R
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PatchScannerPostgresDatabasePostgresDatabaseId(ctx, request.(PatchScannerPostgresDatabasePostgresDatabaseIdRequestObject))
+		return sh.ssi.PatchScanId(ctx, request.(PatchScanIdRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PatchScannerPostgresDatabasePostgresDatabaseId")
+		handler = middleware(handler, "PatchScanId")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PatchScannerPostgresDatabasePostgresDatabaseIdResponseObject); ok {
-		if err := validResponse.VisitPatchScannerPostgresDatabasePostgresDatabaseIdResponse(w); err != nil {
+	} else if validResponse, ok := response.(PatchScanIdResponseObject); ok {
+		if err := validResponse.VisitPatchScanIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4166,65 +3992,13 @@ func (sh *strictHandler) PatchScannerPostgresDatabasePostgresDatabaseId(w http.R
 	}
 }
 
-// PostScannerPostgresDatabasePostgresDatabaseId operation middleware
-func (sh *strictHandler) PostScannerPostgresDatabasePostgresDatabaseId(w http.ResponseWriter, r *http.Request, postgresDatabaseId int64) {
-	var request PostScannerPostgresDatabasePostgresDatabaseIdRequestObject
+// PostScanIdResult operation middleware
+func (sh *strictHandler) PostScanIdResult(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostScanIdResultRequestObject
 
-	request.PostgresDatabaseId = postgresDatabaseId
+	request.Id = id
 
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostScannerPostgresDatabasePostgresDatabaseId(ctx, request.(PostScannerPostgresDatabasePostgresDatabaseIdRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostScannerPostgresDatabasePostgresDatabaseId")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostScannerPostgresDatabasePostgresDatabaseIdResponseObject); ok {
-		if err := validResponse.VisitPostScannerPostgresDatabasePostgresDatabaseIdResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetScannerPostgresScanScanid operation middleware
-func (sh *strictHandler) GetScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request, scanid int64) {
-	var request GetScannerPostgresScanScanidRequestObject
-
-	request.Scanid = scanid
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetScannerPostgresScanScanid(ctx, request.(GetScannerPostgresScanScanidRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetScannerPostgresScanScanid")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetScannerPostgresScanScanidResponseObject); ok {
-		if err := validResponse.VisitGetScannerPostgresScanScanidResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PatchScannerPostgresScanScanid operation middleware
-func (sh *strictHandler) PatchScannerPostgresScanScanid(w http.ResponseWriter, r *http.Request, scanid int64) {
-	var request PatchScannerPostgresScanScanidRequestObject
-
-	request.Scanid = scanid
-
-	var body PatchScannerPostgresScanScanidJSONRequestBody
+	var body PostScanIdResultJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -4232,51 +4006,18 @@ func (sh *strictHandler) PatchScannerPostgresScanScanid(w http.ResponseWriter, r
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PatchScannerPostgresScanScanid(ctx, request.(PatchScannerPostgresScanScanidRequestObject))
+		return sh.ssi.PostScanIdResult(ctx, request.(PostScanIdResultRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PatchScannerPostgresScanScanid")
+		handler = middleware(handler, "PostScanIdResult")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PatchScannerPostgresScanScanidResponseObject); ok {
-		if err := validResponse.VisitPatchScannerPostgresScanScanidResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostScannerPostgresScanScanidResult operation middleware
-func (sh *strictHandler) PostScannerPostgresScanScanidResult(w http.ResponseWriter, r *http.Request, scanid int64) {
-	var request PostScannerPostgresScanScanidResultRequestObject
-
-	request.Scanid = scanid
-
-	var body PostScannerPostgresScanScanidResultJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostScannerPostgresScanScanidResult(ctx, request.(PostScannerPostgresScanScanidResultRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostScannerPostgresScanScanidResult")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostScannerPostgresScanScanidResultResponseObject); ok {
-		if err := validResponse.VisitPostScannerPostgresScanScanidResultResponse(w); err != nil {
+	} else if validResponse, ok := response.(PostScanIdResultResponseObject); ok {
+		if err := validResponse.VisitPostScanIdResultResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4418,57 +4159,56 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"AAD//y4iRCUWTAAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

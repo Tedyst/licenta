@@ -10,13 +10,13 @@ import (
 	"github.com/tedyst/licenta/models"
 )
 
-func (server *serverHandler) GetProjectProjectid(ctx context.Context, request generated.GetProjectProjectidRequestObject) (generated.GetProjectProjectidResponseObject, error) {
-	project, err := server.DatabaseProvider.GetProjectByID(ctx, request.Projectid)
+func (server *serverHandler) GetProjectId(ctx context.Context, request generated.GetProjectIdRequestObject) (generated.GetProjectIdResponseObject, error) {
+	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	postgres_databases_q, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Projectid)
+	postgres_databases_q, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -30,13 +30,12 @@ func (server *serverHandler) GetProjectProjectid(ctx context.Context, request ge
 			Password:     db.Password,
 			Port:         int(db.Port),
 			ProjectId:    int(db.ProjectID),
-			Remote:       db.Remote,
 			Username:     db.Username,
 			Version:      db.Version.String,
 		}
 	}
 
-	return generated.GetProjectProjectid200JSONResponse{
+	return generated.GetProjectId200JSONResponse{
 		Success: true,
 		Project: generated.Project{
 			CreatedAt:      project.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
@@ -48,13 +47,13 @@ func (server *serverHandler) GetProjectProjectid(ctx context.Context, request ge
 	}, nil
 }
 
-func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, request generated.PostProjectProjectidRunRequestObject) (generated.PostProjectProjectidRunResponseObject, error) {
-	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Projectid)
+func (server *serverHandler) PostProjectIdRun(ctx context.Context, request generated.PostProjectIdRunRequestObject) (generated.PostProjectIdRunResponseObject, error) {
+	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting postgres databases for project")
 	}
 
-	var postgresScans []generated.PostgresScan
+	var scans []generated.Scan
 	for _, db := range postgres_databases {
 		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
 			Status: models.SCAN_NOT_STARTED,
@@ -67,27 +66,34 @@ func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, reques
 			ScanID:     scan.ID,
 			DatabaseID: db.ID,
 		})
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating postgres scan")
+		}
 
 		go func() {
 			ctx := context.WithoutCancel(ctx)
-			err := server.TaskRunner.SchedulePostgresScan(ctx, postgresScan)
+			err := server.TaskRunner.RunAllScanners(ctx, scan, false)
 			if err != nil {
 				slog.Error("Error scheduling postgres scan", "error", err)
 			}
 		}()
 
-		postgresScans = append(postgresScans, generated.PostgresScan{
+		scans = append(scans, generated.Scan{
 			CreatedAt:       db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 			EndedAt:         db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 			Error:           "",
 			Id:              int(scan.ID),
 			Status:          int(scan.Status),
 			MaximumSeverity: 0,
+			PostgresScan: &generated.PostgresScan{
+				Id:         int(postgresScan.ID),
+				DatabaseId: int(db.ID),
+			},
 		})
 	}
 
-	return generated.PostProjectProjectidRun200JSONResponse{
-		Success:       true,
-		PostgresScans: postgresScans,
+	return generated.PostProjectIdRun200JSONResponse{
+		Success: true,
+		Scans:   &scans,
 	}, nil
 }

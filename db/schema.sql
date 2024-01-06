@@ -225,6 +225,7 @@ CREATE TABLE scan_results(
   scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
   severity integer NOT NULL,
   message text NOT NULL,
+  scan_source integer NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

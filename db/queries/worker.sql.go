@@ -10,13 +10,16 @@ import (
 	"database/sql"
 )
 
-const bindScanToWorker = `-- name: BindScanToWorker :exec
+const bindScanToWorker = `-- name: BindScanToWorker :one
 UPDATE
     scans
 SET
     worker_id = $2
 WHERE
     id = $1
+    AND worker_id IS NULL
+RETURNING
+    id, project_id, status, error, worker_id, created_at, ended_at
 `
 
 type BindScanToWorkerParams struct {
@@ -24,9 +27,19 @@ type BindScanToWorkerParams struct {
 	WorkerID sql.NullInt64 `json:"worker_id"`
 }
 
-func (q *Queries) BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) error {
-	_, err := q.db.Exec(ctx, bindScanToWorker, arg.ID, arg.WorkerID)
-	return err
+func (q *Queries) BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) (*Scan, error) {
+	row := q.db.QueryRow(ctx, bindScanToWorker, arg.ID, arg.WorkerID)
+	var i Scan
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.Status,
+		&i.Error,
+		&i.WorkerID,
+		&i.CreatedAt,
+		&i.EndedAt,
+	)
+	return &i, err
 }
 
 const getWorkerByToken = `-- name: GetWorkerByToken :one
