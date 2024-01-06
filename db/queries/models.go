@@ -71,43 +71,21 @@ type PostgresDatabase struct {
 	DatabaseName string             `json:"database_name"`
 	Username     string             `json:"username"`
 	Password     string             `json:"password"`
-	Remote       bool               `json:"remote"`
 	Version      sql.NullString     `json:"version"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type PostgresScan struct {
-	ID                 int64              `json:"id"`
-	PostgresDatabaseID int64              `json:"postgres_database_id"`
-	Status             int32              `json:"status"`
-	Error              sql.NullString     `json:"error"`
-	WorkerID           sql.NullInt64      `json:"worker_id"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	EndedAt            pgtype.Timestamptz `json:"ended_at"`
-}
-
-type PostgresScanBruteforceResult struct {
-	ID             int64              `json:"id"`
-	PostgresScanID int64              `json:"postgres_scan_id"`
-	Username       string             `json:"username"`
-	Password       sql.NullString     `json:"password"`
-	Total          int32              `json:"total"`
-	Tried          int32              `json:"tried"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-}
-
-type PostgresScanResult struct {
-	ID             int64              `json:"id"`
-	PostgresScanID int64              `json:"postgres_scan_id"`
-	Severity       int32              `json:"severity"`
-	Message        string             `json:"message"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	ID         int64 `json:"id"`
+	ScanID     int64 `json:"scan_id"`
+	DatabaseID int64 `json:"database_id"`
 }
 
 type Project struct {
 	ID             int64              `json:"id"`
 	Name           string             `json:"name"`
 	OrganizationID int64              `json:"organization_id"`
+	Remote         bool               `json:"remote"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
@@ -212,6 +190,34 @@ type ResetPasswordToken struct {
 	ID        uuid.UUID          `json:"id"`
 	UserID    sql.NullInt64      `json:"user_id"`
 	Valid     bool               `json:"valid"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type Scan struct {
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	Status    int32              `json:"status"`
+	Error     sql.NullString     `json:"error"`
+	WorkerID  sql.NullInt64      `json:"worker_id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	EndedAt   pgtype.Timestamptz `json:"ended_at"`
+}
+
+type ScanBruteforceResult struct {
+	ID        int64              `json:"id"`
+	ScanID    int64              `json:"scan_id"`
+	Username  string             `json:"username"`
+	Password  sql.NullString     `json:"password"`
+	Total     int32              `json:"total"`
+	Tried     int32              `json:"tried"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type ScanResult struct {
+	ID        int64              `json:"id"`
+	ScanID    int64              `json:"scan_id"`
+	Severity  int32              `json:"severity"`
+	Message   string             `json:"message"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 

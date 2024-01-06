@@ -56,17 +56,21 @@ func (server *serverHandler) PostProjectProjectidRun(ctx context.Context, reques
 
 	var postgresScans []generated.PostgresScan
 	for _, db := range postgres_databases {
-		scan, err := server.DatabaseProvider.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
-			PostgresDatabaseID: int64(db.ID),
-			Status:             models.SCAN_NOT_STARTED,
+		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
+			Status: models.SCAN_NOT_STARTED,
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "error creating postgres scan")
 		}
 
+		postgresScan, err := server.DatabaseProvider.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
+			ScanID:     scan.ID,
+			DatabaseID: db.ID,
+		})
+
 		go func() {
 			ctx := context.WithoutCancel(ctx)
-			err := server.TaskRunner.SchedulePostgresScan(ctx, scan)
+			err := server.TaskRunner.SchedulePostgresScan(ctx, postgresScan)
 			if err != nil {
 				slog.Error("Error scheduling postgres scan", "error", err)
 			}

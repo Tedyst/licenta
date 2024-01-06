@@ -1,28 +1,28 @@
 -- name: GetWorkersForProject :many
 SELECT
-    sqlc.embed(workers)
+    workers.*
 FROM
     workers
     INNER JOIN worker_projects ON workers.id = worker_projects.worker_id
 WHERE
     worker_projects.project_id = $1;
 
--- name: BindPostgresScanToWorker :exec
+-- name: BindScanToWorker :exec
 UPDATE
-    postgres_scan
+    scans
 SET
     worker_id = $2
 WHERE
     id = $1;
 
--- name: GetWorkerForPostgresScan :one
+-- name: GetWorkerForScan :one
 SELECT
-    sqlc.embed(workers)
+    workers.*
 FROM
     workers
-    INNER JOIN postgres_scan ON workers.id = postgres_scan.worker_id
+    INNER JOIN scans ON workers.id = scans.worker_id
 WHERE
-    postgres_scan.id = $1;
+    scans.id = $1;
 
 -- name: GetWorkerByToken :one
 SELECT

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/scanner"
 
 	"github.com/jackc/pgx/v5"
@@ -62,6 +63,14 @@ func (sc *postgresScanner) CheckPermissions(ctx context.Context) error {
 	row.Close()
 
 	return nil
+}
+
+func (sc *postgresScanner) GetNvdProductType() nvd.Product {
+	return nvd.POSTGRESQL
+}
+
+func (sc *postgresScanner) ShouldNotBePublic() bool {
+	return true
 }
 
 func NewScanner(ctx context.Context, db *pgx.Conn) (scanner.Scanner, error) {

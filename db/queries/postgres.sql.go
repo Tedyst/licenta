@@ -8,110 +8,37 @@ package queries
 import (
 	"context"
 	"database/sql"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPostgresScan = `-- name: CreatePostgresScan :one
-INSERT INTO postgres_scan(postgres_database_id, status, worker_id)
-    VALUES ($1, $2, $3)
+INSERT INTO postgres_scans(scan_id, database_id)
+    VALUES ($1, $2)
 RETURNING
-    id, postgres_database_id, status, error, worker_id, created_at, ended_at
+    id, scan_id, database_id
 `
 
 type CreatePostgresScanParams struct {
-	PostgresDatabaseID int64         `json:"postgres_database_id"`
-	Status             int32         `json:"status"`
-	WorkerID           sql.NullInt64 `json:"worker_id"`
+	ScanID     int64 `json:"scan_id"`
+	DatabaseID int64 `json:"database_id"`
 }
 
 func (q *Queries) CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error) {
-	row := q.db.QueryRow(ctx, createPostgresScan, arg.PostgresDatabaseID, arg.Status, arg.WorkerID)
+	row := q.db.QueryRow(ctx, createPostgresScan, arg.ScanID, arg.DatabaseID)
 	var i PostgresScan
-	err := row.Scan(
-		&i.ID,
-		&i.PostgresDatabaseID,
-		&i.Status,
-		&i.Error,
-		&i.WorkerID,
-		&i.CreatedAt,
-		&i.EndedAt,
-	)
-	return &i, err
-}
-
-const createPostgresScanBruteforceResult = `-- name: CreatePostgresScanBruteforceResult :one
-INSERT INTO postgres_scan_bruteforce_results(postgres_scan_id, username, PASSWORD, tried, total)
-    VALUES ($1, $2, $3, $4, $5)
-RETURNING
-    id, postgres_scan_id, username, password, total, tried, created_at
-`
-
-type CreatePostgresScanBruteforceResultParams struct {
-	PostgresScanID int64          `json:"postgres_scan_id"`
-	Username       string         `json:"username"`
-	Password       sql.NullString `json:"password"`
-	Tried          int32          `json:"tried"`
-	Total          int32          `json:"total"`
-}
-
-func (q *Queries) CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error) {
-	row := q.db.QueryRow(ctx, createPostgresScanBruteforceResult,
-		arg.PostgresScanID,
-		arg.Username,
-		arg.Password,
-		arg.Tried,
-		arg.Total,
-	)
-	var i PostgresScanBruteforceResult
-	err := row.Scan(
-		&i.ID,
-		&i.PostgresScanID,
-		&i.Username,
-		&i.Password,
-		&i.Total,
-		&i.Tried,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
-const createPostgresScanResult = `-- name: CreatePostgresScanResult :one
-INSERT INTO postgres_scan_results(postgres_scan_id, severity, message)
-    VALUES ($1, $2, $3)
-RETURNING
-    id, postgres_scan_id, severity, message, created_at
-`
-
-type CreatePostgresScanResultParams struct {
-	PostgresScanID int64  `json:"postgres_scan_id"`
-	Severity       int32  `json:"severity"`
-	Message        string `json:"message"`
-}
-
-func (q *Queries) CreatePostgresScanResult(ctx context.Context, arg CreatePostgresScanResultParams) (*PostgresScanResult, error) {
-	row := q.db.QueryRow(ctx, createPostgresScanResult, arg.PostgresScanID, arg.Severity, arg.Message)
-	var i PostgresScanResult
-	err := row.Scan(
-		&i.ID,
-		&i.PostgresScanID,
-		&i.Severity,
-		&i.Message,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.ScanID, &i.DatabaseID)
 	return &i, err
 }
 
 const getPostgresDatabase = `-- name: GetPostgresDatabase :one
 SELECT
-    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.remote, postgres_databases.version, postgres_databases.created_at,
+    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.version, postgres_databases.created_at,
 (
         SELECT
             COUNT(*)
         FROM
-            postgres_scan
+            postgres_scans
         WHERE
-            postgres_scan.postgres_database_id = postgres_databases.id) AS scan_count
+            postgres_scans.database_id = postgres_databases.id) AS scan_count
 FROM
     postgres_databases
 WHERE
@@ -134,7 +61,6 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgr
 		&i.PostgresDatabase.DatabaseName,
 		&i.PostgresDatabase.Username,
 		&i.PostgresDatabase.Password,
-		&i.PostgresDatabase.Remote,
 		&i.PostgresDatabase.Version,
 		&i.PostgresDatabase.CreatedAt,
 		&i.ScanCount,
@@ -144,7 +70,7 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgr
 
 const getPostgresDatabasesForProject = `-- name: GetPostgresDatabasesForProject :many
 SELECT
-    id, project_id, host, port, database_name, username, password, remote, version, created_at
+    id, project_id, host, port, database_name, username, password, version, created_at
 FROM
     postgres_databases
 WHERE
@@ -168,7 +94,6 @@ func (q *Queries) GetPostgresDatabasesForProject(ctx context.Context, projectID 
 			&i.DatabaseName,
 			&i.Username,
 			&i.Password,
-			&i.Remote,
 			&i.Version,
 			&i.CreatedAt,
 		); err != nil {
@@ -184,184 +109,36 @@ func (q *Queries) GetPostgresDatabasesForProject(ctx context.Context, projectID 
 
 const getPostgresScan = `-- name: GetPostgresScan :one
 SELECT
-    postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
-(
-        SELECT
-            COALESCE(MAX(postgres_scan_results.severity), 0)::integer
-        FROM
-            postgres_scan_results
-        WHERE
-            postgres_scan_id = postgres_scan.id) AS maximum_severity
+    id, scan_id, database_id
 FROM
-    postgres_scan
+    postgres_scans
 WHERE
-    postgres_scan.id = $1
+    id = $1
+LIMIT 1
 `
 
-type GetPostgresScanRow struct {
-	PostgresScan    PostgresScan `json:"postgres_scan"`
-	MaximumSeverity int32        `json:"maximum_severity"`
-}
-
-func (q *Queries) GetPostgresScan(ctx context.Context, id int64) (*GetPostgresScanRow, error) {
+func (q *Queries) GetPostgresScan(ctx context.Context, id int64) (*PostgresScan, error) {
 	row := q.db.QueryRow(ctx, getPostgresScan, id)
-	var i GetPostgresScanRow
-	err := row.Scan(
-		&i.PostgresScan.ID,
-		&i.PostgresScan.PostgresDatabaseID,
-		&i.PostgresScan.Status,
-		&i.PostgresScan.Error,
-		&i.PostgresScan.WorkerID,
-		&i.PostgresScan.CreatedAt,
-		&i.PostgresScan.EndedAt,
-		&i.MaximumSeverity,
-	)
+	var i PostgresScan
+	err := row.Scan(&i.ID, &i.ScanID, &i.DatabaseID)
 	return &i, err
 }
 
-const getPostgresScanResults = `-- name: GetPostgresScanResults :many
+const getPostgresScanByScanID = `-- name: GetPostgresScanByScanID :one
 SELECT
-    id, postgres_scan_id, severity, message, created_at
+    id, scan_id, database_id
 FROM
-    postgres_scan_results
+    postgres_scans
 WHERE
-    postgres_scan_id = $1
+    scan_id = $1
+LIMIT 1
 `
 
-func (q *Queries) GetPostgresScanResults(ctx context.Context, postgresScanID int64) ([]*PostgresScanResult, error) {
-	rows, err := q.db.Query(ctx, getPostgresScanResults, postgresScanID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*PostgresScanResult
-	for rows.Next() {
-		var i PostgresScanResult
-		if err := rows.Scan(
-			&i.ID,
-			&i.PostgresScanID,
-			&i.Severity,
-			&i.Message,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPostgresScansForDatabase = `-- name: GetPostgresScansForDatabase :many
-SELECT
-    postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
-(
-        SELECT
-            COALESCE(MAX(postgres_scan_results.severity), 0)::integer
-        FROM
-            postgres_scan_results
-        WHERE
-            postgres_scan_id = postgres_scan.id) AS maximum_severity
-FROM
-    postgres_scan
-WHERE
-    postgres_scan.postgres_database_id = $1
-ORDER BY
-    postgres_scan.id DESC
-`
-
-type GetPostgresScansForDatabaseRow struct {
-	PostgresScan    PostgresScan `json:"postgres_scan"`
-	MaximumSeverity int32        `json:"maximum_severity"`
-}
-
-func (q *Queries) GetPostgresScansForDatabase(ctx context.Context, postgresDatabaseID int64) ([]*GetPostgresScansForDatabaseRow, error) {
-	rows, err := q.db.Query(ctx, getPostgresScansForDatabase, postgresDatabaseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*GetPostgresScansForDatabaseRow
-	for rows.Next() {
-		var i GetPostgresScansForDatabaseRow
-		if err := rows.Scan(
-			&i.PostgresScan.ID,
-			&i.PostgresScan.PostgresDatabaseID,
-			&i.PostgresScan.Status,
-			&i.PostgresScan.Error,
-			&i.PostgresScan.WorkerID,
-			&i.PostgresScan.CreatedAt,
-			&i.PostgresScan.EndedAt,
-			&i.MaximumSeverity,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPostgresScansForProject = `-- name: GetPostgresScansForProject :many
-SELECT
-    postgres_scan.id, postgres_scan.postgres_database_id, postgres_scan.status, postgres_scan.error, postgres_scan.worker_id, postgres_scan.created_at, postgres_scan.ended_at,
-(
-        SELECT
-            MAX(postgres_scan_results.severity)::integer
-        FROM
-            postgres_scan_results
-        WHERE
-            postgres_scan_id = postgres_scan.id) AS maximum_severity
-FROM
-    postgres_scan
-WHERE
-    postgres_scan.postgres_database_id IN (
-        SELECT
-            postgres_databases.id
-        FROM
-            postgres_databases
-        WHERE
-            postgres_databases.project_id = $1)
-ORDER BY
-    postgres_scan.id DESC
-`
-
-type GetPostgresScansForProjectRow struct {
-	PostgresScan    PostgresScan `json:"postgres_scan"`
-	MaximumSeverity int32        `json:"maximum_severity"`
-}
-
-func (q *Queries) GetPostgresScansForProject(ctx context.Context, projectID int64) ([]*GetPostgresScansForProjectRow, error) {
-	rows, err := q.db.Query(ctx, getPostgresScansForProject, projectID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []*GetPostgresScansForProjectRow
-	for rows.Next() {
-		var i GetPostgresScansForProjectRow
-		if err := rows.Scan(
-			&i.PostgresScan.ID,
-			&i.PostgresScan.PostgresDatabaseID,
-			&i.PostgresScan.Status,
-			&i.PostgresScan.Error,
-			&i.PostgresScan.WorkerID,
-			&i.PostgresScan.CreatedAt,
-			&i.PostgresScan.EndedAt,
-			&i.MaximumSeverity,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetPostgresScanByScanID(ctx context.Context, scanID int64) (*PostgresScan, error) {
+	row := q.db.QueryRow(ctx, getPostgresScanByScanID, scanID)
+	var i PostgresScan
+	err := row.Scan(&i.ID, &i.ScanID, &i.DatabaseID)
+	return &i, err
 }
 
 const updatePostgresDatabase = `-- name: UpdatePostgresDatabase :exec
@@ -373,8 +150,7 @@ SET
     port = $4,
     username = $5,
     PASSWORD = $6,
-    remote = $7,
-    version = $8
+    version = $7
 WHERE
     id = $1
 `
@@ -386,7 +162,6 @@ type UpdatePostgresDatabaseParams struct {
 	Port         int32          `json:"port"`
 	Username     string         `json:"username"`
 	Password     string         `json:"password"`
-	Remote       bool           `json:"remote"`
 	Version      sql.NullString `json:"version"`
 }
 
@@ -398,64 +173,7 @@ func (q *Queries) UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgres
 		arg.Port,
 		arg.Username,
 		arg.Password,
-		arg.Remote,
 		arg.Version,
-	)
-	return err
-}
-
-const updatePostgresScanBruteforceResult = `-- name: UpdatePostgresScanBruteforceResult :exec
-UPDATE
-    postgres_scan_bruteforce_results
-SET
-    PASSWORD = $2,
-    tried = $3,
-    total = $4
-WHERE
-    id = $1
-`
-
-type UpdatePostgresScanBruteforceResultParams struct {
-	ID       int64          `json:"id"`
-	Password sql.NullString `json:"password"`
-	Tried    int32          `json:"tried"`
-	Total    int32          `json:"total"`
-}
-
-func (q *Queries) UpdatePostgresScanBruteforceResult(ctx context.Context, arg UpdatePostgresScanBruteforceResultParams) error {
-	_, err := q.db.Exec(ctx, updatePostgresScanBruteforceResult,
-		arg.ID,
-		arg.Password,
-		arg.Tried,
-		arg.Total,
-	)
-	return err
-}
-
-const updatePostgresScanStatus = `-- name: UpdatePostgresScanStatus :exec
-UPDATE
-    postgres_scan
-SET
-    status = $2,
-    error = $3,
-    ended_at = $4
-WHERE
-    id = $1
-`
-
-type UpdatePostgresScanStatusParams struct {
-	ID      int64              `json:"id"`
-	Status  int32              `json:"status"`
-	Error   sql.NullString     `json:"error"`
-	EndedAt pgtype.Timestamptz `json:"ended_at"`
-}
-
-func (q *Queries) UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error {
-	_, err := q.db.Exec(ctx, updatePostgresScanStatus,
-		arg.ID,
-		arg.Status,
-		arg.Error,
-		arg.EndedAt,
 	)
 	return err
 }

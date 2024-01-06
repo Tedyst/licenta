@@ -12,7 +12,7 @@ import (
 )
 
 type Querier interface {
-	BindPostgresScanToWorker(ctx context.Context, arg BindPostgresScanToWorkerParams) error
+	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) error
 	CountUsers(ctx context.Context) (int64, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
@@ -25,10 +25,11 @@ type Querier interface {
 	CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error)
 	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
 	CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error)
-	CreatePostgresScanBruteforceResult(ctx context.Context, arg CreatePostgresScanBruteforceResultParams) (*PostgresScanBruteforceResult, error)
-	CreatePostgresScanResult(ctx context.Context, arg CreatePostgresScanResultParams) (*PostgresScanResult, error)
 	CreateRememberMeToken(ctx context.Context, arg CreateRememberMeTokenParams) (*RememberMeToken, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
+	CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, error)
+	CreateScanBruteforceResult(ctx context.Context, arg CreateScanBruteforceResultParams) (*ScanBruteforceResult, error)
+	CreateScanResult(ctx context.Context, arg CreateScanResultParams) (*ScanResult, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
@@ -62,17 +63,18 @@ type Querier interface {
 	GetOrganizationsByUser(ctx context.Context, userID int64) ([]*Organization, error)
 	GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgresDatabaseRow, error)
 	GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*PostgresDatabase, error)
-	GetPostgresScan(ctx context.Context, id int64) (*GetPostgresScanRow, error)
-	GetPostgresScanResults(ctx context.Context, postgresScanID int64) ([]*PostgresScanResult, error)
-	GetPostgresScansForDatabase(ctx context.Context, postgresDatabaseID int64) ([]*GetPostgresScansForDatabaseRow, error)
-	GetPostgresScansForProject(ctx context.Context, projectID int64) ([]*GetPostgresScansForProjectRow, error)
-	GetProjectByID(ctx context.Context, id int64) (*Project, error)
+	GetPostgresScan(ctx context.Context, id int64) (*PostgresScan, error)
+	GetPostgresScanByScanID(ctx context.Context, scanID int64) (*PostgresScan, error)
+	GetProject(ctx context.Context, id int64) (*Project, error)
 	GetProjectByOrganizationAndName(ctx context.Context, arg GetProjectByOrganizationAndNameParams) (*Project, error)
 	GetProjectMembers(ctx context.Context, projectID int64) ([]*ProjectMember, error)
 	GetProjectPermissionsForUser(ctx context.Context, arg GetProjectPermissionsForUserParams) (int16, error)
 	GetProjectUser(ctx context.Context, arg GetProjectUserParams) (*ProjectMember, error)
 	GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
+	GetScan(ctx context.Context, id int64) (*GetScanRow, error)
+	GetScanResults(ctx context.Context, scanID int64) ([]*ScanResult, error)
+	GetScansForProject(ctx context.Context, projectID int64) ([]*GetScansForProjectRow, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error)
@@ -81,8 +83,8 @@ type Querier interface {
 	GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*GetUserByWebauthnCredentialIDRow, error)
 	GetWebauthnCredentialsByUserID(ctx context.Context, userID int64) ([]*WebauthnCredential, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
-	GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error)
-	GetWorkersForProject(ctx context.Context, projectID int64) ([]*GetWorkersForProjectRow, error)
+	GetWorkerForScan(ctx context.Context, id int64) (*Worker, error)
+	GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
 	InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error
@@ -92,9 +94,9 @@ type Querier interface {
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error
-	UpdatePostgresScanBruteforceResult(ctx context.Context, arg UpdatePostgresScanBruteforceResultParams) error
-	UpdatePostgresScanStatus(ctx context.Context, arg UpdatePostgresScanStatusParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
+	UpdateScanBruteforceResult(ctx context.Context, arg UpdateScanBruteforceResultParams) error
+	UpdateScanStatus(ctx context.Context, arg UpdateScanStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 	UpdateWebauthnCredential(ctx context.Context, arg UpdateWebauthnCredentialParams) (*WebauthnCredential, error)
 	ValidateTOTPSecretForUser(ctx context.Context, userID int64) error

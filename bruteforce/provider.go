@@ -8,7 +8,7 @@ import (
 )
 
 type BruteforceProvider interface {
-	NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc StatusFunc, projectID int) (Bruteforcer, error)
+	NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc StatusFunc, projectID int64) (Bruteforcer, error)
 }
 
 type Bruteforcer interface {
@@ -27,8 +27,8 @@ func NewDatabaseBruteforceProvider(queries db.TransactionQuerier) *databaseBrute
 	}
 }
 
-func (d *databaseBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc StatusFunc, projectID int) (Bruteforcer, error) {
-	passProvider, err := NewDatabasePasswordProvider(ctx, d.queries, int64(projectID))
+func (d *databaseBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc StatusFunc, projectID int64) (Bruteforcer, error) {
+	passProvider, err := NewDatabasePasswordProvider(ctx, d.queries, projectID)
 	if err != nil {
 		return nil, err
 	}

@@ -13,20 +13,20 @@ const (
 )
 
 type SendScanToWorkerMessage struct {
-	ScanType       scanType
-	PostgresScanID int
-	ProjectID      int
+	ScanType  scanType `json:"scan_type"`
+	ScanID    int64    `json:"scan_id"`
+	ProjectID int64    `json:"project_id"`
 }
 
 type Exchange interface {
-	PublishSendScanToWorkerMessage(ctx context.Context, worker models.Worker, message SendScanToWorkerMessage) error
-	ReceiveSendScanToWorkerMessage(ctx context.Context, worker models.Worker) (SendScanToWorkerMessage, bool, error)
+	PublishSendScanToWorkerMessage(ctx context.Context, worker *models.Worker, message *SendScanToWorkerMessage) error
+	ReceiveSendScanToWorkerMessage(ctx context.Context, worker *models.Worker) (SendScanToWorkerMessage, bool, error)
 }
 
-func GetPostgresScanMessage(postgresScanID int, projectID int) SendScanToWorkerMessage {
+func GetStartScanMessage(scan *models.Scan) SendScanToWorkerMessage {
 	return SendScanToWorkerMessage{
-		ScanType:       PostgresScan,
-		PostgresScanID: postgresScanID,
-		ProjectID:      projectID,
+		ScanType:  PostgresScan,
+		ScanID:    scan.ID,
+		ProjectID: scan.ProjectID,
 	}
 }

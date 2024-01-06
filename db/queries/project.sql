@@ -54,7 +54,7 @@ FROM (
         organization_id = $3
         AND user_id = $2) AS role;
 
--- name: GetProjectByID :one
+-- name: GetProject :one
 SELECT
     *
 FROM

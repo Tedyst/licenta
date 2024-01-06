@@ -9,9 +9,9 @@ import (
 	"context"
 )
 
-const getProjectByID = `-- name: GetProjectByID :one
+const getProject = `-- name: GetProject :one
 SELECT
-    id, name, organization_id, created_at
+    id, name, organization_id, remote, created_at
 FROM
     projects
 WHERE
@@ -19,13 +19,14 @@ WHERE
 LIMIT 1
 `
 
-func (q *Queries) GetProjectByID(ctx context.Context, id int64) (*Project, error) {
-	row := q.db.QueryRow(ctx, getProjectByID, id)
+func (q *Queries) GetProject(ctx context.Context, id int64) (*Project, error) {
+	row := q.db.QueryRow(ctx, getProject, id)
 	var i Project
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.OrganizationID,
+		&i.Remote,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -33,7 +34,7 @@ func (q *Queries) GetProjectByID(ctx context.Context, id int64) (*Project, error
 
 const getProjectByOrganizationAndName = `-- name: GetProjectByOrganizationAndName :one
 SELECT
-    id, name, organization_id, created_at
+    id, name, organization_id, remote, created_at
 FROM
     projects
 WHERE
@@ -54,6 +55,7 @@ func (q *Queries) GetProjectByOrganizationAndName(ctx context.Context, arg GetPr
 		&i.ID,
 		&i.Name,
 		&i.OrganizationID,
+		&i.Remote,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -159,7 +161,7 @@ func (q *Queries) GetProjectUser(ctx context.Context, arg GetProjectUserParams) 
 
 const getProjectsByOrganization = `-- name: GetProjectsByOrganization :many
 SELECT
-    id, name, organization_id, created_at
+    id, name, organization_id, remote, created_at
 FROM
     projects
 WHERE
@@ -179,6 +181,7 @@ func (q *Queries) GetProjectsByOrganization(ctx context.Context, organizationID 
 			&i.ID,
 			&i.Name,
 			&i.OrganizationID,
+			&i.Remote,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err

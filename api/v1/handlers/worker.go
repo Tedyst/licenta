@@ -43,19 +43,19 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, errors.New("invalid scan type")
 	}
 
-	scan, err := server.DatabaseProvider.GetPostgresScan(ctx, int64(message.PostgresScanID))
+	scan, err := server.DatabaseProvider.GetScan(ctx, int64(message.PostgresScanID))
 	if err != nil {
 		return nil, err
 	}
 
-	if scan.PostgresScan.WorkerID.Valid {
+	if scan.Scan.WorkerID.Valid {
 		return generated.GetWorkerGetTask202JSONResponse{
 			Success: false,
 			Message: "Task already taken",
 		}, nil
 	}
 
-	err = server.DatabaseProvider.BindPostgresScanToWorker(ctx, queries.BindPostgresScanToWorkerParams{
+	err = server.DatabaseProvider.BindScanToWorker(ctx, queries.BindScanToWorkerParams{
 		ID:       int64(message.PostgresScanID),
 		WorkerID: sql.NullInt64{Int64: int64(w.ID), Valid: true},
 	})
@@ -63,9 +63,24 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, err
 	}
 
-	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, scan.PostgresScan.PostgresDatabaseID)
-	if err != nil {
-		return nil, err
+	var postgresDatabase *generated.PostgresDatabase
+	if scan.PostgresScan != 0 {
+		database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, scan.PostgresScan)
+		if err != nil {
+			return nil, err
+		}
+
+		postgresDatabase = &generated.PostgresDatabase{
+			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
+			DatabaseName: database.PostgresDatabase.DatabaseName,
+			Host:         database.PostgresDatabase.Host,
+			Id:           int(database.PostgresDatabase.ID),
+			Password:     database.PostgresDatabase.Password,
+			Port:         int(database.PostgresDatabase.Port),
+			ProjectId:    int(database.PostgresDatabase.ProjectID),
+			Remote:       database.PostgresDatabase.Remote,
+			Username:     database.PostgresDatabase.Username,
+		}
 	}
 
 	return generated.GetWorkerGetTask200JSONResponse{
@@ -77,23 +92,13 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 				Scan             *generated.PostgresScan     "json:\"scan,omitempty\""
 			}{
 				Scan: &generated.PostgresScan{
-					CreatedAt: scan.PostgresScan.CreatedAt.Time.Format(time.RFC3339),
-					EndedAt:   scan.PostgresScan.EndedAt.Time.Format(time.RFC3339),
-					Error:     scan.PostgresScan.Error.String,
-					Id:        int(scan.PostgresScan.ID),
-					Status:    int(scan.PostgresScan.Status),
+					CreatedAt: scan.Scan.CreatedAt.Time.Format(time.RFC3339),
+					EndedAt:   scan.Scan.EndedAt.Time.Format(time.RFC3339),
+					Error:     scan.Scan.Error.String,
+					Id:        int(scan.Scan.ID),
+					Status:    int(scan.Scan.Status),
 				},
-				PostgresDatabase: &generated.PostgresDatabase{
-					CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
-					DatabaseName: database.PostgresDatabase.DatabaseName,
-					Host:         database.PostgresDatabase.Host,
-					Id:           int(database.PostgresDatabase.ID),
-					Password:     database.PostgresDatabase.Password,
-					Port:         int(database.PostgresDatabase.Port),
-					ProjectId:    int(database.PostgresDatabase.ProjectID),
-					Remote:       database.PostgresDatabase.Remote,
-					Username:     database.PostgresDatabase.Username,
-				},
+				PostgresDatabase: postgresDatabase,
 			},
 		},
 	}, nil

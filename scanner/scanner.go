@@ -2,6 +2,9 @@ package scanner
 
 import (
 	"context"
+	"errors"
+
+	"github.com/tedyst/licenta/nvd"
 )
 
 type Severity = int
@@ -12,7 +15,19 @@ const (
 	SEVERITY_HIGH
 )
 
+var (
+	ErrPingNotSupported             = errors.New("ping not supported")
+	ErrCheckPermissionsNotSupported = errors.New("check permissions not supported")
+	ErrScanConfigNotSupported       = errors.New("scan config not supported")
+	ErrGetUsersNotSupported         = errors.New("get users not supported")
+	ErrVersionNotSupported          = errors.New("version not supported")
+)
+
 type Scanner interface {
+	GetNvdProductType() nvd.Product
+	ShouldNotBePublic() bool
+
+	ScanForPublicAccess(ctx context.Context) error
 	Ping(context.Context) error
 	CheckPermissions(context.Context) error
 	ScanConfig(ctx context.Context) ([]ScanResult, error)

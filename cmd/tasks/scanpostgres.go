@@ -31,15 +31,19 @@ var taskScanPostgresCmd = &cobra.Command{
 			return err
 		}
 
-		scan, err := database.CreatePostgresScan(cmd.Context(), queries.CreatePostgresScanParams{
-			PostgresDatabaseID: dbid,
-			Status:             models.SCAN_NOT_STARTED,
+		scan, err := database.CreateScan(cmd.Context(), queries.CreateScanParams{
+			Status: models.SCAN_NOT_STARTED,
 		})
 		if err != nil {
 			return err
 		}
 
-		return taskRunner.ScanPostgresDB(cmd.Context(), scan)
+		postgresScan, err := database.CreatePostgresScan(cmd.Context(), queries.CreatePostgresScanParams{
+			ScanID:     scan.ID,
+			DatabaseID: dbid,
+		})
+
+		return taskRunner.ScanPostgresDB(cmd.Context(), postgresScan)
 	},
 }
 

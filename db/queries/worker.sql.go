@@ -10,22 +10,22 @@ import (
 	"database/sql"
 )
 
-const bindPostgresScanToWorker = `-- name: BindPostgresScanToWorker :exec
+const bindScanToWorker = `-- name: BindScanToWorker :exec
 UPDATE
-    postgres_scan
+    scans
 SET
     worker_id = $2
 WHERE
     id = $1
 `
 
-type BindPostgresScanToWorkerParams struct {
+type BindScanToWorkerParams struct {
 	ID       int64         `json:"id"`
 	WorkerID sql.NullInt64 `json:"worker_id"`
 }
 
-func (q *Queries) BindPostgresScanToWorker(ctx context.Context, arg BindPostgresScanToWorkerParams) error {
-	_, err := q.db.Exec(ctx, bindPostgresScanToWorker, arg.ID, arg.WorkerID)
+func (q *Queries) BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) error {
+	_, err := q.db.Exec(ctx, bindScanToWorker, arg.ID, arg.WorkerID)
 	return err
 }
 
@@ -45,24 +45,20 @@ func (q *Queries) GetWorkerByToken(ctx context.Context, token string) (*Worker, 
 	return &i, err
 }
 
-const getWorkerForPostgresScan = `-- name: GetWorkerForPostgresScan :one
+const getWorkerForScan = `-- name: GetWorkerForScan :one
 SELECT
     workers.id, workers.token, workers.created_at
 FROM
     workers
-    INNER JOIN postgres_scan ON workers.id = postgres_scan.worker_id
+    INNER JOIN scans ON workers.id = scans.worker_id
 WHERE
-    postgres_scan.id = $1
+    scans.id = $1
 `
 
-type GetWorkerForPostgresScanRow struct {
-	Worker Worker `json:"worker"`
-}
-
-func (q *Queries) GetWorkerForPostgresScan(ctx context.Context, id int64) (*GetWorkerForPostgresScanRow, error) {
-	row := q.db.QueryRow(ctx, getWorkerForPostgresScan, id)
-	var i GetWorkerForPostgresScanRow
-	err := row.Scan(&i.Worker.ID, &i.Worker.Token, &i.Worker.CreatedAt)
+func (q *Queries) GetWorkerForScan(ctx context.Context, id int64) (*Worker, error) {
+	row := q.db.QueryRow(ctx, getWorkerForScan, id)
+	var i Worker
+	err := row.Scan(&i.ID, &i.Token, &i.CreatedAt)
 	return &i, err
 }
 
@@ -76,20 +72,16 @@ WHERE
     worker_projects.project_id = $1
 `
 
-type GetWorkersForProjectRow struct {
-	Worker Worker `json:"worker"`
-}
-
-func (q *Queries) GetWorkersForProject(ctx context.Context, projectID int64) ([]*GetWorkersForProjectRow, error) {
+func (q *Queries) GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error) {
 	rows, err := q.db.Query(ctx, getWorkersForProject, projectID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*GetWorkersForProjectRow
+	var items []*Worker
 	for rows.Next() {
-		var i GetWorkersForProjectRow
-		if err := rows.Scan(&i.Worker.ID, &i.Worker.Token, &i.Worker.CreatedAt); err != nil {
+		var i Worker
+		if err := rows.Scan(&i.ID, &i.Token, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

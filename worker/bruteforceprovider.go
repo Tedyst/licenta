@@ -115,7 +115,7 @@ func (p *remotePasswordProvider) GetPasswordByHash(username, hash string) (strin
 	return "", 0, nil
 }
 
-func (p *remoteBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc bruteforce.StatusFunc, projectID int) (bruteforce.Bruteforcer, error) {
+func (p *remoteBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc bruteforce.StatusFunc, projectID int64) (bruteforce.Bruteforcer, error) {
 	return bruteforce.NewBruteforcer(&remotePasswordProvider{
 		client:  p.client,
 		task:    p.task,

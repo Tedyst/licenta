@@ -28,7 +28,8 @@ var ErrRateLimit error = errors.New("request rate limit exceeded")
 type Product int
 
 const (
-	POSTGRESQL Product = iota
+	PRODUCT_UNKNOWN Product = iota
+	POSTGRESQL
 )
 
 func GetNvdDatabaseType(name string) (Product, error) {

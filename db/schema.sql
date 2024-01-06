@@ -58,6 +58,7 @@ CREATE TABLE projects(
   id bigserial PRIMARY KEY,
   name text NOT NULL,
   organization_id bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  remote boolean NOT NULL DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -199,14 +200,13 @@ CREATE TABLE postgres_databases(
   database_name text NOT NULL,
   username text NOT NULL,
   password text NOT NULL,
-  remote boolean NOT NULL DEFAULT FALSE,
   version text,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE postgres_scan(
+CREATE TABLE scans(
   id bigserial PRIMARY KEY,
-  postgres_database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   status integer NOT NULL,
   error text,
   worker_id bigint REFERENCES workers(id),
@@ -214,19 +214,25 @@ CREATE TABLE postgres_scan(
   ended_at timestamp with time zone
 );
 
-CREATE TABLE postgres_scan_results(
+CREATE TABLE postgres_scans(
   id bigserial PRIMARY KEY,
-  postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,
+  scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+  database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE
+);
+
+CREATE TABLE scan_results(
+  id bigserial PRIMARY KEY,
+  scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
   severity integer NOT NULL,
   message text NOT NULL,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE INDEX postgres_scan_results_postgres_scan_id_idx ON postgres_scan_results(postgres_scan_id);
+CREATE INDEX scan_results_scan_id_idx ON scan_results(scan_id);
 
-CREATE TABLE postgres_scan_bruteforce_results(
+CREATE TABLE scan_bruteforce_results(
   id bigserial PRIMARY KEY,
-  postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,
+  scan_id bigint NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
   username text NOT NULL,
   password text,
   total integer NOT NULL,

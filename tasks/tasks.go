@@ -3,7 +3,6 @@ package tasks
 import (
 	"context"
 
-	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 )
@@ -36,7 +35,14 @@ type VulnerabilityTasksRunner interface {
 }
 
 type ScannerTaskRunner interface {
-	ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error
-	ScanPostgresDBForPublicAccess(ctx context.Context, scan *queries.PostgresScan) error
-	SchedulePostgresScan(ctx context.Context, scan *queries.PostgresScan) error
+	AllScanTaskRunner
+	PostgresTaskRunner
+}
+
+type PostgresTaskRunner interface {
+	ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error
+}
+
+type AllScanTaskRunner interface {
+	RunAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error
 }
