@@ -2,7 +2,12 @@
 	import { theme } from '../lib/stores';
 	import { user } from '$lib/stores';
 
+	import { pa } from '@accuser/svelte-plausible-analytics';
+
+	const { addEvent } = pa;
+
 	function toggleTheme() {
+		addEvent('theme-toggle');
 		theme.set($theme === 'dark' ? 'light' : 'dark');
 	}
 </script>
