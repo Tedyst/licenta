@@ -3152,18 +3152,18 @@ func (c *TransactionQuerierInvalidateTOTPSecretForUserCall) DoAndReturn(f func(c
 }
 
 // ListUsers mocks base method.
-func (m *MockTransactionQuerier) ListUsers(ctx context.Context, arg queries.ListUsersParams) ([]*queries.User, error) {
+func (m *MockTransactionQuerier) ListUsers(ctx context.Context) ([]*queries.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListUsers", ctx, arg)
+	ret := m.ctrl.Call(m, "ListUsers", ctx)
 	ret0, _ := ret[0].([]*queries.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ListUsers indicates an expected call of ListUsers.
-func (mr *MockTransactionQuerierMockRecorder) ListUsers(ctx, arg any) *TransactionQuerierListUsersCall {
+func (mr *MockTransactionQuerierMockRecorder) ListUsers(ctx any) *TransactionQuerierListUsersCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockTransactionQuerier)(nil).ListUsers), ctx, arg)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockTransactionQuerier)(nil).ListUsers), ctx)
 	return &TransactionQuerierListUsersCall{Call: call}
 }
 
@@ -3179,22 +3179,22 @@ func (c *TransactionQuerierListUsersCall) Return(arg0 []*queries.User, arg1 erro
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierListUsersCall) Do(f func(context.Context, queries.ListUsersParams) ([]*queries.User, error)) *TransactionQuerierListUsersCall {
+func (c *TransactionQuerierListUsersCall) Do(f func(context.Context) ([]*queries.User, error)) *TransactionQuerierListUsersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierListUsersCall) DoAndReturn(f func(context.Context, queries.ListUsersParams) ([]*queries.User, error)) *TransactionQuerierListUsersCall {
+func (c *TransactionQuerierListUsersCall) DoAndReturn(f func(context.Context) ([]*queries.User, error)) *TransactionQuerierListUsersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // ListUsersPaginated mocks base method.
-func (m *MockTransactionQuerier) ListUsersPaginated(ctx context.Context, arg queries.ListUsersPaginatedParams) ([]*queries.User, error) {
+func (m *MockTransactionQuerier) ListUsersPaginated(ctx context.Context, arg queries.ListUsersPaginatedParams) ([]*queries.ListUsersPaginatedRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListUsersPaginated", ctx, arg)
-	ret0, _ := ret[0].([]*queries.User)
+	ret0, _ := ret[0].([]*queries.ListUsersPaginatedRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -3212,19 +3212,19 @@ type TransactionQuerierListUsersPaginatedCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierListUsersPaginatedCall) Return(arg0 []*queries.User, arg1 error) *TransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) Return(arg0 []*queries.ListUsersPaginatedRow, arg1 error) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.ListUsersPaginatedRow, error)) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.ListUsersPaginatedRow, error)) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -12,33 +12,47 @@ SELECT
   *
 FROM
   users
-WHERE
-  CASE WHEN @username::text = '' THEN
-    TRUE
-  ELSE
-    username = @username::text
-  END
-  AND CASE WHEN @email::text = '' THEN
-    TRUE
-  ELSE
-    email = @email::text
-  END
-  AND CASE WHEN @admin::text = '' THEN
-    TRUE
-  ELSE
-    admin = @admin::boolean
-  END
 ORDER BY
   id;
 
 -- name: ListUsersPaginated :many
 SELECT
-  *
+  *,
+(
+    SELECT
+      users.id
+    FROM
+      users
+    WHERE
+      users.id > $1
+    ORDER BY
+      users.ID ASC offset $2
+    LIMIT 1) AS next_page_id,
+(
+  SELECT
+    users.id
+  FROM
+    users
+  WHERE
+    users.id <= $1
+  ORDER BY
+    users.ID DESC offset $2
+  LIMIT 1) AS previous_page_id,
+(
+  SELECT
+    users.id
+  FROM
+    users
+  ORDER BY
+    users.ID DESC offset 50
+  LIMIT 1) AS last_page_id
 FROM
   users
+WHERE
+  id > $1
 ORDER BY
-  id
-LIMIT $1 OFFSET $2;
+  id ASC
+LIMIT $2;
 
 -- name: CountUsers :one
 SELECT
