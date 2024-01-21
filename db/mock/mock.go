@@ -3191,10 +3191,10 @@ func (c *TransactionQuerierListUsersCall) DoAndReturn(f func(context.Context) ([
 }
 
 // ListUsersPaginated mocks base method.
-func (m *MockTransactionQuerier) ListUsersPaginated(ctx context.Context, arg queries.ListUsersPaginatedParams) ([]*queries.ListUsersPaginatedRow, error) {
+func (m *MockTransactionQuerier) ListUsersPaginated(ctx context.Context, arg queries.ListUsersPaginatedParams) ([]*queries.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListUsersPaginated", ctx, arg)
-	ret0, _ := ret[0].([]*queries.ListUsersPaginatedRow)
+	ret0, _ := ret[0].([]*queries.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -3212,19 +3212,19 @@ type TransactionQuerierListUsersPaginatedCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierListUsersPaginatedCall) Return(arg0 []*queries.ListUsersPaginatedRow, arg1 error) *TransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) Return(arg0 []*queries.User, arg1 error) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.ListUsersPaginatedRow, error)) *TransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.ListUsersPaginatedRow, error)) *TransactionQuerierListUsersPaginatedCall {
+func (c *TransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

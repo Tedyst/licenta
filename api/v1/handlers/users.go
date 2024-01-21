@@ -36,8 +36,8 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 	}
 
 	users, err := server.DatabaseProvider.ListUsersPaginated(ctx, queries.ListUsersPaginatedParams{
-		Limit:  limit,
-		Offset: offset,
+		StartID:      0,
+		ItemsPerPage: limit,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "GetUsers: error getting users")

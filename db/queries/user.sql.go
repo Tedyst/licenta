@@ -289,35 +289,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]*User, error) {
 
 const listUsersPaginated = `-- name: ListUsersPaginated :many
 SELECT
-  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at,
-(
-    SELECT
-      users.id
-    FROM
-      users
-    WHERE
-      users.id > $1
-    ORDER BY
-      users.ID ASC offset $2
-    LIMIT 1) AS next_page_id,
-(
-  SELECT
-    users.id
-  FROM
-    users
-  WHERE
-    users.id <= $1
-  ORDER BY
-    users.ID DESC offset $2
-  LIMIT 1) AS previous_page_id,
-(
-  SELECT
-    users.id
-  FROM
-    users
-  ORDER BY
-    users.ID DESC offset 50
-  LIMIT 1) AS last_page_id
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
 FROM
   users
 WHERE
@@ -328,41 +300,19 @@ LIMIT $2
 `
 
 type ListUsersPaginatedParams struct {
-	ID     int64 `json:"id"`
-	Offset int32 `json:"offset"`
+	StartID      int64 `json:"start_id"`
+	ItemsPerPage int32 `json:"items_per_page"`
 }
 
-type ListUsersPaginatedRow struct {
-	ID                int64              `json:"id"`
-	Username          string             `json:"username"`
-	Password          string             `json:"password"`
-	Email             string             `json:"email"`
-	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
-	TotpSecret        sql.NullString     `json:"totp_secret"`
-	RecoverSelector   sql.NullString     `json:"recover_selector"`
-	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
-	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
-	LoginAttemptCount int32              `json:"login_attempt_count"`
-	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
-	Locked            pgtype.Timestamptz `json:"locked"`
-	ConfirmSelector   sql.NullString     `json:"confirm_selector"`
-	ConfirmVerifier   sql.NullString     `json:"confirm_verifier"`
-	Confirmed         bool               `json:"confirmed"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	NextPageID        int64              `json:"next_page_id"`
-	PreviousPageID    int64              `json:"previous_page_id"`
-	LastPageID        int64              `json:"last_page_id"`
-}
-
-func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*ListUsersPaginatedRow, error) {
-	rows, err := q.db.Query(ctx, listUsersPaginated, arg.ID, arg.Offset)
+func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error) {
+	rows, err := q.db.Query(ctx, listUsersPaginated, arg.StartID, arg.ItemsPerPage)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*ListUsersPaginatedRow
+	var items []*User
 	for rows.Next() {
-		var i ListUsersPaginatedRow
+		var i User
 		if err := rows.Scan(
 			&i.ID,
 			&i.Username,
@@ -380,9 +330,6 @@ func (q *Queries) ListUsersPaginated(ctx context.Context, arg ListUsersPaginated
 			&i.ConfirmVerifier,
 			&i.Confirmed,
 			&i.CreatedAt,
-			&i.NextPageID,
-			&i.PreviousPageID,
-			&i.LastPageID,
 		); err != nil {
 			return nil, err
 		}

@@ -91,7 +91,7 @@ type Querier interface {
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error
 	InvalidateTOTPSecretForUser(ctx context.Context, userID int64) error
 	ListUsers(ctx context.Context) ([]*User, error)
-	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*ListUsersPaginatedRow, error)
+	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error

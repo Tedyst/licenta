@@ -12,20 +12,20 @@ import (
 	"github.com/tedyst/licenta/scanner"
 )
 
-func waitForPostgresScan(ctx context.Context, client generated.ClientWithResponsesInterface, scan *generated.PostgresScan) (int, error) {
-	slog.InfoContext(ctx, "Waiting for postgres scan to finish", "postgres_scan", scan.Id)
+func waitForScan(ctx context.Context, client generated.ClientWithResponsesInterface, scan *generated.Scan) (int, error) {
+	slog.InfoContext(ctx, "Waiting for scan to finish", "scan", scan.Id)
 
 	for {
-		response, err := client.GetScannerPostgresScanScanidWithResponse(ctx, int64(scan.Id))
+		response, err := client.GetScanIdWithResponse(ctx, int64(scan.Id))
 		if err != nil {
 			return 0, err
 		}
 
-		slog.DebugContext(ctx, "Received postgres scan status from server", "status_code", response.StatusCode())
+		slog.DebugContext(ctx, "Received scan status from server", "status_code", response.StatusCode(), "scan", scan.Id)
 
 		switch response.StatusCode() {
 		case http.StatusOK:
-			slog.DebugContext(ctx, "Received postgres scan status from server", "status", response.JSON200.Scan.Status, "severity", response.JSON200.Scan.MaximumSeverity, "error", response.JSON200.Scan.Error)
+			slog.DebugContext(ctx, "Received scan status from server", "status", response.JSON200.Scan.Status, "severity", response.JSON200.Scan.MaximumSeverity, "error", response.JSON200.Scan.Error, "scan", scan.Id)
 			if response.JSON200.Scan.Error != "" {
 				return 0, errors.New("received error from remote server: " + response.JSON200.Scan.Error)
 			}
@@ -66,7 +66,7 @@ func waitForPostgresScan(ctx context.Context, client generated.ClientWithRespons
 func ProjectRunAndWaitResults(ctx context.Context, client generated.ClientWithResponsesInterface, projectID int) (int, error) {
 	slog.InfoContext(ctx, "Starting project run", "project", projectID)
 
-	response, err := client.PostProjectProjectidRunWithResponse(ctx, int64(projectID))
+	response, err := client.PostProjectIdRunWithResponse(ctx, int64(projectID))
 	if err != nil {
 		return 0, err
 	}
@@ -77,8 +77,11 @@ func ProjectRunAndWaitResults(ctx context.Context, client generated.ClientWithRe
 
 	switch response.StatusCode() {
 	case http.StatusOK:
-		for _, postgresScan := range response.JSON200.PostgresScans {
-			severity, err := waitForPostgresScan(ctx, client, &postgresScan)
+		if !response.JSON200.Success {
+			return 0, errors.New("success is not false")
+		}
+		for _, scan := range *response.JSON200.Scans {
+			severity, err := waitForScan(ctx, client, &scan)
 			if err != nil {
 				return maximumSeverity, err
 			}

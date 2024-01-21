@@ -17,16 +17,26 @@ ORDER BY
 
 -- name: ListUsersPaginated :many
 SELECT
-  *,
-(
+  *
+FROM
+  users
+WHERE
+  id > sqlc.arg(start_id)
+ORDER BY
+  id ASC
+LIMIT sqlc.arg(items_per_page);
+
+-- ListUsersPaginationInfo :one
+SELECT
+  (
     SELECT
       users.id
     FROM
       users
     WHERE
-      users.id > $1
+      users.id > sqlc.arg(start_id)
     ORDER BY
-      users.ID ASC offset $2
+      users.ID ASC offset sqlc.arg(items_per_page)
     LIMIT 1) AS next_page_id,
 (
   SELECT
@@ -34,9 +44,9 @@ SELECT
   FROM
     users
   WHERE
-    users.id <= $1
+    users.id <= sqlc.arg(start_id)
   ORDER BY
-    users.ID DESC offset $2
+    users.ID DESC offset sqlc.arg(items_per_page)
   LIMIT 1) AS previous_page_id,
 (
   SELECT
@@ -44,15 +54,8 @@ SELECT
   FROM
     users
   ORDER BY
-    users.ID DESC offset 50
-  LIMIT 1) AS last_page_id
-FROM
-  users
-WHERE
-  id > $1
-ORDER BY
-  id ASC
-LIMIT $2;
+    users.ID DESC offset sqlc.arg(items_per_page)
+  LIMIT 1) AS last_page_id;
 
 -- name: CountUsers :one
 SELECT
