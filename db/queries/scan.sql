@@ -1,6 +1,6 @@
 -- name: CreateScan :one
-INSERT INTO scans(status, worker_id)
-    VALUES ($1, $2)
+INSERT INTO scans(status, worker_id, project_id)
+    VALUES ($1, $2, $3)
 RETURNING
     *;
 

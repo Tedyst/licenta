@@ -69,7 +69,7 @@ func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresSc
 	}
 
 	if err := runner.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
-		ID:     postgresScan.ScanID,
+		ID:     scan.Scan.ID,
 		Status: models.SCAN_FINISHED,
 	}); err != nil {
 		return errors.Wrap(err, "could not update scan status")

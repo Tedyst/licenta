@@ -2,8 +2,8 @@ package rbac
 
 import (
 	"context"
-	"database/sql"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -45,7 +45,7 @@ func (r *rbacImpl) GetPermissionsForOrganization(ctx context.Context, org *model
 		OrganizationID: org.ID,
 		UserID:         user.ID,
 	})
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != pgx.ErrNoRows {
 		return None, err
 	}
 
@@ -58,7 +58,7 @@ func (r *rbacImpl) GetPermissionsForProject(ctx context.Context, project *models
 		UserID:         user.ID,
 		OrganizationID: project.OrganizationID,
 	})
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != pgx.ErrNoRows {
 		return None, err
 	}
 

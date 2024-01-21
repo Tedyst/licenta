@@ -2,11 +2,12 @@ package ci
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
@@ -18,7 +19,7 @@ func waitForScan(ctx context.Context, client generated.ClientWithResponsesInterf
 	for {
 		response, err := client.GetScanIdWithResponse(ctx, int64(scan.Id))
 		if err != nil {
-			return 0, err
+			return 0, errors.Wrap(err, "cannot get scan")
 		}
 
 		slog.DebugContext(ctx, "Received scan status from server", "status_code", response.StatusCode(), "scan", scan.Id)
@@ -42,15 +43,15 @@ func waitForScan(ctx context.Context, client generated.ClientWithResponsesInterf
 				for _, result := range response.JSON200.Results {
 					switch result.Severity {
 					case int(scanner.SEVERITY_WARNING):
-						slog.InfoContext(ctx, "Found problem", "postgres_scan", scan.Id, "severity", result.Severity, "title", result.Message)
+						slog.InfoContext(ctx, "Found problem", "scan", scan.Id, "severity", result.Severity, "title", result.Message, "source", result.ScanSource)
 					case int(scanner.SEVERITY_MEDIUM):
-						slog.WarnContext(ctx, "Found problem", "postgres_scan", scan.Id, "severity", result.Severity, "title", result.Message)
+						slog.WarnContext(ctx, "Found problem", "scan", scan.Id, "severity", result.Severity, "title", result.Message, "source", result.ScanSource)
 					case int(scanner.SEVERITY_HIGH):
-						slog.ErrorContext(ctx, "Found problem", "postgres_scan", scan.Id, "severity", result.Severity, "title", result.Message)
+						slog.ErrorContext(ctx, "Found problem", "scan", scan.Id, "severity", result.Severity, "title", result.Message, "source", result.ScanSource)
 					}
 				}
 
-				slog.InfoContext(ctx, "Postgres scan finished", "postgres_scan", scan.Id, "time", endedAt.Sub(createdAt).Milliseconds())
+				slog.InfoContext(ctx, "Scan finished", "scan", scan.Id, "time", fmt.Sprint(endedAt.Sub(createdAt).Milliseconds())+"ms")
 				return response.JSON200.Scan.MaximumSeverity, nil
 			}
 		default:

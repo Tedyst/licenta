@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	errs "errors"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -53,7 +54,7 @@ func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *models.Scan
 		}); err2 != nil {
 			return errs.Join(err, errors.Wrap(err2, "could not update scan status"))
 		}
-		return err
+		return errors.Wrap(err, "could not run all scanners")
 	}
 
 	return nil
@@ -62,21 +63,23 @@ func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *models.Scan
 func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
 	project, err := r.queries.GetProject(ctx, scan.ProjectID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot get project")
 	}
 
 	postgresScan, err := r.queries.GetPostgresScanByScanID(ctx, scan.ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot get postgres scan")
 	}
 	if err != pgx.ErrNoRows {
 		err := r.postgresScanRunner.scanPostgresDB(ctx, postgresScan, scan, project.Remote && !runningRemote)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "cannot run postgres scanner")
 		}
 	}
 
 	if project.Remote && !runningRemote {
+		slog.DebugContext(ctx, "Sending task to remote workers", "scan", scan.ID)
+
 		workers, err := r.queries.GetWorkersForProject(ctx, scan.ProjectID)
 		if err != nil {
 			return errors.Wrap(err, "could not get workers for project")
@@ -89,7 +92,7 @@ func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *models.Scan
 		message := messages.GetStartScanMessage(scan)
 
 		for _, worker := range workers {
-			err := r.messageExchange.PublishSendScanToWorkerMessage(ctx, worker, &message)
+			err := r.messageExchange.PublishSendScanToWorkerMessage(ctx, worker, message)
 			if err != nil {
 				return errors.Wrap(err, "could not publish message")
 			}
@@ -99,8 +102,9 @@ func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *models.Scan
 	}
 
 	if err := r.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
-		ID:     postgresScan.ScanID,
-		Status: models.SCAN_FINISHED,
+		ID:      scan.ID,
+		Status:  models.SCAN_FINISHED,
+		EndedAt: pgtype.Timestamptz{Time: time.Now(), Valid: runningRemote || !project.Remote},
 	}); err != nil {
 		return errors.Wrap(err, "could not update scan status")
 	}

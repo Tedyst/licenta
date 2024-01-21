@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
@@ -15,7 +15,7 @@ import (
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
 	w, err := server.workerauth.GetWorker(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "cannot get worker")
 	}
 	if w == nil {
 		return generated.GetWorkerGetTask401JSONResponse{
@@ -29,7 +29,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 
 	message, ok, err := server.MessageExchange.ReceiveSendScanToWorkerMessage(ctx, w)
 	if err != nil && err != context.DeadlineExceeded {
-		return nil, err
+		return nil, errors.Wrap(err, "cannot receive message")
 	}
 
 	if !ok {
@@ -48,7 +48,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		WorkerID: sql.NullInt64{Int64: int64(w.ID), Valid: true},
 	})
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
+		return nil, errors.Wrap(err, "cannot bind scan to worker")
 	}
 
 	if boundScan == nil {
@@ -59,16 +59,16 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 	}
 
 	scan, err := server.DatabaseProvider.GetScan(ctx, int64(message.ScanID))
-	if err != nil && err != sql.ErrNoRows {
-		return nil, err
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, errors.Wrap(err, "cannot get scan")
 	}
 
-	postgresScan, err := server.DatabaseProvider.GetPostgresScan(ctx, int64(message.ScanID))
-	if err != nil && err != sql.ErrNoRows {
-		return nil, err
+	postgresScan, err := server.DatabaseProvider.GetPostgresScanByScanID(ctx, message.ScanID)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, errors.Wrap(err, "cannot get postgres scan")
 	}
 
-	var postgresScanResponse *generated.PostgresScan
+	var postgresScanResponse *generated.PostgresScan = nil
 	if postgresScan != nil {
 		postgresScanResponse = &generated.PostgresScan{
 			DatabaseId: int(postgresScan.DatabaseID),

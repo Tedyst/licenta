@@ -19,7 +19,7 @@ type SendScanToWorkerMessage struct {
 }
 
 type Exchange interface {
-	PublishSendScanToWorkerMessage(ctx context.Context, worker *models.Worker, message *SendScanToWorkerMessage) error
+	PublishSendScanToWorkerMessage(ctx context.Context, worker *models.Worker, message SendScanToWorkerMessage) error
 	ReceiveSendScanToWorkerMessage(ctx context.Context, worker *models.Worker) (SendScanToWorkerMessage, bool, error)
 }
 

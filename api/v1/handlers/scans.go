@@ -14,10 +14,10 @@ import (
 
 func (server *serverHandler) GetScanId(ctx context.Context, request generated.GetScanIdRequestObject) (generated.GetScanIdResponseObject, error) {
 	scan, err := server.DatabaseProvider.GetScan(ctx, request.Id)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, errors.Wrap(err, "GetScanId: error getting scan")
 	}
-	if err == sql.ErrNoRows {
+	if err == pgx.ErrNoRows {
 		return generated.GetScanId404JSONResponse{
 			Success: false,
 			Message: "Scan not found",
@@ -25,12 +25,12 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 	}
 
 	psScan, err := server.DatabaseProvider.GetPostgresScan(ctx, scan.PostgresScan)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan")
 	}
 
 	var postgresScan *generated.PostgresScan
-	if err != sql.ErrNoRows {
+	if err != pgx.ErrNoRows {
 		postgresScan = &generated.PostgresScan{
 			DatabaseId: int(psScan.DatabaseID),
 			Id:         int(psScan.ID),
@@ -77,7 +77,7 @@ func (server *serverHandler) PatchScanId(ctx context.Context, request generated.
 	}
 
 	scan, err := server.DatabaseProvider.GetScan(ctx, request.Id)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, errors.Wrap(err, "PatchScanId: error getting scan")
 	}
 	if err == pgx.ErrNoRows {

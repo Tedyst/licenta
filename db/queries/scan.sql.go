@@ -13,19 +13,20 @@ import (
 )
 
 const createScan = `-- name: CreateScan :one
-INSERT INTO scans(status, worker_id)
-    VALUES ($1, $2)
+INSERT INTO scans(status, worker_id, project_id)
+    VALUES ($1, $2, $3)
 RETURNING
     id, project_id, status, error, worker_id, created_at, ended_at
 `
 
 type CreateScanParams struct {
-	Status   int32         `json:"status"`
-	WorkerID sql.NullInt64 `json:"worker_id"`
+	Status    int32         `json:"status"`
+	WorkerID  sql.NullInt64 `json:"worker_id"`
+	ProjectID int64         `json:"project_id"`
 }
 
 func (q *Queries) CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, error) {
-	row := q.db.QueryRow(ctx, createScan, arg.Status, arg.WorkerID)
+	row := q.db.QueryRow(ctx, createScan, arg.Status, arg.WorkerID, arg.ProjectID)
 	var i Scan
 	err := row.Scan(
 		&i.ID,

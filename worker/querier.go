@@ -12,6 +12,7 @@ import (
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/tasks/local"
 )
 
@@ -42,6 +43,8 @@ func (q *remoteQuerier) UpdateScanStatus(ctx context.Context, params queries.Upd
 		return errors.Wrap(err, "cannot update scan status")
 	}
 
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+
 	switch response.StatusCode() {
 	case http.StatusOK:
 		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
@@ -62,6 +65,8 @@ func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.Cre
 	if err != nil {
 		return nil, err
 	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
 
 	switch response.StatusCode() {
 	case http.StatusOK:
@@ -95,10 +100,12 @@ func (q *remoteQuerier) UpdateScanBruteforceResult(ctx context.Context, params q
 }
 
 func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error) {
-	response, err := q.client.GetCvesDbTypeVersionWithResponse(ctx, string(arg.DatabaseType), arg.Version)
+	response, err := q.client.GetCvesDbTypeVersionWithResponse(ctx, nvd.GetNvdDatabaseName(nvd.Product(arg.DatabaseType)), arg.Version)
 	if err != nil {
 		return nil, err
 	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
 
 	switch response.StatusCode() {
 	case http.StatusOK:
@@ -129,8 +136,11 @@ func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg quer
 func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error) {
 	response, err := q.client.GetPostgresIdWithResponse(ctx, q.postgresScan.DatabaseID)
 	if err != nil {
-		return nil, errors.New("cannot get postgres database")
+		return nil, errors.New("cannot get postgres database from server")
 	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+
 	switch response.StatusCode() {
 	case http.StatusOK:
 		return &queries.GetPostgresDatabaseRow{
@@ -161,6 +171,8 @@ func (q *remoteQuerier) UpdatePostgresVersion(ctx context.Context, params querie
 		return err
 	}
 
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+
 	switch response.StatusCode() {
 	case http.StatusOK:
 		return nil
@@ -174,6 +186,8 @@ func (q *remoteQuerier) GetProject(ctx context.Context, id int64) (*queries.Proj
 	if err != nil {
 		return nil, errors.New("cannot get project")
 	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
 
 	switch response.StatusCode() {
 	case http.StatusOK:

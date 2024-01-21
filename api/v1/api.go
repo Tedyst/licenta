@@ -3,6 +3,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -70,6 +71,9 @@ func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
 			if err == nil {
 				return
 			}
+
+			slog.ErrorContext(r.Context(), "Error while processing request", "error", err)
+
 			var message = "Internal server error"
 			if config.Debug {
 				message = err.Error()

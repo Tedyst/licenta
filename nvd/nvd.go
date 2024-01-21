@@ -32,12 +32,21 @@ const (
 	POSTGRESQL
 )
 
-func GetNvdDatabaseType(name string) (Product, error) {
+func GetNvdDatabaseType(name string) Product {
 	switch name {
 	case "postgres":
-		return POSTGRESQL, nil
+		return POSTGRESQL
 	default:
-		return 0, errors.New("Product does not exist")
+		return PRODUCT_UNKNOWN
+	}
+}
+
+func GetNvdDatabaseName(t Product) string {
+	switch t {
+	case POSTGRESQL:
+		return "postgres"
+	default:
+		return "unknown"
 	}
 }
 

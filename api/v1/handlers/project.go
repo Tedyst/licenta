@@ -56,7 +56,8 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 	var scans []generated.Scan
 	for _, db := range postgres_databases {
 		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
-			Status: models.SCAN_NOT_STARTED,
+			Status:    models.SCAN_NOT_STARTED,
+			ProjectID: db.ProjectID,
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "error creating postgres scan")

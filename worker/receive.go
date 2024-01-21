@@ -30,7 +30,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 
 		switch task.StatusCode() {
 		case http.StatusOK:
-			slog.Info("Received task", "task", task.JSON200)
+			slog.Info("Received task", "task", string(task.Body))
 
 			scan := models.Scan{
 				ID:        int64(task.JSON200.Scan.Id),
@@ -46,6 +46,8 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 					ScanID:     int64(task.JSON200.Scan.Id),
 				}
 			}
+
+			slog.DebugContext(ctx, "Got task from remote server", "scan", scan, "postgres_scan", postgresScan)
 
 			localExchange := localexchange.NewLocalExchange()
 			runner := local.NewAllScannerRunner(&remoteQuerier{
@@ -64,6 +66,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 		case http.StatusAccepted:
 			slog.Debug("No task available yet, retrying in 5 seconds...")
 		default:
+			slog.ErrorContext(ctx, "got invalid response from server", "response", task)
 			return errors.New("error receiving task")
 		}
 
