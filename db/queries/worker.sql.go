@@ -44,7 +44,7 @@ func (q *Queries) BindScanToWorker(ctx context.Context, arg BindScanToWorkerPara
 
 const getWorkerByToken = `-- name: GetWorkerByToken :one
 SELECT
-    id, token, created_at
+    id, token, organization, created_at
 FROM
     workers
 WHERE
@@ -54,13 +54,18 @@ WHERE
 func (q *Queries) GetWorkerByToken(ctx context.Context, token string) (*Worker, error) {
 	row := q.db.QueryRow(ctx, getWorkerByToken, token)
 	var i Worker
-	err := row.Scan(&i.ID, &i.Token, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Organization,
+		&i.CreatedAt,
+	)
 	return &i, err
 }
 
 const getWorkerForScan = `-- name: GetWorkerForScan :one
 SELECT
-    workers.id, workers.token, workers.created_at
+    workers.id, workers.token, workers.organization, workers.created_at
 FROM
     workers
     INNER JOIN scans ON workers.id = scans.worker_id
@@ -71,13 +76,18 @@ WHERE
 func (q *Queries) GetWorkerForScan(ctx context.Context, id int64) (*Worker, error) {
 	row := q.db.QueryRow(ctx, getWorkerForScan, id)
 	var i Worker
-	err := row.Scan(&i.ID, &i.Token, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Organization,
+		&i.CreatedAt,
+	)
 	return &i, err
 }
 
 const getWorkersForProject = `-- name: GetWorkersForProject :many
 SELECT
-    workers.id, workers.token, workers.created_at
+    workers.id, workers.token, workers.organization, workers.created_at
 FROM
     workers
     INNER JOIN worker_projects ON workers.id = worker_projects.worker_id
@@ -94,7 +104,12 @@ func (q *Queries) GetWorkersForProject(ctx context.Context, projectID int64) ([]
 	var items []*Worker
 	for rows.Next() {
 		var i Worker
-		if err := rows.Scan(&i.ID, &i.Token, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Token,
+			&i.Organization,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

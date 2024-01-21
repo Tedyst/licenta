@@ -209,7 +209,7 @@ CREATE TABLE scans(
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   status integer NOT NULL,
   error text,
-  worker_id bigint REFERENCES workers(id),
+  worker_id bigint REFERENCES workers(id) ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
   ended_at timestamp with time zone
 );
@@ -253,6 +253,7 @@ CREATE TABLE bruteforced_passwords(
 CREATE TABLE workers(
   id bigserial PRIMARY KEY,
   token text NOT NULL UNIQUE,
+  organization bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

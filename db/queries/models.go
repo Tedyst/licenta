@@ -267,9 +267,10 @@ type WebauthnCredential struct {
 }
 
 type Worker struct {
-	ID        int64              `json:"id"`
-	Token     string             `json:"token"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID           int64              `json:"id"`
+	Token        string             `json:"token"`
+	Organization int64              `json:"organization"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 
 type WorkerProject struct {
