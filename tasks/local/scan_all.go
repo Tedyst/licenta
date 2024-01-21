@@ -15,9 +15,9 @@ import (
 	"github.com/tedyst/licenta/models"
 )
 
-type allScannerQuerier interface {
-	scanQuerier
-	postgresQuerier
+type AllScannerQuerier interface {
+	ScanQuerier
+	PostgresQuerier
 
 	GetProject(ctx context.Context, id int64) (*queries.Project, error)
 	GetPostgresScanByScanID(ctx context.Context, scanID int64) (*queries.PostgresScan, error)
@@ -26,13 +26,13 @@ type allScannerQuerier interface {
 }
 
 type allScannerRunner struct {
-	queries         allScannerQuerier
+	queries         AllScannerQuerier
 	messageExchange messages.Exchange
 
 	postgresScanRunner postgresScanRunner
 }
 
-func NewAllScannerRunner(queries allScannerQuerier, messageExchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *allScannerRunner {
+func NewAllScannerRunner(queries AllScannerQuerier, messageExchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *allScannerRunner {
 	return &allScannerRunner{
 		queries:            queries,
 		messageExchange:    messageExchange,

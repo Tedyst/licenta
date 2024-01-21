@@ -10,7 +10,6 @@ import (
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/worker"
 )
 
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
@@ -79,17 +78,15 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 
 	return generated.GetWorkerGetTask200JSONResponse{
 		Success: true,
-		Task: generated.WorkerTask{
-			Type: generated.WorkerTaskType(worker.TaskTypePostgresScan),
-			Scan: generated.Scan{
-				Id:              int(scan.Scan.ID),
-				CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
-				EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
-				Error:           scan.Scan.Error.String,
-				PostgresScan:    postgresScanResponse,
-				Status:          int(scan.Scan.Status),
-				MaximumSeverity: int(scan.MaximumSeverity),
-			},
+		Scan: generated.Scan{
+			Id:              int(scan.Scan.ID),
+			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
+			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
+			Error:           scan.Scan.Error.String,
+			PostgresScan:    postgresScanResponse,
+			Status:          int(scan.Scan.Status),
+			MaximumSeverity: int(scan.MaximumSeverity),
+			ProjectId:       int(scan.Scan.ProjectID),
 		},
 	}, nil
 }

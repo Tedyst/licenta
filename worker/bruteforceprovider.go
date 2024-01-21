@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/bruteforce"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
 )
 
@@ -17,12 +18,12 @@ type internalPassword struct {
 
 type remoteBruteforceProvider struct {
 	client generated.ClientWithResponsesInterface
-	task   Task
+	scan   *models.Scan
 }
 
 type remotePasswordProvider struct {
 	client generated.ClientWithResponsesInterface
-	task   Task
+	scan   *models.Scan
 
 	context context.Context
 
@@ -40,8 +41,8 @@ func (p *remotePasswordProvider) readBatch() error {
 	if len(p.currentBatch) > 0 {
 		lastID = int32(p.currentBatch[len(p.currentBatch)-1].ID)
 	}
-	response, err := p.client.GetProjectProjectidBruteforcePasswordsWithResponse(p.context, p.task.PostgresScan.Database.ID, &generated.GetProjectProjectidBruteforcePasswordsParams{
-		LastId: &lastID,
+	response, err := p.client.GetProjectIdBruteforcePasswordsWithResponse(p.context, p.scan.ProjectID, &generated.GetProjectIdBruteforcePasswordsParams{
+		LastPasswordId: &lastID,
 	})
 
 	if err != nil {
@@ -118,7 +119,7 @@ func (p *remotePasswordProvider) GetPasswordByHash(username, hash string) (strin
 func (p *remoteBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc bruteforce.StatusFunc, projectID int64) (bruteforce.Bruteforcer, error) {
 	return bruteforce.NewBruteforcer(&remotePasswordProvider{
 		client:  p.client,
-		task:    p.task,
+		scan:    p.scan,
 		context: ctx,
 	}, sc, statusFunc), nil
 }

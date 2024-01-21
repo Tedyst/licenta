@@ -22,21 +22,21 @@ func getPostgresConnectString(db *models.PostgresDatabases) string {
 	return fmt.Sprintf("host=%s port=%d database=%s user=%s password=%s", db.Host, db.Port, db.DatabaseName, db.Username, db.Password)
 }
 
-type postgresQuerier interface {
-	scanQuerier
+type PostgresQuerier interface {
+	ScanQuerier
 
 	GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error)
 	UpdatePostgresVersion(ctx context.Context, params queries.UpdatePostgresVersionParams) error
 }
 
 type postgresScanRunner struct {
-	queries            postgresQuerier
+	queries            PostgresQuerier
 	bruteforceProvider bruteforce.BruteforceProvider
 
 	PostgresScannerProvider func(ctx context.Context, db *pgx.Conn) (scanner.Scanner, error)
 }
 
-func NewPostgresScanRunner(queries postgresQuerier, bruteforceProvider bruteforce.BruteforceProvider) *postgresScanRunner {
+func NewPostgresScanRunner(queries PostgresQuerier, bruteforceProvider bruteforce.BruteforceProvider) *postgresScanRunner {
 	return &postgresScanRunner{
 		queries:                 queries,
 		bruteforceProvider:      bruteforceProvider,

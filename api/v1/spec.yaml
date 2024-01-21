@@ -169,12 +169,12 @@ paths:
                 type: object
                 required:
                   - success
-                  - task
+                  - scan
                 properties:
                   success:
                     type: boolean
-                  task:
-                    $ref: '#/components/schemas/WorkerTask'
+                  scan:
+                    $ref: '#/components/schemas/Scan'
         "202":
           description: No task available
           content:
@@ -624,6 +624,7 @@ components:
         - name
         - organization_id
         - created_at
+        - remote
       properties:
         id:
           type: integer
@@ -643,6 +644,10 @@ components:
           type: string
           description: The date the project was created
           example: 2019-01-23T16:00:00Z
+        remote:
+          type: boolean
+          description: Whether to use the workers associated with the project instead of the default ones
+          example: false
     CVE:
       required:
         - id
@@ -775,6 +780,7 @@ components:
         - ended_at
         - error
         - maximum_severity
+        - project_id
       type: object
       properties:
         id:
@@ -791,6 +797,8 @@ components:
           type: integer
         postgres_scan:
           $ref: "#/components/schemas/PostgresScan"
+        project_id:
+          type: integer
     PostgresScan:
       required:
         - id
@@ -801,18 +809,6 @@ components:
           type: integer
         database_id:
           type: integer
-    WorkerTask:
-      type: object
-      required:
-        - type
-        - scan
-      properties:
-        type:
-          type: string
-          description: The Task type
-          enum: [postgres_scan]
-        scan:
-          $ref: "#/components/schemas/Scan"
     LoginUser:
       required:
         - username

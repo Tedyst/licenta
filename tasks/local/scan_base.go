@@ -14,7 +14,7 @@ import (
 	"github.com/tedyst/licenta/scanner"
 )
 
-type scanQuerier interface {
+type ScanQuerier interface {
 	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 	UpdateScanStatus(ctx context.Context, params queries.UpdateScanStatusParams) error
 	CreateScanResult(ctx context.Context, params queries.CreateScanResultParams) (*queries.ScanResult, error)
@@ -25,7 +25,7 @@ type scanQuerier interface {
 }
 
 type baseScanRunner struct {
-	queries            scanQuerier
+	queries            ScanQuerier
 	bruteforceProvider bruteforce.BruteforceProvider
 
 	logger *slog.Logger
@@ -39,7 +39,7 @@ type baseScanRunner struct {
 	scanner scanner.Scanner
 }
 
-func createScanner(ctx context.Context, q scanQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *models.Scan, sc scanner.Scanner) *baseScanRunner {
+func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *models.Scan, sc scanner.Scanner) *baseScanRunner {
 	runner := &baseScanRunner{
 		queries:            q,
 		bruteforceProvider: bruteforceProvider,
