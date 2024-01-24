@@ -61,8 +61,8 @@ WHERE
     scans.id = $1;
 
 -- name: CreateScanBruteforceResult :one
-INSERT INTO scan_bruteforce_results(scan_id, username, PASSWORD, tried, total)
-    VALUES ($1, $2, $3, $4, $5)
+INSERT INTO scan_bruteforce_results(scan_id, scan_type, username, PASSWORD, tried, total)
+    VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING
     *;
 
@@ -75,6 +75,14 @@ SET
     total = $4
 WHERE
     id = $1;
+
+-- name: GetScanBruteforceResults :many
+SELECT
+    *
+FROM
+    scan_bruteforce_results
+WHERE
+    scan_id = $1;
 
 -- name: GetScansForProject :many
 SELECT

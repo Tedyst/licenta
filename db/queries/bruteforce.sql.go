@@ -10,6 +10,43 @@ import (
 	"database/sql"
 )
 
+const createBruteforcedPassword = `-- name: CreateBruteforcedPassword :one
+INSERT INTO bruteforced_passwords(hash, username, PASSWORD, last_bruteforce_id, project_id)
+    VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT
+    DO NOTHING
+RETURNING
+    id, hash, username, password, last_bruteforce_id, project_id
+`
+
+type CreateBruteforcedPasswordParams struct {
+	Hash             string         `json:"hash"`
+	Username         string         `json:"username"`
+	Password         sql.NullString `json:"password"`
+	LastBruteforceID sql.NullInt64  `json:"last_bruteforce_id"`
+	ProjectID        sql.NullInt64  `json:"project_id"`
+}
+
+func (q *Queries) CreateBruteforcedPassword(ctx context.Context, arg CreateBruteforcedPasswordParams) (*BruteforcedPassword, error) {
+	row := q.db.QueryRow(ctx, createBruteforcedPassword,
+		arg.Hash,
+		arg.Username,
+		arg.Password,
+		arg.LastBruteforceID,
+		arg.ProjectID,
+	)
+	var i BruteforcedPassword
+	err := row.Scan(
+		&i.ID,
+		&i.Hash,
+		&i.Username,
+		&i.Password,
+		&i.LastBruteforceID,
+		&i.ProjectID,
+	)
+	return &i, err
+}
+
 const getBruteforcePasswordsForProjectCount = `-- name: GetBruteforcePasswordsForProjectCount :one
 SELECT
     SUM(count)
@@ -113,24 +150,27 @@ func (q *Queries) GetBruteforcePasswordsSpecificForProject(ctx context.Context, 
 	return items, nil
 }
 
-const getBruteforcedPasswordByHashAndUsername = `-- name: GetBruteforcedPasswordByHashAndUsername :one
+const getBruteforcedPasswords = `-- name: GetBruteforcedPasswords :one
 SELECT
-    id, hash, username, password, last_bruteforce_id
+    id, hash, username, password, last_bruteforce_id, project_id
 FROM
     bruteforced_passwords
 WHERE
     hash = $1
     AND username = $2
+    AND (project_id = $3
+        OR project_id = NULL)
 LIMIT 1
 `
 
-type GetBruteforcedPasswordByHashAndUsernameParams struct {
-	Hash     string `json:"hash"`
-	Username string `json:"username"`
+type GetBruteforcedPasswordsParams struct {
+	Hash      string        `json:"hash"`
+	Username  string        `json:"username"`
+	ProjectID sql.NullInt64 `json:"project_id"`
 }
 
-func (q *Queries) GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg GetBruteforcedPasswordByHashAndUsernameParams) (*BruteforcedPassword, error) {
-	row := q.db.QueryRow(ctx, getBruteforcedPasswordByHashAndUsername, arg.Hash, arg.Username)
+func (q *Queries) GetBruteforcedPasswords(ctx context.Context, arg GetBruteforcedPasswordsParams) (*BruteforcedPassword, error) {
+	row := q.db.QueryRow(ctx, getBruteforcedPasswords, arg.Hash, arg.Username, arg.ProjectID)
 	var i BruteforcedPassword
 	err := row.Scan(
 		&i.ID,
@@ -138,8 +178,50 @@ func (q *Queries) GetBruteforcedPasswordByHashAndUsername(ctx context.Context, a
 		&i.Username,
 		&i.Password,
 		&i.LastBruteforceID,
+		&i.ProjectID,
 	)
 	return &i, err
+}
+
+const getSpecificBruteforcePasswordID = `-- name: GetSpecificBruteforcePasswordID :one
+SELECT
+    subq.id
+FROM (
+    SELECT
+        id
+    FROM
+        default_bruteforce_passwords
+    WHERE
+        default_bruteforce_passwords.PASSWORD = $1
+    UNION ALL
+    SELECT
+        -1
+    FROM
+        project_docker_layer_results
+    WHERE
+        project_docker_layer_results.project_id = $2
+        AND project_docker_layer_results.PASSWORD = $1
+    UNION ALL
+    SELECT
+        -1
+    FROM
+        project_git_results
+    WHERE
+        project_git_results.project_id = $2
+        AND project_git_results.PASSWORD = $1) AS subq
+LIMIT 1
+`
+
+type GetSpecificBruteforcePasswordIDParams struct {
+	Password  string `json:"password"`
+	ProjectID int64  `json:"project_id"`
+}
+
+func (q *Queries) GetSpecificBruteforcePasswordID(ctx context.Context, arg GetSpecificBruteforcePasswordIDParams) (int64, error) {
+	row := q.db.QueryRow(ctx, getSpecificBruteforcePasswordID, arg.Password, arg.ProjectID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }
 
 const insertBruteforcePasswords = `-- name: InsertBruteforcePasswords :exec
@@ -154,26 +236,34 @@ func (q *Queries) InsertBruteforcePasswords(ctx context.Context, passwords []str
 	return err
 }
 
-const insertBruteforcedPassword = `-- name: InsertBruteforcedPassword :exec
-INSERT INTO bruteforced_passwords(hash, username, PASSWORD, last_bruteforce_id)
-    VALUES ($1, $2, $3, $4)
-ON CONFLICT
-    DO NOTHING
+const updateBruteforcedPassword = `-- name: UpdateBruteforcedPassword :one
+UPDATE
+    bruteforced_passwords
+SET
+    last_bruteforce_id = $2,
+    PASSWORD = $3
+WHERE
+    id = $1
+RETURNING
+    id, hash, username, password, last_bruteforce_id, project_id
 `
 
-type InsertBruteforcedPasswordParams struct {
-	Hash             string         `json:"hash"`
-	Username         string         `json:"username"`
-	Password         sql.NullString `json:"password"`
+type UpdateBruteforcedPasswordParams struct {
+	ID               int64          `json:"id"`
 	LastBruteforceID sql.NullInt64  `json:"last_bruteforce_id"`
+	Password         sql.NullString `json:"password"`
 }
 
-func (q *Queries) InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error {
-	_, err := q.db.Exec(ctx, insertBruteforcedPassword,
-		arg.Hash,
-		arg.Username,
-		arg.Password,
-		arg.LastBruteforceID,
+func (q *Queries) UpdateBruteforcedPassword(ctx context.Context, arg UpdateBruteforcedPasswordParams) (*BruteforcedPassword, error) {
+	row := q.db.QueryRow(ctx, updateBruteforcedPassword, arg.ID, arg.LastBruteforceID, arg.Password)
+	var i BruteforcedPassword
+	err := row.Scan(
+		&i.ID,
+		&i.Hash,
+		&i.Username,
+		&i.Password,
+		&i.LastBruteforceID,
+		&i.ProjectID,
 	)
-	return err
+	return &i, err
 }

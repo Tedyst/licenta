@@ -14,6 +14,7 @@ import (
 type Querier interface {
 	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) (*Scan, error)
 	CountUsers(ctx context.Context) (int64, error)
+	CreateBruteforcedPassword(ctx context.Context, arg CreateBruteforcedPasswordParams) (*BruteforcedPassword, error)
 	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
 	CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
@@ -42,7 +43,7 @@ type Querier interface {
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
 	GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error)
 	GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error)
-	GetBruteforcedPasswordByHashAndUsername(ctx context.Context, arg GetBruteforcedPasswordByHashAndUsernameParams) (*BruteforcedPassword, error)
+	GetBruteforcedPasswords(ctx context.Context, arg GetBruteforcedPasswordsParams) (*BruteforcedPassword, error)
 	GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error)
 	GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
 	GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error)
@@ -73,9 +74,11 @@ type Querier interface {
 	GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetScan(ctx context.Context, id int64) (*GetScanRow, error)
+	GetScanBruteforceResults(ctx context.Context, scanID int64) ([]*ScanBruteforceResult, error)
 	GetScanResults(ctx context.Context, scanID int64) ([]*ScanResult, error)
 	GetScanResultsByScanIdAndScanSource(ctx context.Context, arg GetScanResultsByScanIdAndScanSourceParams) ([]*ScanResult, error)
 	GetScansForProject(ctx context.Context, projectID int64) ([]*GetScansForProjectRow, error)
+	GetSpecificBruteforcePasswordID(ctx context.Context, arg GetSpecificBruteforcePasswordIDParams) (int64, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error)
@@ -87,11 +90,11 @@ type Querier interface {
 	GetWorkerForScan(ctx context.Context, id int64) (*Worker, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
-	InsertBruteforcedPassword(ctx context.Context, arg InsertBruteforcedPasswordParams) error
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error
 	InvalidateTOTPSecretForUser(ctx context.Context, userID int64) error
 	ListUsers(ctx context.Context) ([]*User, error)
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
+	UpdateBruteforcedPassword(ctx context.Context, arg UpdateBruteforcedPasswordParams) (*BruteforcedPassword, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error

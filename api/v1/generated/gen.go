@@ -36,6 +36,25 @@ type BruteforcePassword struct {
 	Password string `json:"password"`
 }
 
+// BruteforceScanResult defines model for BruteforceScanResult.
+type BruteforceScanResult struct {
+	Id       int    `json:"id"`
+	Password string `json:"password"`
+	Total    int    `json:"total"`
+	Tried    int    `json:"tried"`
+	Username string `json:"username"`
+}
+
+// BruteforcedPassword defines model for BruteforcedPassword.
+type BruteforcedPassword struct {
+	Hash             string `json:"hash"`
+	Id               int    `json:"id"`
+	LastBruteforceId int    `json:"last_bruteforce_id"`
+	Password         string `json:"password"`
+	ProjectId        int    `json:"project_id"`
+	Username         string `json:"username"`
+}
+
 // CVE defines model for CVE.
 type CVE struct {
 	// CveId The CVE ID
@@ -61,6 +80,23 @@ type ChangePasswordLoggedIn struct {
 
 	// OldPassword The old password
 	OldPassword string `json:"old_password" validate:"min=8,alphanum"`
+}
+
+// CreateBruteforceScanResult defines model for CreateBruteforceScanResult.
+type CreateBruteforceScanResult struct {
+	Password string `json:"password"`
+	Total    int    `json:"total"`
+	Tried    int    `json:"tried"`
+	Username string `json:"username"`
+}
+
+// CreateBruteforcedPassword defines model for CreateBruteforcedPassword.
+type CreateBruteforcedPassword struct {
+	Hash             string `json:"hash"`
+	LastBruteforceId int    `json:"last_bruteforce_id"`
+	Password         string `json:"password"`
+	ProjectId        int    `json:"project_id"`
+	Username         string `json:"username"`
 }
 
 // CreateScanResult defines model for CreateScanResult.
@@ -118,6 +154,13 @@ type PaginatedUsers struct {
 
 	// Success The success status
 	Success bool `json:"success"`
+}
+
+// PatchBruteforceScanResult defines model for PatchBruteforceScanResult.
+type PatchBruteforceScanResult struct {
+	Password string `json:"password"`
+	Total    int    `json:"total"`
+	Tried    int    `json:"tried"`
 }
 
 // PatchPostgresDatabase defines model for PatchPostgresDatabase.
@@ -231,6 +274,12 @@ type TOTPSecondStep struct {
 	TotpCode string `json:"totp_code" validate:"numeric,len=6"`
 }
 
+// UpdateBruteforcedPassword defines model for UpdateBruteforcedPassword.
+type UpdateBruteforcedPassword struct {
+	LastBruteforceId int    `json:"last_bruteforce_id"`
+	Password         string `json:"password"`
+}
+
 // UpdatePostgresVersion defines model for UpdatePostgresVersion.
 type UpdatePostgresVersion struct {
 	Version string `json:"version"`
@@ -263,6 +312,15 @@ type GetProjectIdBruteforcePasswordsParams struct {
 	LastPasswordId *int32 `form:"last_password_id,omitempty" json:"last_password_id,omitempty"`
 }
 
+// GetProjectIdBruteforcedPasswordParams defines parameters for GetProjectIdBruteforcedPassword.
+type GetProjectIdBruteforcedPasswordParams struct {
+	// Hash The hash to filter
+	Hash string `form:"hash" json:"hash"`
+
+	// Username The username to filter
+	Username string `form:"username" json:"username"`
+}
+
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
 	// Limit The number of items to return
@@ -278,11 +336,23 @@ type GetUsersParams struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty"`
 }
 
+// PatchBruteforcedPasswordsIdJSONRequestBody defines body for PatchBruteforcedPasswordsId for application/json ContentType.
+type PatchBruteforcedPasswordsIdJSONRequestBody = UpdateBruteforcedPassword
+
+// PatchBruteforceresultsIdJSONRequestBody defines body for PatchBruteforceresultsId for application/json ContentType.
+type PatchBruteforceresultsIdJSONRequestBody = PatchBruteforceScanResult
+
 // PatchPostgresIdJSONRequestBody defines body for PatchPostgresId for application/json ContentType.
 type PatchPostgresIdJSONRequestBody = PatchPostgresDatabase
 
+// PostProjectIdBruteforcedPasswordJSONRequestBody defines body for PostProjectIdBruteforcedPassword for application/json ContentType.
+type PostProjectIdBruteforcedPasswordJSONRequestBody = CreateBruteforcedPassword
+
 // PatchScanIdJSONRequestBody defines body for PatchScanId for application/json ContentType.
 type PatchScanIdJSONRequestBody = PatchScan
+
+// PostScanIdBruteforceresultsJSONRequestBody defines body for PostScanIdBruteforceresults for application/json ContentType.
+type PostScanIdBruteforceresultsJSONRequestBody = CreateBruteforceScanResult
 
 // PostScanIdResultJSONRequestBody defines body for PostScanIdResult for application/json ContentType.
 type PostScanIdResultJSONRequestBody = CreateScanResult
@@ -363,6 +433,16 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// PatchBruteforcedPasswordsIdWithBody request with any body
+	PatchBruteforcedPasswordsIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchBruteforcedPasswordsId(ctx context.Context, id int64, body PatchBruteforcedPasswordsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchBruteforceresultsIdWithBody request with any body
+	PatchBruteforceresultsIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchBruteforceresultsId(ctx context.Context, id int64, body PatchBruteforceresultsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetCvesDbTypeVersion request
 	GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -380,6 +460,14 @@ type ClientInterface interface {
 	// GetProjectIdBruteforcePasswords request
 	GetProjectIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetProjectIdBruteforcedPassword request
+	GetProjectIdBruteforcedPassword(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostProjectIdBruteforcedPasswordWithBody request with any body
+	PostProjectIdBruteforcedPasswordWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostProjectIdBruteforcedPassword(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostProjectIdRun request
 	PostProjectIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -390,6 +478,11 @@ type ClientInterface interface {
 	PatchScanIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PatchScanId(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostScanIdBruteforceresultsWithBody request with any body
+	PostScanIdBruteforceresultsWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostScanIdBruteforceresults(ctx context.Context, id int64, body PostScanIdBruteforceresultsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostScanIdResultWithBody request with any body
 	PostScanIdResultWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -412,6 +505,54 @@ type ClientInterface interface {
 
 	// GetWorkerGetTask request
 	GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) PatchBruteforcedPasswordsIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBruteforcedPasswordsIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBruteforcedPasswordsId(ctx context.Context, id int64, body PatchBruteforcedPasswordsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBruteforcedPasswordsIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBruteforceresultsIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBruteforceresultsIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchBruteforceresultsId(ctx context.Context, id int64, body PatchBruteforceresultsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchBruteforceresultsIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -486,6 +627,42 @@ func (c *Client) GetProjectIdBruteforcePasswords(ctx context.Context, id int64, 
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetProjectIdBruteforcedPassword(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectIdBruteforcedPasswordRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostProjectIdBruteforcedPasswordWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectIdBruteforcedPasswordRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostProjectIdBruteforcedPassword(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectIdBruteforcedPasswordRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) PostProjectIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostProjectIdRunRequest(c.Server, id)
 	if err != nil {
@@ -524,6 +701,30 @@ func (c *Client) PatchScanIdWithBody(ctx context.Context, id int64, contentType 
 
 func (c *Client) PatchScanId(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchScanIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostScanIdBruteforceresultsWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostScanIdBruteforceresultsRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostScanIdBruteforceresults(ctx context.Context, id int64, body PostScanIdBruteforceresultsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostScanIdBruteforceresultsRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -628,6 +829,100 @@ func (c *Client) GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEdit
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewPatchBruteforcedPasswordsIdRequest calls the generic PatchBruteforcedPasswordsId builder with application/json body
+func NewPatchBruteforcedPasswordsIdRequest(server string, id int64, body PatchBruteforcedPasswordsIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchBruteforcedPasswordsIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchBruteforcedPasswordsIdRequestWithBody generates requests for PatchBruteforcedPasswordsId with any type of body
+func NewPatchBruteforcedPasswordsIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/bruteforced-passwords/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPatchBruteforceresultsIdRequest calls the generic PatchBruteforceresultsId builder with application/json body
+func NewPatchBruteforceresultsIdRequest(server string, id int64, body PatchBruteforceresultsIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchBruteforceresultsIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchBruteforceresultsIdRequestWithBody generates requests for PatchBruteforceresultsId with any type of body
+func NewPatchBruteforceresultsIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/bruteforceresults/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewGetCvesDbTypeVersionRequest generates requests for GetCvesDbTypeVersion
@@ -842,6 +1137,117 @@ func NewGetProjectIdBruteforcePasswordsRequest(server string, id int64, params *
 	return req, nil
 }
 
+// NewGetProjectIdBruteforcedPasswordRequest generates requests for GetProjectIdBruteforcedPassword
+func NewGetProjectIdBruteforcedPasswordRequest(server string, id int64, params *GetProjectIdBruteforcedPasswordParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/project/%s/bruteforced-password", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "hash", runtime.ParamLocationQuery, params.Hash); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, params.Username); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostProjectIdBruteforcedPasswordRequest calls the generic PostProjectIdBruteforcedPassword builder with application/json body
+func NewPostProjectIdBruteforcedPasswordRequest(server string, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostProjectIdBruteforcedPasswordRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPostProjectIdBruteforcedPasswordRequestWithBody generates requests for PostProjectIdBruteforcedPassword with any type of body
+func NewPostProjectIdBruteforcedPasswordRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/project/%s/bruteforced-password", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewPostProjectIdRunRequest generates requests for PostProjectIdRun
 func NewPostProjectIdRunRequest(server string, id int64) (*http.Request, error) {
 	var err error
@@ -948,6 +1354,53 @@ func NewPatchScanIdRequestWithBody(server string, id int64, contentType string, 
 	}
 
 	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostScanIdBruteforceresultsRequest calls the generic PostScanIdBruteforceresults builder with application/json body
+func NewPostScanIdBruteforceresultsRequest(server string, id int64, body PostScanIdBruteforceresultsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostScanIdBruteforceresultsRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPostScanIdBruteforceresultsRequestWithBody generates requests for PostScanIdBruteforceresults with any type of body
+func NewPostScanIdBruteforceresultsRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/scan/%s/bruteforceresults", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -1272,6 +1725,16 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// PatchBruteforcedPasswordsIdWithBodyWithResponse request with any body
+	PatchBruteforcedPasswordsIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchBruteforcedPasswordsIdResponse, error)
+
+	PatchBruteforcedPasswordsIdWithResponse(ctx context.Context, id int64, body PatchBruteforcedPasswordsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBruteforcedPasswordsIdResponse, error)
+
+	// PatchBruteforceresultsIdWithBodyWithResponse request with any body
+	PatchBruteforceresultsIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchBruteforceresultsIdResponse, error)
+
+	PatchBruteforceresultsIdWithResponse(ctx context.Context, id int64, body PatchBruteforceresultsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBruteforceresultsIdResponse, error)
+
 	// GetCvesDbTypeVersionWithResponse request
 	GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error)
 
@@ -1289,6 +1752,14 @@ type ClientWithResponsesInterface interface {
 	// GetProjectIdBruteforcePasswordsWithResponse request
 	GetProjectIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcePasswordsResponse, error)
 
+	// GetProjectIdBruteforcedPasswordWithResponse request
+	GetProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcedPasswordResponse, error)
+
+	// PostProjectIdBruteforcedPasswordWithBodyWithResponse request with any body
+	PostProjectIdBruteforcedPasswordWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error)
+
+	PostProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error)
+
 	// PostProjectIdRunWithResponse request
 	PostProjectIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectIdRunResponse, error)
 
@@ -1299,6 +1770,11 @@ type ClientWithResponsesInterface interface {
 	PatchScanIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchScanIdResponse, error)
 
 	PatchScanIdWithResponse(ctx context.Context, id int64, body PatchScanIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchScanIdResponse, error)
+
+	// PostScanIdBruteforceresultsWithBodyWithResponse request with any body
+	PostScanIdBruteforceresultsWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScanIdBruteforceresultsResponse, error)
+
+	PostScanIdBruteforceresultsWithResponse(ctx context.Context, id int64, body PostScanIdBruteforceresultsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostScanIdBruteforceresultsResponse, error)
 
 	// PostScanIdResultWithBodyWithResponse request with any body
 	PostScanIdResultWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScanIdResultResponse, error)
@@ -1321,6 +1797,62 @@ type ClientWithResponsesInterface interface {
 
 	// GetWorkerGetTaskWithResponse request
 	GetWorkerGetTaskWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetWorkerGetTaskResponse, error)
+}
+
+type PatchBruteforcedPasswordsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
+		Success             bool                 `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchBruteforcedPasswordsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchBruteforcedPasswordsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchBruteforceresultsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Bruteforcescanresult *BruteforceScanResult `json:"bruteforcescanresult,omitempty"`
+		Success              bool                  `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchBruteforceresultsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchBruteforceresultsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type GetCvesDbTypeVersionResponse struct {
@@ -1456,6 +1988,61 @@ func (r GetProjectIdBruteforcePasswordsResponse) StatusCode() int {
 	return 0
 }
 
+type GetProjectIdBruteforcedPasswordResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		BruteforcedPassword BruteforcedPassword `json:"bruteforced_password"`
+		Success             bool                `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetProjectIdBruteforcedPasswordResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetProjectIdBruteforcedPasswordResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostProjectIdBruteforcedPasswordResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
+		Success             bool                 `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostProjectIdBruteforcedPasswordResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostProjectIdBruteforcedPasswordResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type PostProjectIdRunResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1488,9 +2075,10 @@ type GetScanIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Results []ScanResult `json:"results"`
-		Scan    Scan         `json:"scan"`
-		Success bool         `json:"success"`
+		BruteforceResults []BruteforceScanResult `json:"bruteforce_results"`
+		Results           []ScanResult           `json:"results"`
+		Scan              Scan                   `json:"scan"`
+		Success           bool                   `json:"success"`
 	}
 	JSON404 *Error
 }
@@ -1533,6 +2121,34 @@ func (r PatchScanIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PatchScanIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostScanIdBruteforceresultsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Bruteforcescanresult *BruteforceScanResult `json:"bruteforcescanresult,omitempty"`
+		Success              bool                  `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostScanIdBruteforceresultsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostScanIdBruteforceresultsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1691,6 +2307,40 @@ func (r GetWorkerGetTaskResponse) StatusCode() int {
 	return 0
 }
 
+// PatchBruteforcedPasswordsIdWithBodyWithResponse request with arbitrary body returning *PatchBruteforcedPasswordsIdResponse
+func (c *ClientWithResponses) PatchBruteforcedPasswordsIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchBruteforcedPasswordsIdResponse, error) {
+	rsp, err := c.PatchBruteforcedPasswordsIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBruteforcedPasswordsIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchBruteforcedPasswordsIdWithResponse(ctx context.Context, id int64, body PatchBruteforcedPasswordsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBruteforcedPasswordsIdResponse, error) {
+	rsp, err := c.PatchBruteforcedPasswordsId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBruteforcedPasswordsIdResponse(rsp)
+}
+
+// PatchBruteforceresultsIdWithBodyWithResponse request with arbitrary body returning *PatchBruteforceresultsIdResponse
+func (c *ClientWithResponses) PatchBruteforceresultsIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchBruteforceresultsIdResponse, error) {
+	rsp, err := c.PatchBruteforceresultsIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBruteforceresultsIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchBruteforceresultsIdWithResponse(ctx context.Context, id int64, body PatchBruteforceresultsIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchBruteforceresultsIdResponse, error) {
+	rsp, err := c.PatchBruteforceresultsId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchBruteforceresultsIdResponse(rsp)
+}
+
 // GetCvesDbTypeVersionWithResponse request returning *GetCvesDbTypeVersionResponse
 func (c *ClientWithResponses) GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error) {
 	rsp, err := c.GetCvesDbTypeVersion(ctx, dbType, version, reqEditors...)
@@ -1744,6 +2394,32 @@ func (c *ClientWithResponses) GetProjectIdBruteforcePasswordsWithResponse(ctx co
 	return ParseGetProjectIdBruteforcePasswordsResponse(rsp)
 }
 
+// GetProjectIdBruteforcedPasswordWithResponse request returning *GetProjectIdBruteforcedPasswordResponse
+func (c *ClientWithResponses) GetProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcedPasswordResponse, error) {
+	rsp, err := c.GetProjectIdBruteforcedPassword(ctx, id, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetProjectIdBruteforcedPasswordResponse(rsp)
+}
+
+// PostProjectIdBruteforcedPasswordWithBodyWithResponse request with arbitrary body returning *PostProjectIdBruteforcedPasswordResponse
+func (c *ClientWithResponses) PostProjectIdBruteforcedPasswordWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error) {
+	rsp, err := c.PostProjectIdBruteforcedPasswordWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostProjectIdBruteforcedPasswordResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error) {
+	rsp, err := c.PostProjectIdBruteforcedPassword(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostProjectIdBruteforcedPasswordResponse(rsp)
+}
+
 // PostProjectIdRunWithResponse request returning *PostProjectIdRunResponse
 func (c *ClientWithResponses) PostProjectIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectIdRunResponse, error) {
 	rsp, err := c.PostProjectIdRun(ctx, id, reqEditors...)
@@ -1777,6 +2453,23 @@ func (c *ClientWithResponses) PatchScanIdWithResponse(ctx context.Context, id in
 		return nil, err
 	}
 	return ParsePatchScanIdResponse(rsp)
+}
+
+// PostScanIdBruteforceresultsWithBodyWithResponse request with arbitrary body returning *PostScanIdBruteforceresultsResponse
+func (c *ClientWithResponses) PostScanIdBruteforceresultsWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostScanIdBruteforceresultsResponse, error) {
+	rsp, err := c.PostScanIdBruteforceresultsWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostScanIdBruteforceresultsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostScanIdBruteforceresultsWithResponse(ctx context.Context, id int64, body PostScanIdBruteforceresultsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostScanIdBruteforceresultsResponse, error) {
+	rsp, err := c.PostScanIdBruteforceresults(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostScanIdBruteforceresultsResponse(rsp)
 }
 
 // PostScanIdResultWithBodyWithResponse request with arbitrary body returning *PostScanIdResultResponse
@@ -1847,6 +2540,106 @@ func (c *ClientWithResponses) GetWorkerGetTaskWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParseGetWorkerGetTaskResponse(rsp)
+}
+
+// ParsePatchBruteforcedPasswordsIdResponse parses an HTTP response from a PatchBruteforcedPasswordsIdWithResponse call
+func ParsePatchBruteforcedPasswordsIdResponse(rsp *http.Response) (*PatchBruteforcedPasswordsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchBruteforcedPasswordsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
+			Success             bool                 `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchBruteforceresultsIdResponse parses an HTTP response from a PatchBruteforceresultsIdWithResponse call
+func ParsePatchBruteforceresultsIdResponse(rsp *http.Response) (*PatchBruteforceresultsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchBruteforceresultsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Bruteforcescanresult *BruteforceScanResult `json:"bruteforcescanresult,omitempty"`
+			Success              bool                  `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseGetCvesDbTypeVersionResponse parses an HTTP response from a GetCvesDbTypeVersionWithResponse call
@@ -2062,6 +2855,99 @@ func ParseGetProjectIdBruteforcePasswordsResponse(rsp *http.Response) (*GetProje
 	return response, nil
 }
 
+// ParseGetProjectIdBruteforcedPasswordResponse parses an HTTP response from a GetProjectIdBruteforcedPasswordWithResponse call
+func ParseGetProjectIdBruteforcedPasswordResponse(rsp *http.Response) (*GetProjectIdBruteforcedPasswordResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetProjectIdBruteforcedPasswordResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			BruteforcedPassword BruteforcedPassword `json:"bruteforced_password"`
+			Success             bool                `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostProjectIdBruteforcedPasswordResponse parses an HTTP response from a PostProjectIdBruteforcedPasswordWithResponse call
+func ParsePostProjectIdBruteforcedPasswordResponse(rsp *http.Response) (*PostProjectIdBruteforcedPasswordResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostProjectIdBruteforcedPasswordResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
+			Success             bool                 `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParsePostProjectIdRunResponse parses an HTTP response from a PostProjectIdRunWithResponse call
 func ParsePostProjectIdRunResponse(rsp *http.Response) (*PostProjectIdRunResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2128,9 +3014,10 @@ func ParseGetScanIdResponse(rsp *http.Response) (*GetScanIdResponse, error) {
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Results []ScanResult `json:"results"`
-			Scan    Scan         `json:"scan"`
-			Success bool         `json:"success"`
+			BruteforceResults []BruteforceScanResult `json:"bruteforce_results"`
+			Results           []ScanResult           `json:"results"`
+			Scan              Scan                   `json:"scan"`
+			Success           bool                   `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -2167,6 +3054,56 @@ func ParsePatchScanIdResponse(rsp *http.Response) (*PatchScanIdResponse, error) 
 		var dest struct {
 			Scan    *Scan `json:"scan,omitempty"`
 			Success bool  `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostScanIdBruteforceresultsResponse parses an HTTP response from a PostScanIdBruteforceresultsWithResponse call
+func ParsePostScanIdBruteforceresultsResponse(rsp *http.Response) (*PostScanIdBruteforceresultsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostScanIdBruteforceresultsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Bruteforcescanresult *BruteforceScanResult `json:"bruteforcescanresult,omitempty"`
+			Success              bool                  `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -2443,6 +3380,12 @@ func ParseGetWorkerGetTaskResponse(rsp *http.Response) (*GetWorkerGetTaskRespons
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Update a bruteforced password by ID
+	// (PATCH /bruteforced-passwords/{id})
+	PatchBruteforcedPasswordsId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update a bruteforce scan result by ID
+	// (PATCH /bruteforceresults/{id})
+	PatchBruteforceresultsId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string)
@@ -2458,6 +3401,12 @@ type ServerInterface interface {
 	// Get all bruteforce passwords associated with a project
 	// (GET /project/{id}/bruteforce-passwords)
 	GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams)
+	// Get bruteforced password for a project
+	// (GET /project/{id}/bruteforced-password)
+	GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcedPasswordParams)
+	// Create a bruteforced password for a project
+	// (POST /project/{id}/bruteforced-password)
+	PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64)
 	// Run all extractors and scanners for a project
 	// (POST /project/{id}/run)
 	PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64)
@@ -2467,6 +3416,9 @@ type ServerInterface interface {
 	// Update a scan by ID
 	// (PATCH /scan/{id})
 	PatchScanId(w http.ResponseWriter, r *http.Request, id int64)
+	// Create a new bruteforce scan result
+	// (POST /scan/{id}/bruteforceresults)
+	PostScanIdBruteforceresults(w http.ResponseWriter, r *http.Request, id int64)
 	// Create a new scan result
 	// (POST /scan/{id}/result)
 	PostScanIdResult(w http.ResponseWriter, r *http.Request, id int64)
@@ -2490,6 +3442,18 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// Update a bruteforced password by ID
+// (PATCH /bruteforced-passwords/{id})
+func (_ Unimplemented) PatchBruteforcedPasswordsId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update a bruteforce scan result by ID
+// (PATCH /bruteforceresults/{id})
+func (_ Unimplemented) PatchBruteforceresultsId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // Get all CVEs for a database type and version
 // (GET /cves/{dbType}/{version})
@@ -2521,6 +3485,18 @@ func (_ Unimplemented) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r 
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get bruteforced password for a project
+// (GET /project/{id}/bruteforced-password)
+func (_ Unimplemented) GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcedPasswordParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a bruteforced password for a project
+// (POST /project/{id}/bruteforced-password)
+func (_ Unimplemented) PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Run all extractors and scanners for a project
 // (POST /project/{id}/run)
 func (_ Unimplemented) PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64) {
@@ -2536,6 +3512,12 @@ func (_ Unimplemented) GetScanId(w http.ResponseWriter, r *http.Request, id int6
 // Update a scan by ID
 // (PATCH /scan/{id})
 func (_ Unimplemented) PatchScanId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new bruteforce scan result
+// (POST /scan/{id}/bruteforceresults)
+func (_ Unimplemented) PostScanIdBruteforceresults(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2583,6 +3565,62 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// PatchBruteforcedPasswordsId operation middleware
+func (siw *ServerInterfaceWrapper) PatchBruteforcedPasswordsId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchBruteforcedPasswordsId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchBruteforceresultsId operation middleware
+func (siw *ServerInterfaceWrapper) PatchBruteforceresultsId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchBruteforceresultsId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
 
 // GetCvesDbTypeVersion operation middleware
 func (siw *ServerInterfaceWrapper) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request) {
@@ -2744,6 +3782,95 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcePasswords(w http.Respon
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetProjectIdBruteforcedPassword operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetProjectIdBruteforcedPasswordParams
+
+	// ------------- Required query parameter "hash" -------------
+
+	if paramValue := r.URL.Query().Get("hash"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "hash"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "hash", r.URL.Query(), &params.Hash)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "hash", Err: err})
+		return
+	}
+
+	// ------------- Required query parameter "username" -------------
+
+	if paramValue := r.URL.Query().Get("username"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "username"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "username", r.URL.Query(), &params.Username)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "username", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetProjectIdBruteforcedPassword(w, r, id, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostProjectIdBruteforcedPassword operation middleware
+func (siw *ServerInterfaceWrapper) PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostProjectIdBruteforcedPassword(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // PostProjectIdRun operation middleware
 func (siw *ServerInterfaceWrapper) PostProjectIdRun(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -2819,6 +3946,34 @@ func (siw *ServerInterfaceWrapper) PatchScanId(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PatchScanId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostScanIdBruteforceresults operation middleware
+func (siw *ServerInterfaceWrapper) PostScanIdBruteforceresults(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostScanIdBruteforceresults(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3111,6 +4266,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/bruteforced-passwords/{id}", wrapper.PatchBruteforcedPasswordsId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/bruteforceresults/{id}", wrapper.PatchBruteforceresultsId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/cves/{dbType}/{version}", wrapper.GetCvesDbTypeVersion)
 	})
 	r.Group(func(r chi.Router) {
@@ -3126,6 +4287,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/project/{id}/bruteforce-passwords", wrapper.GetProjectIdBruteforcePasswords)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/project/{id}/bruteforced-password", wrapper.GetProjectIdBruteforcedPassword)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/project/{id}/bruteforced-password", wrapper.PostProjectIdBruteforcedPassword)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/project/{id}/run", wrapper.PostProjectIdRun)
 	})
 	r.Group(func(r chi.Router) {
@@ -3133,6 +4300,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Patch(options.BaseURL+"/scan/{id}", wrapper.PatchScanId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/scan/{id}/bruteforceresults", wrapper.PostScanIdBruteforceresults)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/scan/{id}/result", wrapper.PostScanIdResult)
@@ -3154,6 +4324,102 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 
 	return r
+}
+
+type PatchBruteforcedPasswordsIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchBruteforcedPasswordsIdJSONRequestBody
+}
+
+type PatchBruteforcedPasswordsIdResponseObject interface {
+	VisitPatchBruteforcedPasswordsIdResponse(w http.ResponseWriter) error
+}
+
+type PatchBruteforcedPasswordsId200JSONResponse struct {
+	BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
+	Success             bool                 `json:"success"`
+}
+
+func (response PatchBruteforcedPasswordsId200JSONResponse) VisitPatchBruteforcedPasswordsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforcedPasswordsId400JSONResponse Error
+
+func (response PatchBruteforcedPasswordsId400JSONResponse) VisitPatchBruteforcedPasswordsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforcedPasswordsId401JSONResponse Error
+
+func (response PatchBruteforcedPasswordsId401JSONResponse) VisitPatchBruteforcedPasswordsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforcedPasswordsId404JSONResponse Error
+
+func (response PatchBruteforcedPasswordsId404JSONResponse) VisitPatchBruteforcedPasswordsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforceresultsIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchBruteforceresultsIdJSONRequestBody
+}
+
+type PatchBruteforceresultsIdResponseObject interface {
+	VisitPatchBruteforceresultsIdResponse(w http.ResponseWriter) error
+}
+
+type PatchBruteforceresultsId200JSONResponse struct {
+	Bruteforcescanresult *BruteforceScanResult `json:"bruteforcescanresult,omitempty"`
+	Success              bool                  `json:"success"`
+}
+
+func (response PatchBruteforceresultsId200JSONResponse) VisitPatchBruteforceresultsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforceresultsId400JSONResponse Error
+
+func (response PatchBruteforceresultsId400JSONResponse) VisitPatchBruteforceresultsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforceresultsId401JSONResponse Error
+
+func (response PatchBruteforceresultsId401JSONResponse) VisitPatchBruteforceresultsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchBruteforceresultsId404JSONResponse Error
+
+func (response PatchBruteforceresultsId404JSONResponse) VisitPatchBruteforceresultsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetCvesDbTypeVersionRequestObject struct {
@@ -3347,6 +4613,93 @@ func (response GetProjectIdBruteforcePasswords401JSONResponse) VisitGetProjectId
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetProjectIdBruteforcedPasswordRequestObject struct {
+	Id     int64 `json:"id"`
+	Params GetProjectIdBruteforcedPasswordParams
+}
+
+type GetProjectIdBruteforcedPasswordResponseObject interface {
+	VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error
+}
+
+type GetProjectIdBruteforcedPassword200JSONResponse struct {
+	BruteforcedPassword BruteforcedPassword `json:"bruteforced_password"`
+	Success             bool                `json:"success"`
+}
+
+func (response GetProjectIdBruteforcedPassword200JSONResponse) VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectIdBruteforcedPassword401JSONResponse Error
+
+func (response GetProjectIdBruteforcedPassword401JSONResponse) VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectIdBruteforcedPassword404JSONResponse Error
+
+func (response GetProjectIdBruteforcedPassword404JSONResponse) VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectIdBruteforcedPasswordRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PostProjectIdBruteforcedPasswordJSONRequestBody
+}
+
+type PostProjectIdBruteforcedPasswordResponseObject interface {
+	VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error
+}
+
+type PostProjectIdBruteforcedPassword200JSONResponse struct {
+	BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
+	Success             bool                 `json:"success"`
+}
+
+func (response PostProjectIdBruteforcedPassword200JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectIdBruteforcedPassword400JSONResponse Error
+
+func (response PostProjectIdBruteforcedPassword400JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectIdBruteforcedPassword401JSONResponse Error
+
+func (response PostProjectIdBruteforcedPassword401JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjectIdBruteforcedPassword404JSONResponse Error
+
+func (response PostProjectIdBruteforcedPassword404JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type PostProjectIdRunRequestObject struct {
 	Id int64 `json:"id"`
 }
@@ -3403,9 +4756,10 @@ type GetScanIdResponseObject interface {
 }
 
 type GetScanId200JSONResponse struct {
-	Results []ScanResult `json:"results"`
-	Scan    Scan         `json:"scan"`
-	Success bool         `json:"success"`
+	BruteforceResults []BruteforceScanResult `json:"bruteforce_results"`
+	Results           []ScanResult           `json:"results"`
+	Scan              Scan                   `json:"scan"`
+	Success           bool                   `json:"success"`
 }
 
 func (response GetScanId200JSONResponse) VisitGetScanIdResponse(w http.ResponseWriter) error {
@@ -3466,6 +4820,54 @@ func (response PatchScanId401JSONResponse) VisitPatchScanIdResponse(w http.Respo
 type PatchScanId404JSONResponse Error
 
 func (response PatchScanId404JSONResponse) VisitPatchScanIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostScanIdBruteforceresultsRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PostScanIdBruteforceresultsJSONRequestBody
+}
+
+type PostScanIdBruteforceresultsResponseObject interface {
+	VisitPostScanIdBruteforceresultsResponse(w http.ResponseWriter) error
+}
+
+type PostScanIdBruteforceresults200JSONResponse struct {
+	Bruteforcescanresult *BruteforceScanResult `json:"bruteforcescanresult,omitempty"`
+	Success              bool                  `json:"success"`
+}
+
+func (response PostScanIdBruteforceresults200JSONResponse) VisitPostScanIdBruteforceresultsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostScanIdBruteforceresults400JSONResponse Error
+
+func (response PostScanIdBruteforceresults400JSONResponse) VisitPostScanIdBruteforceresultsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostScanIdBruteforceresults401JSONResponse Error
+
+func (response PostScanIdBruteforceresults401JSONResponse) VisitPostScanIdBruteforceresultsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostScanIdBruteforceresults404JSONResponse Error
+
+func (response PostScanIdBruteforceresults404JSONResponse) VisitPostScanIdBruteforceresultsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -3683,6 +5085,12 @@ func (response GetWorkerGetTask401JSONResponse) VisitGetWorkerGetTaskResponse(w 
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Update a bruteforced password by ID
+	// (PATCH /bruteforced-passwords/{id})
+	PatchBruteforcedPasswordsId(ctx context.Context, request PatchBruteforcedPasswordsIdRequestObject) (PatchBruteforcedPasswordsIdResponseObject, error)
+	// Update a bruteforce scan result by ID
+	// (PATCH /bruteforceresults/{id})
+	PatchBruteforceresultsId(ctx context.Context, request PatchBruteforceresultsIdRequestObject) (PatchBruteforceresultsIdResponseObject, error)
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(ctx context.Context, request GetCvesDbTypeVersionRequestObject) (GetCvesDbTypeVersionResponseObject, error)
@@ -3698,6 +5106,12 @@ type StrictServerInterface interface {
 	// Get all bruteforce passwords associated with a project
 	// (GET /project/{id}/bruteforce-passwords)
 	GetProjectIdBruteforcePasswords(ctx context.Context, request GetProjectIdBruteforcePasswordsRequestObject) (GetProjectIdBruteforcePasswordsResponseObject, error)
+	// Get bruteforced password for a project
+	// (GET /project/{id}/bruteforced-password)
+	GetProjectIdBruteforcedPassword(ctx context.Context, request GetProjectIdBruteforcedPasswordRequestObject) (GetProjectIdBruteforcedPasswordResponseObject, error)
+	// Create a bruteforced password for a project
+	// (POST /project/{id}/bruteforced-password)
+	PostProjectIdBruteforcedPassword(ctx context.Context, request PostProjectIdBruteforcedPasswordRequestObject) (PostProjectIdBruteforcedPasswordResponseObject, error)
 	// Run all extractors and scanners for a project
 	// (POST /project/{id}/run)
 	PostProjectIdRun(ctx context.Context, request PostProjectIdRunRequestObject) (PostProjectIdRunResponseObject, error)
@@ -3707,6 +5121,9 @@ type StrictServerInterface interface {
 	// Update a scan by ID
 	// (PATCH /scan/{id})
 	PatchScanId(ctx context.Context, request PatchScanIdRequestObject) (PatchScanIdResponseObject, error)
+	// Create a new bruteforce scan result
+	// (POST /scan/{id}/bruteforceresults)
+	PostScanIdBruteforceresults(ctx context.Context, request PostScanIdBruteforceresultsRequestObject) (PostScanIdBruteforceresultsResponseObject, error)
 	// Create a new scan result
 	// (POST /scan/{id}/result)
 	PostScanIdResult(ctx context.Context, request PostScanIdResultRequestObject) (PostScanIdResultResponseObject, error)
@@ -3754,6 +5171,72 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// PatchBruteforcedPasswordsId operation middleware
+func (sh *strictHandler) PatchBruteforcedPasswordsId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchBruteforcedPasswordsIdRequestObject
+
+	request.Id = id
+
+	var body PatchBruteforcedPasswordsIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchBruteforcedPasswordsId(ctx, request.(PatchBruteforcedPasswordsIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchBruteforcedPasswordsId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchBruteforcedPasswordsIdResponseObject); ok {
+		if err := validResponse.VisitPatchBruteforcedPasswordsIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchBruteforceresultsId operation middleware
+func (sh *strictHandler) PatchBruteforceresultsId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchBruteforceresultsIdRequestObject
+
+	request.Id = id
+
+	var body PatchBruteforceresultsIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchBruteforceresultsId(ctx, request.(PatchBruteforceresultsIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchBruteforceresultsId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchBruteforceresultsIdResponseObject); ok {
+		if err := validResponse.VisitPatchBruteforceresultsIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // GetCvesDbTypeVersion operation middleware
@@ -3895,6 +5378,66 @@ func (sh *strictHandler) GetProjectIdBruteforcePasswords(w http.ResponseWriter, 
 	}
 }
 
+// GetProjectIdBruteforcedPassword operation middleware
+func (sh *strictHandler) GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcedPasswordParams) {
+	var request GetProjectIdBruteforcedPasswordRequestObject
+
+	request.Id = id
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectIdBruteforcedPassword(ctx, request.(GetProjectIdBruteforcedPasswordRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectIdBruteforcedPassword")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectIdBruteforcedPasswordResponseObject); ok {
+		if err := validResponse.VisitGetProjectIdBruteforcedPasswordResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostProjectIdBruteforcedPassword operation middleware
+func (sh *strictHandler) PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostProjectIdBruteforcedPasswordRequestObject
+
+	request.Id = id
+
+	var body PostProjectIdBruteforcedPasswordJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjectIdBruteforcedPassword(ctx, request.(PostProjectIdBruteforcedPasswordRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjectIdBruteforcedPassword")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostProjectIdBruteforcedPasswordResponseObject); ok {
+		if err := validResponse.VisitPostProjectIdBruteforcedPasswordResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // PostProjectIdRun operation middleware
 func (sh *strictHandler) PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64) {
 	var request PostProjectIdRunRequestObject
@@ -3973,6 +5516,39 @@ func (sh *strictHandler) PatchScanId(w http.ResponseWriter, r *http.Request, id 
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PatchScanIdResponseObject); ok {
 		if err := validResponse.VisitPatchScanIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostScanIdBruteforceresults operation middleware
+func (sh *strictHandler) PostScanIdBruteforceresults(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostScanIdBruteforceresultsRequestObject
+
+	request.Id = id
+
+	var body PostScanIdBruteforceresultsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostScanIdBruteforceresults(ctx, request.(PostScanIdBruteforceresultsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostScanIdBruteforceresults")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostScanIdBruteforceresultsResponseObject); ok {
+		if err := validResponse.VisitPostScanIdBruteforceresultsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -4147,56 +5723,62 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"//+72bgxEEwAAA==",
+	"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",
+	"xstD5+7z3f8CAAD//+Wg+1/YZwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

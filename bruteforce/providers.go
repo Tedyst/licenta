@@ -37,8 +37,10 @@ func (d *databasePasswordProvider) GetCount() (int, error) {
 }
 
 func (d *databasePasswordProvider) GetSpecificPassword(password string) (int64, bool, error) {
-	var id int64
-	err := d.database.GetRawPool().QueryRow(d.context, "select subq.id from (select id from default_bruteforce_passwords where password = $1 union all select -1 from project_docker_layer_results where project_id = $2 and password = $1 UNION all SELECT -1 FROM project_git_results WHERE project_id = $2 AND password = $1) as subq limit 1;", password, d.projectID).Scan(&id)
+	id, err := d.database.GetSpecificBruteforcePasswordID(d.context, queries.GetSpecificBruteforcePasswordIDParams{
+		Password:  password,
+		ProjectID: d.projectID,
+	})
 	if err == pgx.ErrNoRows {
 		return -1, false, nil
 	}
@@ -86,7 +88,7 @@ func (d *databasePasswordProvider) Close() {
 }
 
 func (d *databasePasswordProvider) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
-	return d.database.InsertBruteforcedPassword(d.context, queries.InsertBruteforcedPasswordParams{
+	_, err := d.database.CreateBruteforcedPassword(d.context, queries.CreateBruteforcedPasswordParams{
 		Username: username,
 		Hash:     hash,
 		Password: sql.NullString{String: password, Valid: password != ""},
@@ -94,13 +96,19 @@ func (d *databasePasswordProvider) SavePasswordHash(username, hash, password str
 			Int64: maxInternalID,
 			Valid: true,
 		},
+		ProjectID: sql.NullInt64{Valid: false},
 	})
+	return err
 }
 
 func (d *databasePasswordProvider) GetPasswordByHash(username, hash string) (string, int64, error) {
-	p, err := d.database.GetBruteforcedPasswordByHashAndUsername(d.context, queries.GetBruteforcedPasswordByHashAndUsernameParams{
+	p, err := d.database.GetBruteforcedPasswords(d.context, queries.GetBruteforcedPasswordsParams{
 		Username: username,
 		Hash:     hash,
+		ProjectID: sql.NullInt64{
+			Int64: d.projectID,
+			Valid: true,
+		},
 	})
 	if err == pgx.ErrNoRows {
 		return "", 0, nil

@@ -41,14 +41,15 @@ func (q *Queries) CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, 
 }
 
 const createScanBruteforceResult = `-- name: CreateScanBruteforceResult :one
-INSERT INTO scan_bruteforce_results(scan_id, username, PASSWORD, tried, total)
-    VALUES ($1, $2, $3, $4, $5)
+INSERT INTO scan_bruteforce_results(scan_id, scan_type, username, PASSWORD, tried, total)
+    VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING
-    id, scan_id, username, password, total, tried, created_at
+    id, scan_id, scan_type, username, password, total, tried, created_at
 `
 
 type CreateScanBruteforceResultParams struct {
 	ScanID   int64          `json:"scan_id"`
+	ScanType int32          `json:"scan_type"`
 	Username string         `json:"username"`
 	Password sql.NullString `json:"password"`
 	Tried    int32          `json:"tried"`
@@ -58,6 +59,7 @@ type CreateScanBruteforceResultParams struct {
 func (q *Queries) CreateScanBruteforceResult(ctx context.Context, arg CreateScanBruteforceResultParams) (*ScanBruteforceResult, error) {
 	row := q.db.QueryRow(ctx, createScanBruteforceResult,
 		arg.ScanID,
+		arg.ScanType,
 		arg.Username,
 		arg.Password,
 		arg.Tried,
@@ -67,6 +69,7 @@ func (q *Queries) CreateScanBruteforceResult(ctx context.Context, arg CreateScan
 	err := row.Scan(
 		&i.ID,
 		&i.ScanID,
+		&i.ScanType,
 		&i.Username,
 		&i.Password,
 		&i.Total,
@@ -154,6 +157,44 @@ func (q *Queries) GetScan(ctx context.Context, id int64) (*GetScanRow, error) {
 		&i.PostgresScan,
 	)
 	return &i, err
+}
+
+const getScanBruteforceResults = `-- name: GetScanBruteforceResults :many
+SELECT
+    id, scan_id, scan_type, username, password, total, tried, created_at
+FROM
+    scan_bruteforce_results
+WHERE
+    scan_id = $1
+`
+
+func (q *Queries) GetScanBruteforceResults(ctx context.Context, scanID int64) ([]*ScanBruteforceResult, error) {
+	rows, err := q.db.Query(ctx, getScanBruteforceResults, scanID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*ScanBruteforceResult
+	for rows.Next() {
+		var i ScanBruteforceResult
+		if err := rows.Scan(
+			&i.ID,
+			&i.ScanID,
+			&i.ScanType,
+			&i.Username,
+			&i.Password,
+			&i.Total,
+			&i.Tried,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getScanResults = `-- name: GetScanResults :many

@@ -17,6 +17,7 @@ type BruteforcedPassword struct {
 	Username         string         `json:"username"`
 	Password         sql.NullString `json:"password"`
 	LastBruteforceID sql.NullInt64  `json:"last_bruteforce_id"`
+	ProjectID        sql.NullInt64  `json:"project_id"`
 }
 
 type DefaultBruteforcePassword struct {
@@ -206,6 +207,7 @@ type Scan struct {
 type ScanBruteforceResult struct {
 	ID        int64              `json:"id"`
 	ScanID    int64              `json:"scan_id"`
+	ScanType  int32              `json:"scan_type"`
 	Username  string             `json:"username"`
 	Password  sql.NullString     `json:"password"`
 	Total     int32              `json:"total"`

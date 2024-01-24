@@ -85,18 +85,56 @@ func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.Cre
 
 func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg queries.CreateScanBruteforceResultParams) (*models.ScanBruteforceResult, error) {
 	slog.InfoContext(ctx, "Creating bruteforce result", "params", arg)
-	return &queries.ScanBruteforceResult{
-		ID:       1,
-		ScanID:   arg.ScanID,
+
+	response, err := q.client.PostScanIdBruteforceresultsWithResponse(ctx, arg.ScanID, generated.CreateBruteforceScanResult{
+		Password: arg.Password.String,
+		Total:    int(arg.Total),
+		Tried:    int(arg.Tried),
 		Username: arg.Username,
-		Password: sql.NullString{String: arg.Password.String, Valid: true},
-		Total:    arg.Total,
-		Tried:    arg.Tried,
-	}, nil
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot create scan bruteforce result")
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
+		return &queries.ScanBruteforceResult{
+			ID:        int64(response.JSON200.Bruteforcescanresult.Id),
+			ScanID:    arg.ScanID,
+			ScanType:  arg.ScanType,
+			Username:  arg.Username,
+			Password:  arg.Password,
+			Total:     arg.Total,
+			Tried:     arg.Tried,
+			CreatedAt: q.scan.CreatedAt,
+		}, nil
+	default:
+		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body)
+		return nil, errors.New("error creating scan result")
+	}
 }
 
 func (q *remoteQuerier) UpdateScanBruteforceResult(ctx context.Context, params queries.UpdateScanBruteforceResultParams) error {
-	return nil
+	slog.InfoContext(ctx, "Updating bruteforce result", "params", params)
+
+	response, err := q.client.PatchBruteforceresultsIdWithResponse(ctx, params.ID, generated.PatchBruteforceScanResult{
+		Password: params.Password.String,
+		Total:    int(params.Total),
+		Tried:    int(params.Tried),
+	})
+	if err != nil {
+		return errors.Wrap(err, "cannot update scan bruteforce result")
+	}
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
+		return nil
+	default:
+		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body)
+		return errors.New("error creating scan result")
+	}
 }
 
 func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error) {

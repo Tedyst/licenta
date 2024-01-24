@@ -72,6 +72,7 @@ func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider brutef
 				}
 				bfuser, err := runner.queries.CreateScanBruteforceResult(ctx, queries.CreateScanBruteforceResultParams{
 					ScanID:   runner.scan.ID,
+					ScanType: int32(sc.GetScannerID()),
 					Username: username,
 					Password: sql.NullString{String: entry.FoundPassword, Valid: entry.FoundPassword != ""},
 					Tried:    int32(entry.Tried),

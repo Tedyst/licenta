@@ -37,19 +37,35 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 		}
 	}
 
-	scanResults, err := server.DatabaseProvider.GetScanResults(ctx, scan.Scan.ID)
+	scanResultsQ, err := server.DatabaseProvider.GetScanResults(ctx, scan.Scan.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan results")
+		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting scan results")
 	}
 
-	results := make([]generated.ScanResult, len(scanResults))
-	for i, scanResult := range scanResults {
-		results[i] = generated.ScanResult{
+	scanResults := make([]generated.ScanResult, len(scanResultsQ))
+	for i, scanResult := range scanResultsQ {
+		scanResults[i] = generated.ScanResult{
 			CreatedAt:  scanResult.CreatedAt.Time.Format(time.RFC3339),
 			Id:         int(scanResult.ID),
 			Message:    scanResult.Message,
 			Severity:   int(scanResult.Severity),
 			ScanSource: int(scanResult.ScanSource),
+		}
+	}
+
+	bruteforceScanResultsQ, err := server.DatabaseProvider.GetScanBruteforceResults(ctx, scan.Scan.ID)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting bruteforce scan results")
+	}
+
+	bruteforceResults := make([]generated.BruteforceScanResult, len(bruteforceScanResultsQ))
+	for i, scanResult := range bruteforceScanResultsQ {
+		bruteforceResults[i] = generated.BruteforceScanResult{
+			Id:       int(scanResult.ID),
+			Password: scanResult.Password.String,
+			Total:    int(scanResult.Total),
+			Tried:    int(scanResult.Tried),
+			Username: scanResult.Username,
 		}
 	}
 
@@ -63,8 +79,10 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
 			PostgresScan:    postgresScan,
+			ProjectId:       int(scan.Scan.ProjectID),
 		},
-		Results: results,
+		Results:           scanResults,
+		BruteforceResults: bruteforceResults,
 	}, nil
 }
 

@@ -234,6 +234,7 @@ CREATE INDEX scan_results_scan_id_idx ON scan_results(scan_id);
 CREATE TABLE scan_bruteforce_results(
   id bigserial PRIMARY KEY,
   scan_id bigint NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
+  scan_type integer NOT NULL,
   username text NOT NULL,
   password text,
   total integer NOT NULL,
@@ -247,6 +248,7 @@ CREATE TABLE bruteforced_passwords(
   username text NOT NULL,
   password text,
   last_bruteforce_id bigint,
+  project_id bigint REFERENCES projects(id) ON DELETE CASCADE,
   UNIQUE (hash, username)
 );
 

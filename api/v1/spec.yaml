@@ -250,6 +250,7 @@ paths:
                   - success
                   - scan
                   - results
+                  - bruteforce_results
                 properties:
                   success:
                     type: boolean
@@ -259,6 +260,10 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/ScanResult'
+                  bruteforce_results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BruteforceScanResult'
         "404":
           description: Scan not found
           content:
@@ -356,6 +361,116 @@ paths:
                     type: boolean
                   scan:
                     $ref: '#/components/schemas/ScanResult'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /scan/{id}/bruteforceresults:
+    post:
+      summary: Create a new bruteforce scan result
+      security:
+        - workerAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the scan
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The scan result object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBruteforceScanResult'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  bruteforcescanresult:
+                    $ref: '#/components/schemas/BruteforceScanResult'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /bruteforceresults/{id}:
+    patch:
+      summary: Update a bruteforce scan result by ID
+      security:
+        - workerAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the bruteforce result
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The scan result object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchBruteforceScanResult'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  bruteforcescanresult:
+                    $ref: '#/components/schemas/BruteforceScanResult'
         "400":
           description: Invalid body
           content:
@@ -516,6 +631,169 @@ paths:
                 $ref: '#/components/schemas/Error'
         "404":
           description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /project/{id}/bruteforced-password:
+    get:
+      summary: Get bruteforced password for a project
+      security:
+        - workerAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: hash
+          in: query
+          description: The hash to filter
+          required: true
+          schema:
+            type: string
+        - name: username
+          in: query
+          description: The username to filter
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - bruteforced_password
+                properties:
+                  success:
+                    type: boolean
+                  bruteforced_password:
+                    $ref: '#/components/schemas/BruteforcedPassword'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a bruteforced password for a project
+      security:
+        - workerAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The bruteforced password object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBruteforcedPassword'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  bruteforced_password:
+                    $ref: '#/components/schemas/BruteforcedPassword'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /bruteforced-passwords/{id}:
+    patch:
+      summary: Update a bruteforced password by ID
+      security:
+        - workerAuth: []
+      tags:
+        - worker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the bruteforced password
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The bruteforced password object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBruteforcedPassword'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - task
+                properties:
+                  success:
+                    type: boolean
+                  bruteforced_password:
+                    $ref: '#/components/schemas/BruteforcedPassword'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
           content:
             application/json:
               schema:
@@ -745,6 +1023,105 @@ components:
         severity:
           type: integer
         message:
+          type: string
+    BruteforcedPassword:
+      type: object
+      required:
+        - id
+        - hash
+        - username
+        - password
+        - last_bruteforce_id
+        - project_id
+      properties:
+        id:
+          type: integer
+        hash:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        last_bruteforce_id:
+          type: integer
+        project_id:
+          type: integer
+    CreateBruteforcedPassword:
+      type: object
+      required:
+        - hash
+        - username
+        - password
+        - last_bruteforce_id
+        - project_id
+      properties:
+        hash:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        last_bruteforce_id:
+          type: integer
+        project_id:
+          type: integer
+    UpdateBruteforcedPassword:
+      type: object
+      required:
+        - last_bruteforce_id
+        - password
+      properties:
+        last_bruteforce_id:
+          type: integer
+        password:
+          type: string
+    BruteforceScanResult:
+      type: object
+      required:
+        - id
+        - password
+        - username
+        - total
+        - tried
+      properties:
+        id:
+          type: integer
+        password:
+          type: string
+        username:
+          type: string
+        total:
+          type: integer
+        tried:
+          type: integer
+    CreateBruteforceScanResult:
+      type: object
+      required:
+        - password
+        - username
+        - total
+        - tried
+      properties:
+        password:
+          type: string
+        username:
+          type: string
+        total:
+          type: integer
+        tried:
+          type: integer
+    PatchBruteforceScanResult:
+      type: object
+      required:
+        - tried
+        - total
+        - password
+      properties:
+        tried:
+          type: integer
+        total:
+          type: integer
+        password:
           type: string
     UpdatePostgresVersion:
       type: object

@@ -4,13 +4,26 @@ INSERT INTO default_bruteforce_passwords(PASSWORD)
 ON CONFLICT
     DO NOTHING;
 
--- name: InsertBruteforcedPassword :exec
-INSERT INTO bruteforced_passwords(hash, username, PASSWORD, last_bruteforce_id)
-    VALUES ($1, $2, $3, $4)
+-- name: CreateBruteforcedPassword :one
+INSERT INTO bruteforced_passwords(hash, username, PASSWORD, last_bruteforce_id, project_id)
+    VALUES ($1, $2, $3, $4, $5)
 ON CONFLICT
-    DO NOTHING;
+    DO NOTHING
+RETURNING
+    *;
 
--- name: GetBruteforcedPasswordByHashAndUsername :one
+-- name: UpdateBruteforcedPassword :one
+UPDATE
+    bruteforced_passwords
+SET
+    last_bruteforce_id = $2,
+    PASSWORD = $3
+WHERE
+    id = $1
+RETURNING
+    *;
+
+-- name: GetBruteforcedPasswords :one
 SELECT
     *
 FROM
@@ -18,6 +31,8 @@ FROM
 WHERE
     hash = $1
     AND username = $2
+    AND (project_id = $3
+        OR project_id = NULL)
 LIMIT 1;
 
 -- name: GetBruteforcePasswordsForProjectCount :one
@@ -67,4 +82,32 @@ FROM
 WHERE
     id > sqlc.arg('last_id')
 LIMIT sqlc.arg('limit');
+
+-- name: GetSpecificBruteforcePasswordID :one
+SELECT
+    subq.id
+FROM (
+    SELECT
+        id
+    FROM
+        default_bruteforce_passwords
+    WHERE
+        default_bruteforce_passwords.PASSWORD = $1
+    UNION ALL
+    SELECT
+        -1
+    FROM
+        project_docker_layer_results
+    WHERE
+        project_docker_layer_results.project_id = $2
+        AND project_docker_layer_results.PASSWORD = $1
+    UNION ALL
+    SELECT
+        -1
+    FROM
+        project_git_results
+    WHERE
+        project_git_results.project_id = $2
+        AND project_git_results.PASSWORD = $1) AS subq
+LIMIT 1;
 
