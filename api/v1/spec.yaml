@@ -1446,6 +1446,8 @@ components:
           type: string
           description: The name of the organization
           example: My Organization
+          x-oapi-codegen-extra-tags:
+            validate: "min=4,alphanum,max=32,lowercase"
     OrganizationStats:
       required:
         - users
