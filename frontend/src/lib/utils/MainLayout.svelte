@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { user } from '$lib/stores';
+	import { user, organizations } from '$lib/stores';
 	import { theme } from '../../lib/stores';
 	import GravatarImage from '$lib/utils/GravatarImage.svelte';
 
@@ -30,6 +30,19 @@
 					return;
 				} else if (res.data?.success === false) {
 					goto('/login');
+					return;
+				}
+				serverError = res.error?.message || 'Internal server error';
+			})
+			.catch((err) => {
+				serverError = err.message;
+			});
+
+		client
+			.GET('/organizations')
+			.then((res) => {
+				if (res.data?.success) {
+					$organizations = res.data.organizations;
 					return;
 				}
 				serverError = res.error?.message || 'Internal server error';

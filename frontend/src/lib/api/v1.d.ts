@@ -708,6 +708,126 @@ export interface paths {
       };
     };
   };
+  "/organizations": {
+    /** Get all organizations that the user can see */
+    get: {
+      parameters: {
+        query?: {
+          /** @description The organization name to filter for */
+          name?: string;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              organizations: components["schemas"]["Organization"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new organization */
+    post: {
+      /** @description The organization object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["Organization"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              organization: components["schemas"]["Organization"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/organizations/{id}": {
+    /** Get organization by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the organization */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description successful operation */
+        200: {
+          content: {
+            "application/json": components["schemas"]["Organization"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Organization not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update organization by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the organization */
+          id: number;
+        };
+      };
+      /** @description The organization object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["Organization"];
+        };
+      };
+      responses: {
+        /** @description successful operation */
+        200: {
+          content: {
+            "application/json": components["schemas"]["Organization"];
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Organization not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;

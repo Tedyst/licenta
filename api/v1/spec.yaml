@@ -894,6 +894,151 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /organizations:
+    get:
+      summary: Get all organizations that the user can see
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      parameters:
+        - name: name
+          in: query
+          description: The organization name to filter for
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - organizations
+                properties:
+                  success:
+                    type: boolean
+                  organizations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Organization'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new organization
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      requestBody:
+        description: The organization object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - organization
+                properties:
+                  success:
+                    type: boolean
+                  organization:
+                    $ref: '#/components/schemas/Organization'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /organizations/{id}:
+    get:
+      summary: Get organization by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update organization by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The organization object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Project:
