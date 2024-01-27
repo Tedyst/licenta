@@ -1,9 +1,11 @@
 import createClient from 'openapi-fetch';
 import type { paths } from './api/v1';
+import { organizations, user } from './stores';
 import type {
 	PublicKeyCredentialCreationOptionsJSON,
 	PublicKeyCredentialRequestOptionsJSON
 } from './webauthn';
+import { goto } from '$app/navigation';
 
 let token: string | null = null;
 
@@ -250,6 +252,39 @@ export async function requestResetPassword(
 		}
 		throw new Error('Failed to fetch');
 	});
+}
+
+export async function updateOrganizations() {
+	return await client
+		.GET('/organizations')
+		.then((res) => {
+			if (res.data?.success) {
+				organizations.set(res.data.organizations);
+				return '';
+			}
+			return res.error?.message || 'Internal server error';
+		})
+		.catch((err) => {
+			return err.message;
+		});
+}
+
+export async function updateCurrentUser() {
+	return await client
+		.GET('/users/me')
+		.then((res) => {
+			if (res.data?.success) {
+				user.set(res.data.user);
+				return '';
+			} else if (res.data?.success === false) {
+				goto('/login');
+				return '';
+			}
+			return res.error?.message || 'Internal server error';
+		})
+		.catch((err) => {
+			return err.message;
+		});
 }
 
 const client = createClient<paths>({ fetch: csrfFetch, baseUrl: '/api/v1' });

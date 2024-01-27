@@ -2258,10 +2258,10 @@ func (c *TransactionQuerierGetOrganizationUserCall) DoAndReturn(f func(context.C
 }
 
 // GetOrganizationsByUser mocks base method.
-func (m *MockTransactionQuerier) GetOrganizationsByUser(ctx context.Context, userID int64) ([]*queries.Organization, error) {
+func (m *MockTransactionQuerier) GetOrganizationsByUser(ctx context.Context, userID int64) ([]*queries.GetOrganizationsByUserRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrganizationsByUser", ctx, userID)
-	ret0, _ := ret[0].([]*queries.Organization)
+	ret0, _ := ret[0].([]*queries.GetOrganizationsByUserRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -2279,19 +2279,19 @@ type TransactionQuerierGetOrganizationsByUserCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierGetOrganizationsByUserCall) Return(arg0 []*queries.Organization, arg1 error) *TransactionQuerierGetOrganizationsByUserCall {
+func (c *TransactionQuerierGetOrganizationsByUserCall) Return(arg0 []*queries.GetOrganizationsByUserRow, arg1 error) *TransactionQuerierGetOrganizationsByUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierGetOrganizationsByUserCall) Do(f func(context.Context, int64) ([]*queries.Organization, error)) *TransactionQuerierGetOrganizationsByUserCall {
+func (c *TransactionQuerierGetOrganizationsByUserCall) Do(f func(context.Context, int64) ([]*queries.GetOrganizationsByUserRow, error)) *TransactionQuerierGetOrganizationsByUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierGetOrganizationsByUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Organization, error)) *TransactionQuerierGetOrganizationsByUserCall {
+func (c *TransactionQuerierGetOrganizationsByUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetOrganizationsByUserRow, error)) *TransactionQuerierGetOrganizationsByUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

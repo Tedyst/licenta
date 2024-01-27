@@ -114,7 +114,38 @@ func (q *Queries) GetOrganizationUser(ctx context.Context, arg GetOrganizationUs
 
 const getOrganizationsByUser = `-- name: GetOrganizationsByUser :many
 SELECT
-    organizations.id, organizations.name, organizations.created_at
+    organizations.id, organizations.name, organizations.created_at,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            organization_members
+        WHERE
+            organization_id = organizations.id) AS users,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            projects
+        WHERE
+            organization_id = organizations.id) AS projects,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN projects ON scans.project_id = projects.id
+        WHERE
+            projects.organization_id = organizations.id) AS scans,
+(
+        SELECT
+            COALESCE(MAX(scan_results.severity), 0)::integer
+        FROM
+            scan_results
+            INNER JOIN scans ON scan_results.scan_id = scans.id
+            INNER JOIN projects ON scans.project_id = projects.id
+        WHERE
+            projects.organization_id = organizations.id) AS maximum_severity
 FROM
     organizations
     INNER JOIN organization_members ON organizations.id = organization_members.organization_id
@@ -122,16 +153,32 @@ WHERE
     organization_members.user_id = $1
 `
 
-func (q *Queries) GetOrganizationsByUser(ctx context.Context, userID int64) ([]*Organization, error) {
+type GetOrganizationsByUserRow struct {
+	Organization    Organization `json:"organization"`
+	Users           int64        `json:"users"`
+	Projects        int64        `json:"projects"`
+	Scans           int64        `json:"scans"`
+	MaximumSeverity int32        `json:"maximum_severity"`
+}
+
+func (q *Queries) GetOrganizationsByUser(ctx context.Context, userID int64) ([]*GetOrganizationsByUserRow, error) {
 	rows, err := q.db.Query(ctx, getOrganizationsByUser, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*Organization
+	var items []*GetOrganizationsByUserRow
 	for rows.Next() {
-		var i Organization
-		if err := rows.Scan(&i.ID, &i.Name, &i.CreatedAt); err != nil {
+		var i GetOrganizationsByUserRow
+		if err := rows.Scan(
+			&i.Organization.ID,
+			&i.Organization.Name,
+			&i.Organization.CreatedAt,
+			&i.Users,
+			&i.Projects,
+			&i.Scans,
+			&i.MaximumSeverity,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

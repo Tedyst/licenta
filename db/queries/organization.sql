@@ -17,7 +17,38 @@ WHERE
 
 -- name: GetOrganizationsByUser :many
 SELECT
-    organizations.*
+    sqlc.embed(organizations),
+(
+        SELECT
+            COUNT(*)
+        FROM
+            organization_members
+        WHERE
+            organization_id = organizations.id) AS users,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            projects
+        WHERE
+            organization_id = organizations.id) AS projects,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN projects ON scans.project_id = projects.id
+        WHERE
+            projects.organization_id = organizations.id) AS scans,
+(
+        SELECT
+            COALESCE(MAX(scan_results.severity), 0)::integer
+        FROM
+            scan_results
+            INNER JOIN scans ON scan_results.scan_id = scans.id
+            INNER JOIN projects ON scans.project_id = projects.id
+        WHERE
+            projects.organization_id = organizations.id) AS maximum_severity
 FROM
     organizations
     INNER JOIN organization_members ON organizations.id = organization_members.organization_id

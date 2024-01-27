@@ -5,7 +5,7 @@
 
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import client from '../../lib/client';
+	import client, { updateOrganizations } from '../../lib/client';
 
 	import { pa } from '@accuser/svelte-plausible-analytics';
 	import ListOrganizationsAndProjects from '$lib/utils/ListOrganizationsAndProjects.svelte';
@@ -17,39 +17,13 @@
 	}
 
 	let serverError = '';
-	onMount(() => {
+	onMount(async () => {
 		if ($user) {
 			return;
 		}
 
-		client
-			.GET('/users/me')
-			.then((res) => {
-				if (res.data?.success) {
-					$user = res.data.user;
-					return;
-				} else if (res.data?.success === false) {
-					goto('/login');
-					return;
-				}
-				serverError = res.error?.message || 'Internal server error';
-			})
-			.catch((err) => {
-				serverError = err.message;
-			});
-
-		client
-			.GET('/organizations')
-			.then((res) => {
-				if (res.data?.success) {
-					$organizations = res.data.organizations;
-					return;
-				}
-				serverError = res.error?.message || 'Internal server error';
-			})
-			.catch((err) => {
-				serverError = err.message;
-			});
+		let orgError = await updateOrganizations();
+		if (orgError) serverError = orgError;
 	});
 </script>
 

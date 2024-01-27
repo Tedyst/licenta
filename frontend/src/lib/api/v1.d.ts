@@ -130,6 +130,7 @@ export interface paths {
             "application/json": {
               success: boolean;
               scan: components["schemas"]["Scan"];
+              scan_group: components["schemas"]["ScanGroup"];
             };
           };
         };
@@ -440,7 +441,7 @@ export interface paths {
           content: {
             "application/json": {
               success: boolean;
-              scans?: components["schemas"]["Scan"][];
+              scan_group?: components["schemas"]["ScanGroup"];
             };
           };
         };
@@ -740,7 +741,7 @@ export interface paths {
       /** @description The organization object */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["Organization"];
+          "application/json": components["schemas"]["CreateOrganization"];
         };
       };
       responses: {
@@ -775,7 +776,10 @@ export interface paths {
         /** @description successful operation */
         200: {
           content: {
-            "application/json": components["schemas"]["Organization"];
+            "application/json": {
+              success: boolean;
+              organization: components["schemas"]["Organization"];
+            };
           };
         };
         /** @description Unauthorized */
@@ -792,29 +796,25 @@ export interface paths {
         };
       };
     };
-    /** Update organization by ID */
-    patch: {
+    /** Delete organization by ID */
+    delete: {
       parameters: {
         path: {
           /** @description The ID of the organization */
           id: number;
         };
       };
-      /** @description The organization object */
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["Organization"];
-        };
-      };
       responses: {
         /** @description successful operation */
-        200: {
+        204: {
           content: {
-            "application/json": components["schemas"]["Organization"];
+            "application/json": {
+              success: boolean;
+            };
           };
         };
-        /** @description Invalid body */
-        400: {
+        /** @description Unauthorized */
+        401: {
           content: {
             "application/json": components["schemas"]["Error"];
           };
@@ -966,6 +966,12 @@ export interface components {
       created_at: string;
       scan_source: number;
     };
+    ScanGroup: {
+      id: number;
+      project_id: number;
+      created_by?: components["schemas"]["User"];
+      scans: components["schemas"]["Scan"][];
+    };
     Scan: {
       id: number;
       status: number;
@@ -973,8 +979,8 @@ export interface components {
       created_at: string;
       ended_at: string;
       maximum_severity: number;
-      postgres_scans?: components["schemas"]["PostgresScan"][];
-      project_id: number;
+      postgres_scan?: components["schemas"]["PostgresScan"];
+      scan_group_id: number;
     };
     PostgresScan: {
       id: number;
@@ -1052,6 +1058,19 @@ export interface components {
        */
       admin: boolean;
     };
+    CreateOrganization: {
+      /**
+       * @description The name of the organization
+       * @example My Organization
+       */
+      name: string;
+    };
+    OrganizationStats: {
+      users: number;
+      projects: number;
+      scans: number;
+      failed_scans: number;
+    };
     Organization: {
       /**
        * Format: int64
@@ -1070,6 +1089,7 @@ export interface components {
        */
       created_at: string;
       projects: components["schemas"]["Project"][];
+      stats?: components["schemas"]["OrganizationStats"];
     };
     ChangePasswordLoggedIn: {
       /**

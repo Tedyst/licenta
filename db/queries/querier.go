@@ -68,7 +68,7 @@ type Querier interface {
 	GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error)
 	GetOrganizationProjects(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetOrganizationUser(ctx context.Context, arg GetOrganizationUserParams) (*OrganizationMember, error)
-	GetOrganizationsByUser(ctx context.Context, userID int64) ([]*Organization, error)
+	GetOrganizationsByUser(ctx context.Context, userID int64) ([]*GetOrganizationsByUserRow, error)
 	GetOrganizationsForUser(ctx context.Context, userID int64) ([]*Organization, error)
 	GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgresDatabaseRow, error)
 	GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*PostgresDatabase, error)

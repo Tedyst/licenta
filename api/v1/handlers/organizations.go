@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
@@ -16,7 +17,7 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 		return nil, errors.Wrap(err, "error getting user")
 	}
 
-	organization, err := server.DatabaseProvider.GetOrganizationsForUser(ctx, user.ID)
+	organization, err := server.DatabaseProvider.GetOrganizationsByUser(ctx, user.ID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting organizations")
 	}
@@ -26,11 +27,11 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 		return nil, errors.Wrap(err, "error getting organizations")
 	}
 
-	organizationProjects := make(map[int64][]generated.Project)
+	organizationProjects := map[int64][]generated.Project{}
 	for _, project := range projects {
 		organizationProjects[project.OrganizationID] = append(organizationProjects[project.OrganizationID], generated.Project{
 			Id:             int64(project.ID),
-			CreatedAt:      project.CreatedAt.Time.Format("2006-01-02T15:04:05.000Z"),
+			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339),
 			Name:           project.Name,
 			OrganizationId: int64(project.OrganizationID),
 			Remote:         project.Remote,
@@ -38,14 +39,24 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 	}
 
 	response := generated.GetOrganizations200JSONResponse{
-		Organizations: make([]generated.Organization, len(organization)),
+		Organizations: []generated.Organization{},
 		Success:       true,
 	}
 	for _, org := range organization {
+		val, ok := organizationProjects[int64(org.Organization.ID)]
+		if !ok {
+			val = []generated.Project{}
+		}
 		response.Organizations = append(response.Organizations, generated.Organization{
-			Id:       int64(org.ID),
-			Name:     org.Name,
-			Projects: organizationProjects[int64(org.ID)],
+			Id:       int64(org.Organization.ID),
+			Name:     org.Organization.Name,
+			Projects: val,
+			Stats: generated.OrganizationStats{
+				FailedScans: int(org.MaximumSeverity),
+				Projects:    int(org.Projects),
+				Scans:       int(org.Scans),
+				Users:       int(org.Users),
+			},
 		})
 	}
 
@@ -158,9 +169,28 @@ func (server *serverHandler) DeleteOrganizationsId(ctx context.Context, request 
 }
 
 func (server *serverHandler) PostOrganizations(ctx context.Context, request generated.PostOrganizationsRequestObject) (generated.PostOrganizationsResponseObject, error) {
+	err := valid.Struct(request)
+	if err != nil {
+		return generated.PostOrganizations400JSONResponse{
+			Success: false,
+			Message: "Validation error: " + err.Error(),
+		}, nil
+	}
+
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting user")
+	}
+
+	_, err = server.DatabaseProvider.GetOrganizationByName(ctx, request.Body.Name)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, errors.Wrap(err, "error getting organization")
+	}
+	if err == nil {
+		return &generated.PostOrganizations400JSONResponse{
+			Success: false,
+			Message: "Organization already exists",
+		}, nil
 	}
 
 	organization, err := server.DatabaseProvider.CreateOrganization(ctx, request.Body.Name)

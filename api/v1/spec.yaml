@@ -1446,12 +1446,28 @@ components:
           type: string
           description: The name of the organization
           example: My Organization
+    OrganizationStats:
+      required:
+        - users
+        - projects
+        - scans
+        - failed_scans
+      properties:
+        users:
+          type: integer
+        projects:
+          type: integer
+        scans:
+          type: integer
+        failed_scans:
+          type: integer
     Organization:
       required:
         - id
         - name
         - created_at
         - projects
+        - stats
       properties:
         id:
           type: integer
@@ -1470,6 +1486,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Project"
+        stats:
+          $ref: '#/components/schemas/OrganizationStats'
     ChangePasswordLoggedIn:
       required:
         - old_password
