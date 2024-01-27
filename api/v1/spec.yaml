@@ -1172,8 +1172,10 @@ components:
           type: string
         maximum_severity:
           type: integer
-        postgres_scan:
-          $ref: "#/components/schemas/PostgresScan"
+        postgres_scans:
+          type: array
+          items:
+            $ref: "#/components/schemas/PostgresScan"
         project_id:
           type: integer
     PostgresScan:
@@ -1270,25 +1272,6 @@ components:
           description: Whether the user is an admin
           example: false
     Organization:
-      required:
-        - id
-        - name
-        - created_at
-      properties:
-        id:
-          type: integer
-          format: int64
-          description: The internal ID of the organization
-          example: 1
-        name:
-          type: string
-          description: The name of the organization
-          example: My Organization
-        created_at:
-          type: string
-          description: The date the organization was created
-          example: 2019-01-23T16:00:00Z
-    OrganizationProjects:
       required:
         - id
         - name

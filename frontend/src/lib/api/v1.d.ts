@@ -853,7 +853,7 @@ export interface components {
       created_at: string;
       ended_at: string;
       maximum_severity: number;
-      postgres_scan?: components["schemas"]["PostgresScan"];
+      postgres_scans?: components["schemas"]["PostgresScan"][];
       project_id: number;
     };
     PostgresScan: {
@@ -933,24 +933,6 @@ export interface components {
       admin: boolean;
     };
     Organization: {
-      /**
-       * Format: int64
-       * @description The internal ID of the organization
-       * @example 1
-       */
-      id: number;
-      /**
-       * @description The name of the organization
-       * @example My Organization
-       */
-      name: string;
-      /**
-       * @description The date the organization was created
-       * @example "2019-01-23T16:00:00.000Z"
-       */
-      created_at: string;
-    };
-    OrganizationProjects: {
       /**
        * Format: int64
        * @description The internal ID of the organization

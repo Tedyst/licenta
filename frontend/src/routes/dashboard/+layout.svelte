@@ -70,7 +70,24 @@
 			</div>
 
 			<label class="swap swap-rotate mr-5">
-				<input type="checkbox" on:click={toggleTheme} checked={$theme !== 'dark'} />
+				<input
+					id="toggle-theme"
+					type="checkbox"
+					on:click={toggleTheme}
+					checked={$theme !== 'dark'}
+					aria-label="Toggle Theme"
+				/>
+
+				<script>
+					(function () {
+						let localTheme = localStorage.getItem('theme');
+						if (localTheme) {
+							if (typeof document === 'undefined') return;
+							document.getElementById('toggle-theme').checked = JSON.parse(localTheme) !== 'dark';
+						}
+					})();
+				</script>
+
 				<svg
 					class="swap-on fill-current w-8 h-8"
 					xmlns="http://www.w3.org/2000/svg"
@@ -88,10 +105,20 @@
 					/></svg
 				>
 			</label>
-			<div class="avatar">
-				<div class="w-10 rounded-full">
-					<GravatarImage email={$user?.email} />
+			<div class="dropdown dropdown-hover dropdown-end">
+				<div class="avatar">
+					<div tabindex="0" role="button" class="w-10 rounded-full">
+						<GravatarImage email={$user?.email} />
+					</div>
 				</div>
+				<ul
+					tabindex="-1"
+					class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32"
+				>
+					<li><a href="/dashboard">Settings</a></li>
+					<li class="divider m-0 flex-nowrap shrink-0 opacity-100 bg-inherit" />
+					<li><a href="/logout">Logout</a></li>
+				</ul>
 			</div>
 		</div>
 		<div class="m-4">
@@ -100,7 +127,7 @@
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay" />
-		<ul class="menu p-4 w-52 min-h-full bg-base-200">
+		<ul class="menu p-4 w-52 min-h-full bg-base-300">
 			<li class="mb-4 font-semibold text-xl">
 				<a href="/dashboard">Licenta</a>
 			</li>
@@ -111,25 +138,9 @@
 				<li class="mb-4 md:hidden"><a href="/dashboard">Admin</a></li>
 			{/if}
 
-			<div class="divider md:hidden mt-0" />
+			<li class="divider md:hidden m-0 flex-nowrap shrink-0 opacity-100 bg-inherit" />
 
-			<ListOrganizationsAndProjects
-				organizations={[
-					{
-						name: 'Test Org 1',
-						projects: [{ name: 'Test Project 1' }, { name: 'Test Project 2' }]
-					},
-					{
-						name: 'Test Org 1',
-						projects: [{ name: 'Test Project 1' }, { name: 'Test Project 2' }]
-					},
-					{
-						name: 'Test Org 1',
-						projects: [{ name: 'Test Project 1' }, { name: 'Test Project 2' }]
-					},
-					{ name: 'Test Org 1', projects: [{ name: 'Test Project 1' }, { name: 'Test Project 2' }] }
-				]}
-			/>
+			<ListOrganizationsAndProjects />
 		</ul>
 	</div>
 </div>
