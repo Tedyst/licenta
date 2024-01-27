@@ -83,6 +83,7 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	})
 
 	apiRouter := app.Route("/api/v1/", func(r chi.Router) {
+		// r.Use(app.Middlewares()...)
 		r.Use(config.UserAuth.APIMiddleware)
 	})
 

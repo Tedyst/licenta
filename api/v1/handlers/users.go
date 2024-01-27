@@ -82,6 +82,7 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 			Id:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
+			Admin:    user.Username == "Tedyst",
 		},
 	}, nil
 }

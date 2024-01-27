@@ -1238,6 +1238,7 @@ components:
         - id
         - username
         - email
+        - admin
       properties:
         id:
           type: integer
@@ -1264,6 +1265,53 @@ components:
           type: string
           description: The phone number of the user
           example:
+        admin:
+          type: boolean
+          description: Whether the user is an admin
+          example: false
+    Organization:
+      required:
+        - id
+        - name
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the organization
+          example: 1
+        name:
+          type: string
+          description: The name of the organization
+          example: My Organization
+        created_at:
+          type: string
+          description: The date the organization was created
+          example: 2019-01-23T16:00:00Z
+    OrganizationProjects:
+      required:
+        - id
+        - name
+        - created_at
+        - projects
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the organization
+          example: 1
+        name:
+          type: string
+          description: The name of the organization
+          example: My Organization
+        created_at:
+          type: string
+          description: The date the organization was created
+          example: 2019-01-23T16:00:00Z
+        projects:
+          type: array
+          items:
+            $ref: "#/components/schemas/Project"
     ChangePasswordLoggedIn:
       required:
         - old_password

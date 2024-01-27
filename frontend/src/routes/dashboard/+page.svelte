@@ -2,6 +2,8 @@
 	import { user } from '$lib/stores';
 </script>
 
-<h1>Dashboard</h1>
+<div>
+	<h1>Dashboard</h1>
 
-<p>Logged in as {$user?.username}</p>
+	<p>Logged in as {$user?.username}</p>
+</div>

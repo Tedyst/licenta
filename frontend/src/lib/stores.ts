@@ -1,6 +1,5 @@
 import { persisted } from 'svelte-local-storage-store';
-import type { User } from '../interfaces';
-import { writable } from 'svelte/store';
+import type { components } from '../lib/api/v1';
 
 export const theme = persisted('theme', 'light');
-export const user = writable<User | null>(null);
+export const user = persisted<components['schemas']['User'] | null>('user', null);

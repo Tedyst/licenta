@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
@@ -123,14 +124,19 @@ func (auth *authenticationProvider) Middleware(next http.Handler) http.Handler {
 }
 
 func (auth *authenticationProvider) APIMiddleware(next http.Handler) http.Handler {
+	lockMiddleware := lock.Middleware(auth.authboss)(next)
+	confirmMiddleware := confirm.Middleware(auth.authboss)(lockMiddleware)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		lockMiddleware := lock.Middleware(auth.authboss)(next)
-		confirmMiddleware := confirm.Middleware(auth.authboss)(lockMiddleware)
-		user, err := auth.authboss.CurrentUser(r)
+		user, err := auth.authboss.LoadCurrentUser(&r)
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
 		}
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, requestStorer{}, r)
+		r = r.WithContext(ctx)
+
 		if user != nil {
 			confirmMiddleware.ServeHTTP(w, r)
 		} else {
@@ -146,8 +152,11 @@ func (auth *authenticationProvider) Handler() http.Handler {
 func (auth *authenticationProvider) GetUser(ctx context.Context) (*models.User, error) {
 	r := ctx.Value(requestStorer{}).(*http.Request)
 	user, err := auth.authboss.CurrentUser(r)
-	if err != nil {
+	if err != nil && !errors.Is(err, authboss.ErrUserNotFound) {
 		return nil, err
+	}
+	if errors.Is(err, authboss.ErrUserNotFound) {
+		return nil, nil
 	}
 
 	return user.(*authbossUser).user, nil

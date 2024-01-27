@@ -129,7 +129,7 @@ export interface paths {
           content: {
             "application/json": {
               success: boolean;
-              task: components["schemas"]["WorkerTask"];
+              scan: components["schemas"]["Scan"];
             };
           };
         };
@@ -148,17 +148,17 @@ export interface paths {
       };
     };
   };
-  "/project/{projectid}/bruteforce-passwords": {
+  "/project/{id}/bruteforce-passwords": {
     /** Get all bruteforce passwords associated with a project */
     get: {
       parameters: {
         query?: {
           /** @description The last ID of the item to return */
-          last_id?: number;
+          last_password_id?: number;
         };
         path: {
           /** @description The ID of the project */
-          projectid: number;
+          id: number;
         };
       };
       responses: {
@@ -177,128 +177,13 @@ export interface paths {
       };
     };
   };
-  "/scanner/postgres/database/{postgresDatabaseId}": {
-    /** Get all postgres scans associated with a database */
-    get: {
-      parameters: {
-        path: {
-          /** @description The ID of the postgres database */
-          postgresDatabaseId: number;
-        };
-      };
-      responses: {
-        /** @description Successful operation */
-        200: {
-          content: {
-            "application/json": {
-              /** @description The success status */
-              success: boolean;
-              /** @description The list of scans */
-              scans: components["schemas"]["PostgresScan"][];
-              database: components["schemas"]["PostgresDatabase"];
-              /** @description The number of scans */
-              scan_count: number;
-            };
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Unauthorized */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
-    /** Create a new postgres scan associated with a database */
-    post: {
-      parameters: {
-        path: {
-          /** @description The ID of the postgres database */
-          postgresDatabaseId: number;
-        };
-      };
-      responses: {
-        /** @description Successful operation */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-              scan?: components["schemas"]["PostgresScan"];
-            };
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Database not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
-    /** Update a postgres database by ID */
-    patch: {
-      parameters: {
-        path: {
-          /** @description The ID of the postgres database */
-          postgresDatabaseId: number;
-        };
-      };
-      /** @description The database object */
-      requestBody: {
-        content: {
-          "application/json": components["schemas"]["PatchPostgresDatabase"];
-        };
-      };
-      responses: {
-        /** @description Successful operation */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-              database?: components["schemas"]["PostgresDatabase"];
-            };
-          };
-        };
-        /** @description Invalid body */
-        400: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-        /** @description Database not found */
-        404: {
-          content: {
-            "application/json": components["schemas"]["Error"];
-          };
-        };
-      };
-    };
-  };
-  "/scanner/postgres/scan/{scanid}": {
-    /** Get a postgres scan by ID */
+  "/scan/{id}": {
+    /** Get a scan by ID */
     get: {
       parameters: {
         path: {
           /** @description The ID of the scan */
-          scanid: number;
+          id: number;
         };
       };
       responses: {
@@ -307,8 +192,9 @@ export interface paths {
           content: {
             "application/json": {
               success: boolean;
-              scan: components["schemas"]["PostgresScan"];
-              results: components["schemas"]["PostgresScanResult"][];
+              scan: components["schemas"]["Scan"];
+              results: components["schemas"]["ScanResult"][];
+              bruteforce_results: components["schemas"]["BruteforceScanResult"][];
             };
           };
         };
@@ -320,18 +206,18 @@ export interface paths {
         };
       };
     };
-    /** Update a postgres scan by ID */
+    /** Update a scan by ID */
     patch: {
       parameters: {
         path: {
           /** @description The ID of the scan */
-          scanid: number;
+          id: number;
         };
       };
       /** @description The scan object */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["PatchPostgresScan"];
+          "application/json": components["schemas"]["PatchScan"];
         };
       };
       responses: {
@@ -340,7 +226,7 @@ export interface paths {
           content: {
             "application/json": {
               success: boolean;
-              scan?: components["schemas"]["PostgresScan"];
+              scan?: components["schemas"]["Scan"];
             };
           };
         };
@@ -365,19 +251,19 @@ export interface paths {
       };
     };
   };
-  "/scanner/postgres/scan/{scanid}/result": {
-    /** Create a new postgres scan result */
+  "/scan/{id}/result": {
+    /** Create a new scan result */
     post: {
       parameters: {
         path: {
           /** @description The ID of the scan */
-          scanid: number;
+          id: number;
         };
       };
       /** @description The scan result object */
       requestBody: {
         content: {
-          "application/json": components["schemas"]["CreatePostgresScanResult"];
+          "application/json": components["schemas"]["CreateScanResult"];
         };
       };
       responses: {
@@ -386,7 +272,7 @@ export interface paths {
           content: {
             "application/json": {
               success: boolean;
-              scan?: components["schemas"]["PostgresScanResult"];
+              scan?: components["schemas"]["ScanResult"];
             };
           };
         };
@@ -411,13 +297,105 @@ export interface paths {
       };
     };
   };
-  "/cves/{databaseType}/{version}": {
+  "/scan/{id}/bruteforceresults": {
+    /** Create a new bruteforce scan result */
+    post: {
+      parameters: {
+        path: {
+          /** @description The ID of the scan */
+          id: number;
+        };
+      };
+      /** @description The scan result object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateBruteforceScanResult"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              bruteforcescanresult?: components["schemas"]["BruteforceScanResult"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/bruteforceresults/{id}": {
+    /** Update a bruteforce scan result by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the bruteforce result */
+          id: number;
+        };
+      };
+      /** @description The scan result object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchBruteforceScanResult"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              bruteforcescanresult?: components["schemas"]["BruteforceScanResult"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/cves/{dbType}/{version}": {
     /** Get all CVEs for a database type and version */
     get: {
       parameters: {
         path: {
           /** @description The database type */
-          databaseType: string;
+          dbType: string;
           /** @description The database version */
           version: string;
         };
@@ -447,13 +425,13 @@ export interface paths {
       };
     };
   };
-  "/project/{projectid}/run": {
+  "/project/{id}/run": {
     /** Run all extractors and scanners for a project */
     post: {
       parameters: {
         path: {
           /** @description The ID of the project */
-          projectid: number;
+          id: number;
         };
       };
       responses: {
@@ -462,7 +440,7 @@ export interface paths {
           content: {
             "application/json": {
               success: boolean;
-              postgres_scans: components["schemas"]["PostgresScan"][];
+              scans?: components["schemas"]["Scan"][];
             };
           };
         };
@@ -487,13 +465,13 @@ export interface paths {
       };
     };
   };
-  "/project/{projectid}": {
+  "/project/{id}": {
     /** Get project by ID */
     get: {
       parameters: {
         path: {
           /** @description The ID of the project */
-          projectid: number;
+          id: number;
         };
       };
       responses: {
@@ -514,6 +492,214 @@ export interface paths {
           };
         };
         /** @description Project not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/project/{id}/bruteforced-password": {
+    /** Get bruteforced password for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The hash to filter */
+          hash: string;
+          /** @description The username to filter */
+          username: string;
+        };
+        path: {
+          /** @description The ID of the project */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              bruteforced_password: components["schemas"]["BruteforcedPassword"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a bruteforced password for a project */
+    post: {
+      parameters: {
+        path: {
+          /** @description The ID of the project */
+          id: number;
+        };
+      };
+      /** @description The bruteforced password object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateBruteforcedPassword"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              bruteforced_password?: components["schemas"]["BruteforcedPassword"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/bruteforced-passwords/{id}": {
+    /** Update a bruteforced password by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the bruteforced password */
+          id: number;
+        };
+      };
+      /** @description The bruteforced password object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["UpdateBruteforcedPassword"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              bruteforced_password?: components["schemas"]["BruteforcedPassword"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/postgres/{id}": {
+    /** Get postgres database by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the postgres database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              postgres_database: components["schemas"]["PostgresDatabase"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update postgres database by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the postgres database */
+          id: number;
+        };
+      };
+      /** @description The postgres database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchPostgresDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              postgres_database: components["schemas"]["PostgresDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
         404: {
           content: {
             "application/json": components["schemas"]["Error"];
@@ -551,6 +737,11 @@ export interface components {
        * @example "2019-01-23T16:00:00.000Z"
        */
       created_at: string;
+      /**
+       * @description Whether to use the workers associated with the project instead of the default ones
+       * @example false
+       */
+      remote: boolean;
     };
     CVE: {
       /**
@@ -586,7 +777,6 @@ export interface components {
       database_name?: string;
       username?: string;
       password?: string;
-      remote?: boolean;
       version?: string;
     };
     PostgresDatabase: {
@@ -598,45 +788,77 @@ export interface components {
       username: string;
       password: string;
       created_at: string;
-      remote: boolean;
       version: string;
     };
-    PatchPostgresScan: {
+    PatchScan: {
       status: number;
       error: string;
       ended_at: string;
     };
-    CreatePostgresScanResult: {
+    CreateScanResult: {
       severity: number;
       message: string;
+    };
+    BruteforcedPassword: {
+      id: number;
+      hash: string;
+      username: string;
+      password: string;
+      last_bruteforce_id: number;
+      project_id: number;
+    };
+    CreateBruteforcedPassword: {
+      hash: string;
+      username: string;
+      password: string;
+      last_bruteforce_id: number;
+      project_id: number;
+    };
+    UpdateBruteforcedPassword: {
+      last_bruteforce_id: number;
+      password: string;
+    };
+    BruteforceScanResult: {
+      id: number;
+      password: string;
+      username: string;
+      total: number;
+      tried: number;
+    };
+    CreateBruteforceScanResult: {
+      password: string;
+      username: string;
+      total: number;
+      tried: number;
+    };
+    PatchBruteforceScanResult: {
+      tried: number;
+      total: number;
+      password: string;
     };
     UpdatePostgresVersion: {
       version: string;
     };
-    PostgresScanResult: {
+    ScanResult: {
       id: number;
       severity: number;
       message: string;
       created_at: string;
+      scan_source: number;
     };
-    PostgresScan: {
+    Scan: {
       id: number;
       status: number;
       error: string;
       created_at: string;
       ended_at: string;
       maximum_severity: number;
+      postgres_scan?: components["schemas"]["PostgresScan"];
+      project_id: number;
     };
-    WorkerTask: {
-      /**
-       * @description The Task type
-       * @enum {string}
-       */
-      type: "postgres_scan";
-      postgres_scan?: {
-        scan?: components["schemas"]["PostgresScan"];
-        postgres_database?: components["schemas"]["PostgresDatabase"];
-      };
+    PostgresScan: {
+      id: number;
+      database_id: number;
     };
     LoginUser: {
       /**
@@ -704,6 +926,48 @@ export interface components {
        * @example null
        */
       phone?: string;
+      /**
+       * @description Whether the user is an admin
+       * @example false
+       */
+      admin: boolean;
+    };
+    Organization: {
+      /**
+       * Format: int64
+       * @description The internal ID of the organization
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description The name of the organization
+       * @example My Organization
+       */
+      name: string;
+      /**
+       * @description The date the organization was created
+       * @example "2019-01-23T16:00:00.000Z"
+       */
+      created_at: string;
+    };
+    OrganizationProjects: {
+      /**
+       * Format: int64
+       * @description The internal ID of the organization
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description The name of the organization
+       * @example My Organization
+       */
+      name: string;
+      /**
+       * @description The date the organization was created
+       * @example "2019-01-23T16:00:00.000Z"
+       */
+      created_at: string;
+      projects: components["schemas"]["Project"][];
     };
     ChangePasswordLoggedIn: {
       /**
