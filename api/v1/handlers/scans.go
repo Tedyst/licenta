@@ -79,7 +79,6 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
 			PostgresScan:    postgresScan,
-			ProjectId:       int(scan.Scan.ProjectID),
 		},
 		Results:           scanResults,
 		BruteforceResults: bruteforceResults,

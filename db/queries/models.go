@@ -195,13 +195,13 @@ type ResetPasswordToken struct {
 }
 
 type Scan struct {
-	ID        int64              `json:"id"`
-	ProjectID int64              `json:"project_id"`
-	Status    int32              `json:"status"`
-	Error     sql.NullString     `json:"error"`
-	WorkerID  sql.NullInt64      `json:"worker_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	EndedAt   pgtype.Timestamptz `json:"ended_at"`
+	ID          int64              `json:"id"`
+	ScanGroupID int64              `json:"scan_group_id"`
+	Status      int32              `json:"status"`
+	Error       sql.NullString     `json:"error"`
+	WorkerID    sql.NullInt64      `json:"worker_id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	EndedAt     pgtype.Timestamptz `json:"ended_at"`
 }
 
 type ScanBruteforceResult struct {
@@ -212,6 +212,13 @@ type ScanBruteforceResult struct {
 	Password  sql.NullString     `json:"password"`
 	Total     int32              `json:"total"`
 	Tried     int32              `json:"tried"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type ScanGroup struct {
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	CreatedBy sql.NullInt64      `json:"created_by"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }
 

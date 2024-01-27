@@ -25,6 +25,8 @@ type remotePasswordProvider struct {
 	client generated.ClientWithResponsesInterface
 	scan   *models.Scan
 
+	projectID int64
+
 	context context.Context
 
 	hasNext      bool
@@ -41,7 +43,7 @@ func (p *remotePasswordProvider) readBatch() error {
 	if len(p.currentBatch) > 0 {
 		lastID = int32(p.currentBatch[len(p.currentBatch)-1].ID)
 	}
-	response, err := p.client.GetProjectIdBruteforcePasswordsWithResponse(p.context, p.scan.ProjectID, &generated.GetProjectIdBruteforcePasswordsParams{
+	response, err := p.client.GetProjectIdBruteforcePasswordsWithResponse(p.context, p.projectID, &generated.GetProjectIdBruteforcePasswordsParams{
 		LastPasswordId: &lastID,
 	})
 
@@ -118,9 +120,10 @@ func (p *remotePasswordProvider) GetPasswordByHash(username, hash string) (strin
 
 func (p *remoteBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc bruteforce.StatusFunc, projectID int64) (bruteforce.Bruteforcer, error) {
 	return bruteforce.NewBruteforcer(&remotePasswordProvider{
-		client:  p.client,
-		scan:    p.scan,
-		context: ctx,
+		client:    p.client,
+		scan:      p.scan,
+		context:   ctx,
+		projectID: projectID,
 	}, sc, statusFunc), nil
 }
 

@@ -61,7 +61,11 @@ func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *models.Scan
 }
 
 func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
-	project, err := r.queries.GetProject(ctx, scan.ProjectID)
+	scanGroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
+	if err != nil {
+		return errors.Wrap(err, "cannot get scan group")
+	}
+	project, err := r.queries.GetProject(ctx, scanGroup.ProjectID)
 	if err != nil {
 		return errors.Wrap(err, "cannot get project")
 	}
@@ -80,7 +84,11 @@ func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *models.Scan
 	if project.Remote && !runningRemote {
 		slog.DebugContext(ctx, "Sending task to remote workers", "scan", scan.ID)
 
-		workers, err := r.queries.GetWorkersForProject(ctx, scan.ProjectID)
+		scangroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
+		if err != nil {
+			return errors.Wrap(err, "could not get scan group")
+		}
+		workers, err := r.queries.GetWorkersForProject(ctx, scangroup.ProjectID)
 		if err != nil {
 			return errors.Wrap(err, "could not get workers for project")
 		}

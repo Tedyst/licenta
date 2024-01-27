@@ -81,7 +81,7 @@ func ProjectRunAndWaitResults(ctx context.Context, client generated.ClientWithRe
 		if !response.JSON200.Success {
 			return 0, errors.New("success is not false")
 		}
-		for _, scan := range *response.JSON200.Scans {
+		for _, scan := range response.JSON200.ScanGroup.Scans {
 			severity, err := waitForScan(ctx, client, &scan)
 			if err != nil {
 				return maximumSeverity, err

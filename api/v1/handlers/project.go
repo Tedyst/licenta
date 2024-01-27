@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"context"
+	"database/sql"
 	"log/slog"
 
 	"github.com/pkg/errors"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -48,16 +50,49 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 }
 
 func (server *serverHandler) PostProjectIdRun(ctx context.Context, request generated.PostProjectIdRunRequestObject) (generated.PostProjectIdRunResponseObject, error) {
+	user, err := server.userAuth.GetUser(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting user")
+	}
+
+	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
+	if err != nil {
+		return generated.PostProjectIdRun404JSONResponse{
+			Message: "Project not found",
+			Success: false,
+		}, nil
+	}
+
+	authorized, err := server.authorization.UserHasPermissionForProject(ctx, project, user, authorization.Admin)
+	if err != nil {
+		return nil, errors.Wrap(err, "error checking permissions")
+	}
+	if !authorized {
+		return generated.PostProjectIdRun400JSONResponse{
+			Message: "Not allowed to run scans on this project",
+			Success: false,
+		}, nil
+	}
+
+	scanGroup, err := server.DatabaseProvider.CreateScanGroup(ctx, queries.CreateScanGroupParams{
+		ProjectID: request.Id,
+		CreatedBy: sql.NullInt64{Int64: user.ID, Valid: true},
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "error creating scan group")
+	}
+
+	var scans []*models.Scan
+	var resultScans []generated.Scan
+
 	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting postgres databases for project")
 	}
-
-	var scans []generated.Scan
 	for _, db := range postgres_databases {
 		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
-			Status:    models.SCAN_NOT_STARTED,
-			ProjectID: db.ProjectID,
+			Status:      models.SCAN_NOT_STARTED,
+			ScanGroupID: scanGroup.ID,
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "error creating postgres scan")
@@ -71,15 +106,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 			return nil, errors.Wrap(err, "error creating postgres scan")
 		}
 
-		go func() {
-			ctx := context.WithoutCancel(ctx)
-			err := server.TaskRunner.RunAllScanners(ctx, scan, false)
-			if err != nil {
-				slog.Error("Error scheduling postgres scan", "error", err)
-			}
-		}()
-
-		scans = append(scans, generated.Scan{
+		resultScans = append(resultScans, generated.Scan{
 			CreatedAt:       db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 			EndedAt:         db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
 			Error:           "",
@@ -91,10 +118,26 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 				DatabaseId: int(db.ID),
 			},
 		})
+
+		scans = append(scans, scan)
+	}
+
+	for _, scan := range scans {
+		scan := scan
+		go func() {
+			ctx := context.WithoutCancel(ctx)
+			err := server.TaskRunner.RunAllScanners(ctx, scan, false)
+			if err != nil {
+				slog.Error("Error scheduling postgres scan", "error", err)
+			}
+		}()
 	}
 
 	return generated.PostProjectIdRun200JSONResponse{
 		Success: true,
-		Scans:   &scans,
+		ScanGroup: &generated.ScanGroup{
+			Id:    int(scanGroup.ID),
+			Scans: resultScans,
+		},
 	}, nil
 }

@@ -12,6 +12,7 @@ import (
 )
 
 type Querier interface {
+	AddUserToOrganization(ctx context.Context, arg AddUserToOrganizationParams) error
 	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) (*Scan, error)
 	CountUsers(ctx context.Context) (int64, error)
 	CreateBruteforcedPassword(ctx context.Context, arg CreateBruteforcedPasswordParams) (*BruteforcedPassword, error)
@@ -25,11 +26,13 @@ type Querier interface {
 	CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error)
 	CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error)
 	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
+	CreateOrganization(ctx context.Context, name string) (*Organization, error)
 	CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error)
 	CreateRememberMeToken(ctx context.Context, arg CreateRememberMeTokenParams) (*RememberMeToken, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, error)
 	CreateScanBruteforceResult(ctx context.Context, arg CreateScanBruteforceResultParams) (*ScanBruteforceResult, error)
+	CreateScanGroup(ctx context.Context, arg CreateScanGroupParams) (*ScanGroup, error)
 	CreateScanResult(ctx context.Context, arg CreateScanResultParams) (*ScanResult, error)
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
@@ -37,9 +40,11 @@ type Querier interface {
 	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
+	DeleteOrganization(ctx context.Context, id int64) error
 	DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg DeleteRememberMeTokenByUserAndTokenParams) error
 	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*Project, error)
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
 	GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error)
 	GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error)
@@ -57,11 +62,14 @@ type Querier interface {
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetNvdCPEsByDBType(ctx context.Context, databaseType int32) ([]*NvdCpe, error)
 	GetNvdCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
+	GetOrganization(ctx context.Context, id int64) (*Organization, error)
 	GetOrganizationByName(ctx context.Context, name string) (*Organization, error)
 	GetOrganizationMembers(ctx context.Context, organizationID int64) ([]*OrganizationMember, error)
 	GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error)
+	GetOrganizationProjects(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetOrganizationUser(ctx context.Context, arg GetOrganizationUserParams) (*OrganizationMember, error)
 	GetOrganizationsByUser(ctx context.Context, userID int64) ([]*Organization, error)
+	GetOrganizationsForUser(ctx context.Context, userID int64) ([]*Organization, error)
 	GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgresDatabaseRow, error)
 	GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*PostgresDatabase, error)
 	GetPostgresScan(ctx context.Context, id int64) (*PostgresScan, error)
@@ -75,6 +83,7 @@ type Querier interface {
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetScan(ctx context.Context, id int64) (*GetScanRow, error)
 	GetScanBruteforceResults(ctx context.Context, scanID int64) ([]*ScanBruteforceResult, error)
+	GetScanGroup(ctx context.Context, id int64) (*ScanGroup, error)
 	GetScanResults(ctx context.Context, scanID int64) ([]*ScanResult, error)
 	GetScanResultsByScanIdAndScanSource(ctx context.Context, arg GetScanResultsByScanIdAndScanSourceParams) ([]*ScanResult, error)
 	GetScansForProject(ctx context.Context, projectID int64) ([]*GetScansForProjectRow, error)

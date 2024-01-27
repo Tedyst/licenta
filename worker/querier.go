@@ -19,6 +19,7 @@ import (
 type remoteQuerier struct {
 	client       generated.ClientWithResponsesInterface
 	scan         *models.Scan
+	scanGroup    *models.ScanGroup
 	postgresScan *models.PostgresScan
 }
 
@@ -29,6 +30,10 @@ func (q *remoteQuerier) GetScan(ctx context.Context, id int64) (*queries.GetScan
 		Scan:         *q.scan,
 		PostgresScan: q.postgresScan.ID,
 	}, nil
+}
+
+func (q *remoteQuerier) GetScanGroup(ctx context.Context, id int64) (*queries.ScanGroup, error) {
+	return q.scanGroup, nil
 }
 
 func (q *remoteQuerier) UpdateScanStatus(ctx context.Context, params queries.UpdateScanStatusParams) error {

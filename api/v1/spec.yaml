@@ -170,11 +170,14 @@ paths:
                 required:
                   - success
                   - scan
+                  - scan_group
                 properties:
                   success:
                     type: boolean
                   scan:
                     $ref: '#/components/schemas/Scan'
+                  scan_group:
+                    $ref: '#/components/schemas/ScanGroup'
         "202":
           description: No task available
           content:
@@ -562,14 +565,12 @@ paths:
                 type: object
                 required:
                   - success
-                  - postgres_scans
+                  - scan
                 properties:
                   success:
                     type: boolean
-                  scans:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Scan'
+                  scan_group:
+                    $ref: '#/components/schemas/ScanGroup'
         "400":
           description: Invalid body
           content:
@@ -943,7 +944,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Organization'
+              $ref: '#/components/schemas/CreateOrganization'
       responses:
         "201":
           description: Successful operation
@@ -986,7 +987,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
+                type: object
+                required:
+                  - success
+                  - organization
+                properties:
+                  success:
+                    type: boolean
+                  organization:
+                    $ref: '#/components/schemas/Organization'
         "401":
           description: Unauthorized
           content:
@@ -999,8 +1008,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    patch:
-      summary: Update organization by ID
+    delete:
+      summary: Delete organization by ID
       security:
         - sessionAuth: []
       tags:
@@ -1013,22 +1022,20 @@ paths:
           schema:
             type: integer
             format: int64
-      requestBody:
-        description: The organization object
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Organization'
       responses:
-        "200":
+        "204":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Organization'
-        "400":
-          description: Invalid body
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -1294,6 +1301,23 @@ components:
           type: string
         scan_source:
           type: integer
+    ScanGroup:
+      required:
+        - id
+        - project_id
+        - scans
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        created_by:
+          $ref: "#/components/schemas/User"
+        scans:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scan"
     Scan:
       required:
         - id
@@ -1302,7 +1326,7 @@ components:
         - ended_at
         - error
         - maximum_severity
-        - project_id
+        - scan_group_id
       type: object
       properties:
         id:
@@ -1317,11 +1341,9 @@ components:
           type: string
         maximum_severity:
           type: integer
-        postgres_scans:
-          type: array
-          items:
-            $ref: "#/components/schemas/PostgresScan"
-        project_id:
+        postgres_scan:
+          $ref: "#/components/schemas/PostgresScan"
+        scan_group_id:
           type: integer
     PostgresScan:
       required:
@@ -1416,6 +1438,14 @@ components:
           type: boolean
           description: Whether the user is an admin
           example: false
+    CreateOrganization:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: The name of the organization
+          example: My Organization
     Organization:
       required:
         - id

@@ -15,6 +15,7 @@ import (
 )
 
 type ScanQuerier interface {
+	GetScanGroup(ctx context.Context, id int64) (*queries.ScanGroup, error)
 	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 	UpdateScanStatus(ctx context.Context, params queries.UpdateScanStatusParams) error
 	CreateScanResult(ctx context.Context, params queries.CreateScanResultParams) (*queries.ScanResult, error)
@@ -205,7 +206,11 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 func (r *baseScanRunner) bruteforce(ctx context.Context) error {
 	r.logger.DebugContext(ctx, "Bruteforcing passwords for all users")
 
-	bruteforcer, err := r.bruteforceProvider.NewBruteforcer(ctx, r.scanner, r.notifyBruteforceStatus, r.scan.ProjectID)
+	scangroup, err := r.queries.GetScanGroup(ctx, r.scan.ScanGroupID)
+	if err != nil {
+		return errors.Wrap(err, "could not get scan group")
+	}
+	bruteforcer, err := r.bruteforceProvider.NewBruteforcer(ctx, r.scanner, r.notifyBruteforceStatus, scangroup.ProjectID)
 	if err != nil {
 		return errors.Wrap(err, "could not create bruteforcer")
 	}

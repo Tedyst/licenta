@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/messages"
 )
 
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
@@ -37,10 +36,6 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 			Success: false,
 			Message: "No task available",
 		}, nil
-	}
-
-	if message.ScanType != messages.PostgresScan {
-		return nil, errors.New("invalid scan type")
 	}
 
 	boundScan, err := server.DatabaseProvider.BindScanToWorker(ctx, queries.BindScanToWorkerParams{
@@ -86,7 +81,6 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 			PostgresScan:    postgresScanResponse,
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
-			ProjectId:       int(scan.Scan.ProjectID),
 		},
 	}, nil
 }

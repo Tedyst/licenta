@@ -99,6 +99,12 @@ type CreateBruteforcedPassword struct {
 	Username         string `json:"username"`
 }
 
+// CreateOrganization defines model for CreateOrganization.
+type CreateOrganization struct {
+	// Name The name of the organization
+	Name string `json:"name"`
+}
+
 // CreateScanResult defines model for CreateScanResult.
 type CreateScanResult struct {
 	Message  string `json:"message"`
@@ -124,6 +130,19 @@ type LoginUser struct {
 
 	// Username The user name for login
 	Username string `json:"username" validate:"printascii,min=3,max=20"`
+}
+
+// Organization defines model for Organization.
+type Organization struct {
+	// CreatedAt The date the organization was created
+	CreatedAt string `json:"created_at"`
+
+	// Id The internal ID of the organization
+	Id int64 `json:"id"`
+
+	// Name The name of the organization
+	Name     string    `json:"name"`
+	Projects []Project `json:"projects"`
 }
 
 // PaginatedBruteforcePasswords defines model for PaginatedBruteforcePasswords.
@@ -237,8 +256,16 @@ type Scan struct {
 	Id              int           `json:"id"`
 	MaximumSeverity int           `json:"maximum_severity"`
 	PostgresScan    *PostgresScan `json:"postgres_scan,omitempty"`
-	ProjectId       int           `json:"project_id"`
+	ScanGroupId     int           `json:"scan_group_id"`
 	Status          int           `json:"status"`
+}
+
+// ScanGroup defines model for ScanGroup.
+type ScanGroup struct {
+	CreatedBy *User  `json:"created_by,omitempty"`
+	Id        int    `json:"id"`
+	ProjectId int    `json:"project_id"`
+	Scans     []Scan `json:"scans"`
 }
 
 // ScanResult defines model for ScanResult.
@@ -309,6 +336,12 @@ type User struct {
 	Username string `json:"username"`
 }
 
+// GetOrganizationsParams defines parameters for GetOrganizations.
+type GetOrganizationsParams struct {
+	// Name The organization name to filter for
+	Name *string `form:"name,omitempty" json:"name,omitempty"`
+}
+
 // GetProjectIdBruteforcePasswordsParams defines parameters for GetProjectIdBruteforcePasswords.
 type GetProjectIdBruteforcePasswordsParams struct {
 	// LastPasswordId The last ID of the item to return
@@ -344,6 +377,9 @@ type PatchBruteforcedPasswordsIdJSONRequestBody = UpdateBruteforcedPassword
 
 // PatchBruteforceresultsIdJSONRequestBody defines body for PatchBruteforceresultsId for application/json ContentType.
 type PatchBruteforceresultsIdJSONRequestBody = PatchBruteforceScanResult
+
+// PostOrganizationsJSONRequestBody defines body for PostOrganizations for application/json ContentType.
+type PostOrganizationsJSONRequestBody = CreateOrganization
 
 // PatchPostgresIdJSONRequestBody defines body for PatchPostgresId for application/json ContentType.
 type PatchPostgresIdJSONRequestBody = PatchPostgresDatabase
@@ -448,6 +484,20 @@ type ClientInterface interface {
 
 	// GetCvesDbTypeVersion request
 	GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetOrganizations request
+	GetOrganizations(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostOrganizationsWithBody request with any body
+	PostOrganizationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostOrganizations(ctx context.Context, body PostOrganizationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteOrganizationsId request
+	DeleteOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetOrganizationsId request
+	GetOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetPostgresId request
 	GetPostgresId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -560,6 +610,66 @@ func (c *Client) PatchBruteforceresultsId(ctx context.Context, id int64, body Pa
 
 func (c *Client) GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetCvesDbTypeVersionRequest(c.Server, dbType, version)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetOrganizations(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrganizationsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostOrganizationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostOrganizationsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostOrganizations(ctx context.Context, body PostOrganizationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostOrganizationsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteOrganizationsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrganizationsIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -952,6 +1062,163 @@ func NewGetCvesDbTypeVersionRequest(server string, dbType string, version string
 	}
 
 	operationPath := fmt.Sprintf("/cves/%s/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetOrganizationsRequest generates requests for GetOrganizations
+func NewGetOrganizationsRequest(server string, params *GetOrganizationsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Name != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "name", runtime.ParamLocationQuery, *params.Name); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostOrganizationsRequest calls the generic PostOrganizations builder with application/json body
+func NewPostOrganizationsRequest(server string, body PostOrganizationsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostOrganizationsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostOrganizationsRequestWithBody generates requests for PostOrganizations with any type of body
+func NewPostOrganizationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteOrganizationsIdRequest generates requests for DeleteOrganizationsId
+func NewDeleteOrganizationsIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetOrganizationsIdRequest generates requests for GetOrganizationsId
+func NewGetOrganizationsIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1741,6 +2008,20 @@ type ClientWithResponsesInterface interface {
 	// GetCvesDbTypeVersionWithResponse request
 	GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error)
 
+	// GetOrganizationsWithResponse request
+	GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error)
+
+	// PostOrganizationsWithBodyWithResponse request with any body
+	PostOrganizationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrganizationsResponse, error)
+
+	PostOrganizationsWithResponse(ctx context.Context, body PostOrganizationsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsResponse, error)
+
+	// DeleteOrganizationsIdWithResponse request
+	DeleteOrganizationsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdResponse, error)
+
+	// GetOrganizationsIdWithResponse request
+	GetOrganizationsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetOrganizationsIdResponse, error)
+
 	// GetPostgresIdWithResponse request
 	GetPostgresIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetPostgresIdResponse, error)
 
@@ -1879,6 +2160,111 @@ func (r GetCvesDbTypeVersionResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetCvesDbTypeVersionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetOrganizationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Organizations []Organization `json:"organizations"`
+		Success       bool           `json:"success"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrganizationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrganizationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostOrganizationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Organization Organization `json:"organization"`
+		Success      bool         `json:"success"`
+	}
+	JSON400 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostOrganizationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostOrganizationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteOrganizationsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteOrganizationsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteOrganizationsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetOrganizationsIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Organization Organization `json:"organization"`
+		Success      bool         `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrganizationsIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrganizationsIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2050,8 +2436,8 @@ type PostProjectIdRunResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Scans   *[]Scan `json:"scans,omitempty"`
-		Success bool    `json:"success"`
+		ScanGroup *ScanGroup `json:"scan_group,omitempty"`
+		Success   bool       `json:"success"`
 	}
 	JSON400 *Error
 	JSON401 *Error
@@ -2287,8 +2673,9 @@ type GetWorkerGetTaskResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Scan    Scan `json:"scan"`
-		Success bool `json:"success"`
+		Scan      Scan      `json:"scan"`
+		ScanGroup ScanGroup `json:"scan_group"`
+		Success   bool      `json:"success"`
 	}
 	JSON202 *Error
 	JSON401 *Error
@@ -2351,6 +2738,50 @@ func (c *ClientWithResponses) GetCvesDbTypeVersionWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseGetCvesDbTypeVersionResponse(rsp)
+}
+
+// GetOrganizationsWithResponse request returning *GetOrganizationsResponse
+func (c *ClientWithResponses) GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error) {
+	rsp, err := c.GetOrganizations(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrganizationsResponse(rsp)
+}
+
+// PostOrganizationsWithBodyWithResponse request with arbitrary body returning *PostOrganizationsResponse
+func (c *ClientWithResponses) PostOrganizationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrganizationsResponse, error) {
+	rsp, err := c.PostOrganizationsWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostOrganizationsResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostOrganizationsWithResponse(ctx context.Context, body PostOrganizationsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsResponse, error) {
+	rsp, err := c.PostOrganizations(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostOrganizationsResponse(rsp)
+}
+
+// DeleteOrganizationsIdWithResponse request returning *DeleteOrganizationsIdResponse
+func (c *ClientWithResponses) DeleteOrganizationsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdResponse, error) {
+	rsp, err := c.DeleteOrganizationsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteOrganizationsIdResponse(rsp)
+}
+
+// GetOrganizationsIdWithResponse request returning *GetOrganizationsIdResponse
+func (c *ClientWithResponses) GetOrganizationsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetOrganizationsIdResponse, error) {
+	rsp, err := c.GetOrganizationsId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrganizationsIdResponse(rsp)
 }
 
 // GetPostgresIdWithResponse request returning *GetPostgresIdResponse
@@ -2688,6 +3119,163 @@ func ParseGetCvesDbTypeVersionResponse(rsp *http.Response) (*GetCvesDbTypeVersio
 	return response, nil
 }
 
+// ParseGetOrganizationsResponse parses an HTTP response from a GetOrganizationsWithResponse call
+func ParseGetOrganizationsResponse(rsp *http.Response) (*GetOrganizationsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrganizationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Organizations []Organization `json:"organizations"`
+			Success       bool           `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostOrganizationsResponse parses an HTTP response from a PostOrganizationsWithResponse call
+func ParsePostOrganizationsResponse(rsp *http.Response) (*PostOrganizationsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostOrganizationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Organization Organization `json:"organization"`
+			Success      bool         `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteOrganizationsIdResponse parses an HTTP response from a DeleteOrganizationsIdWithResponse call
+func ParseDeleteOrganizationsIdResponse(rsp *http.Response) (*DeleteOrganizationsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteOrganizationsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetOrganizationsIdResponse parses an HTTP response from a GetOrganizationsIdWithResponse call
+func ParseGetOrganizationsIdResponse(rsp *http.Response) (*GetOrganizationsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrganizationsIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Organization Organization `json:"organization"`
+			Success      bool         `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetPostgresIdResponse parses an HTTP response from a GetPostgresIdWithResponse call
 func ParseGetPostgresIdResponse(rsp *http.Response) (*GetPostgresIdResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2967,8 +3555,8 @@ func ParsePostProjectIdRunResponse(rsp *http.Response) (*PostProjectIdRunRespons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Scans   *[]Scan `json:"scans,omitempty"`
-			Success bool    `json:"success"`
+			ScanGroup *ScanGroup `json:"scan_group,omitempty"`
+			Success   bool       `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -3354,8 +3942,9 @@ func ParseGetWorkerGetTaskResponse(rsp *http.Response) (*GetWorkerGetTaskRespons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Scan    Scan `json:"scan"`
-			Success bool `json:"success"`
+			Scan      Scan      `json:"scan"`
+			ScanGroup ScanGroup `json:"scan_group"`
+			Success   bool      `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -3392,6 +3981,18 @@ type ServerInterface interface {
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string)
+	// Get all organizations that the user can see
+	// (GET /organizations)
+	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams)
+	// Create a new organization
+	// (POST /organizations)
+	PostOrganizations(w http.ResponseWriter, r *http.Request)
+	// Delete organization by ID
+	// (DELETE /organizations/{id})
+	DeleteOrganizationsId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get organization by ID
+	// (GET /organizations/{id})
+	GetOrganizationsId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get postgres database by ID
 	// (GET /postgres/{id})
 	GetPostgresId(w http.ResponseWriter, r *http.Request, id int64)
@@ -3461,6 +4062,30 @@ func (_ Unimplemented) PatchBruteforceresultsId(w http.ResponseWriter, r *http.R
 // Get all CVEs for a database type and version
 // (GET /cves/{dbType}/{version})
 func (_ Unimplemented) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all organizations that the user can see
+// (GET /organizations)
+func (_ Unimplemented) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new organization
+// (POST /organizations)
+func (_ Unimplemented) PostOrganizations(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete organization by ID
+// (DELETE /organizations/{id})
+func (_ Unimplemented) DeleteOrganizationsId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get organization by ID
+// (GET /organizations/{id})
+func (_ Unimplemented) GetOrganizationsId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -3653,6 +4278,109 @@ func (siw *ServerInterfaceWrapper) GetCvesDbTypeVersion(w http.ResponseWriter, r
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCvesDbTypeVersion(w, r, dbType, version)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetOrganizations operation middleware
+func (siw *ServerInterfaceWrapper) GetOrganizations(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetOrganizationsParams
+
+	// ------------- Optional query parameter "name" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "name", r.URL.Query(), &params.Name)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetOrganizations(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostOrganizations operation middleware
+func (siw *ServerInterfaceWrapper) PostOrganizations(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostOrganizations(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteOrganizationsId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteOrganizationsId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteOrganizationsId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetOrganizationsId operation middleware
+func (siw *ServerInterfaceWrapper) GetOrganizationsId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetOrganizationsId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4278,6 +5006,18 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/cves/{dbType}/{version}", wrapper.GetCvesDbTypeVersion)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/organizations", wrapper.GetOrganizations)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/organizations", wrapper.PostOrganizations)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/organizations/{id}", wrapper.DeleteOrganizationsId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/organizations/{id}", wrapper.GetOrganizationsId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/postgres/{id}", wrapper.GetPostgresId)
 	})
 	r.Group(func(r chi.Router) {
@@ -4458,6 +5198,139 @@ func (response GetCvesDbTypeVersion401JSONResponse) VisitGetCvesDbTypeVersionRes
 type GetCvesDbTypeVersion404JSONResponse Error
 
 func (response GetCvesDbTypeVersion404JSONResponse) VisitGetCvesDbTypeVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetOrganizationsRequestObject struct {
+	Params GetOrganizationsParams
+}
+
+type GetOrganizationsResponseObject interface {
+	VisitGetOrganizationsResponse(w http.ResponseWriter) error
+}
+
+type GetOrganizations200JSONResponse struct {
+	Organizations []Organization `json:"organizations"`
+	Success       bool           `json:"success"`
+}
+
+func (response GetOrganizations200JSONResponse) VisitGetOrganizationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetOrganizations401JSONResponse Error
+
+func (response GetOrganizations401JSONResponse) VisitGetOrganizationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsRequestObject struct {
+	Body *PostOrganizationsJSONRequestBody
+}
+
+type PostOrganizationsResponseObject interface {
+	VisitPostOrganizationsResponse(w http.ResponseWriter) error
+}
+
+type PostOrganizations201JSONResponse struct {
+	Organization Organization `json:"organization"`
+	Success      bool         `json:"success"`
+}
+
+func (response PostOrganizations201JSONResponse) VisitPostOrganizationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizations400JSONResponse Error
+
+func (response PostOrganizations400JSONResponse) VisitPostOrganizationsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteOrganizationsIdResponseObject interface {
+	VisitDeleteOrganizationsIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteOrganizationsId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteOrganizationsId204JSONResponse) VisitDeleteOrganizationsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsId401JSONResponse Error
+
+func (response DeleteOrganizationsId401JSONResponse) VisitDeleteOrganizationsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsId404JSONResponse Error
+
+func (response DeleteOrganizationsId404JSONResponse) VisitDeleteOrganizationsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetOrganizationsIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetOrganizationsIdResponseObject interface {
+	VisitGetOrganizationsIdResponse(w http.ResponseWriter) error
+}
+
+type GetOrganizationsId200JSONResponse struct {
+	Organization Organization `json:"organization"`
+	Success      bool         `json:"success"`
+}
+
+func (response GetOrganizationsId200JSONResponse) VisitGetOrganizationsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetOrganizationsId401JSONResponse Error
+
+func (response GetOrganizationsId401JSONResponse) VisitGetOrganizationsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetOrganizationsId404JSONResponse Error
+
+func (response GetOrganizationsId404JSONResponse) VisitGetOrganizationsIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -4712,8 +5585,8 @@ type PostProjectIdRunResponseObject interface {
 }
 
 type PostProjectIdRun200JSONResponse struct {
-	Scans   *[]Scan `json:"scans,omitempty"`
-	Success bool    `json:"success"`
+	ScanGroup *ScanGroup `json:"scan_group,omitempty"`
+	Success   bool       `json:"success"`
 }
 
 func (response PostProjectIdRun200JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
@@ -5057,8 +5930,9 @@ type GetWorkerGetTaskResponseObject interface {
 }
 
 type GetWorkerGetTask200JSONResponse struct {
-	Scan    Scan `json:"scan"`
-	Success bool `json:"success"`
+	Scan      Scan      `json:"scan"`
+	ScanGroup ScanGroup `json:"scan_group"`
+	Success   bool      `json:"success"`
 }
 
 func (response GetWorkerGetTask200JSONResponse) VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error {
@@ -5097,6 +5971,18 @@ type StrictServerInterface interface {
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(ctx context.Context, request GetCvesDbTypeVersionRequestObject) (GetCvesDbTypeVersionResponseObject, error)
+	// Get all organizations that the user can see
+	// (GET /organizations)
+	GetOrganizations(ctx context.Context, request GetOrganizationsRequestObject) (GetOrganizationsResponseObject, error)
+	// Create a new organization
+	// (POST /organizations)
+	PostOrganizations(ctx context.Context, request PostOrganizationsRequestObject) (PostOrganizationsResponseObject, error)
+	// Delete organization by ID
+	// (DELETE /organizations/{id})
+	DeleteOrganizationsId(ctx context.Context, request DeleteOrganizationsIdRequestObject) (DeleteOrganizationsIdResponseObject, error)
+	// Get organization by ID
+	// (GET /organizations/{id})
+	GetOrganizationsId(ctx context.Context, request GetOrganizationsIdRequestObject) (GetOrganizationsIdResponseObject, error)
 	// Get postgres database by ID
 	// (GET /postgres/{id})
 	GetPostgresId(ctx context.Context, request GetPostgresIdRequestObject) (GetPostgresIdResponseObject, error)
@@ -5262,6 +6148,115 @@ func (sh *strictHandler) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Req
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetCvesDbTypeVersionResponseObject); ok {
 		if err := validResponse.VisitGetCvesDbTypeVersionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetOrganizations operation middleware
+func (sh *strictHandler) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) {
+	var request GetOrganizationsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetOrganizations(ctx, request.(GetOrganizationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetOrganizations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetOrganizationsResponseObject); ok {
+		if err := validResponse.VisitGetOrganizationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostOrganizations operation middleware
+func (sh *strictHandler) PostOrganizations(w http.ResponseWriter, r *http.Request) {
+	var request PostOrganizationsRequestObject
+
+	var body PostOrganizationsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostOrganizations(ctx, request.(PostOrganizationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostOrganizations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostOrganizationsResponseObject); ok {
+		if err := validResponse.VisitPostOrganizationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteOrganizationsId operation middleware
+func (sh *strictHandler) DeleteOrganizationsId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteOrganizationsIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteOrganizationsId(ctx, request.(DeleteOrganizationsIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteOrganizationsId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteOrganizationsIdResponseObject); ok {
+		if err := validResponse.VisitDeleteOrganizationsIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetOrganizationsId operation middleware
+func (sh *strictHandler) GetOrganizationsId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetOrganizationsIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetOrganizationsId(ctx, request.(GetOrganizationsIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetOrganizationsId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetOrganizationsIdResponseObject); ok {
+		if err := validResponse.VisitGetOrganizationsIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -5726,62 +6721,67 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

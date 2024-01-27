@@ -204,9 +204,16 @@ CREATE TABLE postgres_databases(
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE scans(
+CREATE TABLE scan_groups(
   id bigserial PRIMARY KEY,
   project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  created_by bigint REFERENCES users(id) ON DELETE CASCADE,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE scans(
+  id bigserial PRIMARY KEY,
+  scan_group_id bigint NOT NULL REFERENCES scan_groups(id) ON DELETE CASCADE,
   status integer NOT NULL,
   error text,
   worker_id bigint REFERENCES workers(id) ON DELETE CASCADE,
@@ -233,7 +240,7 @@ CREATE INDEX scan_results_scan_id_idx ON scan_results(scan_id);
 
 CREATE TABLE scan_bruteforce_results(
   id bigserial PRIMARY KEY,
-  scan_id bigint NOT NULL REFERENCES scan(id) ON DELETE CASCADE,
+  scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
   scan_type integer NOT NULL,
   username text NOT NULL,
   password text,

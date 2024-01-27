@@ -83,7 +83,6 @@ func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgre
 		"scan", scan.ID,
 		"postgres_scan", postgresScan.ID,
 		"postgres_database_id", postgresScan.DatabaseID,
-		"project_id", scan.ProjectID,
 	)
 
 	db, err := runner.queries.GetPostgresDatabase(ctx, postgresScan.DatabaseID)

@@ -13,9 +13,7 @@ const (
 )
 
 type SendScanToWorkerMessage struct {
-	ScanType  scanType `json:"scan_type"`
-	ScanID    int64    `json:"scan_id"`
-	ProjectID int64    `json:"project_id"`
+	ScanID int64 `json:"scan_id"`
 }
 
 type Exchange interface {
@@ -25,8 +23,6 @@ type Exchange interface {
 
 func GetStartScanMessage(scan *models.Scan) SendScanToWorkerMessage {
 	return SendScanToWorkerMessage{
-		ScanType:  PostgresScan,
-		ScanID:    scan.ID,
-		ProjectID: scan.ProjectID,
+		ScanID: scan.ID,
 	}
 }

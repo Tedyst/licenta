@@ -36,9 +36,13 @@ var taskScanPostgresCmd = &cobra.Command{
 			return err
 		}
 
-		scan, err := database.CreateScan(cmd.Context(), queries.CreateScanParams{
-			Status:    models.SCAN_NOT_STARTED,
+		scanGroup, err := database.CreateScanGroup(cmd.Context(), queries.CreateScanGroupParams{
 			ProjectID: db.PostgresDatabase.ProjectID,
+		})
+
+		scan, err := database.CreateScan(cmd.Context(), queries.CreateScanParams{
+			Status:      models.SCAN_NOT_STARTED,
+			ScanGroupID: scanGroup.ID,
 		})
 		if err != nil {
 			return err

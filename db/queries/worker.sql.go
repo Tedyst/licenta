@@ -19,7 +19,7 @@ WHERE
     id = $1
     AND worker_id IS NULL
 RETURNING
-    id, project_id, status, error, worker_id, created_at, ended_at
+    id, scan_group_id, status, error, worker_id, created_at, ended_at
 `
 
 type BindScanToWorkerParams struct {
@@ -32,7 +32,7 @@ func (q *Queries) BindScanToWorker(ctx context.Context, arg BindScanToWorkerPara
 	var i Scan
 	err := row.Scan(
 		&i.ID,
-		&i.ProjectID,
+		&i.ScanGroupID,
 		&i.Status,
 		&i.Error,
 		&i.WorkerID,

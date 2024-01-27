@@ -1,0 +1,64 @@
+-- name: GetOrganizationsForUser :many
+SELECT
+    *
+FROM
+    organizations
+WHERE
+    id IN (
+        SELECT
+            organization_id
+        FROM
+            organization_members
+        WHERE
+            user_id = $1);
+
+-- name: GetOrganization :one
+SELECT
+    *
+FROM
+    organizations
+WHERE
+    id = $1;
+
+-- name: GetOrganizationProjects :many
+SELECT
+    *
+FROM
+    projects
+WHERE
+    organization_id = $1;
+
+-- name: GetAllOrganizationProjectsForUser :many
+SELECT
+    *
+FROM
+    projects
+WHERE
+    organization_id IN (
+        SELECT
+            id
+        FROM
+            organizations
+        WHERE
+            id IN (
+                SELECT
+                    organization_id
+                FROM
+                    organization_members
+                WHERE
+                    user_id = $1));
+
+-- name: DeleteOrganization :exec
+DELETE FROM organizations
+WHERE id = $1;
+
+-- name: CreateOrganization :one
+INSERT INTO organizations(name)
+    VALUES ($1)
+RETURNING
+    *;
+
+-- name: AddUserToOrganization :exec
+INSERT INTO organization_members(organization_id, user_id, ROLE)
+    VALUES ($1, $2, $3);
+

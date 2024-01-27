@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
+	"github.com/tedyst/licenta/db/queries"
 	localexchange "github.com/tedyst/licenta/messages/local"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks/local"
@@ -33,11 +34,16 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			slog.Info("Received task", "task", string(task.Body))
 
 			scan := models.Scan{
-				ID:        int64(task.JSON200.Scan.Id),
-				ProjectID: int64(task.JSON200.Scan.ProjectId),
-				Status:    int32(task.JSON200.Scan.Status),
-				Error:     sql.NullString{String: task.JSON200.Scan.Error, Valid: task.JSON200.Scan.Error != ""},
+				ID:     int64(task.JSON200.Scan.Id),
+				Status: int32(task.JSON200.Scan.Status),
+				Error:  sql.NullString{String: task.JSON200.Scan.Error, Valid: task.JSON200.Scan.Error != ""},
 			}
+			scanGroup := queries.ScanGroup{
+				ID:        int64(task.JSON200.ScanGroup.Id),
+				ProjectID: int64(task.JSON200.ScanGroup.ProjectId),
+				CreatedBy: sql.NullInt64{Int64: int64(task.JSON200.ScanGroup.CreatedBy.Id), Valid: task.JSON200.ScanGroup.CreatedBy != nil},
+			}
+
 			var postgresScan *models.PostgresScan
 			if task.JSON200.Scan.PostgresScan != nil {
 				postgresScan = &models.PostgresScan{
@@ -54,6 +60,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 				client:       client,
 				scan:         &scan,
 				postgresScan: postgresScan,
+				scanGroup:    &scanGroup,
 			}, localExchange, &remoteBruteforceProvider{
 				client: client,
 				scan:   &scan,

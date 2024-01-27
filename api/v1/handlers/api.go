@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/messages"
@@ -15,8 +16,9 @@ type serverHandler struct {
 	TaskRunner       tasks.TaskRunner
 	MessageExchange  messages.Exchange
 
-	workerauth workerAuth
-	userAuth   userAuth
+	workerauth    workerAuth
+	userAuth      userAuth
+	authorization AuthorizationManager
 }
 
 type workerAuth interface {
@@ -29,13 +31,16 @@ type userAuth interface {
 	UpdatePassword(ctx context.Context, user *models.User, newPassword string) error
 }
 
+type AuthorizationManager = authorization.AuthorizationManager
+
 type HandlerConfig struct {
 	DatabaseProvider db.TransactionQuerier
 	TaskRunner       tasks.TaskRunner
 	MessageExchange  messages.Exchange
 
-	WorkerAuth workerAuth
-	UserAuth   userAuth
+	WorkerAuth           workerAuth
+	UserAuth             userAuth
+	AuthorizationManager AuthorizationManager
 }
 
 func NewServerHandler(config HandlerConfig) *serverHandler {
@@ -45,6 +50,7 @@ func NewServerHandler(config HandlerConfig) *serverHandler {
 		TaskRunner:       config.TaskRunner,
 		workerauth:       config.WorkerAuth,
 		userAuth:         config.UserAuth,
+		authorization:    config.AuthorizationManager,
 	}
 }
 

@@ -1,8 +1,22 @@
+-- name: CreateScanGroup :one
+INSERT INTO scan_groups(project_id, created_by)
+    VALUES ($1, $2)
+RETURNING
+    *;
+
 -- name: CreateScan :one
-INSERT INTO scans(status, worker_id, project_id)
+INSERT INTO scans(status, worker_id, scan_group_id)
     VALUES ($1, $2, $3)
 RETURNING
     *;
+
+-- name: GetScanGroup :one
+SELECT
+    *
+FROM
+    scan_groups
+WHERE
+    id = $1;
 
 -- name: CreateScanResult :one
 INSERT INTO scan_results(scan_id, severity, message, scan_source)
@@ -104,8 +118,9 @@ SELECT
         LIMIT 1) AS postgres_scan
 FROM
     scans
+    INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
 WHERE
-    scans.project_id = $1
+    scan_groups.project_id = $1
 ORDER BY
     scans.id DESC;
 
