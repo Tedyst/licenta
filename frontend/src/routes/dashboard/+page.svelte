@@ -7,3 +7,7 @@
 
 	<p>Logged in as {$user?.username}</p>
 </div>
+
+<svelte:head>
+	<title>Dashboard | Licenta</title>
+</svelte:head>
