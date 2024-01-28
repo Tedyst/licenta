@@ -5,7 +5,7 @@
 
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import client, { updateOrganizations } from '../../lib/client';
+	import client, { updateCurrentUser, updateOrganizations } from '../../lib/client';
 
 	import { pa } from '@accuser/svelte-plausible-analytics';
 	import ListOrganizationsAndProjects from '$lib/utils/ListOrganizationsAndProjects.svelte';
@@ -22,8 +22,15 @@
 			return;
 		}
 
-		let orgError = await updateOrganizations();
-		if (orgError) serverError = orgError;
+		let results = await Promise.all([updateCurrentUser(), updateOrganizations()]);
+		if (results[0]) {
+			serverError = results[0];
+			return;
+		}
+		if (results[1]) {
+			serverError = results[1];
+			return;
+		}
 	});
 </script>
 

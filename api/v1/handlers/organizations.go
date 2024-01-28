@@ -9,12 +9,19 @@ import (
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/models"
 )
 
 func (server *serverHandler) GetOrganizations(ctx context.Context, request generated.GetOrganizationsRequestObject) (generated.GetOrganizationsResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting user")
+	}
+	if user == nil {
+		return generated.GetOrganizations401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
 	}
 
 	organization, err := server.DatabaseProvider.GetOrganizationsByUser(ctx, user.ID)
@@ -63,29 +70,63 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 	return &response, nil
 }
 
-func (server *serverHandler) GetOrganizationsId(ctx context.Context, request generated.GetOrganizationsIdRequestObject) (generated.GetOrganizationsIdResponseObject, error) {
+func (server *serverHandler) checkForOrganizationPermission(ctx context.Context, organizationID int64, role authorization.RBACGroup) (*models.User, *models.Organization, bool, bool, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting user")
+		return user, nil, false, false, errors.Wrap(err, "error getting user")
+	}
+	if user == nil {
+		return nil, nil, false, false, nil
 	}
 
-	organization, err := server.DatabaseProvider.GetOrganization(ctx, request.Id)
+	organization, err := server.DatabaseProvider.GetOrganization(ctx, organizationID)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "error getting organization")
+		return user, nil, false, false, errors.Wrap(err, "error getting organization")
 	}
 
 	if organization == nil {
-		return &generated.GetOrganizationsId404JSONResponse{
-			Success: false,
-			Message: "Organization not found",
-		}, nil
+		return user, nil, false, false, nil
 	}
 
-	hasPerm, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, authorization.Viewer)
+	hasPerm, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, role)
+	if err != nil {
+		return user, nil, false, false, errors.Wrap(err, "error checking permissions")
+	}
+	if !hasPerm {
+		hasViewPerm, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, authorization.Viewer)
+		if err != nil {
+			return user, nil, false, false, errors.Wrap(err, "error checking permissions")
+		}
+		return user, organization, false, hasViewPerm, nil
+	}
+
+	return user, organization, true, true, nil
+}
+
+func (server *serverHandler) GetOrganizationsId(ctx context.Context, request generated.GetOrganizationsIdRequestObject) (generated.GetOrganizationsIdResponseObject, error) {
+	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
 	if err != nil {
 		return nil, errors.Wrap(err, "error checking permissions")
 	}
+	if user == nil {
+		return generated.GetOrganizationsId401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
+	}
+	if organization == nil {
+		return &generated.GetOrganizationsId401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
+	}
 	if !hasPerm {
+		if hasViewPerm {
+			return &generated.GetOrganizationsId401JSONResponse{
+				Success: false,
+				Message: "Forbidden",
+			}, nil
+		}
 		return &generated.GetOrganizationsId404JSONResponse{
 			Success: false,
 			Message: "Organization not found",
@@ -120,33 +161,24 @@ func (server *serverHandler) GetOrganizationsId(ctx context.Context, request gen
 }
 
 func (server *serverHandler) DeleteOrganizationsId(ctx context.Context, request generated.DeleteOrganizationsIdRequestObject) (generated.DeleteOrganizationsIdResponseObject, error) {
-	user, err := server.userAuth.GetUser(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "error getting user")
-	}
-
-	organization, err := server.DatabaseProvider.GetOrganization(ctx, request.Id)
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "error getting organization")
-	}
-
-	if organization == nil {
-		return &generated.DeleteOrganizationsId404JSONResponse{
-			Success: false,
-			Message: "Organization not found",
-		}, nil
-	}
-
-	hasPerm, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, authorization.Admin)
+	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
 	if err != nil {
 		return nil, errors.Wrap(err, "error checking permissions")
 	}
+	if user == nil {
+		return generated.DeleteOrganizationsId401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
+	}
+	if organization == nil {
+		return &generated.DeleteOrganizationsId401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
+	}
 	if !hasPerm {
-		hasPermViewer, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, authorization.Viewer)
-		if err != nil {
-			return nil, errors.Wrap(err, "error checking permissions")
-		}
-		if hasPermViewer {
+		if hasViewPerm {
 			return &generated.DeleteOrganizationsId401JSONResponse{
 				Success: false,
 				Message: "Forbidden",
@@ -180,6 +212,12 @@ func (server *serverHandler) PostOrganizations(ctx context.Context, request gene
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting user")
+	}
+	if user == nil {
+		return generated.PostOrganizations401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
 	}
 
 	_, err = server.DatabaseProvider.GetOrganizationByName(ctx, request.Body.Name)

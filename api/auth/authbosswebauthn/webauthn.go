@@ -371,7 +371,16 @@ func (webn *webAuthn) HijackAuth(w http.ResponseWriter, r *http.Request, handled
 	}
 
 	storer := MustBeWebauthnStorer(webn.Authboss.Config.Storage.Server)
-	user := r.Context().Value(authboss.CTXKeyUser).(authboss.User).(totp2fa.User)
+	user := r.Context().Value(authboss.CTXKeyUser).(totp2fa.User)
+
+	rmIntf := r.Context().Value(authboss.CTXKeyValues)
+	if rmIntf == nil {
+		authboss.PutSession(w, "should_remember", "false")
+	} else if rm, ok := rmIntf.(authboss.RememberValuer); !ok || !rm.GetShouldRemember() {
+		authboss.PutSession(w, "should_remember", "false")
+	} else {
+		authboss.PutSession(w, "should_remember", "true")
+	}
 
 	creds, err := storer.GetWebauthnCredentials(r.Context(), user.GetPID())
 	if err != nil && err != authboss.ErrUserNotFound {

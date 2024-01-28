@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -112,15 +113,12 @@ func NewAuthenticationProvider(baseURL string, querier db.TransactionQuerier, au
 func (auth *authenticationProvider) Middleware(next http.Handler) http.Handler {
 	rememberMiddleware := remember.Middleware(auth.authboss)
 	next = rememberMiddleware(next)
-	loadClientStateMiddleware := auth.authboss.LoadClientStateMiddleware(next)
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, requestStorer{}, r)
-		r = r.WithContext(ctx)
-
-		loadClientStateMiddleware.ServeHTTP(w, r)
-	})
+	return auth.authboss.LoadClientStateMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		shouldRemember, ok := authboss.GetSession(r, "should_remember")
+		r = r.WithContext(context.WithValue(r.Context(), authboss.CTXKeyValues, rememberer{remember: ok && shouldRemember == "true"}))
+		next.ServeHTTP(w, r)
+	}))
 }
 
 func (auth *authenticationProvider) APIMiddleware(next http.Handler) http.Handler {
@@ -128,19 +126,25 @@ func (auth *authenticationProvider) APIMiddleware(next http.Handler) http.Handle
 	confirmMiddleware := confirm.Middleware(auth.authboss)(lockMiddleware)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, err := auth.authboss.LoadCurrentUser(&r)
-		if err != nil {
-			next.ServeHTTP(w, r)
-			return
-		}
 
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, requestStorer{}, r)
 		r = r.WithContext(ctx)
 
+		if err != nil && err != authboss.ErrUserNotFound {
+			slog.Error("Error while loading current user", "error", err.Error())
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"success": false, "message": "Internal server error"}`))
+			return
+		}
+
 		if user != nil {
 			confirmMiddleware.ServeHTTP(w, r)
 		} else {
-			next.ServeHTTP(w, r)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"success": false, "message": "Unauthorized"}`))
 		}
 	})
 }

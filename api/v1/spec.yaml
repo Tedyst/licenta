@@ -966,6 +966,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        "401":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /organizations/{id}:
     get:
       summary: Get organization by ID

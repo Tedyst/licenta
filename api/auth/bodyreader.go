@@ -55,6 +55,14 @@ func (u WebauthnValues) GetShouldRemember() bool {
 	return ok && rm == "true"
 }
 
+type rememberer struct {
+	remember bool
+}
+
+func (r rememberer) GetShouldRemember() bool {
+	return r.remember
+}
+
 // authbossBodyReader reads forms from various pages and decodes
 // them.
 type authbossBodyReader struct {
