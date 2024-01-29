@@ -10,7 +10,7 @@ import { goto } from '$app/navigation';
 let token: string | null = null;
 
 export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
-	if (token == null) {
+	if (token == null || token === '') {
 		token = await getCSRFToken(input);
 	}
 	return await fetch(input, {
@@ -18,6 +18,17 @@ export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | u
 		headers: {
 			...init?.headers,
 			'X-CSRF-Token': token || ''
+		}
+	}).catch(async (err) => {
+		if (err.message === 'Failed to fetch') {
+			token = await getCSRFToken(input);
+			return fetch(input, {
+				...init,
+				headers: {
+					...init?.headers,
+					'X-CSRF-Token': token || ''
+				}
+			});
 		}
 	});
 }
@@ -254,7 +265,7 @@ export async function requestResetPassword(
 	});
 }
 
-export async function updateOrganizations() {
+export async function updateOrganizations(): Promise<string> {
 	return await client
 		.GET('/organizations')
 		.then((res) => {
@@ -269,7 +280,7 @@ export async function updateOrganizations() {
 		});
 }
 
-export async function updateCurrentUser() {
+export async function updateCurrentUser(): Promise<string> {
 	return await client
 		.GET('/users/me')
 		.then((res) => {

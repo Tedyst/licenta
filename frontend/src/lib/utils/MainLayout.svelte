@@ -5,7 +5,7 @@
 
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import client, { updateCurrentUser, updateOrganizations } from '../../lib/client';
+	import { updateCurrentUser, updateOrganizations } from '../../lib/client';
 
 	import { pa } from '@accuser/svelte-plausible-analytics';
 	import ListOrganizationsAndProjects from '$lib/utils/ListOrganizationsAndProjects.svelte';
@@ -18,19 +18,17 @@
 
 	let serverError = '';
 	onMount(async () => {
-		if ($user) {
+		if ($user && $organizations) {
 			return;
 		}
 
 		let results = await Promise.all([updateCurrentUser(), updateOrganizations()]);
-		if (results[0]) {
-			serverError = results[0];
+		if (results[0] === 'Unauthorized' || results[1] === 'Unauthorized') {
+			goto('/login');
 			return;
 		}
-		if (results[1]) {
-			serverError = results[1];
-			return;
-		}
+
+		serverError = results[0] || results[1] || '';
 	});
 </script>
 

@@ -9,15 +9,15 @@
 	}
 </script>
 
+<div class="min-h-screen bg-base-200">
+	<slot />
+</div>
+
 <PlausibleAnalytics
 	apiHost="https://plausible.tedyst.ro"
 	domain="laptop.tedyst.ro"
 	enabled={true}
 />
-
-<div class="min-h-screen bg-base-200">
-	<slot />
-</div>
 
 <svelte:head>
 	<script>

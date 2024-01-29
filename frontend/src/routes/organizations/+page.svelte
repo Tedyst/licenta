@@ -49,3 +49,7 @@
 		</div>
 	</div>
 </a>
+
+<svelte:head>
+	<title>Organizations | Licenta</title>
+</svelte:head>
