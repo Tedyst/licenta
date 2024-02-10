@@ -14,7 +14,7 @@ type TransactionQuerier interface {
 	queries.Querier
 
 	StartTransaction(ctx context.Context) (TransactionQuerier, error)
-	EndTransaction(ctx context.Context, err error) error
+	EndTransaction(ctx context.Context, rollback bool) error
 }
 
 type querierImpl struct {
@@ -48,8 +48,8 @@ func (q querierImpl) StartTransaction(ctx context.Context) (TransactionQuerier, 
 	}, nil
 }
 
-func (q querierImpl) EndTransaction(ctx context.Context, err error) error {
-	if err != nil {
+func (q querierImpl) EndTransaction(ctx context.Context, rollback bool) error {
+	if rollback {
 		return q.tx.Rollback(ctx)
 	}
 	return q.tx.Commit(ctx)

@@ -26,7 +26,7 @@ var rockyouCmd = &cobra.Command{
 			return err
 		}
 		defer func() {
-			err = errors.Join(err, database.EndTransaction(cmd.Context(), err))
+			err = errors.Join(err, database.EndTransaction(cmd.Context(), err != nil))
 		}()
 
 		reader, err := http.Get(baseRockyouURL)

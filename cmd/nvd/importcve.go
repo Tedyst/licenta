@@ -1,7 +1,6 @@
 package nvd
 
 import (
-	errorss "errors"
 	"fmt"
 	"os"
 
@@ -35,7 +34,7 @@ var importCveCmd = &cobra.Command{
 			return fmt.Errorf("failed to start transaction: %w", err)
 		}
 		defer func() {
-			err = errorss.Join(database.EndTransaction(cmd.Context(), err))
+			err = errors.Join(database.EndTransaction(cmd.Context(), err != nil))
 		}()
 
 		cpe, err := database.GetCPEByProductAndVersion(cmd.Context(), queries.GetCPEByProductAndVersionParams{
@@ -59,7 +58,7 @@ var importCveCmd = &cobra.Command{
 			return fmt.Errorf("failed to open file: %w", err)
 		}
 		defer func() {
-			err = errorss.Join(err, reader.Close())
+			err = errors.Join(err, reader.Close())
 		}()
 
 		result, err := nvd.ParseCveAPI(cmd.Context(), reader)

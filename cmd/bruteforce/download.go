@@ -24,7 +24,7 @@ var downloadCmd = &cobra.Command{
 			return err
 		}
 		defer func() {
-			err = errors.Join(err, database.EndTransaction(cmd.Context(), err))
+			err = errors.Join(err, database.EndTransaction(cmd.Context(), err != nil))
 		}()
 
 		reader, err := http.Get(args[0])

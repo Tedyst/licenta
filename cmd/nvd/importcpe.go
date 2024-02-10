@@ -2,7 +2,6 @@ package nvd
 
 import (
 	"database/sql"
-	errorss "errors"
 	"fmt"
 	"io"
 	"os"
@@ -39,7 +38,7 @@ var importCpeCmd = &cobra.Command{
 				return err
 			}
 			defer func() {
-				err = errorss.Join(err, reader.Close())
+				err = errors.Join(err, reader.Close())
 			}()
 
 			fmt.Println("Downloaded CPE from NVD API")
@@ -49,7 +48,7 @@ var importCpeCmd = &cobra.Command{
 				return err
 			}
 			defer func() {
-				err = errorss.Join(err, reader.Close())
+				err = errors.Join(err, reader.Close())
 			}()
 		}
 
@@ -65,7 +64,7 @@ var importCpeCmd = &cobra.Command{
 			return err
 		}
 		defer func() {
-			err = errorss.Join(err, database.EndTransaction(cmd.Context(), err))
+			err = errors.Join(err, database.EndTransaction(cmd.Context(), err != nil))
 		}()
 
 		dbCpes, err := database.GetNvdCPEsByDBType(cmd.Context(), int32(nvd.POSTGRESQL))

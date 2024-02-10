@@ -3,7 +3,6 @@ package local
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -62,7 +61,7 @@ func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresSc
 				Valid: true,
 			},
 		}); err2 != nil {
-			return errors.Join(err, fmt.Errorf("could not update scan status: %w", err2))
+			return fmt.Errorf("could not update scan status: %w; %w", err, err2)
 		}
 		return err
 	}
