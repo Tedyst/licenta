@@ -41,7 +41,7 @@ func NewAllScannerRunner(queries AllScannerQuerier, messageExchange messages.Exc
 	}
 }
 
-func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
+func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
 	if err := r.runAllScanners(ctx, scan, runningRemote); err != nil {
 		if err2 := r.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
 			ID:     scan.ID,
@@ -60,7 +60,7 @@ func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *models.Scan
 	return nil
 }
 
-func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
+func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
 	scanGroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
 	if err != nil {
 		return errors.Wrap(err, "cannot get scan group")

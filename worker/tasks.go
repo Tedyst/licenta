@@ -1,6 +1,6 @@
 package worker
 
-import "github.com/tedyst/licenta/models"
+import "github.com/tedyst/licenta/db/queries"
 
 type TaskType string
 
@@ -9,8 +9,8 @@ const (
 )
 
 type PostgresScan struct {
-	Scan     models.PostgresScan      `json:"scan"`
-	Database models.PostgresDatabases `json:"database"`
+	Scan     queries.PostgresScan     `json:"scan"`
+	Database queries.PostgresDatabase `json:"database"`
 }
 
 type Task struct {

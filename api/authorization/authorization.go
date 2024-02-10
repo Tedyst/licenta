@@ -5,7 +5,6 @@ import (
 
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 )
 
 type RBACGroup int16
@@ -18,13 +17,13 @@ const (
 )
 
 type AuthorizationManager interface {
-	UserHasPermissionForOrganization(ctx context.Context, organization *models.Organization, user *models.User, permission RBACGroup) (bool, error)
-	UserHasPermissionForProject(ctx context.Context, project *models.Project, user *models.User, permission RBACGroup) (bool, error)
+	UserHasPermissionForOrganization(ctx context.Context, organization *queries.Organization, user *queries.User, permission RBACGroup) (bool, error)
+	UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error)
 
-	WorkerHasPermissionForProject(ctx context.Context, project *models.Project, worker *models.Worker, permission RBACGroup) (bool, error)
+	WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error)
 
-	UserPermissionsChanged(ctx context.Context, user *models.User) error
-	WorkerPermissionsChanged(ctx context.Context, worker *models.Worker) error
+	UserPermissionsChanged(ctx context.Context, user *queries.User) error
+	WorkerPermissionsChanged(ctx context.Context, worker *queries.Worker) error
 }
 
 type authorizationManagerImpl struct {
@@ -35,7 +34,7 @@ func NewAuthorizationManager(querier db.TransactionQuerier) AuthorizationManager
 	return &authorizationManagerImpl{querier: querier}
 }
 
-func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.Context, organization *models.Organization, user *models.User, permission RBACGroup) (bool, error) {
+func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.Context, organization *queries.Organization, user *queries.User, permission RBACGroup) (bool, error) {
 	p, err := a.querier.GetOrganizationPermissionsForUser(ctx, queries.GetOrganizationPermissionsForUserParams{
 		OrganizationID: organization.ID,
 		UserID:         user.ID,
@@ -47,7 +46,7 @@ func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.
 	return RBACGroup(p) >= permission, nil
 }
 
-func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Context, project *models.Project, user *models.User, permission RBACGroup) (bool, error) {
+func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error) {
 	p, err := a.querier.GetProjectPermissionsForUser(ctx, queries.GetProjectPermissionsForUserParams{
 		ProjectID:      project.ID,
 		UserID:         user.ID,
@@ -60,14 +59,14 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 	return RBACGroup(p) >= permission, nil
 }
 
-func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *models.Project, worker *models.Worker, permission RBACGroup) (bool, error) {
+func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error) {
 	return false, nil
 }
 
-func (a *authorizationManagerImpl) UserPermissionsChanged(ctx context.Context, user *models.User) error {
+func (a *authorizationManagerImpl) UserPermissionsChanged(ctx context.Context, user *queries.User) error {
 	return nil
 }
 
-func (a *authorizationManagerImpl) WorkerPermissionsChanged(ctx context.Context, worker *models.Worker) error {
+func (a *authorizationManagerImpl) WorkerPermissionsChanged(ctx context.Context, worker *queries.Worker) error {
 	return nil
 }

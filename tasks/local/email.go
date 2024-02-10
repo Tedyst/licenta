@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/email"
-	"github.com/tedyst/licenta/models"
 )
 
 type emailRunner struct {
@@ -29,7 +29,7 @@ func (r *emailRunner) SendResetEmail(ctx context.Context, address string, subjec
 	return nil
 }
 
-func (r *emailRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *models.Project) error {
+func (r *emailRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *queries.Project) error {
 	return nil
 }
 

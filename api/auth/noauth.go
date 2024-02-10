@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/db/queries"
 )
 
 type noAuth struct {
-	user *models.User
+	user *queries.User
 }
 
-func NewNoAuth(user *models.User) *noAuth {
+func NewNoAuth(user *queries.User) *noAuth {
 	return &noAuth{
 		user: user,
 	}
@@ -27,6 +27,6 @@ func (auth *noAuth) Handler() http.Handler {
 	})
 }
 
-func (auth *noAuth) GetUser(ctx context.Context) (*models.User, error) {
+func (auth *noAuth) GetUser(ctx context.Context) (*queries.User, error) {
 	return auth.user, nil
 }

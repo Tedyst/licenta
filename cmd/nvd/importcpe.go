@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 )
 
@@ -85,7 +84,7 @@ var importCpeCmd = &cobra.Command{
 				return err
 			}
 
-			var cpe *models.NvdCPE
+			var cpe *queries.NvdCpe
 			found := false
 			for _, dbCpe := range dbCpes {
 				if dbCpe.Cpe == result.Cpe.CpeName {

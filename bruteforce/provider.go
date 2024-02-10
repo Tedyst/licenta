@@ -3,7 +3,6 @@ package bruteforce
 import (
 	"context"
 
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/scanner"
 )
 
@@ -16,12 +15,12 @@ type Bruteforcer interface {
 }
 
 type databaseBruteforceProvider struct {
-	queries db.TransactionQuerier
+	queries DatabasePasswordProviderInterface
 }
 
 var _ BruteforceProvider = (*databaseBruteforceProvider)(nil)
 
-func NewDatabaseBruteforceProvider(queries db.TransactionQuerier) *databaseBruteforceProvider {
+func NewDatabaseBruteforceProvider(queries DatabasePasswordProviderInterface) *databaseBruteforceProvider {
 	return &databaseBruteforceProvider{
 		queries: queries,
 	}

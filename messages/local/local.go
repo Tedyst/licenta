@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/models"
 )
 
 const bufferSize = 100
@@ -23,15 +23,15 @@ func NewLocalExchange() *localExchange {
 	}
 }
 
-func (e *localExchange) getWorkerTopic(worker models.Worker) string {
+func (e *localExchange) getWorkerTopic(worker queries.Worker) string {
 	return "worker." + strconv.Itoa(int(worker.ID))
 }
 
-func (e *localExchange) PublishSendScanToWorkerMessage(ctx context.Context, worker *models.Worker, message messages.SendScanToWorkerMessage) error {
+func (e *localExchange) PublishSendScanToWorkerMessage(ctx context.Context, worker *queries.Worker, message messages.SendScanToWorkerMessage) error {
 	return e.publish(ctx, e.getWorkerTopic(*worker), message)
 }
 
-func (e *localExchange) ReceiveSendScanToWorkerMessage(ctx context.Context, worker *models.Worker) (messages.SendScanToWorkerMessage, bool, error) {
+func (e *localExchange) ReceiveSendScanToWorkerMessage(ctx context.Context, worker *queries.Worker) (messages.SendScanToWorkerMessage, bool, error) {
 	message := messages.SendScanToWorkerMessage{}
 	ok, err := e.receive(ctx, e.getWorkerTopic(*worker), &message)
 	return message, ok, err

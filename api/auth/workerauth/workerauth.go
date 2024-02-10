@@ -6,24 +6,24 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/cache"
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/db/queries"
 )
 
 const workerAuthHeader = "X-Worker-Token"
 
 type workerAuthQuerier interface {
-	GetWorkerByToken(ctx context.Context, token string) (*models.Worker, error)
+	GetWorkerByToken(ctx context.Context, token string) (*queries.Worker, error)
 }
 
 type workerAuthKey struct{}
 
 type workerAuth struct {
-	cache   cache.CacheProvider[models.Worker]
+	cache   cache.CacheProvider[queries.Worker]
 	querier workerAuthQuerier
 }
 
-func (wa *workerAuth) getWorkerAuthData(ctx context.Context) *models.Worker {
-	if data, ok := ctx.Value(workerAuthKey{}).(*models.Worker); ok {
+func (wa *workerAuth) getWorkerAuthData(ctx context.Context) *queries.Worker {
+	if data, ok := ctx.Value(workerAuthKey{}).(*queries.Worker); ok {
 		return data
 	}
 	return nil
@@ -67,11 +67,11 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 	})
 }
 
-func (wa *workerAuth) GetWorker(ctx context.Context) (*models.Worker, error) {
+func (wa *workerAuth) GetWorker(ctx context.Context) (*queries.Worker, error) {
 	return wa.getWorkerAuthData(ctx), nil
 }
 
-func NewWorkerAuth(cache cache.CacheProvider[models.Worker], querier workerAuthQuerier) *workerAuth {
+func NewWorkerAuth(cache cache.CacheProvider[queries.Worker], querier workerAuthQuerier) *workerAuth {
 	return &workerAuth{
 		cache:   cache,
 		querier: querier,

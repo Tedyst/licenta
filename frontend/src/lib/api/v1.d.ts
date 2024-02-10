@@ -760,6 +760,12 @@ export interface paths {
             "application/json": components["schemas"]["Error"];
           };
         };
+        /** @description Invalid body */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
       };
     };
   };
@@ -1089,7 +1095,7 @@ export interface components {
        */
       created_at: string;
       projects: components["schemas"]["Project"][];
-      stats?: components["schemas"]["OrganizationStats"];
+      stats: components["schemas"]["OrganizationStats"];
     };
     ChangePasswordLoggedIn: {
       /**

@@ -9,9 +9,9 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
+	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	localexchange "github.com/tedyst/licenta/messages/local"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks/local"
 )
 
@@ -33,7 +33,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 		case http.StatusOK:
 			slog.Info("Received task", "task", string(task.Body))
 
-			scan := models.Scan{
+			scan := queries.Scan{
 				ID:     int64(task.JSON200.Scan.Id),
 				Status: int32(task.JSON200.Scan.Status),
 				Error:  sql.NullString{String: task.JSON200.Scan.Error, Valid: task.JSON200.Scan.Error != ""},
@@ -44,9 +44,9 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 				CreatedBy: sql.NullInt64{Int64: int64(task.JSON200.ScanGroup.CreatedBy.Id), Valid: task.JSON200.ScanGroup.CreatedBy != nil},
 			}
 
-			var postgresScan *models.PostgresScan
+			var postgresScan *queries.PostgresScan
 			if task.JSON200.Scan.PostgresScan != nil {
-				postgresScan = &models.PostgresScan{
+				postgresScan = &queries.PostgresScan{
 					ID:         int64(task.JSON200.Scan.PostgresScan.Id),
 					DatabaseID: int64(task.JSON200.Scan.PostgresScan.DatabaseId),
 					ScanID:     int64(task.JSON200.Scan.Id),
@@ -56,15 +56,16 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			slog.DebugContext(ctx, "Got task from remote server", "scan", scan, "postgres_scan", postgresScan)
 
 			localExchange := localexchange.NewLocalExchange()
-			runner := local.NewAllScannerRunner(&remoteQuerier{
+
+			database := &remoteQuerier{
 				client:       client,
 				scan:         &scan,
 				postgresScan: postgresScan,
 				scanGroup:    &scanGroup,
-			}, localExchange, &remoteBruteforceProvider{
-				client: client,
-				scan:   &scan,
-			})
+			}
+			passProvider := bruteforce.NewDatabaseBruteforceProvider(database)
+
+			runner := local.NewAllScannerRunner(database, localExchange, passProvider)
 
 			err := runner.RunAllScanners(ctx, &scan, true)
 			if err != nil {

@@ -3,7 +3,7 @@ package messages
 import (
 	"context"
 
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/db/queries"
 )
 
 type scanType string
@@ -17,11 +17,11 @@ type SendScanToWorkerMessage struct {
 }
 
 type Exchange interface {
-	PublishSendScanToWorkerMessage(ctx context.Context, worker *models.Worker, message SendScanToWorkerMessage) error
-	ReceiveSendScanToWorkerMessage(ctx context.Context, worker *models.Worker) (SendScanToWorkerMessage, bool, error)
+	PublishSendScanToWorkerMessage(ctx context.Context, worker *queries.Worker, message SendScanToWorkerMessage) error
+	ReceiveSendScanToWorkerMessage(ctx context.Context, worker *queries.Worker) (SendScanToWorkerMessage, bool, error)
 }
 
-func GetStartScanMessage(scan *models.Scan) SendScanToWorkerMessage {
+func GetStartScanMessage(scan *queries.Scan) SendScanToWorkerMessage {
 	return SendScanToWorkerMessage{
 		ScanID: scan.ID,
 	}

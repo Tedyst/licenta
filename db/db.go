@@ -15,7 +15,6 @@ type TransactionQuerier interface {
 
 	StartTransaction(ctx context.Context) (TransactionQuerier, error)
 	EndTransaction(ctx context.Context, err error) error
-	GetRawPool() *pgxpool.Pool
 }
 
 type querierImpl struct {

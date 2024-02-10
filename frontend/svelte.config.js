@@ -13,7 +13,7 @@ const config = {
 			precompress: true,
 			strict: true
 		}),
-		inlineStyleThreshold: 102400
+		inlineStyleThreshold: Infinity,
 	}
 };
 

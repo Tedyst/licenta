@@ -82,7 +82,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 		return nil, errors.Wrap(err, "error creating scan group")
 	}
 
-	var scans []*models.Scan
+	var scans []*queries.Scan
 	var resultScans []generated.Scan
 
 	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)

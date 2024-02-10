@@ -10,7 +10,6 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/file"
 	"github.com/tedyst/licenta/extractors/git"
-	"github.com/tedyst/licenta/models"
 )
 
 type gitQuerier interface {
@@ -33,7 +32,7 @@ func NewGitRunner(queries gitQuerier) *gitRunner {
 	}
 }
 
-func (r *gitRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
+func (r *gitRunner) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
 	if repo == nil {
 		return errors.New("repo is nil")
 	}

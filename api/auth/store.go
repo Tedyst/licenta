@@ -10,7 +10,6 @@ import (
 	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/volatiletech/authboss/v3"
 )
 
@@ -65,7 +64,7 @@ func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
 
 func (a *authbossStorer) New(ctx context.Context) authboss.User {
 	return &authbossUser{
-		user: &models.User{},
+		user: &queries.User{},
 	}
 }
 

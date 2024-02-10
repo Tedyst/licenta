@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 )
 
@@ -68,7 +67,7 @@ var importCveCmd = &cobra.Command{
 		}
 
 		for _, result := range result.Vulnerabilities {
-			var cve *models.NvdCVE
+			var cve *queries.NvdCfe
 			cve, err = database.GetCveByCveID(cmd.Context(), result.Cve.ID)
 			if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 				return errors.Wrap(err, "failed to get cve")

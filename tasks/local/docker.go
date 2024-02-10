@@ -13,7 +13,6 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/docker"
 	"github.com/tedyst/licenta/extractors/file"
-	"github.com/tedyst/licenta/models"
 )
 
 type dockerRunner struct {
@@ -38,7 +37,7 @@ func NewDockerRunner(queries dockerQuerier) *dockerRunner {
 	}
 }
 
-func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *models.ProjectDockerImage) (err error) {
+func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *queries.ProjectDockerImage) (err error) {
 	if image == nil {
 		return errors.New("image is nil")
 	}

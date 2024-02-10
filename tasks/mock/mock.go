@@ -12,7 +12,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	models "github.com/tedyst/licenta/models"
+	queries "github.com/tedyst/licenta/db/queries"
 	nvd "github.com/tedyst/licenta/nvd"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -41,7 +41,7 @@ func (m *MockTaskRunner) EXPECT() *MockTaskRunnerMockRecorder {
 }
 
 // RunAllScanners mocks base method.
-func (m *MockTaskRunner) RunAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
+func (m *MockTaskRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RunAllScanners", ctx, scan, runningRemote)
 	ret0, _ := ret[0].(error)
@@ -67,19 +67,19 @@ func (c *TaskRunnerRunAllScannersCall) Return(arg0 error) *TaskRunnerRunAllScann
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerRunAllScannersCall) Do(f func(context.Context, *models.Scan, bool) error) *TaskRunnerRunAllScannersCall {
+func (c *TaskRunnerRunAllScannersCall) Do(f func(context.Context, *queries.Scan, bool) error) *TaskRunnerRunAllScannersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *models.Scan, bool) error) *TaskRunnerRunAllScannersCall {
+func (c *TaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *queries.Scan, bool) error) *TaskRunnerRunAllScannersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // ScanDockerRepository mocks base method.
-func (m *MockTaskRunner) ScanDockerRepository(ctx context.Context, image *models.ProjectDockerImage) error {
+func (m *MockTaskRunner) ScanDockerRepository(ctx context.Context, image *queries.ProjectDockerImage) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanDockerRepository", ctx, image)
 	ret0, _ := ret[0].(error)
@@ -105,19 +105,19 @@ func (c *TaskRunnerScanDockerRepositoryCall) Return(arg0 error) *TaskRunnerScanD
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScanDockerRepositoryCall) Do(f func(context.Context, *models.ProjectDockerImage) error) *TaskRunnerScanDockerRepositoryCall {
+func (c *TaskRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.ProjectDockerImage) error) *TaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectDockerImage) error) *TaskRunnerScanDockerRepositoryCall {
+func (c *TaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectDockerImage) error) *TaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // ScanGitRepository mocks base method.
-func (m *MockTaskRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
+func (m *MockTaskRunner) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo)
 	ret0, _ := ret[0].(error)
@@ -143,19 +143,19 @@ func (c *TaskRunnerScanGitRepositoryCall) Return(arg0 error) *TaskRunnerScanGitR
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *models.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
+func (c *TaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
+func (c *TaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // ScanPostgresDB mocks base method.
-func (m *MockTaskRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
+func (m *MockTaskRunner) ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanPostgresDB", ctx, scan)
 	ret0, _ := ret[0].(error)
@@ -181,13 +181,13 @@ func (c *TaskRunnerScanPostgresDBCall) Return(arg0 error) *TaskRunnerScanPostgre
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScanPostgresDBCall) Do(f func(context.Context, *models.PostgresScan) error) *TaskRunnerScanPostgresDBCall {
+func (c *TaskRunnerScanPostgresDBCall) Do(f func(context.Context, *queries.PostgresScan) error) *TaskRunnerScanPostgresDBCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *models.PostgresScan) error) *TaskRunnerScanPostgresDBCall {
+func (c *TaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *queries.PostgresScan) error) *TaskRunnerScanPostgresDBCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -269,7 +269,7 @@ func (c *TaskRunnerSendCVEMailsToAllProjectsCall) DoAndReturn(f func(context.Con
 }
 
 // SendCVEVulnerabilityEmail mocks base method.
-func (m *MockTaskRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *models.Project) error {
+func (m *MockTaskRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *queries.Project) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendCVEVulnerabilityEmail", ctx, project)
 	ret0, _ := ret[0].(error)
@@ -295,13 +295,13 @@ func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Return(arg0 error) *TaskRunner
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *models.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
+func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *queries.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *models.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
+func (c *TaskRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *queries.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -482,7 +482,7 @@ func (c *EmailTasksRunnerSendCVEMailsToAllProjectsCall) DoAndReturn(f func(conte
 }
 
 // SendCVEVulnerabilityEmail mocks base method.
-func (m *MockEmailTasksRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *models.Project) error {
+func (m *MockEmailTasksRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *queries.Project) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendCVEVulnerabilityEmail", ctx, project)
 	ret0, _ := ret[0].(error)
@@ -508,13 +508,13 @@ func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Return(arg0 error) *Emai
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *models.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
+func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *queries.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *models.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
+func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *queries.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -581,7 +581,7 @@ func (m *MockDockerTasksRunner) EXPECT() *MockDockerTasksRunnerMockRecorder {
 }
 
 // ScanDockerRepository mocks base method.
-func (m *MockDockerTasksRunner) ScanDockerRepository(ctx context.Context, image *models.ProjectDockerImage) error {
+func (m *MockDockerTasksRunner) ScanDockerRepository(ctx context.Context, image *queries.ProjectDockerImage) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanDockerRepository", ctx, image)
 	ret0, _ := ret[0].(error)
@@ -607,13 +607,13 @@ func (c *DockerTasksRunnerScanDockerRepositoryCall) Return(arg0 error) *DockerTa
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *DockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *models.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
+func (c *DockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *DockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
+func (c *DockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -642,7 +642,7 @@ func (m *MockGitTasksRunner) EXPECT() *MockGitTasksRunnerMockRecorder {
 }
 
 // ScanGitRepository mocks base method.
-func (m *MockGitTasksRunner) ScanGitRepository(ctx context.Context, repo *models.ProjectGitRepository) error {
+func (m *MockGitTasksRunner) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo)
 	ret0, _ := ret[0].(error)
@@ -668,13 +668,13 @@ func (c *GitTasksRunnerScanGitRepositoryCall) Return(arg0 error) *GitTasksRunner
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *GitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *models.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
+func (c *GitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *GitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *models.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
+func (c *GitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -764,7 +764,7 @@ func (m *MockScannerTaskRunner) EXPECT() *MockScannerTaskRunnerMockRecorder {
 }
 
 // RunAllScanners mocks base method.
-func (m *MockScannerTaskRunner) RunAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
+func (m *MockScannerTaskRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RunAllScanners", ctx, scan, runningRemote)
 	ret0, _ := ret[0].(error)
@@ -790,19 +790,19 @@ func (c *ScannerTaskRunnerRunAllScannersCall) Return(arg0 error) *ScannerTaskRun
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerRunAllScannersCall) Do(f func(context.Context, *models.Scan, bool) error) *ScannerTaskRunnerRunAllScannersCall {
+func (c *ScannerTaskRunnerRunAllScannersCall) Do(f func(context.Context, *queries.Scan, bool) error) *ScannerTaskRunnerRunAllScannersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *models.Scan, bool) error) *ScannerTaskRunnerRunAllScannersCall {
+func (c *ScannerTaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *queries.Scan, bool) error) *ScannerTaskRunnerRunAllScannersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // ScanPostgresDB mocks base method.
-func (m *MockScannerTaskRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
+func (m *MockScannerTaskRunner) ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanPostgresDB", ctx, scan)
 	ret0, _ := ret[0].(error)
@@ -828,13 +828,13 @@ func (c *ScannerTaskRunnerScanPostgresDBCall) Return(arg0 error) *ScannerTaskRun
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerScanPostgresDBCall) Do(f func(context.Context, *models.PostgresScan) error) *ScannerTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerScanPostgresDBCall) Do(f func(context.Context, *queries.PostgresScan) error) *ScannerTaskRunnerScanPostgresDBCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *models.PostgresScan) error) *ScannerTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *queries.PostgresScan) error) *ScannerTaskRunnerScanPostgresDBCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -863,7 +863,7 @@ func (m *MockPostgresTaskRunner) EXPECT() *MockPostgresTaskRunnerMockRecorder {
 }
 
 // ScanPostgresDB mocks base method.
-func (m *MockPostgresTaskRunner) ScanPostgresDB(ctx context.Context, scan *models.PostgresScan) error {
+func (m *MockPostgresTaskRunner) ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ScanPostgresDB", ctx, scan)
 	ret0, _ := ret[0].(error)
@@ -889,13 +889,13 @@ func (c *PostgresTaskRunnerScanPostgresDBCall) Return(arg0 error) *PostgresTaskR
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *PostgresTaskRunnerScanPostgresDBCall) Do(f func(context.Context, *models.PostgresScan) error) *PostgresTaskRunnerScanPostgresDBCall {
+func (c *PostgresTaskRunnerScanPostgresDBCall) Do(f func(context.Context, *queries.PostgresScan) error) *PostgresTaskRunnerScanPostgresDBCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *PostgresTaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *models.PostgresScan) error) *PostgresTaskRunnerScanPostgresDBCall {
+func (c *PostgresTaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *queries.PostgresScan) error) *PostgresTaskRunnerScanPostgresDBCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -924,7 +924,7 @@ func (m *MockAllScanTaskRunner) EXPECT() *MockAllScanTaskRunnerMockRecorder {
 }
 
 // RunAllScanners mocks base method.
-func (m *MockAllScanTaskRunner) RunAllScanners(ctx context.Context, scan *models.Scan, runningRemote bool) error {
+func (m *MockAllScanTaskRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RunAllScanners", ctx, scan, runningRemote)
 	ret0, _ := ret[0].(error)
@@ -950,13 +950,13 @@ func (c *AllScanTaskRunnerRunAllScannersCall) Return(arg0 error) *AllScanTaskRun
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *AllScanTaskRunnerRunAllScannersCall) Do(f func(context.Context, *models.Scan, bool) error) *AllScanTaskRunnerRunAllScannersCall {
+func (c *AllScanTaskRunnerRunAllScannersCall) Do(f func(context.Context, *queries.Scan, bool) error) *AllScanTaskRunnerRunAllScannersCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *AllScanTaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *models.Scan, bool) error) *AllScanTaskRunnerRunAllScannersCall {
+func (c *AllScanTaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *queries.Scan, bool) error) *AllScanTaskRunnerRunAllScannersCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

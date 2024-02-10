@@ -19,7 +19,7 @@ type ScanQuerier interface {
 	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 	UpdateScanStatus(ctx context.Context, params queries.UpdateScanStatusParams) error
 	CreateScanResult(ctx context.Context, params queries.CreateScanResultParams) (*queries.ScanResult, error)
-	CreateScanBruteforceResult(ctx context.Context, arg queries.CreateScanBruteforceResultParams) (*models.ScanBruteforceResult, error)
+	CreateScanBruteforceResult(ctx context.Context, arg queries.CreateScanBruteforceResultParams) (*queries.ScanBruteforceResult, error)
 	UpdateScanBruteforceResult(ctx context.Context, params queries.UpdateScanBruteforceResultParams) error
 
 	GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)
@@ -36,11 +36,11 @@ type baseScanRunner struct {
 	bruteforceResults      map[scanner.User]int64
 	notifyBruteforceStatus func(status map[scanner.User]bruteforce.BruteforceUserStatus) error
 
-	scan    *models.Scan
+	scan    *queries.Scan
 	scanner scanner.Scanner
 }
 
-func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *models.Scan, sc scanner.Scanner) *baseScanRunner {
+func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *queries.Scan, sc scanner.Scanner) *baseScanRunner {
 	runner := &baseScanRunner{
 		queries:            q,
 		bruteforceProvider: bruteforceProvider,

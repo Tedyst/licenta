@@ -18,7 +18,7 @@ import (
 	"github.com/tedyst/licenta/scanner/postgres"
 )
 
-func getPostgresConnectString(db *models.PostgresDatabases) string {
+func getPostgresConnectString(db *queries.PostgresDatabase) string {
 	return fmt.Sprintf("host=%s port=%d database=%s user=%s password=%s", db.Host, db.Port, db.DatabaseName, db.Username, db.Password)
 }
 
@@ -44,7 +44,7 @@ func NewPostgresScanRunner(queries PostgresQuerier, bruteforceProvider bruteforc
 	}
 }
 
-func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresScan *models.PostgresScan) error {
+func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresScan *queries.PostgresScan) error {
 	ctx, span := tracer.Start(ctx, "ScanPostgresDB")
 	defer span.End()
 
@@ -78,7 +78,7 @@ func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresSc
 	return nil
 }
 
-func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgresScan *models.PostgresScan, scan *models.Scan) (scanner.Scanner, *baseScanRunner, error) {
+func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgresScan *queries.PostgresScan, scan *queries.Scan) (scanner.Scanner, *baseScanRunner, error) {
 	logger := slog.With(
 		"scan", scan.ID,
 		"postgres_scan", postgresScan.ID,
@@ -110,7 +110,7 @@ func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgre
 	return sc, createScanner(ctx, runner.queries, runner.bruteforceProvider, logger, scan, sc), nil
 }
 
-func (runner *postgresScanRunner) scanPostgresDB(ctx context.Context, postgresScan *models.PostgresScan, scan *models.Scan, shouldOnlyScanRemote bool) error {
+func (runner *postgresScanRunner) scanPostgresDB(ctx context.Context, postgresScan *queries.PostgresScan, scan *queries.Scan, shouldOnlyScanRemote bool) error {
 	sc, scanRunner, err := runner.createBaseScanner(ctx, postgresScan, scan)
 	if err != nil {
 		return errors.Wrap(err, "could not create scanner")

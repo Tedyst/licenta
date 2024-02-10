@@ -5,12 +5,21 @@ import (
 	"database/sql"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 )
 
+const MAX_PASSWORDS_PER_BATCH = 10000
+
+type DatabasePasswordProviderInterface interface {
+	GetBruteforcePasswordsPaginated(ctx context.Context, arg queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error)
+	GetSpecificBruteforcePasswordID(ctx context.Context, arg queries.GetSpecificBruteforcePasswordIDParams) (int64, error)
+	CreateBruteforcedPassword(ctx context.Context, arg queries.CreateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error)
+	GetBruteforcedPasswords(ctx context.Context, arg queries.GetBruteforcedPasswordsParams) (*queries.BruteforcedPassword, error)
+	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
+}
+
 type PasswordProvider interface {
-	GetCount() (int, error)
+	GetCount() (int64, error)
 	GetSpecificPassword(password string) (int64, bool, error)
 	Next() bool
 	Error() error
@@ -25,14 +34,37 @@ type PasswordProvider interface {
 type databasePasswordProvider struct {
 	projectID int64
 
-	count    int
-	rows     pgx.Rows
-	database db.TransactionQuerier
+	context  context.Context
+	database DatabasePasswordProviderInterface
+	error    error
 
-	context context.Context
+	hasNext      bool
+	count        int64
+	currentBatch []*queries.DefaultBruteforcePassword
 }
 
-func (d *databasePasswordProvider) GetCount() (int, error) {
+func (p *databasePasswordProvider) readBatch() error {
+	if len(p.currentBatch) > 1 || !p.hasNext {
+		return nil
+	}
+
+	lastID := int64(-1)
+	if len(p.currentBatch) > 0 {
+		lastID = p.currentBatch[len(p.currentBatch)-1].ID
+	}
+	response, err := p.database.GetBruteforcePasswordsPaginated(p.context, queries.GetBruteforcePasswordsPaginatedParams{
+		LastID: lastID,
+		Limit:  MAX_PASSWORDS_PER_BATCH,
+	})
+	if err != nil {
+		return err
+	}
+
+	p.currentBatch = response
+	return nil
+}
+
+func (d *databasePasswordProvider) GetCount() (int64, error) {
 	return d.count, nil
 }
 
@@ -48,43 +80,34 @@ func (d *databasePasswordProvider) GetSpecificPassword(password string) (int64, 
 }
 
 func (d *databasePasswordProvider) Next() bool {
-	if d.rows == nil {
+	err := d.readBatch()
+	if err != nil {
+		d.error = err
 		return false
 	}
-	return d.rows.Next()
+
+	if len(d.currentBatch) == 0 {
+		return false
+	}
+	d.currentBatch = d.currentBatch[1:]
+
+	return len(d.currentBatch) != 0 || d.hasNext
 }
 
 func (d *databasePasswordProvider) Error() error {
-	if d.rows == nil {
-		return nil
-	}
-	return d.rows.Err()
+	return d.error
 }
 
 func (d *databasePasswordProvider) Current() (int64, string, error) {
-	if d.rows == nil {
-		return -1, "", nil
-	}
-	var password string
-	var id int64
-	err := d.rows.Scan(&id, &password)
-	return id, password, err
+	return d.currentBatch[0].ID, d.currentBatch[0].Password, nil
 }
 
 func (d *databasePasswordProvider) Start(index int64) error {
-	rows, err := d.database.GetRawPool().Query(context.Background(), "SELECT id, password FROM default_bruteforce_passwords WHERE id > $1 UNION all SELECT -1, password FROM project_docker_layer_results WHERE project_id = $2 UNION all SELECT -1, password FROM project_git_results WHERE project_id = $2 ORDER BY id ASC", index, d.projectID)
-	if err != nil {
-		return err
-	}
-	d.rows = rows
 	return nil
 }
 
 func (d *databasePasswordProvider) Close() {
-	if d.rows == nil {
-		return
-	}
-	d.rows.Close()
+
 }
 
 func (d *databasePasswordProvider) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
@@ -116,9 +139,8 @@ func (d *databasePasswordProvider) GetPasswordByHash(username, hash string) (str
 	return p.Password.String, p.LastBruteforceID.Int64, err
 }
 
-func NewDatabasePasswordProvider(ctx context.Context, database db.TransactionQuerier, projectID int64) (*databasePasswordProvider, error) {
-	count := 0
-	err := database.GetRawPool().QueryRow(ctx, "select SUM(count) from (SELECT COUNT(*) FROM default_bruteforce_passwords union all select COUNT(*) from project_docker_layer_results where project_id = $1 UNION all SELECT COUNT(*) FROM project_git_results WHERE project_id = $1) as count;", projectID).Scan(&count)
+func NewDatabasePasswordProvider(ctx context.Context, database DatabasePasswordProviderInterface, projectID int64) (*databasePasswordProvider, error) {
+	count, err := database.GetBruteforcePasswordsForProjectCount(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -152,8 +174,8 @@ func NewPasswordListIterator(passwords []string) *passwordListProvider {
 	}
 }
 
-func (p *passwordListProvider) GetCount() (int, error) {
-	return len(p.passwords), nil
+func (p *passwordListProvider) GetCount() (int64, error) {
+	return int64(len(p.passwords)), nil
 }
 
 func (p *passwordListProvider) GetSpecificPassword(password string) (int64, bool, error) {

@@ -14,7 +14,6 @@ import (
 	reflect "reflect"
 
 	uuid "github.com/google/uuid"
-	pgxpool "github.com/jackc/pgx/v5/pgxpool"
 	db "github.com/tedyst/licenta/db"
 	queries "github.com/tedyst/licenta/db/queries"
 	gomock "go.uber.org/mock/gomock"
@@ -2721,44 +2720,6 @@ func (c *TransactionQuerierGetProjectsByOrganizationCall) Do(f func(context.Cont
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetProjectsByOrganizationCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Project, error)) *TransactionQuerierGetProjectsByOrganizationCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// GetRawPool mocks base method.
-func (m *MockTransactionQuerier) GetRawPool() *pgxpool.Pool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRawPool")
-	ret0, _ := ret[0].(*pgxpool.Pool)
-	return ret0
-}
-
-// GetRawPool indicates an expected call of GetRawPool.
-func (mr *MockTransactionQuerierMockRecorder) GetRawPool() *TransactionQuerierGetRawPoolCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRawPool", reflect.TypeOf((*MockTransactionQuerier)(nil).GetRawPool))
-	return &TransactionQuerierGetRawPoolCall{Call: call}
-}
-
-// TransactionQuerierGetRawPoolCall wrap *gomock.Call
-type TransactionQuerierGetRawPoolCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TransactionQuerierGetRawPoolCall) Return(arg0 *pgxpool.Pool) *TransactionQuerierGetRawPoolCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierGetRawPoolCall) Do(f func() *pgxpool.Pool) *TransactionQuerierGetRawPoolCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierGetRawPoolCall) DoAndReturn(f func() *pgxpool.Pool) *TransactionQuerierGetRawPoolCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

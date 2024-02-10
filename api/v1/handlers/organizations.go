@@ -9,7 +9,6 @@ import (
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 )
 
 func (server *serverHandler) GetOrganizations(ctx context.Context, request generated.GetOrganizationsRequestObject) (generated.GetOrganizationsResponseObject, error) {
@@ -70,7 +69,7 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 	return &response, nil
 }
 
-func (server *serverHandler) checkForOrganizationPermission(ctx context.Context, organizationID int64, role authorization.RBACGroup) (*models.User, *models.Organization, bool, bool, error) {
+func (server *serverHandler) checkForOrganizationPermission(ctx context.Context, organizationID int64, role authorization.RBACGroup) (*queries.User, *queries.Organization, bool, bool, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return user, nil, false, false, errors.Wrap(err, "error getting user")

@@ -12,7 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 )
 
@@ -20,10 +19,10 @@ type nvdQuerier interface {
 	GetNvdCPEsByDBType(ctx context.Context, databaseType int32) ([]*queries.NvdCpe, error)
 	CreateNvdCPE(ctx context.Context, params queries.CreateNvdCPEParams) (*queries.NvdCpe, error)
 	UpdateNvdCPE(ctx context.Context, params queries.UpdateNvdCPEParams) error
-	GetCveByCveID(ctx context.Context, cveID string) (*models.NvdCVE, error)
-	CreateNvdCve(ctx context.Context, params queries.CreateNvdCveParams) (*models.NvdCVE, error)
-	GetCveCpeByCveAndCpe(ctx context.Context, params queries.GetCveCpeByCveAndCpeParams) (*models.NvdCVECPE, error)
-	CreateNvdCveCPE(ctx context.Context, params queries.CreateNvdCveCPEParams) (*models.NvdCVECPE, error)
+	GetCveByCveID(ctx context.Context, cveID string) (*queries.NvdCfe, error)
+	CreateNvdCve(ctx context.Context, params queries.CreateNvdCveParams) (*queries.NvdCfe, error)
+	GetCveCpeByCveAndCpe(ctx context.Context, params queries.GetCveCpeByCveAndCpeParams) (*queries.NvdCveCpe, error)
+	CreateNvdCveCPE(ctx context.Context, params queries.CreateNvdCveCPEParams) (*queries.NvdCveCpe, error)
 }
 
 type nvdRunner struct {
@@ -41,7 +40,7 @@ func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 	defer span.End()
 
 	for _, result := range result.Products {
-		var cpe *models.NvdCPE
+		var cpe *queries.NvdCpe
 
 		version, err := nvd.ExtractCpeVersionProduct(product, result.Cpe.Titles)
 		if err != nil {
@@ -98,12 +97,12 @@ func (r *nvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 	return nil
 }
 
-func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database nvdQuerier, result nvd.NvdCveAPIResult, cpe *models.NvdCPE) error {
+func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, database nvdQuerier, result nvd.NvdCveAPIResult, cpe *queries.NvdCpe) error {
 	ctx, span := tracer.Start(ctx, "importCVEsInDB")
 	defer span.End()
 
 	for _, result := range result.Vulnerabilities {
-		var cve *models.NvdCVE
+		var cve *queries.NvdCfe
 		cve, err := database.GetCveByCveID(ctx, result.Cve.ID)
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 			return errors.Wrap(err, "failed to get cve")

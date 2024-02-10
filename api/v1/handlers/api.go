@@ -6,8 +6,8 @@ import (
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks"
 )
 
@@ -22,13 +22,13 @@ type serverHandler struct {
 }
 
 type workerAuth interface {
-	GetWorker(ctx context.Context) (*models.Worker, error)
+	GetWorker(ctx context.Context) (*queries.Worker, error)
 }
 
 type userAuth interface {
-	GetUser(ctx context.Context) (*models.User, error)
-	VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error)
-	UpdatePassword(ctx context.Context, user *models.User, newPassword string) error
+	GetUser(ctx context.Context) (*queries.User, error)
+	VerifyPassword(ctx context.Context, user *queries.User, password string) (bool, error)
+	UpdatePassword(ctx context.Context, user *queries.User, newPassword string) error
 }
 
 type AuthorizationManager = authorization.AuthorizationManager

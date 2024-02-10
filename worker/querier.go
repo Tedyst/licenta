@@ -11,16 +11,15 @@ import (
 	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/tasks/local"
 )
 
 type remoteQuerier struct {
 	client       generated.ClientWithResponsesInterface
-	scan         *models.Scan
-	scanGroup    *models.ScanGroup
-	postgresScan *models.PostgresScan
+	scan         *queries.Scan
+	scanGroup    *queries.ScanGroup
+	postgresScan *queries.PostgresScan
 }
 
 var _ local.AllScannerQuerier = (*remoteQuerier)(nil)
@@ -76,7 +75,7 @@ func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.Cre
 	switch response.StatusCode() {
 	case http.StatusOK:
 		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
-		return &models.ScanResult{
+		return &queries.ScanResult{
 			ID:        int64(response.JSON200.Scan.Id),
 			Severity:  int32(response.JSON200.Scan.Severity),
 			Message:   response.JSON200.Scan.Message,
@@ -88,7 +87,7 @@ func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.Cre
 	}
 }
 
-func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg queries.CreateScanBruteforceResultParams) (*models.ScanBruteforceResult, error) {
+func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg queries.CreateScanBruteforceResultParams) (*queries.ScanBruteforceResult, error) {
 	slog.InfoContext(ctx, "Creating bruteforce result", "params", arg)
 
 	response, err := q.client.PostScanIdBruteforceresultsWithResponse(ctx, arg.ScanID, generated.CreateBruteforceScanResult{
@@ -254,4 +253,24 @@ func (q *remoteQuerier) GetPostgresScanByScanID(ctx context.Context, scanID int6
 
 func (q *remoteQuerier) GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.Worker, error) {
 	return nil, nil
+}
+
+func (q *remoteQuerier) CreateBruteforcedPassword(ctx context.Context, arg queries.CreateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
+	return nil, nil
+}
+
+func (q *remoteQuerier) GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error) {
+	return 0, nil
+}
+
+func (q *remoteQuerier) GetBruteforcePasswordsPaginated(ctx context.Context, arg queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error) {
+	return nil, nil
+}
+
+func (q *remoteQuerier) GetBruteforcedPasswords(ctx context.Context, arg queries.GetBruteforcedPasswordsParams) (*queries.BruteforcedPassword, error) {
+	return nil, nil
+}
+
+func (q *remoteQuerier) GetSpecificBruteforcePasswordID(ctx context.Context, arg queries.GetSpecificBruteforcePasswordIDParams) (int64, error) {
+	return 0, nil
 }

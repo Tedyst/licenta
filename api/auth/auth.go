@@ -12,7 +12,7 @@ import (
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/tedyst/licenta/db"
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/db/queries"
 	abclientstate "github.com/volatiletech/authboss-clientstate"
 	"github.com/volatiletech/authboss/v3"
 	_ "github.com/volatiletech/authboss/v3/auth"
@@ -153,7 +153,7 @@ func (auth *authenticationProvider) Handler() http.Handler {
 	return auth.authboss.Config.Core.Router
 }
 
-func (auth *authenticationProvider) GetUser(ctx context.Context) (*models.User, error) {
+func (auth *authenticationProvider) GetUser(ctx context.Context) (*queries.User, error) {
 	r := ctx.Value(requestStorer{}).(*http.Request)
 	user, err := auth.authboss.CurrentUser(r)
 	if err != nil && !errors.Is(err, authboss.ErrUserNotFound) {
@@ -166,13 +166,13 @@ func (auth *authenticationProvider) GetUser(ctx context.Context) (*models.User, 
 	return user.(*authbossUser).user, nil
 }
 
-func (auth *authenticationProvider) UpdatePassword(ctx context.Context, user *models.User, newPassword string) error {
+func (auth *authenticationProvider) UpdatePassword(ctx context.Context, user *queries.User, newPassword string) error {
 	return auth.authboss.UpdatePassword(ctx, &authbossUser{
 		user: user,
 	}, newPassword)
 }
 
-func (auth *authenticationProvider) VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error) {
+func (auth *authenticationProvider) VerifyPassword(ctx context.Context, user *queries.User, password string) (bool, error) {
 	err := auth.authboss.VerifyPassword(&authbossUser{
 		user: user,
 	}, password)

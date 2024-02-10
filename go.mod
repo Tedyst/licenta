@@ -1,8 +1,8 @@
 module github.com/tedyst/licenta
 
-go 1.21
+go 1.22
 
-toolchain go1.21.5
+toolchain go1.22.0
 
 require (
 	github.com/deepmap/oapi-codegen/v2 v2.0.0
@@ -26,7 +26,6 @@ require (
 	github.com/justinas/nosurf v1.1.1
 	github.com/oapi-codegen/runtime v1.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/pquerna/otp v1.4.0
 	github.com/samber/slog-chi v1.6.1
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	github.com/spf13/cobra v1.8.0
@@ -49,7 +48,6 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.21.0
 	go.opentelemetry.io/otel/trace v1.21.0
 	go.uber.org/mock v0.3.0
-	golang.org/x/crypto v0.17.0
 	golang.org/x/sync v0.5.0
 	golang.org/x/text v0.14.0
 )
@@ -140,6 +138,7 @@ require (
 	github.com/pingcap/log v1.1.0 // indirect
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20231208160015-899dfe8a7417 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
+	github.com/pquerna/otp v1.4.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -164,6 +163,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect

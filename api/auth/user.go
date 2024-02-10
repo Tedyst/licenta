@@ -3,12 +3,12 @@ package auth
 import (
 	"time"
 
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/volatiletech/authboss/v3"
 )
 
 type authbossUser struct {
-	user *models.User
+	user *queries.User
 }
 
 var _ authboss.User = (*authbossUser)(nil)

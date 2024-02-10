@@ -17,8 +17,8 @@ import (
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
 	"github.com/tedyst/licenta/db"
+	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/tasks"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -38,16 +38,16 @@ type ApiConfig struct {
 
 type workerAuth interface {
 	Handler(next http.Handler) http.Handler
-	GetWorker(ctx context.Context) (*models.Worker, error)
+	GetWorker(ctx context.Context) (*queries.Worker, error)
 }
 
 type userAuth interface {
 	Middleware(next http.Handler) http.Handler
 	APIMiddleware(next http.Handler) http.Handler
 	Handler() http.Handler
-	GetUser(ctx context.Context) (*models.User, error)
-	VerifyPassword(ctx context.Context, user *models.User, password string) (bool, error)
-	UpdatePassword(ctx context.Context, user *models.User, newPassword string) error
+	GetUser(ctx context.Context) (*queries.User, error)
+	VerifyPassword(ctx context.Context, user *queries.User, password string) (bool, error)
+	UpdatePassword(ctx context.Context, user *queries.User, newPassword string) error
 }
 
 func Initialize(config ApiConfig) (http.Handler, error) {

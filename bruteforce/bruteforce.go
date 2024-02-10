@@ -29,8 +29,8 @@ func (b *bruteforceResult) Detail() string {
 var _ scanner.ScanResult = (*bruteforceResult)(nil)
 
 type BruteforceUserStatus struct {
-	Total             int
-	Tried             int
+	Total             int64
+	Tried             int64
 	FoundPassword     string
 	MaximumInternalID int64
 }
