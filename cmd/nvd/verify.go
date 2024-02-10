@@ -3,7 +3,8 @@ package nvd
 import (
 	"log/slog"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"

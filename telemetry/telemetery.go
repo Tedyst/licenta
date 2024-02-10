@@ -2,8 +2,8 @@ package telemetry
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
@@ -33,7 +33,7 @@ func initTracer(collectorEndpoint string) error {
 		)
 	}
 	if err != nil {
-		return errors.Wrap(err, "failed to create trace exporter")
+		return fmt.Errorf("failed to create trace exporter: %w", err)
 	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -70,10 +70,10 @@ func initMetric(collectorEndpoint string) error {
 
 func InitTelemetry(collectorEndpoint string) error {
 	if err := initTracer(collectorEndpoint); err != nil {
-		return errors.Wrap(err, "failed to init tracer")
+		return fmt.Errorf("failed to init tracer: %w", err)
 	}
 	if err := initMetric(collectorEndpoint); err != nil {
-		return errors.Wrap(err, "failed to init metric")
+		return fmt.Errorf("failed to init metric: %w", err)
 	}
 	return nil
 }

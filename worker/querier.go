@@ -3,12 +3,14 @@ package worker
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
+	"errors"
+
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/nvd"
@@ -44,7 +46,7 @@ func (q *remoteQuerier) UpdateScanStatus(ctx context.Context, params queries.Upd
 		Error:   params.Error.String,
 	})
 	if err != nil {
-		return errors.Wrap(err, "cannot update scan status")
+		return fmt.Errorf("cannot update scan status: %w", err)
 	}
 
 	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
@@ -97,7 +99,7 @@ func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg quer
 		Username: arg.Username,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot create scan bruteforce result")
+		return nil, fmt.Errorf("cannot create scan bruteforce result: %w", err)
 	}
 
 	switch response.StatusCode() {
@@ -128,7 +130,7 @@ func (q *remoteQuerier) UpdateScanBruteforceResult(ctx context.Context, params q
 		Tried:    int(params.Tried),
 	})
 	if err != nil {
-		return errors.Wrap(err, "cannot update scan bruteforce result")
+		return fmt.Errorf("cannot update scan bruteforce result: %w", err)
 	}
 
 	switch response.StatusCode() {

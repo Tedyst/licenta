@@ -3,13 +3,14 @@ package file
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
 
 	"log/slog"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 const maxMatchesPerLine = 100
@@ -155,7 +156,7 @@ func (fs *FileScanner) ExtractFromLine(ctx context.Context, fileName string, lin
 			results = append(results, result)
 			select {
 			case <-ctx.Done():
-				return nil, errors.Wrap(ctx.Err(), "ExtractFromLine")
+				return nil, fmt.Errorf("ExtractFromLine: context is done: %w", ctx.Err())
 			default:
 			}
 		}
@@ -193,7 +194,7 @@ func (fs *FileScanner) ExtractFromReader(ctx context.Context, fileName string, r
 
 		select {
 		case <-ctx.Done():
-			return nil, errors.Wrap(ctx.Err(), "ExtractFromReader")
+			return nil, fmt.Errorf("ExtractFromReader: context is done: %w", ctx.Err())
 		default:
 		}
 	}

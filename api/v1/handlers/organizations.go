@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -14,7 +14,7 @@ import (
 func (server *serverHandler) GetOrganizations(ctx context.Context, request generated.GetOrganizationsRequestObject) (generated.GetOrganizationsResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting user")
+		return nil, fmt.Errorf("error getting user: %w", err)
 	}
 	if user == nil {
 		return generated.GetOrganizations401JSONResponse{
@@ -25,12 +25,12 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 
 	organization, err := server.DatabaseProvider.GetOrganizationsByUser(ctx, user.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting organizations")
+		return nil, fmt.Errorf("error getting organizations: %w", err)
 	}
 
 	projects, err := server.DatabaseProvider.GetAllOrganizationProjectsForUser(ctx, user.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting organizations")
+		return nil, fmt.Errorf("error getting organizations: %w", err)
 	}
 
 	organizationProjects := map[int64][]generated.Project{}
@@ -72,7 +72,7 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 func (server *serverHandler) checkForOrganizationPermission(ctx context.Context, organizationID int64, role authorization.RBACGroup) (*queries.User, *queries.Organization, bool, bool, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return user, nil, false, false, errors.Wrap(err, "error getting user")
+		return user, nil, false, false, fmt.Errorf("error getting user: %w", err)
 	}
 	if user == nil {
 		return nil, nil, false, false, nil
@@ -80,7 +80,7 @@ func (server *serverHandler) checkForOrganizationPermission(ctx context.Context,
 
 	organization, err := server.DatabaseProvider.GetOrganization(ctx, organizationID)
 	if err != nil && err != pgx.ErrNoRows {
-		return user, nil, false, false, errors.Wrap(err, "error getting organization")
+		return user, nil, false, false, fmt.Errorf("error getting organization: %w", err)
 	}
 
 	if organization == nil {
@@ -89,12 +89,12 @@ func (server *serverHandler) checkForOrganizationPermission(ctx context.Context,
 
 	hasPerm, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, role)
 	if err != nil {
-		return user, nil, false, false, errors.Wrap(err, "error checking permissions")
+		return user, nil, false, false, fmt.Errorf("error checking permissions: %w", err)
 	}
 	if !hasPerm {
 		hasViewPerm, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, authorization.Viewer)
 		if err != nil {
-			return user, nil, false, false, errors.Wrap(err, "error checking permissions")
+			return user, nil, false, false, fmt.Errorf("error checking permissions: %w", err)
 		}
 		return user, organization, false, hasViewPerm, nil
 	}
@@ -105,7 +105,7 @@ func (server *serverHandler) checkForOrganizationPermission(ctx context.Context,
 func (server *serverHandler) GetOrganizationsId(ctx context.Context, request generated.GetOrganizationsIdRequestObject) (generated.GetOrganizationsIdResponseObject, error) {
 	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
 	if err != nil {
-		return nil, errors.Wrap(err, "error checking permissions")
+		return nil, fmt.Errorf("error checking permissions: %w", err)
 	}
 	if user == nil {
 		return generated.GetOrganizationsId401JSONResponse{
@@ -134,7 +134,7 @@ func (server *serverHandler) GetOrganizationsId(ctx context.Context, request gen
 
 	projects, err := server.DatabaseProvider.GetOrganizationProjects(ctx, organization.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting projects")
+		return nil, fmt.Errorf("error getting projects: %w", err)
 	}
 
 	response := generated.GetOrganizationsId200JSONResponse{
@@ -162,7 +162,7 @@ func (server *serverHandler) GetOrganizationsId(ctx context.Context, request gen
 func (server *serverHandler) DeleteOrganizationsId(ctx context.Context, request generated.DeleteOrganizationsIdRequestObject) (generated.DeleteOrganizationsIdResponseObject, error) {
 	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
 	if err != nil {
-		return nil, errors.Wrap(err, "error checking permissions")
+		return nil, fmt.Errorf("error checking permissions: %w", err)
 	}
 	if user == nil {
 		return generated.DeleteOrganizationsId401JSONResponse{
@@ -191,7 +191,7 @@ func (server *serverHandler) DeleteOrganizationsId(ctx context.Context, request 
 
 	err = server.DatabaseProvider.DeleteOrganization(ctx, organization.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error deleting organization")
+		return nil, fmt.Errorf("error deleting organization: %w", err)
 	}
 
 	return &generated.DeleteOrganizationsId204JSONResponse{
@@ -210,7 +210,7 @@ func (server *serverHandler) PostOrganizations(ctx context.Context, request gene
 
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting user")
+		return nil, fmt.Errorf("error getting user: %w", err)
 	}
 	if user == nil {
 		return generated.PostOrganizations401JSONResponse{
@@ -221,7 +221,7 @@ func (server *serverHandler) PostOrganizations(ctx context.Context, request gene
 
 	_, err = server.DatabaseProvider.GetOrganizationByName(ctx, request.Body.Name)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "error getting organization")
+		return nil, fmt.Errorf("error getting organization: %w", err)
 	}
 	if err == nil {
 		return &generated.PostOrganizations400JSONResponse{
@@ -232,7 +232,7 @@ func (server *serverHandler) PostOrganizations(ctx context.Context, request gene
 
 	organization, err := server.DatabaseProvider.CreateOrganization(ctx, request.Body.Name)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating organization")
+		return nil, fmt.Errorf("error creating organization: %w", err)
 	}
 
 	err = server.DatabaseProvider.AddUserToOrganization(ctx, queries.AddUserToOrganizationParams{
@@ -241,7 +241,7 @@ func (server *serverHandler) PostOrganizations(ctx context.Context, request gene
 		Role:           int32(authorization.Owner),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "error adding user to organization")
+		return nil, fmt.Errorf("error adding user to organization: %w", err)
 	}
 
 	return &generated.PostOrganizations201JSONResponse{

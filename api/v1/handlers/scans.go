@@ -3,11 +3,11 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -15,7 +15,7 @@ import (
 func (server *serverHandler) GetScanId(ctx context.Context, request generated.GetScanIdRequestObject) (generated.GetScanIdResponseObject, error) {
 	scan, err := server.DatabaseProvider.GetScan(ctx, request.Id)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "GetScanId: error getting scan")
+		return nil, fmt.Errorf("GetScanId: error getting scan: %w", err)
 	}
 	if err == pgx.ErrNoRows {
 		return generated.GetScanId404JSONResponse{
@@ -26,7 +26,7 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 
 	psScan, err := server.DatabaseProvider.GetPostgresScan(ctx, scan.PostgresScan)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting postgres scan")
+		return nil, fmt.Errorf("GetScannerPostgresScanScanid: error getting postgres scan: %w", err)
 	}
 
 	var postgresScan *generated.PostgresScan
@@ -39,7 +39,7 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 
 	scanResultsQ, err := server.DatabaseProvider.GetScanResults(ctx, scan.Scan.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting scan results")
+		return nil, fmt.Errorf("GetScannerPostgresScanScanid: error getting scan results: %w", err)
 	}
 
 	scanResults := make([]generated.ScanResult, len(scanResultsQ))
@@ -55,7 +55,7 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 
 	bruteforceScanResultsQ, err := server.DatabaseProvider.GetScanBruteforceResults(ctx, scan.Scan.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetScannerPostgresScanScanid: error getting bruteforce scan results")
+		return nil, fmt.Errorf("GetScannerPostgresScanScanid: error getting bruteforce scan results: %w", err)
 	}
 
 	bruteforceResults := make([]generated.BruteforceScanResult, len(bruteforceScanResultsQ))
@@ -95,7 +95,7 @@ func (server *serverHandler) PatchScanId(ctx context.Context, request generated.
 
 	scan, err := server.DatabaseProvider.GetScan(ctx, request.Id)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "PatchScanId: error getting scan")
+		return nil, fmt.Errorf("PatchScanId: error getting scan: %w", err)
 	}
 	if err == pgx.ErrNoRows {
 		return generated.PatchScanId404JSONResponse{

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"errors"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/db"
@@ -31,7 +32,7 @@ var importCveCmd = &cobra.Command{
 
 		database, err := db.InitDatabase(viper.GetString("database")).StartTransaction(cmd.Context())
 		if err != nil {
-			return errors.Wrap(err, "failed to start transaction")
+			return fmt.Errorf("failed to start transaction: %w", err)
 		}
 		defer func() {
 			err = errorss.Join(database.EndTransaction(cmd.Context(), err))
@@ -42,7 +43,7 @@ var importCveCmd = &cobra.Command{
 			Version:      viper.GetString("version"),
 		})
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-			return errors.Wrap(err, "failed to get cpe")
+			return fmt.Errorf("failed to get cpe: %w", err)
 		}
 		if cpe == nil {
 			return errors.New("cpe not found")
@@ -55,7 +56,7 @@ var importCveCmd = &cobra.Command{
 
 		reader, err := os.Open(viper.GetString("file"))
 		if err != nil {
-			return errors.Wrap(err, "failed to open file")
+			return fmt.Errorf("failed to open file: %w", err)
 		}
 		defer func() {
 			err = errorss.Join(err, reader.Close())
@@ -63,27 +64,27 @@ var importCveCmd = &cobra.Command{
 
 		result, err := nvd.ParseCveAPI(cmd.Context(), reader)
 		if err != nil {
-			return errors.Wrap(err, "failed to parse cve api")
+			return fmt.Errorf("failed to parse cve api: %w", err)
 		}
 
 		for _, result := range result.Vulnerabilities {
 			var cve *queries.NvdCfe
 			cve, err = database.GetCveByCveID(cmd.Context(), result.Cve.ID)
 			if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-				return errors.Wrap(err, "failed to get cve")
+				return fmt.Errorf("failed to get cve: %w", err)
 			}
 			if errors.Is(err, pgx.ErrNoRows) {
 				publishedDate, err := result.Cve.PubslihedDate()
 				if err != nil {
-					return errors.Wrap(err, "failed to parse published date")
+					return fmt.Errorf("failed to parse published date: %w", err)
 				}
 				lastModified, err := result.Cve.LastModifiedDate()
 				if err != nil {
-					return errors.Wrap(err, "failed to parse last modified date")
+					return fmt.Errorf("failed to parse last modified date: %w", err)
 				}
 				score, err := result.Cve.Score()
 				if err != nil {
-					return errors.Wrap(err, "failed to get score")
+					return fmt.Errorf("failed to get score: %w", err)
 				}
 
 				cve, err = database.CreateNvdCve(cmd.Context(), queries.CreateNvdCveParams{
@@ -94,7 +95,7 @@ var importCveCmd = &cobra.Command{
 					Score:        score,
 				})
 				if err != nil {
-					return errors.Wrap(err, "failed to create cve")
+					return fmt.Errorf("failed to create cve: %w", err)
 				}
 			}
 
@@ -103,7 +104,7 @@ var importCveCmd = &cobra.Command{
 				CpeID: cpe.ID,
 			})
 			if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-				return errors.Wrap(err, "failed to get cvecpe")
+				return fmt.Errorf("failed to get cvecpe: %w", err)
 			}
 			if errors.Is(err, pgx.ErrNoRows) {
 				_, err = database.CreateNvdCveCPE(cmd.Context(), queries.CreateNvdCveCPEParams{
@@ -111,7 +112,7 @@ var importCveCmd = &cobra.Command{
 					CpeID: cpe.ID,
 				})
 				if err != nil {
-					return errors.Wrap(err, "failed to create cvecpe")
+					return fmt.Errorf("failed to create cvecpe: %w", err)
 				}
 			}
 		}

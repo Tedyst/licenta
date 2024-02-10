@@ -19,36 +19,9 @@ const baseNvdCveUrl = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 const baseNvdCpeCpeMatchStringQuery = "cpeMatchString"
 const baseNvdCpeCpeNameQuery = "cpeName"
 
-const postgresqlCpe = "cpe:2.3:a:postgresql:postgresql"
-
 var semverRegex = regexp.MustCompile(`(0|[1-9]\d*)\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?`)
 
 var ErrRateLimit error = errors.New("request rate limit exceeded")
-
-type Product int
-
-const (
-	PRODUCT_UNKNOWN Product = iota
-	POSTGRESQL
-)
-
-func GetNvdDatabaseType(name string) Product {
-	switch name {
-	case "postgres":
-		return POSTGRESQL
-	default:
-		return PRODUCT_UNKNOWN
-	}
-}
-
-func GetNvdDatabaseName(t Product) string {
-	switch t {
-	case POSTGRESQL:
-		return "postgres"
-	default:
-		return "unknown"
-	}
-}
 
 func DownloadCpe(ctx context.Context, product Product) (io.ReadCloser, error) {
 	return DownloadCpeNext(ctx, product, 0)
@@ -64,12 +37,13 @@ func DownloadCpeNext(ctx context.Context, product Product, startIndex int64) (io
 	}
 	u.Scheme = "https"
 	q := u.Query()
-	switch product {
-	case POSTGRESQL:
-		q.Set(baseNvdCpeCpeMatchStringQuery, postgresqlCpe)
-	default:
-		return nil, errors.New("Product does not exist")
+
+	p, err := GetNvdCpeForProduct(product)
+	if err != nil {
+		return nil, err
 	}
+	q.Set(baseNvdCpeCpeMatchStringQuery, p)
+
 	q.Set("startIndex", fmt.Sprint(startIndex))
 	u.RawQuery = q.Encode()
 

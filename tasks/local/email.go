@@ -2,8 +2,8 @@ package local
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/email"
 )
@@ -23,7 +23,7 @@ func (r *emailRunner) SendResetEmail(ctx context.Context, address string, subjec
 
 	err := r.emailSender.SendMultipartEmail(ctx, address, subject, html, text)
 	if err != nil {
-		return errors.Wrap(err, "failed to send email")
+		return fmt.Errorf("failed to send email: %w", err)
 	}
 
 	return nil

@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -12,7 +12,7 @@ import (
 func (server *serverHandler) GetUsers(ctx context.Context, request generated.GetUsersRequestObject) (generated.GetUsersResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsers: error getting user")
+		return nil, fmt.Errorf("GetUsers: error getting user: %w", err)
 	}
 	if user == nil {
 		return generated.GetUsers401JSONResponse{
@@ -23,7 +23,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 
 	count, err := server.DatabaseProvider.CountUsers(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsers: error cou7nting users")
+		return nil, fmt.Errorf("GetUsers: error cou7nting users: %w", err)
 	}
 
 	var limit int32 = DefaultPaginationLimit
@@ -40,7 +40,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 		ItemsPerPage: limit,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsers: error getting users")
+		return nil, fmt.Errorf("GetUsers: error getting users: %w", err)
 	}
 
 	result := make([]generated.User, len(users))
@@ -67,7 +67,7 @@ func (server *serverHandler) GetUsers(ctx context.Context, request generated.Get
 func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.GetUsersMeRequestObject) (generated.GetUsersMeResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsersMe: error getting user")
+		return nil, fmt.Errorf("GetUsersMe: error getting user: %w", err)
 	}
 	if user == nil {
 		return generated.GetUsersMe401JSONResponse{
@@ -90,7 +90,7 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 func (server *serverHandler) GetUsersId(ctx context.Context, request generated.GetUsersIdRequestObject) (generated.GetUsersIdResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsersId: error getting user")
+		return nil, fmt.Errorf("GetUsersId: error getting user: %w", err)
 	}
 	if user == nil {
 		return generated.GetUsersId401JSONResponse{
@@ -101,7 +101,7 @@ func (server *serverHandler) GetUsersId(ctx context.Context, request generated.G
 
 	u, err := server.DatabaseProvider.GetUser(ctx, request.Id)
 	if err != nil {
-		return nil, errors.Wrap(err, "GetUsersId: error getting user")
+		return nil, fmt.Errorf("GetUsersId: error getting user: %w", err)
 	}
 
 	return generated.GetUsersId200JSONResponse{
@@ -114,12 +114,12 @@ func (server *serverHandler) GetUsersId(ctx context.Context, request generated.G
 func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, request generated.PostUsersMeChangePasswordRequestObject) (generated.PostUsersMeChangePasswordResponseObject, error) {
 	err := valid.Struct(request)
 	if err != nil {
-		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error validating request")
+		return nil, fmt.Errorf("PostUsersMeChangePassword: error validating request: %w", err)
 	}
 
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error getting user")
+		return nil, fmt.Errorf("PostUsersMeChangePassword: error getting user: %w", err)
 	}
 	if user == nil {
 		return generated.PostUsersMeChangePassword401JSONResponse{
@@ -138,7 +138,7 @@ func (server *serverHandler) PostUsersMeChangePassword(ctx context.Context, requ
 
 	err = server.userAuth.UpdatePassword(ctx, user, request.Body.NewPassword)
 	if err != nil {
-		return nil, errors.Wrap(err, "PostUsersMeChangePassword: error setting password")
+		return nil, fmt.Errorf("PostUsersMeChangePassword: error setting password: %w", err)
 	}
 
 	return generated.PostUsersMeChangePassword200JSONResponse{

@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 
+	"errors"
+
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/file"
 	"github.com/tedyst/licenta/extractors/git"

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/cookiejar"
@@ -8,7 +9,6 @@ import (
 	"os"
 
 	"github.com/deepmap/oapi-codegen/v2/pkg/securityprovider"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
@@ -28,7 +28,7 @@ func (c *csrfClient) Do(req *http.Request) (*http.Response, error) {
 func initHttpCsrfClient() (*csrfClient, error) {
 	jar, err := cookiejar.New(nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating cookie jar")
+		return nil, fmt.Errorf("error creating cookie jar: %w", err)
 	}
 	httpClient := csrfClient{
 		httpClient: &http.Client{
@@ -39,14 +39,14 @@ func initHttpCsrfClient() (*csrfClient, error) {
 
 	url, err := url.Parse(viper.GetString("api") + "/api/v1")
 	if err != nil {
-		return nil, errors.Wrap(err, "error parsing url")
+		return nil, fmt.Errorf("error parsing url: %w", err)
 	}
 	optionsRequest, err := httpClient.httpClient.Do(&http.Request{
 		Method: "OPTIONS",
 		URL:    url,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "error doing options request")
+		return nil, fmt.Errorf("error doing options request: %w", err)
 	}
 
 	httpClient.csrfToken = optionsRequest.Header.Get("X-CSRF-Token")
@@ -61,22 +61,22 @@ var ciCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		apiKeyProvider, err := securityprovider.NewSecurityProviderApiKey("header", "X-Worker-Token", viper.GetString("worker-token"))
 		if err != nil {
-			return errors.Wrap(err, "error creating security provider")
+			return fmt.Errorf("error creating security provider: %w", err)
 		}
 
 		httpClient, err := initHttpCsrfClient()
 		if err != nil {
-			return errors.Wrap(err, "error creating http client")
+			return fmt.Errorf("error creating http client: %w", err)
 		}
 
 		client, err := generated.NewClientWithResponses(viper.GetString("api")+"/api/v1", generated.WithRequestEditorFn(apiKeyProvider.Intercept), generated.WithHTTPClient(httpClient))
 		if err != nil {
-			return errors.Wrap(err, "error creating client")
+			return fmt.Errorf("error creating client: %w", err)
 		}
 
 		severity, err := ci.ProjectRunAndWaitResults(cmd.Context(), client, viper.GetInt("project"))
 		if err != nil {
-			return errors.Wrap(err, "error running project")
+			return fmt.Errorf("error running project: %w", err)
 		}
 
 		if severity > viper.GetInt("severity") {

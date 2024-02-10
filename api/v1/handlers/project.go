@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -52,7 +52,7 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 func (server *serverHandler) PostProjectIdRun(ctx context.Context, request generated.PostProjectIdRunRequestObject) (generated.PostProjectIdRunResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting user")
+		return nil, fmt.Errorf("error getting user: %w", err)
 	}
 
 	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
@@ -65,7 +65,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 
 	authorized, err := server.authorization.UserHasPermissionForProject(ctx, project, user, authorization.Admin)
 	if err != nil {
-		return nil, errors.Wrap(err, "error checking permissions")
+		return nil, fmt.Errorf("error checking permissions: %w", err)
 	}
 	if !authorized {
 		return generated.PostProjectIdRun400JSONResponse{
@@ -79,7 +79,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 		CreatedBy: sql.NullInt64{Int64: user.ID, Valid: true},
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating scan group")
+		return nil, fmt.Errorf("error creating scan group: %w", err)
 	}
 
 	var scans []*queries.Scan
@@ -87,7 +87,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 
 	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting postgres databases for project")
+		return nil, fmt.Errorf("error getting postgres databases for project: %w", err)
 	}
 	for _, db := range postgres_databases {
 		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
@@ -95,7 +95,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 			ScanGroupID: scanGroup.ID,
 		})
 		if err != nil {
-			return nil, errors.Wrap(err, "error creating postgres scan")
+			return nil, fmt.Errorf("error creating postgres scan: %w", err)
 		}
 
 		postgresScan, err := server.DatabaseProvider.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
@@ -103,7 +103,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 			DatabaseID: db.ID,
 		})
 		if err != nil {
-			return nil, errors.Wrap(err, "error creating postgres scan")
+			return nil, fmt.Errorf("error creating postgres scan: %w", err)
 		}
 
 		resultScans = append(resultScans, generated.Scan{

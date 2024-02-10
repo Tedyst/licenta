@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -16,7 +16,7 @@ const bruteforcePasswordsPerPage = 10000
 func (server *serverHandler) GetPostgresId(ctx context.Context, request generated.GetPostgresIdRequestObject) (generated.GetPostgresIdResponseObject, error) {
 	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.Id)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "error getting postgres database")
+		return nil, fmt.Errorf("error getting postgres database: %w", err)
 	}
 	if err == pgx.ErrNoRows {
 		return generated.GetPostgresId404JSONResponse{
@@ -44,7 +44,7 @@ func (server *serverHandler) GetPostgresId(ctx context.Context, request generate
 func (server *serverHandler) PatchPostgresId(ctx context.Context, request generated.PatchPostgresIdRequestObject) (generated.PatchPostgresIdResponseObject, error) {
 	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.Id)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "error getting postgres database")
+		return nil, fmt.Errorf("error getting postgres database: %w", err)
 	}
 	if err == pgx.ErrNoRows {
 		return generated.PatchPostgresId404JSONResponse{

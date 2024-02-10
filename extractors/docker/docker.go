@@ -4,18 +4,20 @@ import (
 	"archive/tar"
 	"context"
 	errorss "errors"
+	"fmt"
 	"io"
 	"strings"
 	"sync"
 
 	"log/slog"
 
+	"errors"
+
 	"github.com/djherbis/buffer"
 	"github.com/djherbis/nio/v3"
 	"github.com/google/go-containerregistry/pkg/name"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/extractors/file"
 )
 
@@ -50,7 +52,7 @@ func (scanner *DockerScan) scanFile(ctx context.Context, reader io.Reader, heade
 			Results:  results,
 		})
 		if err != nil {
-			return errors.Wrap(err, "worker: cannot callback result")
+			return fmt.Errorf("worker: cannot callback result: %w", err)
 		}
 	}
 	return nil
@@ -70,7 +72,7 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 
 	digest, err := layer.Digest()
 	if err != nil {
-		return errors.Wrap(err, "processLayer: cannot get digest for layer")
+		return fmt.Errorf("processLayer: cannot get digest for layer: %w", err)
 	}
 
 	for {
@@ -79,7 +81,7 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 			break
 		}
 		if err != nil {
-			return errors.Wrap(err, "scanTarArchive: failed to read file from archive")
+			return fmt.Errorf("scanTarArchive: failed to read file from archive: %w", err)
 		}
 
 		if !header.FileInfo().Mode().IsRegular() {
@@ -111,11 +113,11 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 		_, err = io.Copy(w, &archive)
 		if err != nil && !errors.Is(err, io.ErrClosedPipe) {
 			err2 := w.Close()
-			return errorss.Join(errors.Wrap(err, "scanTarArchive: failed to read file from archive using Copy"), err2)
+			return errorss.Join(fmt.Errorf("scanTarArchive: failed to read file from archive using Copy: %w", err), err2)
 		}
 		err = w.Close()
 		if err != nil {
-			return errors.Wrap(err, "scanTarArchive: failed to close writer")
+			return fmt.Errorf("scanTarArchive: failed to close writer: %w", err)
 		}
 
 		select {
@@ -133,9 +135,9 @@ func (scanner *DockerScan) scanTarArchive(ctx context.Context, archive tar.Reade
 
 	select {
 	case err := <-scanner.errorChannel:
-		return errors.Wrap(err, "scanTarArchive: caught error worker")
+		return fmt.Errorf("scanTarArchive: caught error worker: %w", err)
 	case <-ctx.Done():
-		return errors.Wrap(ctx.Err(), "scanTarArchive: context is done")
+		return fmt.Errorf("scanTarArchive: context is done: %w", ctx.Err())
 	case <-waitChan:
 		scanner.scannedLayers = append(scanner.scannedLayers, layer)
 		slog.InfoContext(ctx, "scanTarArchive: finished processing archive", "digest", digest)
@@ -148,7 +150,7 @@ func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) (er
 
 	reader, err := layer.Uncompressed()
 	if err != nil {
-		return errors.Wrap(err, "processLayer: cannot get layer reader")
+		return fmt.Errorf("processLayer: cannot get layer reader: %w", err)
 	}
 	defer func() {
 		err = errorss.Join(err, reader.Close())
@@ -167,14 +169,14 @@ func NewScanner(ctx context.Context, fileScanner FileScanner, imageName string, 
 
 	o, err := makeOptions(opts...)
 	if err != nil {
-		return nil, errors.Wrap(err, "NewScanner: cannot make options")
+		return nil, fmt.Errorf("NewScanner: cannot make options: %w", err)
 	}
 
 	scanner.options = o
 
 	ref, err := name.ParseReference(imageName)
 	if err != nil {
-		return nil, errors.Wrap(err, "NewScanner: cannot parse reference")
+		return nil, fmt.Errorf("NewScanner: cannot parse reference: %w", err)
 	}
 
 	scanner.reference = ref
@@ -188,21 +190,21 @@ func (scanner *DockerScan) FindLayers(ctx context.Context) ([]v1.Layer, error) {
 	result := []v1.Layer{}
 	index, err := remote.Index(scanner.reference, remote.WithAuth(scanner.options.credentials), remote.WithContext(ctx))
 	if err != nil {
-		return nil, errors.Wrap(err, "ProcessImage: cannot get index for image")
+		return nil, fmt.Errorf("ProcessImage: cannot get index for image: %w", err)
 	}
 	indexManifest, err := index.IndexManifest()
 	if err != nil {
-		return nil, errors.Wrap(err, "ProcessImage: cannot get index manifest for image")
+		return nil, fmt.Errorf("ProcessImage: cannot get index manifest for image: %w", err)
 	}
 
 	for _, manifest := range indexManifest.Manifests {
 		img, err := index.Image(manifest.Digest)
 		if err != nil {
-			return nil, errors.Wrap(err, "ProcessImage: cannot get image from digest")
+			return nil, fmt.Errorf("ProcessImage: cannot get image from digest: %w", err)
 		}
 		layers, err := img.Layers()
 		if err != nil {
-			return nil, errors.Wrap(err, "ProcessImage: cannot get layers for image")
+			return nil, fmt.Errorf("ProcessImage: cannot get layers for image: %w", err)
 		}
 		result = append(result, layers...)
 	}
@@ -250,9 +252,9 @@ func (scanner *DockerScan) ProcessLayers(ctx context.Context, layers []v1.Layer)
 
 	select {
 	case err := <-scanner.errorChannel:
-		return errors.Wrap(err, "ProcessLayers: caught error worker")
+		return fmt.Errorf("ProcessLayers: caught error worker: %w", err)
 	case <-ctx.Done():
-		return errors.Wrap(ctx.Err(), "ProcessLayers: context is done")
+		return fmt.Errorf("ProcessLayers: context is done: %w", ctx.Err())
 	case <-waitCh:
 		slog.InfoContext(ctx, "ProcessLayers: finished processing layers")
 		return nil

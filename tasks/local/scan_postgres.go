@@ -3,14 +3,13 @@ package local
 import (
 	"context"
 	"database/sql"
-	errs "errors"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -50,7 +49,7 @@ func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresSc
 
 	scan, err := runner.queries.GetScan(ctx, postgresScan.ScanID)
 	if err != nil {
-		return errors.Wrap(err, "could not get scan")
+		return fmt.Errorf("could not get scan: %w", err)
 	}
 
 	if err := runner.scanPostgresDB(ctx, postgresScan, &scan.Scan, false); err != nil {
@@ -63,7 +62,7 @@ func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresSc
 				Valid: true,
 			},
 		}); err2 != nil {
-			return errs.Join(err, errors.Wrap(err2, "could not update scan status"))
+			return errors.Join(err, fmt.Errorf("could not update scan status: %w", err2))
 		}
 		return err
 	}
@@ -72,7 +71,7 @@ func (runner *postgresScanRunner) ScanPostgresDB(ctx context.Context, postgresSc
 		ID:     scan.Scan.ID,
 		Status: models.SCAN_FINISHED,
 	}); err != nil {
-		return errors.Wrap(err, "could not update scan status")
+		return fmt.Errorf("could not update scan status: %w", err)
 	}
 
 	return nil
@@ -87,7 +86,7 @@ func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgre
 
 	db, err := runner.queries.GetPostgresDatabase(ctx, postgresScan.DatabaseID)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "could not get database")
+		return nil, nil, fmt.Errorf("could not get database: %w", err)
 	}
 
 	logger.InfoContext(ctx, "Starting Postgres DB scan")
@@ -95,14 +94,14 @@ func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgre
 
 	conn, err := pgx.Connect(ctx, getPostgresConnectString(&db.PostgresDatabase))
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "could not connect to database")
+		return nil, nil, fmt.Errorf("could not connect to database: %w", err)
 	}
 
 	logger.DebugContext(ctx, "Connected to database")
 
 	sc, err := runner.PostgresScannerProvider(ctx, conn)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "could not create scanner")
+		return nil, nil, fmt.Errorf("could not create scanner: %w", err)
 	}
 
 	logger.DebugContext(ctx, "Created scanner")
@@ -113,26 +112,29 @@ func (runner *postgresScanRunner) createBaseScanner(ctx context.Context, postgre
 func (runner *postgresScanRunner) scanPostgresDB(ctx context.Context, postgresScan *queries.PostgresScan, scan *queries.Scan, shouldOnlyScanRemote bool) error {
 	sc, scanRunner, err := runner.createBaseScanner(ctx, postgresScan, scan)
 	if err != nil {
-		return errors.Wrap(err, "could not create scanner")
+		return fmt.Errorf("could not create scanner: %w", err)
 	}
 
 	if shouldOnlyScanRemote {
-		return errors.Wrap(scanRunner.scanForPublicAccess(ctx), "could not scan for public access")
+		err := scanRunner.scanForPublicAccess(ctx)
+		if err != nil {
+			return fmt.Errorf("could not scan for public access: %w", err)
+		}
 	}
 
 	if err := scanRunner.run(ctx); err != nil {
-		return errors.Wrap(err, "could not scan")
+		return fmt.Errorf("could not scan: %w", err)
 	}
 
 	version, err := sc.GetVersion(ctx)
 	if err != nil {
-		return errors.Wrap(err, "could not get version")
+		return fmt.Errorf("could not get version: %w", err)
 	}
 	if err := runner.queries.UpdatePostgresVersion(ctx, queries.UpdatePostgresVersionParams{
 		ID:      postgresScan.DatabaseID,
 		Version: sql.NullString{String: version, Valid: true},
 	}); err != nil {
-		return errors.Wrap(err, "could not update version")
+		return fmt.Errorf("could not update version: %w", err)
 	}
 
 	return nil

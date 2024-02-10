@@ -3,13 +3,13 @@ package local
 import (
 	"context"
 	"database/sql"
-	errs "errors"
+	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
@@ -52,9 +52,9 @@ func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *queries.Sca
 				Valid: true,
 			},
 		}); err2 != nil {
-			return errs.Join(err, errors.Wrap(err2, "could not update scan status"))
+			return errors.Join(err, fmt.Errorf("could not update scan status: %w", err2))
 		}
-		return errors.Wrap(err, "could not run all scanners")
+		return fmt.Errorf("could not run all scanners: %w", err)
 	}
 
 	return nil
@@ -63,21 +63,21 @@ func (r *allScannerRunner) RunAllScanners(ctx context.Context, scan *queries.Sca
 func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
 	scanGroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
 	if err != nil {
-		return errors.Wrap(err, "cannot get scan group")
+		return fmt.Errorf("cannot get scan group: %w", err)
 	}
 	project, err := r.queries.GetProject(ctx, scanGroup.ProjectID)
 	if err != nil {
-		return errors.Wrap(err, "cannot get project")
+		return fmt.Errorf("cannot get project: %w", err)
 	}
 
 	postgresScan, err := r.queries.GetPostgresScanByScanID(ctx, scan.ID)
 	if err != nil {
-		return errors.Wrap(err, "cannot get postgres scan")
+		return fmt.Errorf("cannot get postgres scan: %w", err)
 	}
 	if err != pgx.ErrNoRows {
 		err := r.postgresScanRunner.scanPostgresDB(ctx, postgresScan, scan, project.Remote && !runningRemote)
 		if err != nil {
-			return errors.Wrap(err, "cannot run postgres scanner")
+			return fmt.Errorf("cannot run postgres scanner: %w", err)
 		}
 	}
 
@@ -86,11 +86,11 @@ func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *queries.Sca
 
 		scangroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
 		if err != nil {
-			return errors.Wrap(err, "could not get scan group")
+			return fmt.Errorf("could not get scan group: %w", err)
 		}
 		workers, err := r.queries.GetWorkersForProject(ctx, scangroup.ProjectID)
 		if err != nil {
-			return errors.Wrap(err, "could not get workers for project")
+			return fmt.Errorf("could not get workers for project: %w", err)
 		}
 
 		if len(workers) == 0 {
@@ -102,7 +102,7 @@ func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *queries.Sca
 		for _, worker := range workers {
 			err := r.messageExchange.PublishSendScanToWorkerMessage(ctx, worker, message)
 			if err != nil {
-				return errors.Wrap(err, "could not publish message")
+				return fmt.Errorf("could not publish message: %w", err)
 			}
 		}
 
@@ -114,7 +114,7 @@ func (r *allScannerRunner) runAllScanners(ctx context.Context, scan *queries.Sca
 		Status:  models.SCAN_FINISHED,
 		EndedAt: pgtype.Timestamptz{Time: time.Now(), Valid: runningRemote || !project.Remote},
 	}); err != nil {
-		return errors.Wrap(err, "could not update scan status")
+		return fmt.Errorf("could not update scan status: %w", err)
 	}
 
 	return nil

@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"context"
 	errorss "errors"
+	"fmt"
 	"log/slog"
 	"strings"
 	"sync"
 
+	"errors"
+
 	"github.com/go-git/go-git/v5/plumbing/format/diff"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/extractors/file"
 )
 
@@ -26,12 +28,12 @@ func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Co
 	}
 	if err != nil {
 		scanner.mutex.Unlock()
-		return nil, errors.Wrap(err, "inspectBinaryFile: cannot get file contents")
+		return nil, fmt.Errorf("inspectBinaryFile: cannot get file contents: %w", err)
 	}
 	rd, err := content.Blob.Reader()
 	if err != nil {
 		scanner.mutex.Unlock()
-		return nil, errors.Wrap(err, "inspectBinaryFile: cannot open reader")
+		return nil, fmt.Errorf("inspectBinaryFile: cannot open reader: %w", err)
 	}
 	defer func() {
 		err = errorss.Join(err, rd.Close())
@@ -40,7 +42,7 @@ func (scanner *GitScan) inspectBinaryFile(ctx context.Context, commit *object.Co
 
 	results, err = scanner.fileScanner.ExtractFromReader(ctx, to.Path(), rd)
 	if err != nil {
-		return nil, errors.Wrap(err, "inspectBinaryFile: cannot extract from reader")
+		return nil, fmt.Errorf("inspectBinaryFile: cannot extract from reader: %w", err)
 	}
 	return results, nil
 }
@@ -61,7 +63,7 @@ func (scanner *GitScan) inspectTextFile(ctx context.Context, filePatch diff.File
 				_, toFile := filePatch.Files()
 				fileResults, err := scanner.fileScanner.ExtractFromLine(ctx, toFile.Path(), lineNumber, line, strings.Join(previousLines, "\n"))
 				if err != nil {
-					return nil, errors.Wrap(err, "inspectTextFile: cannot extract from line")
+					return nil, fmt.Errorf("inspectTextFile: cannot extract from line: %w", err)
 				}
 				results = append(results, fileResults...)
 			}
@@ -149,9 +151,9 @@ func (scanner *GitScan) inspectCommit(ctx context.Context, commit *object.Commit
 
 	select {
 	case err := <-errorChannel:
-		return errors.Wrap(err, "inspectCommit: caught error from worker")
+		return fmt.Errorf("inspectCommit: caught error from worker: %w", err)
 	case <-ctx.Done():
-		return errors.Wrap(ctx.Err(), "inspectCommit: context is done")
+		return fmt.Errorf("inspectCommit: context is done: %w", ctx.Err())
 	case <-waitChannel:
 		return nil
 	}
@@ -234,7 +236,7 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 	})
 	if err != nil {
 		scanner.mutex.Unlock()
-		return errors.Wrap(err, "sad")
+		return fmt.Errorf("sad: %w", err)
 	}
 
 	for _, obj := range batch {
@@ -261,9 +263,9 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 
 	select {
 	case err := <-errorChannel:
-		return errors.Wrap(err, "Scan: caught error from worker")
+		return fmt.Errorf("Scan: caught error from worker: %w", err)
 	case <-ctx.Done():
-		return errors.Wrap(ctx.Err(), "Scan: context is done")
+		return fmt.Errorf("Scan: context is done: %w", ctx.Err())
 	case <-waitChannel:
 		return nil
 	}

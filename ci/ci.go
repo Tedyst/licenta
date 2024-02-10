@@ -7,7 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
@@ -19,7 +20,7 @@ func waitForScan(ctx context.Context, client generated.ClientWithResponsesInterf
 	for {
 		response, err := client.GetScanIdWithResponse(ctx, int64(scan.Id))
 		if err != nil {
-			return 0, errors.Wrap(err, "cannot get scan")
+			return 0, fmt.Errorf("cannot get scan: %w", err)
 		}
 
 		slog.DebugContext(ctx, "Received scan status from server", "status_code", response.StatusCode(), "scan", scan.Id)

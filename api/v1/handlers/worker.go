@@ -3,10 +3,10 @@ package handlers
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -14,7 +14,7 @@ import (
 func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request generated.GetWorkerGetTaskRequestObject) (generated.GetWorkerGetTaskResponseObject, error) {
 	w, err := server.workerauth.GetWorker(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot get worker")
+		return nil, fmt.Errorf("cannot get worker: %w", err)
 	}
 	if w == nil {
 		return generated.GetWorkerGetTask401JSONResponse{
@@ -28,7 +28,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 
 	message, ok, err := server.MessageExchange.ReceiveSendScanToWorkerMessage(ctx, w)
 	if err != nil && err != context.DeadlineExceeded {
-		return nil, errors.Wrap(err, "cannot receive message")
+		return nil, fmt.Errorf("cannot receive message: %w", err)
 	}
 
 	if !ok {
@@ -43,7 +43,7 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		WorkerID: sql.NullInt64{Int64: int64(w.ID), Valid: true},
 	})
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "cannot bind scan to worker")
+		return nil, fmt.Errorf("cannot bind scan to worker: %w", err)
 	}
 
 	if boundScan == nil {
@@ -55,12 +55,12 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 
 	scan, err := server.DatabaseProvider.GetScan(ctx, int64(message.ScanID))
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "cannot get scan")
+		return nil, fmt.Errorf("cannot get scan: %w", err)
 	}
 
 	postgresScan, err := server.DatabaseProvider.GetPostgresScanByScanID(ctx, message.ScanID)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, errors.Wrap(err, "cannot get postgres scan")
+		return nil, fmt.Errorf("cannot get postgres scan: %w", err)
 	}
 
 	var postgresScanResponse *generated.PostgresScan = nil

@@ -4,13 +4,15 @@ import (
 	"context"
 	"database/sql"
 	errorss "errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"time"
 
+	"errors"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/nvd"
 )
@@ -105,22 +107,22 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 		var cve *queries.NvdCfe
 		cve, err := database.GetCveByCveID(ctx, result.Cve.ID)
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-			return errors.Wrap(err, "failed to get cve")
+			return fmt.Errorf("failed to get cve: %w", err)
 		}
 		if errors.Is(err, pgx.ErrNoRows) {
 			slog.DebugContext(ctx, "Creating CVE", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe), slog.String("cve", result.Cve.ID))
 
 			publishedDate, err := result.Cve.PubslihedDate()
 			if err != nil {
-				return errors.Wrap(err, "failed to parse published date")
+				return fmt.Errorf("failed to parse published date: %w", err)
 			}
 			lastModified, err := result.Cve.LastModifiedDate()
 			if err != nil {
-				return errors.Wrap(err, "failed to parse last modified date")
+				return fmt.Errorf("failed to parse last modified date: %w", err)
 			}
 			score, err := result.Cve.Score()
 			if err != nil {
-				return errors.Wrap(err, "failed to get score")
+				return fmt.Errorf("failed to get score: %w", err)
 			}
 
 			cve, err = database.CreateNvdCve(ctx, queries.CreateNvdCveParams{
@@ -131,7 +133,7 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 				Score:        score,
 			})
 			if err != nil {
-				return errors.Wrap(err, "failed to create cve")
+				return fmt.Errorf("failed to create cve: %w", err)
 			}
 		}
 
@@ -140,7 +142,7 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 			CpeID: cpe.ID,
 		})
 		if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-			return errors.Wrap(err, "failed to get cvecpe")
+			return fmt.Errorf("failed to get cvecpe: %w", err)
 		}
 		if errors.Is(err, pgx.ErrNoRows) {
 			_, err = database.CreateNvdCveCPE(ctx, queries.CreateNvdCveCPEParams{
@@ -148,7 +150,7 @@ func (r *nvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 				CpeID: cpe.ID,
 			})
 			if err != nil {
-				return errors.Wrap(err, "failed to create cvecpe")
+				return fmt.Errorf("failed to create cvecpe: %w", err)
 			}
 		}
 	}

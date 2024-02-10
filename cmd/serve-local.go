@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
@@ -31,7 +30,7 @@ var serveLocalCmd = &cobra.Command{
 
 		hashKey, err := hex.DecodeString(viper.GetString("hash-key"))
 		if err != nil {
-			return errors.Wrap(err, "hash key must be a hex string")
+			return fmt.Errorf("hash key must be a hex string: %w", err)
 		}
 		if len(hashKey) != 32 {
 			return fmt.Errorf("hash key must be 32 bytes long (64 hex characters)")
@@ -39,7 +38,7 @@ var serveLocalCmd = &cobra.Command{
 
 		encryptKey, err := hex.DecodeString(viper.GetString("encrypt-key"))
 		if err != nil {
-			return errors.Wrap(err, "encrypt key must be a hex string")
+			return fmt.Errorf("encrypt key must be a hex string: %w", err)
 		}
 		if len(encryptKey) != 32 {
 			return fmt.Errorf("encrypt key must be 32 bytes long (64 hex characters)")
@@ -64,7 +63,7 @@ var serveLocalCmd = &cobra.Command{
 
 		userAuth, err := auth.NewAuthenticationProvider(viper.GetString("baseurl"), db, hashKey, encryptKey, taskRunner)
 		if err != nil {
-			return errors.Wrap(err, "failed to initialize user authentication")
+			return fmt.Errorf("failed to initialize user authentication: %w", err)
 		}
 
 		waCacheProvider, err := cache.NewLocalCacheProvider[queries.Worker]()

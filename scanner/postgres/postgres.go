@@ -2,12 +2,12 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/scanner"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pkg/errors"
 )
 
 type postgresScanner struct {
@@ -38,27 +38,27 @@ func (sc *postgresScanner) Ping(ctx context.Context) error {
 func (sc *postgresScanner) CheckPermissions(ctx context.Context) error {
 	row, err := sc.db.Query(ctx, "SELECT * FROM information_schema.role_table_grants;")
 	if err != nil {
-		return errors.Wrap(err, "could not see table information_schema.role_table_grants")
+		return fmt.Errorf("could not see table information_schema.role_table_grants: %w", err)
 	}
 	row.Close()
 	row, err = sc.db.Query(ctx, "SELECT * FROM pg_catalog.pg_roles;")
 	if err != nil {
-		return errors.Wrap(err, "could not see table pg_catalog.pg_roles")
+		return fmt.Errorf("could not see table pg_catalog.pg_roles: %w", err)
 	}
 	row.Close()
 	row, err = sc.db.Query(ctx, "SELECT * FROM pg_catalog.pg_user;")
 	if err != nil {
-		return errors.Wrap(err, "could not see table pg_catalog.pg_user")
+		return fmt.Errorf("could not see table pg_catalog.pg_user: %w", err)
 	}
 	row.Close()
 	row, err = sc.db.Query(ctx, "SELECT * FROM pg_settings;")
 	if err != nil {
-		return errors.Wrap(err, "could not see table pg_settings")
+		return fmt.Errorf("could not see table pg_settings: %w", err)
 	}
 	row.Close()
 	row, err = sc.db.Query(ctx, "SELECT * FROM pg_file_settings;")
 	if err != nil {
-		return errors.Wrap(err, "could not see table pg_file_settings")
+		return fmt.Errorf("could not see table pg_file_settings: %w", err)
 	}
 	row.Close()
 

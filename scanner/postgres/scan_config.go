@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/scanner"
 )
 
@@ -150,7 +149,7 @@ func (sc *postgresScanner) ScanConfig(ctx context.Context) ([]scanner.ScanResult
 
 	rows, err := sc.db.Query(ctx, "SELECT name, setting FROM pg_settings;")
 	if err != nil {
-		return nil, errors.Wrap(err, "could not see table pg_settings")
+		return nil, fmt.Errorf("could not see table pg_settings: %w", err)
 	}
 	defer rows.Close()
 
@@ -160,7 +159,7 @@ func (sc *postgresScanner) ScanConfig(ctx context.Context) ([]scanner.ScanResult
 
 		err := rows.Scan(&name, &setting)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not scan row")
+			return nil, fmt.Errorf("could not scan row: %w", err)
 		}
 
 		if line, ok := scanConfigLines[name]; ok {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/pkg/errors"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -58,7 +57,7 @@ func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider brutef
 				Message:    result.Detail(),
 				ScanSource: int32(sc.GetScannerID()),
 			}); err != nil {
-				return errors.Wrap(err, "could not insert scan result")
+				return fmt.Errorf("could not insert scan result: %w", err)
 			}
 		}
 		return nil
@@ -69,7 +68,7 @@ func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider brutef
 			if _, ok := runner.bruteforceResults[user]; !ok {
 				username, err := user.GetUsername()
 				if err != nil {
-					return errors.Wrap(err, "could not get username")
+					return fmt.Errorf("could not get username: %w", err)
 				}
 				bfuser, err := runner.queries.CreateScanBruteforceResult(ctx, queries.CreateScanBruteforceResultParams{
 					ScanID:   runner.scan.ID,
@@ -80,7 +79,7 @@ func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider brutef
 					Total:    int32(entry.Total),
 				})
 				if err != nil {
-					return errors.Wrap(err, "could not insert bruteforce result")
+					return fmt.Errorf("could not insert bruteforce result: %w", err)
 				}
 				runner.bruteforceResults[user] = bfuser.ID
 			} else {
@@ -90,7 +89,7 @@ func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider brutef
 					Tried:    int32(entry.Tried),
 					Total:    int32(entry.Total),
 				}); err != nil {
-					return errors.Wrap(err, "could not update bruteforce result")
+					return fmt.Errorf("could not update bruteforce result: %w", err)
 				}
 			}
 		}
@@ -112,7 +111,7 @@ func (runner *baseScanRunner) run(ctx context.Context) error {
 				Message:    result.Detail(),
 				ScanSource: int32(runner.scanner.GetScannerID()),
 			}); err != nil {
-				return errors.Wrap(err, "could not insert scan result")
+				return fmt.Errorf("could not insert scan result: %w", err)
 			}
 		}
 		return nil
@@ -134,41 +133,41 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 		ID:     runner.scan.ID,
 		Status: models.SCAN_RUNNING,
 	}); err != nil {
-		return errors.Wrap(err, "could not update scan status")
+		return fmt.Errorf("could not update scan status: %w", err)
 	}
 
 	if err := runner.scanner.Ping(ctx); err != nil && err != scanner.ErrPingNotSupported {
-		return errors.Wrap(err, "could not ping database")
+		return fmt.Errorf("could not ping database: %w", err)
 	}
 
 	runner.logger.DebugContext(ctx, "Pinged database")
 
 	if err := runner.scanner.CheckPermissions(ctx); err != nil && err != scanner.ErrCheckPermissionsNotSupported {
-		return errors.Wrap(err, "could not check permissions")
+		return fmt.Errorf("could not check permissions: %w", err)
 	}
 
 	runner.logger.DebugContext(ctx, "Checked permissions")
 
 	results, err := runner.scanner.ScanConfig(ctx)
 	if err != nil && err != scanner.ErrScanConfigNotSupported {
-		return errors.Wrap(err, "could not scan config")
+		return fmt.Errorf("could not scan config: %w", err)
 	}
 	if err := runner.insertResults(results); err != nil {
-		return errors.Wrap(err, "could not insert scan results")
+		return fmt.Errorf("could not insert scan results: %w", err)
 	}
 
 	runner.logger.DebugContext(ctx, "Scanned config")
 
 	_, err = runner.scanner.GetUsers(ctx)
 	if err != nil && err != scanner.ErrGetUsersNotSupported {
-		return errors.Wrap(err, "could not get users")
+		return fmt.Errorf("could not get users: %w", err)
 	}
 
 	runner.logger.DebugContext(ctx, "Got users")
 
 	version, err := runner.scanner.GetVersion(ctx)
 	if err != nil && err != scanner.ErrVersionNotSupported {
-		return errors.Wrap(err, "could not get version")
+		return fmt.Errorf("could not get version: %w", err)
 	}
 
 	if err != scanner.ErrVersionNotSupported && runner.scanner.GetNvdProductType() != nvd.PRODUCT_UNKNOWN {
@@ -179,7 +178,7 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 			Version:      version,
 		})
 		if err != nil {
-			return errors.Wrap(err, "could not get cves")
+			return fmt.Errorf("could not get cves: %w", err)
 		}
 
 		for _, cve := range cves {
@@ -189,7 +188,7 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 				Message:    fmt.Sprintf("Vulnerability %s found. Please update to the latest version", cve.NvdCfe.CveID),
 				ScanSource: int32(runner.scanner.GetScannerID()),
 			}); err != nil {
-				return errors.Wrap(err, "could not insert scan result")
+				return fmt.Errorf("could not insert scan result: %w", err)
 			}
 		}
 
@@ -197,7 +196,7 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 	}
 
 	if err := runner.bruteforce(ctx); err != nil {
-		return errors.Wrap(err, "could not bruteforce")
+		return fmt.Errorf("could not bruteforce: %w", err)
 	}
 
 	return nil
@@ -208,19 +207,19 @@ func (r *baseScanRunner) bruteforce(ctx context.Context) error {
 
 	scangroup, err := r.queries.GetScanGroup(ctx, r.scan.ScanGroupID)
 	if err != nil {
-		return errors.Wrap(err, "could not get scan group")
+		return fmt.Errorf("could not get scan group: %w", err)
 	}
 	bruteforcer, err := r.bruteforceProvider.NewBruteforcer(ctx, r.scanner, r.notifyBruteforceStatus, scangroup.ProjectID)
 	if err != nil {
-		return errors.Wrap(err, "could not create bruteforcer")
+		return fmt.Errorf("could not create bruteforcer: %w", err)
 	}
 
 	bruteforceResult, err := bruteforcer.BruteforcePasswordAllUsers(ctx)
 	if err != nil {
-		return errors.Wrap(err, "could not bruteforce passwords")
+		return fmt.Errorf("could not bruteforce passwords: %w", err)
 	}
 	if err := r.insertResults(bruteforceResult); err != nil {
-		return errors.Wrap(err, "could not insert bruteforce results")
+		return fmt.Errorf("could not insert bruteforce results: %w", err)
 	}
 
 	r.logger.DebugContext(ctx, "Bruteforced passwords for all users")
@@ -237,7 +236,7 @@ func (runner *baseScanRunner) scanForPublicAccess(ctx context.Context) error {
 		ID:     runner.scan.ID,
 		Status: models.SCAN_CHECKING_PUBLIC_ACCESS,
 	}); err != nil {
-		return errors.Wrap(err, "could not update scan status")
+		return fmt.Errorf("could not update scan status: %w", err)
 	}
 
 	if err := runner.scanner.Ping(ctx); err != nil && err != scanner.ErrPingNotSupported {
@@ -252,7 +251,7 @@ func (runner *baseScanRunner) scanForPublicAccess(ctx context.Context) error {
 		Message:    "Database is accessible from public internet",
 		ScanSource: int32(runner.scanner.GetScannerID()),
 	}); err != nil {
-		return errors.Wrap(err, "could not insert scan result")
+		return fmt.Errorf("could not insert scan result: %w", err)
 	}
 
 	return nil

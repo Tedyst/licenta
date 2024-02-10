@@ -3,11 +3,13 @@ package worker
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
@@ -24,7 +26,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 		task, err := client.GetWorkerGetTaskWithResponse(newCtx)
 		if err != nil && err != context.DeadlineExceeded {
 			cancel()
-			return errors.Wrap(err, "error getting task")
+			return fmt.Errorf("error getting task: %w", err)
 		}
 
 		cancel()
@@ -69,7 +71,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 
 			err := runner.RunAllScanners(ctx, &scan, true)
 			if err != nil {
-				return errors.Wrap(err, "error running task")
+				return fmt.Errorf("error running task: %w", err)
 			}
 		case http.StatusAccepted:
 			slog.Debug("No task available yet, retrying in 5 seconds...")

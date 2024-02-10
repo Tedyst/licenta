@@ -6,12 +6,14 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"log/slog"
 	"strconv"
 	"strings"
 	"unicode"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tedyst/licenta/scanner"
 	"github.com/xdg-go/scram"
 )
@@ -51,7 +53,7 @@ func (u *postgresUser) verifyPasswordSCRAMSHA256(password string) (bool, error) 
 	}
 	iterations, err := strconv.Atoi(iterAndSalt[0])
 	if err != nil {
-		return false, errors.Wrap(err, "could not convert iterations to int")
+		return false, fmt.Errorf("could not convert iterations to int: %w", err)
 	}
 	salt := iterAndSalt[1]
 
@@ -61,20 +63,20 @@ func (u *postgresUser) verifyPasswordSCRAMSHA256(password string) (bool, error) 
 	}
 	storedKey, err := base64.StdEncoding.DecodeString(serverAndStored[0])
 	if err != nil {
-		return false, errors.Wrap(err, "could not decode server key")
+		return false, fmt.Errorf("could not decode server key: %w", err)
 	}
 	serverKey, err := base64.StdEncoding.DecodeString(serverAndStored[1])
 	if err != nil {
-		return false, errors.Wrap(err, "could not decode stored key")
+		return false, fmt.Errorf("could not decode stored key: %w", err)
 	}
 
 	client, err := scram.SHA256.NewClient(u.name, password, "")
 	if err != nil {
-		return false, errors.Wrap(err, "could not create client")
+		return false, fmt.Errorf("could not create client: %w", err)
 	}
 	decodedSalt, err := base64.StdEncoding.DecodeString(salt)
 	if err != nil {
-		return false, errors.Wrap(err, "could not decode salt")
+		return false, fmt.Errorf("could not decode salt: %w", err)
 	}
 	key := client.GetStoredCredentials(scram.KeyFactors{
 		Salt:  string(decodedSalt),
@@ -134,7 +136,7 @@ func (u *postgresUser) GetHashedPassword() (string, error) {
 func (sc *postgresScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {
 	rows, err := sc.db.Query(ctx, "SELECT rolsuper, rolname, rolpassword FROM pg_catalog.pg_authid WHERE rolcanlogin=true;")
 	if err != nil {
-		return nil, errors.Wrap(err, "could not see table pg_catalog.pg_authid")
+		return nil, fmt.Errorf("could not see table pg_catalog.pg_authid: %w", err)
 	}
 	defer rows.Close()
 
@@ -143,7 +145,7 @@ func (sc *postgresScanner) GetUsers(ctx context.Context) ([]scanner.User, error)
 		var user postgresUser
 		err = rows.Scan(&user.super, &user.name, &user.password)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not scan row")
+			return nil, fmt.Errorf("could not scan row: %w", err)
 		}
 		users = append(users, &user)
 	}

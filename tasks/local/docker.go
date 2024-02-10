@@ -3,10 +3,11 @@ package local
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log/slog"
 	"sync"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/google/go-containerregistry/pkg/authn"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
@@ -59,14 +60,14 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 			Finished:      finished,
 		})
 		if err != nil {
-			return errors.Wrap(err, "ScanDockerRepository: cannot update layer scan")
+			return fmt.Errorf("ScanDockerRepository: cannot update layer scan: %w", err)
 		}
 		scannedLayer, err := r.queries.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
 			ProjectID: image.ProjectID,
 			LayerHash: result.Layer,
 		})
 		if err != nil {
-			return errors.Wrap(err, "ScanDockerRepository: cannot create scanned layer")
+			return fmt.Errorf("ScanDockerRepository: cannot create scanned layer: %w", err)
 		}
 
 		layerResults := []queries.CreateDockerLayerResultsForProjectParams{}
@@ -87,7 +88,7 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 
 		count, err := r.queries.CreateDockerLayerResultsForProject(ctx, layerResults)
 		if err != nil {
-			return errors.Wrap(err, "ScanDockerRepository: cannot create layer results")
+			return fmt.Errorf("ScanDockerRepository: cannot create layer results: %w", err)
 		}
 
 		slog.DebugContext(ctx, "ScanDockerRepository: created layer results", "count", count)
@@ -138,7 +139,7 @@ func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 
 	fs, err := r.FileScannerProvider(fileOptions...)
 	if err != nil {
-		return errors.Wrap(err, "ScanDockerRepository: cannot create file scanner")
+		return fmt.Errorf("ScanDockerRepository: cannot create file scanner: %w", err)
 	}
 
 	scannedLayers, err := r.queries.GetDockerScannedLayersForProject(ctx, image.ProjectID)

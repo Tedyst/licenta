@@ -9,7 +9,6 @@ require (
 	github.com/djherbis/buffer v1.2.0
 	github.com/djherbis/nio/v3 v3.0.1
 	github.com/exaring/otelpgx v0.5.2
-	github.com/friendsofgo/errors v0.9.2
 	github.com/getkin/kin-openapi v0.118.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/httprate v0.8.0
@@ -25,7 +24,6 @@ require (
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/justinas/nosurf v1.1.1
 	github.com/oapi-codegen/runtime v1.1.0
-	github.com/pkg/errors v0.9.1
 	github.com/samber/slog-chi v1.6.1
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	github.com/spf13/cobra v1.8.0
@@ -81,6 +79,7 @@ require (
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
+	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.5.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
@@ -138,6 +137,7 @@ require (
 	github.com/pingcap/log v1.1.0 // indirect
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20231208160015-899dfe8a7417 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pquerna/otp v1.4.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect

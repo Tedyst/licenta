@@ -2,12 +2,12 @@ package auth
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
 
-	"github.com/friendsofgo/errors"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
 	"github.com/volatiletech/authboss/v3"
@@ -128,16 +128,16 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 		b, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to read http body")
+			return nil, fmt.Errorf("failed to read http body: %w", err)
 		}
 
 		if err = json.Unmarshal(b, &values); err != nil {
-			return nil, errors.Wrap(err, "failed to parse json http body")
+			return nil, fmt.Errorf("failed to parse json http body: %w", err)
 		}
 
 		creds, err := values.Parse()
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse credential creation response")
+			return nil, fmt.Errorf("failed to parse credential creation response: %w", err)
 		}
 
 		return WebauthnValues{
@@ -149,16 +149,16 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 		b, err := io.ReadAll(r.Body)
 		r.Body.Close()
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to read http body")
+			return nil, fmt.Errorf("failed to read http body: %w", err)
 		}
 
 		if err = json.Unmarshal(b, &values); err != nil {
-			return nil, errors.Wrap(err, "failed to parse json http body")
+			return nil, fmt.Errorf("failed to parse json http body: %w", err)
 		}
 
 		creds, err := values.Parse()
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse credential creation response")
+			return nil, fmt.Errorf("failed to parse credential creation response: %w", err)
 		}
 
 		return WebauthnValues{
@@ -171,11 +171,11 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 	b, err := io.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read http body")
+		return nil, fmt.Errorf("failed to read http body: %w", err)
 	}
 
 	if err = json.Unmarshal(b, &values); err != nil {
-		return nil, errors.Wrap(err, "failed to parse json http body")
+		return nil, fmt.Errorf("failed to parse json http body: %w", err)
 	}
 
 	rules := h.Rulesets[page]
@@ -253,7 +253,7 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 			PID:               values[FormValueUsername],
 		}, nil
 	default:
-		return nil, errors.Errorf("failed to parse unknown page's form: %s", page)
+		return nil, fmt.Errorf("failed to parse unknown page's form: %s", page)
 	}
 }
 

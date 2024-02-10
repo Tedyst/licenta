@@ -2,11 +2,12 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"os"
 	"strings"
+
+	"errors"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
