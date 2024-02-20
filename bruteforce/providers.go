@@ -16,6 +16,7 @@ type DatabasePasswordProviderInterface interface {
 	CreateBruteforcedPassword(ctx context.Context, arg queries.CreateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error)
 	GetBruteforcedPasswords(ctx context.Context, arg queries.GetBruteforcedPasswordsParams) (*queries.BruteforcedPassword, error)
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
+	UpdateBruteforcedPassword(ctx context.Context, arg queries.UpdateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error)
 }
 
 type PasswordProvider interface {
@@ -111,13 +112,31 @@ func (d *databasePasswordProvider) Close() {
 }
 
 func (d *databasePasswordProvider) SavePasswordHash(username, hash, password string, maxInternalID int64) error {
-	_, err := d.database.CreateBruteforcedPassword(d.context, queries.CreateBruteforcedPasswordParams{
+	oldPW, err := d.database.GetBruteforcedPasswords(d.context, queries.GetBruteforcedPasswordsParams{
+		Username: username,
+		Hash:     hash,
+	})
+	if err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+	if oldPW != nil {
+		d.database.UpdateBruteforcedPassword(d.context, queries.UpdateBruteforcedPasswordParams{
+			ID: oldPW.ID,
+			LastBruteforceID: sql.NullInt64{
+				Int64: maxInternalID,
+				Valid: maxInternalID != 0,
+			},
+			Password: sql.NullString{String: password, Valid: password != ""},
+		})
+		return nil
+	}
+	_, err = d.database.CreateBruteforcedPassword(d.context, queries.CreateBruteforcedPasswordParams{
 		Username: username,
 		Hash:     hash,
 		Password: sql.NullString{String: password, Valid: password != ""},
 		LastBruteforceID: sql.NullInt64{
 			Int64: maxInternalID,
-			Valid: true,
+			Valid: maxInternalID != 0,
 		},
 		ProjectID: sql.NullInt64{Valid: false},
 	})

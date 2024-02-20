@@ -14,7 +14,7 @@ import (
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/nvd"
-	"github.com/tedyst/licenta/tasks/local"
+	"github.com/tedyst/licenta/saver"
 )
 
 type remoteQuerier struct {
@@ -24,7 +24,11 @@ type remoteQuerier struct {
 	postgresScan *queries.PostgresScan
 }
 
-var _ local.AllScannerQuerier = (*remoteQuerier)(nil)
+func (*remoteQuerier) UpdateBruteforcedPassword(ctx context.Context, arg queries.UpdateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
+	panic("unimplemented")
+}
+
+var _ saver.BaseQuerier = (*remoteQuerier)(nil)
 
 func (q *remoteQuerier) GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error) {
 	return &queries.GetScanRow{

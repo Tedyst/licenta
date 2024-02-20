@@ -35,14 +35,7 @@ type VulnerabilityTasksRunner interface {
 }
 
 type ScannerTaskRunner interface {
-	AllScanTaskRunner
-	PostgresTaskRunner
-}
-
-type PostgresTaskRunner interface {
-	ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error
-}
-
-type AllScanTaskRunner interface {
-	RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error
+	RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error
+	RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error
+	ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error
 }

@@ -3,7 +3,6 @@ package local
 import (
 	"context"
 	"database/sql"
-	errorss "errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -171,7 +170,7 @@ func (r *nvdRunner) updateCVEsForSpecificCPE(ctx context.Context, database nvdQu
 			return err
 		}
 		defer func() {
-			err = errorss.Join(err, reader.Close())
+			err = errors.Join(err, reader.Close())
 		}()
 
 		if errors.Is(err, nvd.ErrRateLimit) {
@@ -216,7 +215,7 @@ func (r *nvdRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context, prod
 			return err
 		}
 		defer func() {
-			err = errorss.Join(err, reader.Close())
+			err = errors.Join(err, reader.Close())
 		}()
 
 		if errors.Is(err, nvd.ErrRateLimit) {

@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${file}"
+        },
+        {
             "name": "Launch Package",
             "type": "go",
             "request": "launch",
@@ -78,6 +85,19 @@
                 "1",
                 "--worker-token",
                 "asdasd",
+                "-d"
+            ]
+        },
+        {
+            "name": "Run Scan Postgres ID 1",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "args": [
+                "tasks",
+                "scanpostgres",
+                "1",
                 "-d"
             ]
         }

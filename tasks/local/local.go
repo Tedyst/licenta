@@ -9,8 +9,7 @@ import (
 )
 
 type localRunner struct {
-	postgresScanRunner
-	allScannerRunner
+	saverRunner
 	nvdRunner
 	gitRunner
 	emailRunner
@@ -21,13 +20,12 @@ type localRunner struct {
 
 func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *localRunner {
 	return &localRunner{
-		postgresScanRunner: *NewPostgresScanRunner(queries, bruteforceProvider),
-		nvdRunner:          *NewNVDRunner(queries),
-		gitRunner:          *NewGitRunner(queries),
-		emailRunner:        *NewEmailRunner(emailSender),
-		dockerRunner:       *NewDockerRunner(queries),
-		queries:            queries,
-		allScannerRunner:   *NewAllScannerRunner(queries, exchange, bruteforceProvider),
+		nvdRunner:    *NewNVDRunner(queries),
+		gitRunner:    *NewGitRunner(queries),
+		emailRunner:  *NewEmailRunner(emailSender),
+		dockerRunner: *NewDockerRunner(queries),
+		queries:      queries,
+		saverRunner:  *NewSaverRunner(queries, exchange, bruteforceProvider),
 	}
 }
 

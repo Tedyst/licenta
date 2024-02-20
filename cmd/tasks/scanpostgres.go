@@ -39,6 +39,9 @@ var taskScanPostgresCmd = &cobra.Command{
 		scanGroup, err := database.CreateScanGroup(cmd.Context(), queries.CreateScanGroupParams{
 			ProjectID: db.PostgresDatabase.ProjectID,
 		})
+		if err != nil {
+			return err
+		}
 
 		scan, err := database.CreateScan(cmd.Context(), queries.CreateScanParams{
 			Status:      models.SCAN_NOT_STARTED,
@@ -48,7 +51,7 @@ var taskScanPostgresCmd = &cobra.Command{
 			return err
 		}
 
-		postgresScan, err := database.CreatePostgresScan(cmd.Context(), queries.CreatePostgresScanParams{
+		_, err = database.CreatePostgresScan(cmd.Context(), queries.CreatePostgresScanParams{
 			ScanID:     scan.ID,
 			DatabaseID: dbid,
 		})
@@ -56,7 +59,7 @@ var taskScanPostgresCmd = &cobra.Command{
 			return err
 		}
 
-		return taskRunner.ScanPostgresDB(cmd.Context(), postgresScan)
+		return taskRunner.RunSaverRemote(cmd.Context(), scan, "postgres")
 	},
 }
 

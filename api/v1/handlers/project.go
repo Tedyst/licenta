@@ -126,7 +126,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 		scan := scan
 		go func() {
 			ctx := context.WithoutCancel(ctx)
-			err := server.TaskRunner.RunAllScanners(ctx, scan, false)
+			err := server.TaskRunner.ScheduleSaverRun(ctx, scan, "all")
 			if err != nil {
 				slog.Error("Error scheduling postgres scan", "error", err)
 			}

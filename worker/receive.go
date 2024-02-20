@@ -67,9 +67,9 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			}
 			passProvider := bruteforce.NewDatabaseBruteforceProvider(database)
 
-			runner := local.NewAllScannerRunner(database, localExchange, passProvider)
+			runner := local.NewSaverRunner(database, localExchange, passProvider)
 
-			err := runner.RunAllScanners(ctx, &scan, true)
+			err := runner.RunSaverRemote(ctx, &scan, "all")
 			if err != nil {
 				return fmt.Errorf("error running task: %w", err)
 			}

@@ -3,6 +3,7 @@ package bruteforce
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -101,11 +102,11 @@ func (br *bruteforcer) initialize(ctx context.Context) error {
 func (br *bruteforcer) savePasswordHash(ctx context.Context, user scanner.User, password string) error {
 	username, err := user.GetUsername()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get username: %w", err)
 	}
 	hash, err := user.GetHashedPassword()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not get hashed password: %w", err)
 	}
 	return br.passwordProvider.SavePasswordHash(username, hash, password, br.status[user].MaximumInternalID)
 }
@@ -116,23 +117,23 @@ func (br *bruteforcer) BruteforcePasswordAllUsers(ctx context.Context) ([]scanne
 
 	err := br.initialize(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not initialize bruteforcer: %w", err)
 	}
 
 	for _, user := range br.users {
 		pass, err := br.bruteforcePasswordsUser(ctx, user)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not bruteforce passwords for user: %w", err)
 		}
 
 		err = br.savePasswordHash(ctx, user, pass)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not save password hash: %w", err)
 		}
 
 		username, err := user.GetUsername()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not get username: %w", err)
 		}
 		if pass != "" {
 			br.results = append(br.results, &bruteforceResult{

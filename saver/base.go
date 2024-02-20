@@ -1,11 +1,13 @@
-package local
+package saver
 
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/models"
@@ -13,7 +15,7 @@ import (
 	"github.com/tedyst/licenta/scanner"
 )
 
-type ScanQuerier interface {
+type BaseQuerier interface {
 	GetScanGroup(ctx context.Context, id int64) (*queries.ScanGroup, error)
 	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 	UpdateScanStatus(ctx context.Context, params queries.UpdateScanStatusParams) error
@@ -24,55 +26,45 @@ type ScanQuerier interface {
 	GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error)
 }
 
-type baseScanRunner struct {
-	queries            ScanQuerier
+type baseSaver struct {
+	queries            BaseQuerier
 	bruteforceProvider bruteforce.BruteforceProvider
 
 	logger *slog.Logger
 
-	insertResults func([]scanner.ScanResult) error
-
-	bruteforceResults      map[scanner.User]int64
-	notifyBruteforceStatus func(status map[scanner.User]bruteforce.BruteforceUserStatus) error
+	bruteforceResults map[scanner.User]int64
 
 	scan    *queries.Scan
 	scanner scanner.Scanner
+
+	runAfterScan func(ctx context.Context) error
 }
 
-func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *queries.Scan, sc scanner.Scanner) *baseScanRunner {
-	runner := &baseScanRunner{
-		queries:            q,
-		bruteforceProvider: bruteforceProvider,
-		logger:             logger,
-		scan:               scan,
-		scanner:            sc,
-		bruteforceResults:  map[scanner.User]int64{},
-	}
-
-	runner.insertResults = func(results []scanner.ScanResult) error {
-		for _, result := range results {
-			if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
-				ScanID:     scan.ID,
-				Severity:   int32(result.Severity()),
-				Message:    result.Detail(),
-				ScanSource: int32(sc.GetScannerID()),
-			}); err != nil {
-				return fmt.Errorf("could not insert scan result: %w", err)
-			}
+func (saver *baseSaver) insertResults(ctx context.Context, results []scanner.ScanResult) error {
+	for _, result := range results {
+		if _, err := saver.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+			ScanID:     saver.scan.ID,
+			Severity:   int32(result.Severity()),
+			Message:    result.Detail(),
+			ScanSource: int32(saver.scanner.GetScannerID()),
+		}); err != nil {
+			return fmt.Errorf("could not insert scan result: %w", err)
 		}
-		return nil
 	}
+	return nil
+}
 
-	runner.notifyBruteforceStatus = func(status map[scanner.User]bruteforce.BruteforceUserStatus) error {
+func (saver *baseSaver) bruteforceUpdateStatus(ctx context.Context) func(status map[scanner.User]bruteforce.BruteforceUserStatus) error {
+	return func(status map[scanner.User]bruteforce.BruteforceUserStatus) error {
 		for user, entry := range status {
-			if _, ok := runner.bruteforceResults[user]; !ok {
+			if _, ok := saver.bruteforceResults[user]; !ok {
 				username, err := user.GetUsername()
 				if err != nil {
 					return fmt.Errorf("could not get username: %w", err)
 				}
-				bfuser, err := runner.queries.CreateScanBruteforceResult(ctx, queries.CreateScanBruteforceResultParams{
-					ScanID:   runner.scan.ID,
-					ScanType: int32(sc.GetScannerID()),
+				bfuser, err := saver.queries.CreateScanBruteforceResult(ctx, queries.CreateScanBruteforceResultParams{
+					ScanID:   saver.scan.ID,
+					ScanType: int32(saver.scanner.GetScannerID()),
 					Username: username,
 					Password: sql.NullString{String: entry.FoundPassword, Valid: entry.FoundPassword != ""},
 					Tried:    int32(entry.Tried),
@@ -81,54 +73,54 @@ func createScanner(ctx context.Context, q ScanQuerier, bruteforceProvider brutef
 				if err != nil {
 					return fmt.Errorf("could not insert bruteforce result: %w", err)
 				}
-				runner.bruteforceResults[user] = bfuser.ID
-			} else {
-				if err := runner.queries.UpdateScanBruteforceResult(ctx, queries.UpdateScanBruteforceResultParams{
-					ID:       runner.bruteforceResults[user],
-					Password: sql.NullString{String: entry.FoundPassword, Valid: entry.FoundPassword != ""},
-					Tried:    int32(entry.Tried),
-					Total:    int32(entry.Total),
-				}); err != nil {
-					return fmt.Errorf("could not update bruteforce result: %w", err)
-				}
+				saver.bruteforceResults[user] = bfuser.ID
+				continue
+			}
+
+			if err := saver.queries.UpdateScanBruteforceResult(ctx, queries.UpdateScanBruteforceResultParams{
+				ID:       saver.bruteforceResults[user],
+				Password: sql.NullString{String: entry.FoundPassword, Valid: entry.FoundPassword != ""},
+				Tried:    int32(entry.Tried),
+				Total:    int32(entry.Total),
+			}); err != nil {
+				return fmt.Errorf("could not update bruteforce result: %w", err)
 			}
 		}
 		return nil
 	}
-
-	return runner
 }
 
-func (runner *baseScanRunner) run(ctx context.Context) error {
+func createBaseSaver(q BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *queries.Scan, sc scanner.Scanner) *baseSaver {
+	return &baseSaver{
+		queries:            q,
+		bruteforceProvider: bruteforceProvider,
+		logger:             logger,
+		scan:               scan,
+		scanner:            sc,
+		bruteforceResults:  map[scanner.User]int64{},
+	}
+}
+
+func (runner *baseSaver) failScan(ctx context.Context, err error) error {
+	if err2 := runner.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
+		ID:     runner.scan.ID,
+		Status: models.SCAN_FINISHED,
+		Error:  sql.NullString{String: err.Error(), Valid: true},
+		EndedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		},
+	}); err2 != nil {
+		return fmt.Errorf("could not update scan status: %w; %w", err, err2)
+	}
+	return err
+}
+
+func (runner *baseSaver) Scan(ctx context.Context) error {
 	ctx, span := tracer.Start(ctx, "run")
 	defer span.End()
-
-	runner.insertResults = func(results []scanner.ScanResult) error {
-		for _, result := range results {
-			if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
-				ScanID:     runner.scan.ID,
-				Severity:   int32(result.Severity()),
-				Message:    result.Detail(),
-				ScanSource: int32(runner.scanner.GetScannerID()),
-			}); err != nil {
-				return fmt.Errorf("could not insert scan result: %w", err)
-			}
-		}
-		return nil
-	}
-
 	runner.logger.DebugContext(ctx, "Starting scan")
 
-	if err := runner.runScanner(ctx); err != nil {
-		return err
-	}
-
-	runner.logger.DebugContext(ctx, "Finished scan")
-
-	return nil
-}
-
-func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 	if err := runner.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
 		ID:     runner.scan.ID,
 		Status: models.SCAN_RUNNING,
@@ -136,6 +128,22 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 		return fmt.Errorf("could not update scan status: %w", err)
 	}
 
+	if err := runner.runScanner(ctx); err != nil {
+		return runner.failScan(ctx, err)
+	}
+
+	if runner.runAfterScan != nil {
+		if err := runner.runAfterScan(ctx); err != nil {
+			return runner.failScan(ctx, fmt.Errorf("could not run function after scan: %w", err))
+		}
+	}
+
+	runner.logger.DebugContext(ctx, "Finished scan")
+
+	return nil
+}
+
+func (runner *baseSaver) runScanner(ctx context.Context) error {
 	if err := runner.scanner.Ping(ctx); err != nil && err != scanner.ErrPingNotSupported {
 		return fmt.Errorf("could not ping database: %w", err)
 	}
@@ -152,7 +160,7 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 	if err != nil && err != scanner.ErrScanConfigNotSupported {
 		return fmt.Errorf("could not scan config: %w", err)
 	}
-	if err := runner.insertResults(results); err != nil {
+	if err := runner.insertResults(ctx, results); err != nil {
 		return fmt.Errorf("could not insert scan results: %w", err)
 	}
 
@@ -202,14 +210,14 @@ func (runner *baseScanRunner) runScanner(ctx context.Context) error {
 	return nil
 }
 
-func (r *baseScanRunner) bruteforce(ctx context.Context) error {
+func (r *baseSaver) bruteforce(ctx context.Context) error {
 	r.logger.DebugContext(ctx, "Bruteforcing passwords for all users")
 
 	scangroup, err := r.queries.GetScanGroup(ctx, r.scan.ScanGroupID)
 	if err != nil {
 		return fmt.Errorf("could not get scan group: %w", err)
 	}
-	bruteforcer, err := r.bruteforceProvider.NewBruteforcer(ctx, r.scanner, r.notifyBruteforceStatus, scangroup.ProjectID)
+	bruteforcer, err := r.bruteforceProvider.NewBruteforcer(ctx, r.scanner, r.bruteforceUpdateStatus(ctx), scangroup.ProjectID)
 	if err != nil {
 		return fmt.Errorf("could not create bruteforcer: %w", err)
 	}
@@ -218,7 +226,7 @@ func (r *baseScanRunner) bruteforce(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("could not bruteforce passwords: %w", err)
 	}
-	if err := r.insertResults(bruteforceResult); err != nil {
+	if err := r.insertResults(ctx, bruteforceResult); err != nil {
 		return fmt.Errorf("could not insert bruteforce results: %w", err)
 	}
 
@@ -227,7 +235,7 @@ func (r *baseScanRunner) bruteforce(ctx context.Context) error {
 	return nil
 }
 
-func (runner *baseScanRunner) scanForPublicAccess(ctx context.Context) error {
+func (runner *baseSaver) ScanForPublicAccessOnly(ctx context.Context) error {
 	if !runner.scanner.ShouldNotBePublic() {
 		return nil
 	}
