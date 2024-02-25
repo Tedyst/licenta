@@ -34,7 +34,7 @@ func (sc *mysqlScanner) GetScannerID() int64 {
 	return 1
 }
 func (sc *mysqlScanner) GetNvdProductType() nvd.Product {
-	return nvd.PRODUCT_UNKNOWN
+	return nvd.MYSQL
 }
 func (sc *mysqlScanner) ShouldNotBePublic() bool {
 	return true

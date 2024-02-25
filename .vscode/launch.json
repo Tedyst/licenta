@@ -89,14 +89,14 @@
             ]
         },
         {
-            "name": "Run Scan Postgres ID 1",
+            "name": "Run Scan Mysql ID 1",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": ".",
             "args": [
                 "tasks",
-                "scanpostgres",
+                "scanmysql",
                 "1",
                 "-d"
             ]

@@ -216,9 +216,11 @@ func (br *bruteforcer) tryPlaintextPassword(ctx context.Context, user scanner.Us
 			if err != nil {
 				return "", err
 			}
+
+			return pass, nil
 		}
 
-		return pass, nil
+		return "", nil
 	}
 
 	return "", nil

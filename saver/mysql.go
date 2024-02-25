@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log/slog"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/scanner/mysql"
@@ -21,7 +23,7 @@ type MysqlQuerier interface {
 }
 
 func getMysqlConnectString(db *queries.MysqlDatabase) string {
-	return fmt.Sprintf("%s:%s@%s:%d/%s", db.Username, db.Password, db.Host, db.Port, db.DatabaseName)
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.Username, db.Password, db.Host, db.Port, db.DatabaseName)
 }
 
 func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan) (Saver, error) {

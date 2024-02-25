@@ -39,13 +39,14 @@ type databasePasswordProvider struct {
 	database DatabasePasswordProviderInterface
 	error    error
 
-	hasNext      bool
 	count        int64
+	total        int64
 	currentBatch []*queries.DefaultBruteforcePassword
+	firstItem    bool
 }
 
 func (p *databasePasswordProvider) readBatch() error {
-	if len(p.currentBatch) > 1 || !p.hasNext {
+	if len(p.currentBatch) > 1 {
 		return nil
 	}
 
@@ -61,7 +62,7 @@ func (p *databasePasswordProvider) readBatch() error {
 		return err
 	}
 
-	p.currentBatch = response
+	p.currentBatch = append(p.currentBatch, response...)
 	return nil
 }
 
@@ -90,9 +91,13 @@ func (d *databasePasswordProvider) Next() bool {
 	if len(d.currentBatch) == 0 {
 		return false
 	}
+	if !d.firstItem {
+		d.firstItem = true
+		return true
+	}
 	d.currentBatch = d.currentBatch[1:]
 
-	return len(d.currentBatch) != 0 || d.hasNext
+	return len(d.currentBatch) != 0
 }
 
 func (d *databasePasswordProvider) Error() error {
@@ -104,6 +109,9 @@ func (d *databasePasswordProvider) Current() (int64, string, error) {
 }
 
 func (d *databasePasswordProvider) Start(index int64) error {
+	d.currentBatch = []*queries.DefaultBruteforcePassword{}
+	d.firstItem = false
+	d.count = 0
 	return nil
 }
 
@@ -119,8 +127,8 @@ func (d *databasePasswordProvider) SavePasswordHash(username, hash, password str
 	if err != nil && err != pgx.ErrNoRows {
 		return err
 	}
-	if oldPW != nil {
-		d.database.UpdateBruteforcedPassword(d.context, queries.UpdateBruteforcedPasswordParams{
+	if err != pgx.ErrNoRows {
+		_, err = d.database.UpdateBruteforcedPassword(d.context, queries.UpdateBruteforcedPasswordParams{
 			ID: oldPW.ID,
 			LastBruteforceID: sql.NullInt64{
 				Int64: maxInternalID,
@@ -128,7 +136,7 @@ func (d *databasePasswordProvider) SavePasswordHash(username, hash, password str
 			},
 			Password: sql.NullString{String: password, Valid: password != ""},
 		})
-		return nil
+		return err
 	}
 	_, err = d.database.CreateBruteforcedPassword(d.context, queries.CreateBruteforcedPasswordParams{
 		Username: username,
@@ -166,9 +174,11 @@ func NewDatabasePasswordProvider(ctx context.Context, database DatabasePasswordP
 
 	return &databasePasswordProvider{
 		projectID: projectID,
-		count:     count,
+		total:     count,
 		database:  database,
 		context:   ctx,
+		count:     0,
+		firstItem: false,
 	}, nil
 }
 

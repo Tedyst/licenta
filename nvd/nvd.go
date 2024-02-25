@@ -93,25 +93,6 @@ func DownloadCVEsNext(ctx context.Context, product Product, cpe string, startInd
 	return resp.Body, err
 }
 
-func extractCpePostgresqlVersion(titles []NvdCpeTitle) (string, error) {
-	for _, title := range titles {
-		extract := semverRegex.FindAllString(title.Title, -1)
-		if len(extract) > 0 {
-			return extract[0], nil
-		}
-	}
-	return "", errors.New("no version found")
-}
-
-func ExtractCpeVersionProduct(product Product, titles []NvdCpeTitle) (string, error) {
-	switch product {
-	case POSTGRESQL:
-		return extractCpePostgresqlVersion(titles)
-	default:
-		return "", errors.New("Product does not exist")
-	}
-}
-
 func ParseCpeAPI(ctx context.Context, reader io.Reader) (NvdCpeAPIResult, error) {
 	result := NvdCpeAPIResult{}
 	err := json.NewDecoder(reader).Decode(&result)
