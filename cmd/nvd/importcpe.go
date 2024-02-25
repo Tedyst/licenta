@@ -23,14 +23,8 @@ var importCpeCmd = &cobra.Command{
 	Long:  `This command allows you to import CPE from NVD API or file into the database.`,
 	RunE: func(cmd *cobra.Command, args []string) (err error) {
 		var reader io.ReadCloser
-		var product nvd.Product
 
-		switch viper.GetString("product") {
-		case "postgresql":
-			product = nvd.POSTGRESQL
-		default:
-			return errors.New("invalid product")
-		}
+		product := nvd.GetNvdProductType(viper.GetString("product"))
 
 		if viper.GetString("file") == "" {
 			reader, err = nvd.DownloadCpe(cmd.Context(), product)

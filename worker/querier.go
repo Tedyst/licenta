@@ -148,7 +148,7 @@ func (q *remoteQuerier) UpdateScanBruteforceResult(ctx context.Context, params q
 }
 
 func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg queries.GetCvesByProductAndVersionParams) ([]*queries.GetCvesByProductAndVersionRow, error) {
-	response, err := q.client.GetCvesDbTypeVersionWithResponse(ctx, nvd.GetNvdDatabaseName(nvd.Product(arg.DatabaseType)), arg.Version)
+	response, err := q.client.GetCvesDbTypeVersionWithResponse(ctx, nvd.GetNvdProductName(nvd.Product(arg.DatabaseType)), arg.Version)
 	if err != nil {
 		return nil, err
 	}

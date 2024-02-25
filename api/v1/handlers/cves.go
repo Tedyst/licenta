@@ -21,7 +21,7 @@ func (server *serverHandler) GetCvesDbTypeVersion(ctx context.Context, request g
 	}
 
 	cves, err := server.DatabaseProvider.GetCvesByProductAndVersion(ctx, queries.GetCvesByProductAndVersionParams{
-		DatabaseType: int32(nvd.GetNvdDatabaseType(request.DbType)),
+		DatabaseType: int32(nvd.GetNvdProductType(request.DbType)),
 		Version:      request.Version,
 	})
 	if err != nil {

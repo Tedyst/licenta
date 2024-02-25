@@ -10,7 +10,7 @@ const (
 	MYSQL
 )
 
-func GetNvdDatabaseType(name string) Product {
+func GetNvdProductType(name string) Product {
 	switch name {
 	case "postgres":
 		return POSTGRESQL
@@ -21,7 +21,7 @@ func GetNvdDatabaseType(name string) Product {
 	}
 }
 
-func GetNvdDatabaseName(t Product) string {
+func GetNvdProductName(t Product) string {
 	switch t {
 	case POSTGRESQL:
 		return "postgres"
