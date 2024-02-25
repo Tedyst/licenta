@@ -2,40 +2,30 @@ package mysql
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	_ "unsafe"
 
-	"github.com/go-sql-driver/mysql"
-
 	"github.com/tedyst/licenta/scanner"
 )
 
 type mysqlUser struct {
-	super    bool
-	name     string
-	password string
+	name        string
+	password    string
+	auth_plugin string
 }
 
 var _ scanner.User = (*mysqlUser)(nil)
 
-func isASCII(s string) bool {
-	fmt.Print(mysql.Config{})
-	return false
-}
-
-//go:linkname scrambleSHA256Password github.com/go-sql-driver/mysql.scrambleSHA256Password
-func scrambleSHA256Password(scramble []byte, password string) []byte
-
 func (u *mysqlUser) VerifyPassword(password string) (bool, error) {
-	u.password = "6439526B2A0477021C6D1C3F5179280507162101*4E573447484C4F5A7571586362626B69784442492F5259324F6473744B317A7847656C2E77664E51434D36"
-	passwords := strings.Split(u.password, "*")
-	salt := passwords[0]
-	hash := passwords[1]
-	scramble := []byte(salt)
-	scrambledPassword := scrambleSHA256Password(scramble, password)
-	return string(scrambledPassword) == hash, nil
+	switch u.auth_plugin {
+	case "caching_sha2_password":
+		return verifySHA2Password(u.password, password), nil
+	default:
+		return false, errors.New("invalid auth plugin")
+	}
 }
 
 func (u *mysqlUser) GetRawPassword() (string, bool, error) {
@@ -49,7 +39,7 @@ func (u *mysqlUser) GetRawPassword() (string, bool, error) {
 }
 
 func (u *mysqlUser) IsPrivileged() (bool, error) {
-	return u.super, nil
+	return true, nil
 }
 
 func (u *mysqlUser) HasPassword() (bool, error) {
@@ -65,16 +55,16 @@ func (u *mysqlUser) GetHashedPassword() (string, error) {
 }
 
 func (sc *mysqlScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {
-	rows, err := sc.db.QueryContext(ctx, "SELECT rolsuper, rolname, rolpassword FROM pg_catalog.pg_authid WHERE rolcanlogin=true;")
+	rows, err := sc.db.QueryContext(ctx, "SELECT CONCAT(host, ':', user), plugin, CONCAT('$mysql',LEFT(authentication_string,6),'$',INSERT(HEX(SUBSTR(authentication_string,8)),41,0,'$')) AS hash FROM mysql.user WHERE plugin = 'caching_sha2_password' AND authentication_string NOT LIKE '%INVALIDSALTANDPASSWORD%';")
 	if err != nil {
-		return nil, fmt.Errorf("could not see table pg_catalog.pg_authid: %w", err)
+		return nil, fmt.Errorf("could not see table mysql.user: %w", err)
 	}
 	defer rows.Close()
 
 	var users = make([]scanner.User, 0)
 	for rows.Next() {
 		var user mysqlUser
-		err = rows.Scan(&user.super, &user.name, &user.password)
+		err = rows.Scan(&user.name, &user.auth_plugin, &user.password)
 		if err != nil {
 			return nil, fmt.Errorf("could not scan row: %w", err)
 		}

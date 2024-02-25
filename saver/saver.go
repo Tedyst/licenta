@@ -17,9 +17,7 @@ type CreateSaverFunc func(context.Context, BaseQuerier, bruteforce.BruteforcePro
 
 var ErrSaverNotNeeded = errors.New("saver not needed")
 
-var savers = map[string]CreateSaverFunc{
-	"postgres": NewPostgresSaver,
-}
+var savers = map[string]CreateSaverFunc{}
 
 func NewSaver(ctx context.Context, queries BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, scanType string) (Saver, error) {
 	if scanType == "all" {

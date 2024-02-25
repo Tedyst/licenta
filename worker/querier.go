@@ -25,7 +25,7 @@ type remoteQuerier struct {
 }
 
 func (*remoteQuerier) UpdateBruteforcedPassword(ctx context.Context, arg queries.UpdateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
-	panic("unimplemented")
+	return nil, nil
 }
 
 var _ saver.BaseQuerier = (*remoteQuerier)(nil)

@@ -90,3 +90,7 @@ type postgresSaver struct {
 
 	baseSaver
 }
+
+func init() {
+	savers["postgres"] = NewPostgresSaver
+}

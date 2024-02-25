@@ -27,12 +27,12 @@ var scanConfigLines = map[string]struct {
 			if err != nil {
 				return false
 			}
-			return t <= 100000
+			return t < 5000
 		},
 		diagnostic: mysqlScanResult{
 			severity: scanner.SEVERITY_MEDIUM,
-			message:  "caching_sha2_password_digest_rounds is lower than 100000.",
-			detail: "caching_sha2_password_digest_rounds is lower than 100000. " +
+			message:  "caching_sha2_password_digest_rounds is lower than 5000.",
+			detail: "caching_sha2_password_digest_rounds is lower than 5000. " +
 				"See https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_caching_sha2_password_digest_rounds for more details.",
 		},
 	},
