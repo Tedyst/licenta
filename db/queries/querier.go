@@ -23,6 +23,7 @@ type Querier interface {
 	CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*ProjectGitScannedCommit, error)
 	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*ProjectGitRepository, error)
 	CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error)
+	CreateMysqlScan(ctx context.Context, arg CreateMysqlScanParams) (*MysqlScan, error)
 	CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error)
 	CreateNvdCve(ctx context.Context, arg CreateNvdCveParams) (*NvdCfe, error)
 	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
@@ -60,6 +61,10 @@ type Querier interface {
 	GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error)
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, arg GetGitScannedCommitsForProjectBatchParams) ([]string, error)
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
+	GetMysqlDatabase(ctx context.Context, id int64) (*GetMysqlDatabaseRow, error)
+	GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*MysqlDatabase, error)
+	GetMysqlScan(ctx context.Context, id int64) (*MysqlScan, error)
+	GetMysqlScanByScanID(ctx context.Context, scanID int64) (*MysqlScan, error)
 	GetNvdCPEsByDBType(ctx context.Context, databaseType int32) ([]*NvdCpe, error)
 	GetNvdCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
 	GetOrganization(ctx context.Context, id int64) (*Organization, error)
@@ -105,6 +110,8 @@ type Querier interface {
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
 	UpdateBruteforcedPassword(ctx context.Context, arg UpdateBruteforcedPasswordParams) (*BruteforcedPassword, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
+	UpdateMysqlDatabase(ctx context.Context, arg UpdateMysqlDatabaseParams) error
+	UpdateMysqlVersion(ctx context.Context, arg UpdateMysqlVersionParams) error
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error

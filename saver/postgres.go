@@ -62,6 +62,7 @@ func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforcePr
 		baseSaver:    *createBaseSaver(queries, bruteforceProvider, logger, scan, sc),
 		postgresScan: postgresScan,
 		database:     &db.PostgresDatabase,
+		connection:   conn,
 	}
 	saver.runAfterScan = saver.hookAfterScan
 	return saver, nil
@@ -79,11 +80,13 @@ func (saver *postgresSaver) hookAfterScan(ctx context.Context) error {
 		return fmt.Errorf("could not update version: %w", err)
 	}
 
-	return nil
+	return saver.connection.Close(ctx)
 }
 
 type postgresSaver struct {
 	queries PostgresQuerier
+
+	connection *pgx.Conn
 
 	postgresScan *queries.PostgresScan
 	database     *queries.PostgresDatabase

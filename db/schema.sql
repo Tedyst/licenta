@@ -297,3 +297,21 @@ CREATE TABLE webauthn_credentials(
   attachment text NOT NULL
 );
 
+CREATE TABLE mysql_databases(
+  id bigserial PRIMARY KEY,
+  project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  host text NOT NULL,
+  port integer NOT NULL,
+  database_name text NOT NULL,
+  username text NOT NULL,
+  password text NOT NULL,
+  version text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE mysql_scans(
+  id bigserial PRIMARY KEY,
+  scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+  database_id bigint NOT NULL REFERENCES mysql_databases(id) ON DELETE CASCADE
+);
+

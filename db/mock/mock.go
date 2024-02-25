@@ -470,6 +470,45 @@ func (c *TransactionQuerierCreateGitResultForCommitCall) DoAndReturn(f func(cont
 	return c
 }
 
+// CreateMysqlScan mocks base method.
+func (m *MockTransactionQuerier) CreateMysqlScan(ctx context.Context, arg queries.CreateMysqlScanParams) (*queries.MysqlScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMysqlScan", ctx, arg)
+	ret0, _ := ret[0].(*queries.MysqlScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateMysqlScan indicates an expected call of CreateMysqlScan.
+func (mr *MockTransactionQuerierMockRecorder) CreateMysqlScan(ctx, arg any) *TransactionQuerierCreateMysqlScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMysqlScan", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateMysqlScan), ctx, arg)
+	return &TransactionQuerierCreateMysqlScanCall{Call: call}
+}
+
+// TransactionQuerierCreateMysqlScanCall wrap *gomock.Call
+type TransactionQuerierCreateMysqlScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierCreateMysqlScanCall) Return(arg0 *queries.MysqlScan, arg1 error) *TransactionQuerierCreateMysqlScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierCreateMysqlScanCall) Do(f func(context.Context, queries.CreateMysqlScanParams) (*queries.MysqlScan, error)) *TransactionQuerierCreateMysqlScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierCreateMysqlScanCall) DoAndReturn(f func(context.Context, queries.CreateMysqlScanParams) (*queries.MysqlScan, error)) *TransactionQuerierCreateMysqlScanCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateNvdCPE mocks base method.
 func (m *MockTransactionQuerier) CreateNvdCPE(ctx context.Context, arg queries.CreateNvdCPEParams) (*queries.NvdCpe, error) {
 	m.ctrl.T.Helper()
@@ -1283,17 +1322,17 @@ func (c *TransactionQuerierDeleteUserCall) DoAndReturn(f func(context.Context, i
 }
 
 // EndTransaction mocks base method.
-func (m *MockTransactionQuerier) EndTransaction(ctx context.Context, err error) error {
+func (m *MockTransactionQuerier) EndTransaction(ctx context.Context, rollback bool) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EndTransaction", ctx, err)
+	ret := m.ctrl.Call(m, "EndTransaction", ctx, rollback)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // EndTransaction indicates an expected call of EndTransaction.
-func (mr *MockTransactionQuerierMockRecorder) EndTransaction(ctx, err any) *TransactionQuerierEndTransactionCall {
+func (mr *MockTransactionQuerierMockRecorder) EndTransaction(ctx, rollback any) *TransactionQuerierEndTransactionCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndTransaction", reflect.TypeOf((*MockTransactionQuerier)(nil).EndTransaction), ctx, err)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EndTransaction", reflect.TypeOf((*MockTransactionQuerier)(nil).EndTransaction), ctx, rollback)
 	return &TransactionQuerierEndTransactionCall{Call: call}
 }
 
@@ -1309,13 +1348,13 @@ func (c *TransactionQuerierEndTransactionCall) Return(arg0 error) *TransactionQu
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TransactionQuerierEndTransactionCall) Do(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
+func (c *TransactionQuerierEndTransactionCall) Do(f func(context.Context, bool) error) *TransactionQuerierEndTransactionCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, error) error) *TransactionQuerierEndTransactionCall {
+func (c *TransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, bool) error) *TransactionQuerierEndTransactionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1940,6 +1979,162 @@ func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) Do(f func(context.Co
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f func(context.Context, int64) (*queries.TotpSecretToken, error)) *TransactionQuerierGetInvalidTOTPSecretForUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMysqlDatabase mocks base method.
+func (m *MockTransactionQuerier) GetMysqlDatabase(ctx context.Context, id int64) (*queries.GetMysqlDatabaseRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMysqlDatabase", ctx, id)
+	ret0, _ := ret[0].(*queries.GetMysqlDatabaseRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMysqlDatabase indicates an expected call of GetMysqlDatabase.
+func (mr *MockTransactionQuerierMockRecorder) GetMysqlDatabase(ctx, id any) *TransactionQuerierGetMysqlDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlDatabase), ctx, id)
+	return &TransactionQuerierGetMysqlDatabaseCall{Call: call}
+}
+
+// TransactionQuerierGetMysqlDatabaseCall wrap *gomock.Call
+type TransactionQuerierGetMysqlDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetMysqlDatabaseCall) Return(arg0 *queries.GetMysqlDatabaseRow, arg1 error) *TransactionQuerierGetMysqlDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetMysqlDatabaseCall) Do(f func(context.Context, int64) (*queries.GetMysqlDatabaseRow, error)) *TransactionQuerierGetMysqlDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetMysqlDatabaseCall) DoAndReturn(f func(context.Context, int64) (*queries.GetMysqlDatabaseRow, error)) *TransactionQuerierGetMysqlDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMysqlDatabasesForProject mocks base method.
+func (m *MockTransactionQuerier) GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.MysqlDatabase, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMysqlDatabasesForProject", ctx, projectID)
+	ret0, _ := ret[0].([]*queries.MysqlDatabase)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMysqlDatabasesForProject indicates an expected call of GetMysqlDatabasesForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetMysqlDatabasesForProject(ctx, projectID any) *TransactionQuerierGetMysqlDatabasesForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlDatabasesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlDatabasesForProject), ctx, projectID)
+	return &TransactionQuerierGetMysqlDatabasesForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetMysqlDatabasesForProjectCall wrap *gomock.Call
+type TransactionQuerierGetMysqlDatabasesForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetMysqlDatabasesForProjectCall) Return(arg0 []*queries.MysqlDatabase, arg1 error) *TransactionQuerierGetMysqlDatabasesForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetMysqlDatabasesForProjectCall) Do(f func(context.Context, int64) ([]*queries.MysqlDatabase, error)) *TransactionQuerierGetMysqlDatabasesForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetMysqlDatabasesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.MysqlDatabase, error)) *TransactionQuerierGetMysqlDatabasesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMysqlScan mocks base method.
+func (m *MockTransactionQuerier) GetMysqlScan(ctx context.Context, id int64) (*queries.MysqlScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMysqlScan", ctx, id)
+	ret0, _ := ret[0].(*queries.MysqlScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMysqlScan indicates an expected call of GetMysqlScan.
+func (mr *MockTransactionQuerierMockRecorder) GetMysqlScan(ctx, id any) *TransactionQuerierGetMysqlScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlScan", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlScan), ctx, id)
+	return &TransactionQuerierGetMysqlScanCall{Call: call}
+}
+
+// TransactionQuerierGetMysqlScanCall wrap *gomock.Call
+type TransactionQuerierGetMysqlScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetMysqlScanCall) Return(arg0 *queries.MysqlScan, arg1 error) *TransactionQuerierGetMysqlScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetMysqlScanCall) Do(f func(context.Context, int64) (*queries.MysqlScan, error)) *TransactionQuerierGetMysqlScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetMysqlScanCall) DoAndReturn(f func(context.Context, int64) (*queries.MysqlScan, error)) *TransactionQuerierGetMysqlScanCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMysqlScanByScanID mocks base method.
+func (m *MockTransactionQuerier) GetMysqlScanByScanID(ctx context.Context, scanID int64) (*queries.MysqlScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMysqlScanByScanID", ctx, scanID)
+	ret0, _ := ret[0].(*queries.MysqlScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMysqlScanByScanID indicates an expected call of GetMysqlScanByScanID.
+func (mr *MockTransactionQuerierMockRecorder) GetMysqlScanByScanID(ctx, scanID any) *TransactionQuerierGetMysqlScanByScanIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlScanByScanID), ctx, scanID)
+	return &TransactionQuerierGetMysqlScanByScanIDCall{Call: call}
+}
+
+// TransactionQuerierGetMysqlScanByScanIDCall wrap *gomock.Call
+type TransactionQuerierGetMysqlScanByScanIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetMysqlScanByScanIDCall) Return(arg0 *queries.MysqlScan, arg1 error) *TransactionQuerierGetMysqlScanByScanIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetMysqlScanByScanIDCall) Do(f func(context.Context, int64) (*queries.MysqlScan, error)) *TransactionQuerierGetMysqlScanByScanIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetMysqlScanByScanIDCall) DoAndReturn(f func(context.Context, int64) (*queries.MysqlScan, error)) *TransactionQuerierGetMysqlScanByScanIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3731,6 +3926,82 @@ func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) Do(f func(contex
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierUpdateDockerLayerScanForProjectCall) DoAndReturn(f func(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)) *TransactionQuerierUpdateDockerLayerScanForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateMysqlDatabase mocks base method.
+func (m *MockTransactionQuerier) UpdateMysqlDatabase(ctx context.Context, arg queries.UpdateMysqlDatabaseParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMysqlDatabase", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMysqlDatabase indicates an expected call of UpdateMysqlDatabase.
+func (mr *MockTransactionQuerierMockRecorder) UpdateMysqlDatabase(ctx, arg any) *TransactionQuerierUpdateMysqlDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMysqlDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateMysqlDatabase), ctx, arg)
+	return &TransactionQuerierUpdateMysqlDatabaseCall{Call: call}
+}
+
+// TransactionQuerierUpdateMysqlDatabaseCall wrap *gomock.Call
+type TransactionQuerierUpdateMysqlDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierUpdateMysqlDatabaseCall) Return(arg0 error) *TransactionQuerierUpdateMysqlDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierUpdateMysqlDatabaseCall) Do(f func(context.Context, queries.UpdateMysqlDatabaseParams) error) *TransactionQuerierUpdateMysqlDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierUpdateMysqlDatabaseCall) DoAndReturn(f func(context.Context, queries.UpdateMysqlDatabaseParams) error) *TransactionQuerierUpdateMysqlDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateMysqlVersion mocks base method.
+func (m *MockTransactionQuerier) UpdateMysqlVersion(ctx context.Context, arg queries.UpdateMysqlVersionParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMysqlVersion", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMysqlVersion indicates an expected call of UpdateMysqlVersion.
+func (mr *MockTransactionQuerierMockRecorder) UpdateMysqlVersion(ctx, arg any) *TransactionQuerierUpdateMysqlVersionCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMysqlVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateMysqlVersion), ctx, arg)
+	return &TransactionQuerierUpdateMysqlVersionCall{Call: call}
+}
+
+// TransactionQuerierUpdateMysqlVersionCall wrap *gomock.Call
+type TransactionQuerierUpdateMysqlVersionCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierUpdateMysqlVersionCall) Return(arg0 error) *TransactionQuerierUpdateMysqlVersionCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierUpdateMysqlVersionCall) Do(f func(context.Context, queries.UpdateMysqlVersionParams) error) *TransactionQuerierUpdateMysqlVersionCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierUpdateMysqlVersionCall) DoAndReturn(f func(context.Context, queries.UpdateMysqlVersionParams) error) *TransactionQuerierUpdateMysqlVersionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

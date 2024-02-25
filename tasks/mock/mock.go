@@ -40,40 +40,78 @@ func (m *MockTaskRunner) EXPECT() *MockTaskRunnerMockRecorder {
 	return m.recorder
 }
 
-// RunAllScanners mocks base method.
-func (m *MockTaskRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
+// RunSaverForPublic mocks base method.
+func (m *MockTaskRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunAllScanners", ctx, scan, runningRemote)
+	ret := m.ctrl.Call(m, "RunSaverForPublic", ctx, scan, scanType)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// RunAllScanners indicates an expected call of RunAllScanners.
-func (mr *MockTaskRunnerMockRecorder) RunAllScanners(ctx, scan, runningRemote any) *TaskRunnerRunAllScannersCall {
+// RunSaverForPublic indicates an expected call of RunSaverForPublic.
+func (mr *MockTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *TaskRunnerRunSaverForPublicCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunAllScanners", reflect.TypeOf((*MockTaskRunner)(nil).RunAllScanners), ctx, scan, runningRemote)
-	return &TaskRunnerRunAllScannersCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverForPublic", reflect.TypeOf((*MockTaskRunner)(nil).RunSaverForPublic), ctx, scan, scanType)
+	return &TaskRunnerRunSaverForPublicCall{Call: call}
 }
 
-// TaskRunnerRunAllScannersCall wrap *gomock.Call
-type TaskRunnerRunAllScannersCall struct {
+// TaskRunnerRunSaverForPublicCall wrap *gomock.Call
+type TaskRunnerRunSaverForPublicCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerRunAllScannersCall) Return(arg0 error) *TaskRunnerRunAllScannersCall {
+func (c *TaskRunnerRunSaverForPublicCall) Return(arg0 error) *TaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerRunAllScannersCall) Do(f func(context.Context, *queries.Scan, bool) error) *TaskRunnerRunAllScannersCall {
+func (c *TaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *queries.Scan, bool) error) *TaskRunnerRunAllScannersCall {
+func (c *TaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverForPublicCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// RunSaverRemote mocks base method.
+func (m *MockTaskRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RunSaverRemote", ctx, scan, scanType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunSaverRemote indicates an expected call of RunSaverRemote.
+func (mr *MockTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *TaskRunnerRunSaverRemoteCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverRemote", reflect.TypeOf((*MockTaskRunner)(nil).RunSaverRemote), ctx, scan, scanType)
+	return &TaskRunnerRunSaverRemoteCall{Call: call}
+}
+
+// TaskRunnerRunSaverRemoteCall wrap *gomock.Call
+type TaskRunnerRunSaverRemoteCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TaskRunnerRunSaverRemoteCall) Return(arg0 error) *TaskRunnerRunSaverRemoteCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverRemoteCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -154,40 +192,40 @@ func (c *TaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *q
 	return c
 }
 
-// ScanPostgresDB mocks base method.
-func (m *MockTaskRunner) ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error {
+// ScheduleSaverRun mocks base method.
+func (m *MockTaskRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanPostgresDB", ctx, scan)
+	ret := m.ctrl.Call(m, "ScheduleSaverRun", ctx, scan, scanType)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ScanPostgresDB indicates an expected call of ScanPostgresDB.
-func (mr *MockTaskRunnerMockRecorder) ScanPostgresDB(ctx, scan any) *TaskRunnerScanPostgresDBCall {
+// ScheduleSaverRun indicates an expected call of ScheduleSaverRun.
+func (mr *MockTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *TaskRunnerScheduleSaverRunCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanPostgresDB", reflect.TypeOf((*MockTaskRunner)(nil).ScanPostgresDB), ctx, scan)
-	return &TaskRunnerScanPostgresDBCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSaverRun", reflect.TypeOf((*MockTaskRunner)(nil).ScheduleSaverRun), ctx, scan, scanType)
+	return &TaskRunnerScheduleSaverRunCall{Call: call}
 }
 
-// TaskRunnerScanPostgresDBCall wrap *gomock.Call
-type TaskRunnerScanPostgresDBCall struct {
+// TaskRunnerScheduleSaverRunCall wrap *gomock.Call
+type TaskRunnerScheduleSaverRunCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerScanPostgresDBCall) Return(arg0 error) *TaskRunnerScanPostgresDBCall {
+func (c *TaskRunnerScheduleSaverRunCall) Return(arg0 error) *TaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScanPostgresDBCall) Do(f func(context.Context, *queries.PostgresScan) error) *TaskRunnerScanPostgresDBCall {
+func (c *TaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *TaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *queries.PostgresScan) error) *TaskRunnerScanPostgresDBCall {
+func (c *TaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *TaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -763,200 +801,116 @@ func (m *MockScannerTaskRunner) EXPECT() *MockScannerTaskRunnerMockRecorder {
 	return m.recorder
 }
 
-// RunAllScanners mocks base method.
-func (m *MockScannerTaskRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
+// RunSaverForPublic mocks base method.
+func (m *MockScannerTaskRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunAllScanners", ctx, scan, runningRemote)
+	ret := m.ctrl.Call(m, "RunSaverForPublic", ctx, scan, scanType)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// RunAllScanners indicates an expected call of RunAllScanners.
-func (mr *MockScannerTaskRunnerMockRecorder) RunAllScanners(ctx, scan, runningRemote any) *ScannerTaskRunnerRunAllScannersCall {
+// RunSaverForPublic indicates an expected call of RunSaverForPublic.
+func (mr *MockScannerTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *ScannerTaskRunnerRunSaverForPublicCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunAllScanners", reflect.TypeOf((*MockScannerTaskRunner)(nil).RunAllScanners), ctx, scan, runningRemote)
-	return &ScannerTaskRunnerRunAllScannersCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverForPublic", reflect.TypeOf((*MockScannerTaskRunner)(nil).RunSaverForPublic), ctx, scan, scanType)
+	return &ScannerTaskRunnerRunSaverForPublicCall{Call: call}
 }
 
-// ScannerTaskRunnerRunAllScannersCall wrap *gomock.Call
-type ScannerTaskRunnerRunAllScannersCall struct {
+// ScannerTaskRunnerRunSaverForPublicCall wrap *gomock.Call
+type ScannerTaskRunnerRunSaverForPublicCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *ScannerTaskRunnerRunAllScannersCall) Return(arg0 error) *ScannerTaskRunnerRunAllScannersCall {
+func (c *ScannerTaskRunnerRunSaverForPublicCall) Return(arg0 error) *ScannerTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerRunAllScannersCall) Do(f func(context.Context, *queries.Scan, bool) error) *ScannerTaskRunnerRunAllScannersCall {
+func (c *ScannerTaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *queries.Scan, bool) error) *ScannerTaskRunnerRunAllScannersCall {
+func (c *ScannerTaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
-// ScanPostgresDB mocks base method.
-func (m *MockScannerTaskRunner) ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error {
+// RunSaverRemote mocks base method.
+func (m *MockScannerTaskRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanPostgresDB", ctx, scan)
+	ret := m.ctrl.Call(m, "RunSaverRemote", ctx, scan, scanType)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ScanPostgresDB indicates an expected call of ScanPostgresDB.
-func (mr *MockScannerTaskRunnerMockRecorder) ScanPostgresDB(ctx, scan any) *ScannerTaskRunnerScanPostgresDBCall {
+// RunSaverRemote indicates an expected call of RunSaverRemote.
+func (mr *MockScannerTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *ScannerTaskRunnerRunSaverRemoteCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanPostgresDB", reflect.TypeOf((*MockScannerTaskRunner)(nil).ScanPostgresDB), ctx, scan)
-	return &ScannerTaskRunnerScanPostgresDBCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverRemote", reflect.TypeOf((*MockScannerTaskRunner)(nil).RunSaverRemote), ctx, scan, scanType)
+	return &ScannerTaskRunnerRunSaverRemoteCall{Call: call}
 }
 
-// ScannerTaskRunnerScanPostgresDBCall wrap *gomock.Call
-type ScannerTaskRunnerScanPostgresDBCall struct {
+// ScannerTaskRunnerRunSaverRemoteCall wrap *gomock.Call
+type ScannerTaskRunnerRunSaverRemoteCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *ScannerTaskRunnerScanPostgresDBCall) Return(arg0 error) *ScannerTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerRunSaverRemoteCall) Return(arg0 error) *ScannerTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerScanPostgresDBCall) Do(f func(context.Context, *queries.PostgresScan) error) *ScannerTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *queries.PostgresScan) error) *ScannerTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
-// MockPostgresTaskRunner is a mock of PostgresTaskRunner interface.
-type MockPostgresTaskRunner struct {
-	ctrl     *gomock.Controller
-	recorder *MockPostgresTaskRunnerMockRecorder
-}
-
-// MockPostgresTaskRunnerMockRecorder is the mock recorder for MockPostgresTaskRunner.
-type MockPostgresTaskRunnerMockRecorder struct {
-	mock *MockPostgresTaskRunner
-}
-
-// NewMockPostgresTaskRunner creates a new mock instance.
-func NewMockPostgresTaskRunner(ctrl *gomock.Controller) *MockPostgresTaskRunner {
-	mock := &MockPostgresTaskRunner{ctrl: ctrl}
-	mock.recorder = &MockPostgresTaskRunnerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockPostgresTaskRunner) EXPECT() *MockPostgresTaskRunnerMockRecorder {
-	return m.recorder
-}
-
-// ScanPostgresDB mocks base method.
-func (m *MockPostgresTaskRunner) ScanPostgresDB(ctx context.Context, scan *queries.PostgresScan) error {
+// ScheduleSaverRun mocks base method.
+func (m *MockScannerTaskRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanPostgresDB", ctx, scan)
+	ret := m.ctrl.Call(m, "ScheduleSaverRun", ctx, scan, scanType)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ScanPostgresDB indicates an expected call of ScanPostgresDB.
-func (mr *MockPostgresTaskRunnerMockRecorder) ScanPostgresDB(ctx, scan any) *PostgresTaskRunnerScanPostgresDBCall {
+// ScheduleSaverRun indicates an expected call of ScheduleSaverRun.
+func (mr *MockScannerTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *ScannerTaskRunnerScheduleSaverRunCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanPostgresDB", reflect.TypeOf((*MockPostgresTaskRunner)(nil).ScanPostgresDB), ctx, scan)
-	return &PostgresTaskRunnerScanPostgresDBCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSaverRun", reflect.TypeOf((*MockScannerTaskRunner)(nil).ScheduleSaverRun), ctx, scan, scanType)
+	return &ScannerTaskRunnerScheduleSaverRunCall{Call: call}
 }
 
-// PostgresTaskRunnerScanPostgresDBCall wrap *gomock.Call
-type PostgresTaskRunnerScanPostgresDBCall struct {
+// ScannerTaskRunnerScheduleSaverRunCall wrap *gomock.Call
+type ScannerTaskRunnerScheduleSaverRunCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *PostgresTaskRunnerScanPostgresDBCall) Return(arg0 error) *PostgresTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerScheduleSaverRunCall) Return(arg0 error) *ScannerTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *PostgresTaskRunnerScanPostgresDBCall) Do(f func(context.Context, *queries.PostgresScan) error) *PostgresTaskRunnerScanPostgresDBCall {
+func (c *ScannerTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *PostgresTaskRunnerScanPostgresDBCall) DoAndReturn(f func(context.Context, *queries.PostgresScan) error) *PostgresTaskRunnerScanPostgresDBCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// MockAllScanTaskRunner is a mock of AllScanTaskRunner interface.
-type MockAllScanTaskRunner struct {
-	ctrl     *gomock.Controller
-	recorder *MockAllScanTaskRunnerMockRecorder
-}
-
-// MockAllScanTaskRunnerMockRecorder is the mock recorder for MockAllScanTaskRunner.
-type MockAllScanTaskRunnerMockRecorder struct {
-	mock *MockAllScanTaskRunner
-}
-
-// NewMockAllScanTaskRunner creates a new mock instance.
-func NewMockAllScanTaskRunner(ctrl *gomock.Controller) *MockAllScanTaskRunner {
-	mock := &MockAllScanTaskRunner{ctrl: ctrl}
-	mock.recorder = &MockAllScanTaskRunnerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAllScanTaskRunner) EXPECT() *MockAllScanTaskRunnerMockRecorder {
-	return m.recorder
-}
-
-// RunAllScanners mocks base method.
-func (m *MockAllScanTaskRunner) RunAllScanners(ctx context.Context, scan *queries.Scan, runningRemote bool) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunAllScanners", ctx, scan, runningRemote)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// RunAllScanners indicates an expected call of RunAllScanners.
-func (mr *MockAllScanTaskRunnerMockRecorder) RunAllScanners(ctx, scan, runningRemote any) *AllScanTaskRunnerRunAllScannersCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunAllScanners", reflect.TypeOf((*MockAllScanTaskRunner)(nil).RunAllScanners), ctx, scan, runningRemote)
-	return &AllScanTaskRunnerRunAllScannersCall{Call: call}
-}
-
-// AllScanTaskRunnerRunAllScannersCall wrap *gomock.Call
-type AllScanTaskRunnerRunAllScannersCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *AllScanTaskRunnerRunAllScannersCall) Return(arg0 error) *AllScanTaskRunnerRunAllScannersCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *AllScanTaskRunnerRunAllScannersCall) Do(f func(context.Context, *queries.Scan, bool) error) *AllScanTaskRunnerRunAllScannersCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *AllScanTaskRunnerRunAllScannersCall) DoAndReturn(f func(context.Context, *queries.Scan, bool) error) *AllScanTaskRunnerRunAllScannersCall {
+func (c *ScannerTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

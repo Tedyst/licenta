@@ -25,6 +25,24 @@ type DefaultBruteforcePassword struct {
 	Password string `json:"password"`
 }
 
+type MysqlDatabase struct {
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Version      sql.NullString     `json:"version"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type MysqlScan struct {
+	ID         int64 `json:"id"`
+	ScanID     int64 `json:"scan_id"`
+	DatabaseID int64 `json:"database_id"`
+}
+
 type NvdCfe struct {
 	ID           int64              `json:"id"`
 	CveID        string             `json:"cve_id"`
