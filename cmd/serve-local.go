@@ -62,7 +62,12 @@ var serveLocalCmd = &cobra.Command{
 			), db, localExchange, brutefroceProvider)
 		}
 
-		userAuth, err := auth.NewAuthenticationProvider(viper.GetString("baseurl"), db, hashKey, encryptKey, taskRunner)
+		userCacheProvider, err := cache.NewLocalCacheProvider[queries.User]()
+		if err != nil {
+			return err
+		}
+
+		userAuth, err := auth.NewAuthenticationProvider(viper.GetString("baseurl"), db, hashKey, encryptKey, taskRunner, userCacheProvider)
 		if err != nil {
 			return fmt.Errorf("failed to initialize user authentication: %w", err)
 		}

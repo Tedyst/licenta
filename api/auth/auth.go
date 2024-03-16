@@ -12,6 +12,7 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
+	"github.com/tedyst/licenta/cache"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	abclientstate "github.com/volatiletech/authboss-clientstate"
@@ -33,14 +34,15 @@ const sessionCookieName = "session"
 type requestStorer struct{}
 
 type authenticationProvider struct {
+	cache    cache.CacheProvider[queries.User]
 	authboss *authboss.Authboss
 	querier  db.TransactionQuerier
 }
 
-func NewAuthenticationProvider(baseURL string, querier db.TransactionQuerier, authKey []byte, sessionKey []byte, emailTaskRunner emailTaskRunner) (*authenticationProvider, error) {
+func NewAuthenticationProvider(baseURL string, querier db.TransactionQuerier, authKey []byte, sessionKey []byte, emailTaskRunner emailTaskRunner, cache cache.CacheProvider[queries.User]) (*authenticationProvider, error) {
 	ab := authboss.New()
 
-	ab.Config.Storage.Server = newAuthbossStorer(querier)
+	ab.Config.Storage.Server = newAuthbossStorer(querier, cache)
 	ab.Config.Storage.SessionState = abclientstate.NewSessionStorer(sessionCookieName, authKey, sessionKey)
 	ab.Config.Storage.CookieState = abclientstate.NewCookieStorer(authKey, sessionKey)
 
@@ -108,6 +110,7 @@ func NewAuthenticationProvider(baseURL string, querier db.TransactionQuerier, au
 	return &authenticationProvider{
 		querier:  querier,
 		authboss: ab,
+		cache:    cache,
 	}, nil
 }
 

@@ -61,6 +61,7 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 
 		if workerAuthData != nil {
 			ctx = context.WithValue(ctx, workerAuthKey{}, workerAuthData)
+			wa.cache.Set(r.Header.Get(workerAuthHeader), *workerAuthData)
 		}
 
 		next.ServeHTTP(w, r.WithContext(ctx))

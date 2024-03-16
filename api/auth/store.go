@@ -4,29 +4,43 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
+	"github.com/tedyst/licenta/cache"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/volatiletech/authboss/v3"
 )
 
 type authbossStorer struct {
+	cache   cache.CacheProvider[queries.User]
 	querier db.TransactionQuerier
 }
 
 var _ authboss.ServerStorer = (*authbossStorer)(nil)
 
-func newAuthbossStorer(querier db.TransactionQuerier) *authbossStorer {
+func newAuthbossStorer(querier db.TransactionQuerier, cache cache.CacheProvider[queries.User]) *authbossStorer {
 	return &authbossStorer{
 		querier: querier,
+		cache:   cache,
 	}
 }
 
 func (a *authbossStorer) Load(ctx context.Context, key string) (authboss.User, error) {
+	cachedUser, ok, err := a.cache.Get(key)
+	if err == nil && ok {
+		return &authbossUser{
+			user: &cachedUser,
+		}, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error getting user from cache: %w", err)
+	}
+
 	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
 		Username: key,
 		Email:    key,
@@ -48,6 +62,12 @@ func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
 	if !ok {
 		return errors.New("invalid user type")
 	}
+
+	err := a.cache.Set(u.user.Username, *u.user)
+	if err != nil {
+		return fmt.Errorf("error setting user in cache: %w", err)
+	}
+
 	return a.querier.UpdateUser(ctx, queries.UpdateUserParams{
 		ID:                u.user.ID,
 		Username:          u.user.Username,
@@ -110,7 +130,10 @@ func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
 		Confirmed:         u.user.Confirmed,
 	})
 	u.user = newUser
-	return err
+
+	err2 := a.cache.Set(u.user.Username, *u.user)
+
+	return errors.Join(err, err2)
 }
 
 func (a *authbossStorer) AddRememberToken(ctx context.Context, pid, token string) error {
