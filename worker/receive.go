@@ -62,6 +62,8 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			if err != nil {
 				return fmt.Errorf("error running task: %w", err)
 			}
+
+			continue
 		case http.StatusAccepted:
 			slog.Debug("No task available yet, retrying in 5 seconds...")
 		case http.StatusUnauthorized:
