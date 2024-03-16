@@ -13,8 +13,6 @@ import (
 const createBruteforcedPassword = `-- name: CreateBruteforcedPassword :one
 INSERT INTO bruteforced_passwords(hash, username, PASSWORD, last_bruteforce_id, project_id)
     VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT
-    DO NOTHING
 RETURNING
     id, hash, username, password, last_bruteforce_id, project_id
 `

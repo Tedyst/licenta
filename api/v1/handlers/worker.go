@@ -58,6 +58,11 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		return nil, fmt.Errorf("cannot get scan: %w", err)
 	}
 
+	scanGroup, err := server.DatabaseProvider.GetScanGroup(ctx, scan.Scan.ScanGroupID)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("cannot get scan group: %w", err)
+	}
+
 	postgresScan, err := server.DatabaseProvider.GetPostgresScanByScanID(ctx, message.ScanID)
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("cannot get postgres scan: %w", err)
@@ -81,6 +86,11 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 			PostgresScan:    postgresScanResponse,
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
+			ScanGroupId:     int(scan.Scan.ScanGroupID),
+		},
+		ScanGroup: generated.ScanGroup{
+			Id:        int(scanGroup.ID),
+			ProjectId: int(scanGroup.ProjectID),
 		},
 	}, nil
 }

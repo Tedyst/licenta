@@ -256,7 +256,7 @@ CREATE TABLE bruteforced_passwords(
   password text,
   last_bruteforce_id bigint,
   project_id bigint REFERENCES projects(id) ON DELETE CASCADE,
-  UNIQUE (hash, username)
+  UNIQUE (hash, username, project_id)
 );
 
 CREATE TABLE workers(

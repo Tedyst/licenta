@@ -3543,6 +3543,45 @@ func (c *TransactionQuerierGetWorkerByTokenCall) DoAndReturn(f func(context.Cont
 	return c
 }
 
+// GetWorkerForProject mocks base method.
+func (m *MockTransactionQuerier) GetWorkerForProject(ctx context.Context, arg queries.GetWorkerForProjectParams) (*queries.Worker, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkerForProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.Worker)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkerForProject indicates an expected call of GetWorkerForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetWorkerForProject(ctx, arg any) *TransactionQuerierGetWorkerForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkerForProject), ctx, arg)
+	return &TransactionQuerierGetWorkerForProjectCall{Call: call}
+}
+
+// TransactionQuerierGetWorkerForProjectCall wrap *gomock.Call
+type TransactionQuerierGetWorkerForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierGetWorkerForProjectCall) Return(arg0 *queries.Worker, arg1 error) *TransactionQuerierGetWorkerForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierGetWorkerForProjectCall) Do(f func(context.Context, queries.GetWorkerForProjectParams) (*queries.Worker, error)) *TransactionQuerierGetWorkerForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierGetWorkerForProjectCall) DoAndReturn(f func(context.Context, queries.GetWorkerForProjectParams) (*queries.Worker, error)) *TransactionQuerierGetWorkerForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetWorkerForScan mocks base method.
 func (m *MockTransactionQuerier) GetWorkerForScan(ctx context.Context, id int64) (*queries.Worker, error) {
 	m.ctrl.T.Helper()

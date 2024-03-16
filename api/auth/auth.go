@@ -143,9 +143,7 @@ func (auth *authenticationProvider) APIMiddleware(next http.Handler) http.Handle
 		if user != nil {
 			confirmMiddleware.ServeHTTP(w, r)
 		} else {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(`{"success": false, "message": "Unauthorized"}`))
+			next.ServeHTTP(w, r)
 		}
 	})
 }

@@ -138,6 +138,17 @@ func (runner *baseSaver) Scan(ctx context.Context) error {
 		}
 	}
 
+	if err := runner.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
+		ID:     runner.scan.ID,
+		Status: models.SCAN_FINISHED,
+		EndedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		},
+	}); err != nil {
+		return fmt.Errorf("could not update scan status: %w", err)
+	}
+
 	runner.logger.DebugContext(ctx, "Finished scan")
 
 	return nil

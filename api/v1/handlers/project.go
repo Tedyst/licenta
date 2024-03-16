@@ -54,6 +54,10 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 	if err != nil {
 		return nil, fmt.Errorf("error getting user: %w", err)
 	}
+	worker, err := server.workerauth.GetWorker(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting worker: %w", err)
+	}
 
 	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
 	if err != nil {
@@ -63,20 +67,43 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 		}, nil
 	}
 
-	authorized, err := server.authorization.UserHasPermissionForProject(ctx, project, user, authorization.Admin)
-	if err != nil {
-		return nil, fmt.Errorf("error checking permissions: %w", err)
-	}
-	if !authorized {
-		return generated.PostProjectIdRun400JSONResponse{
+	if user != nil {
+		authorized, err := server.authorization.UserHasPermissionForProject(ctx, project, user, authorization.Admin)
+		if err != nil {
+			return nil, fmt.Errorf("error checking permissions: %w", err)
+		}
+		if !authorized {
+			return generated.PostProjectIdRun401JSONResponse{
+				Message: "Not allowed to run scans on this project",
+				Success: false,
+			}, nil
+		}
+	} else if worker != nil {
+		authorized, err := server.authorization.WorkerHasPermissionForProject(ctx, project, worker, authorization.Admin)
+		if err != nil {
+			return nil, fmt.Errorf("error checking permissions: %w", err)
+		}
+		if !authorized {
+			return generated.PostProjectIdRun401JSONResponse{
+				Message: "Not allowed to run scans on this project",
+				Success: false,
+			}, nil
+		}
+	} else {
+		return generated.PostProjectIdRun401JSONResponse{
 			Message: "Not allowed to run scans on this project",
 			Success: false,
 		}, nil
 	}
 
+	createdBy := sql.NullInt64{}
+	if user != nil {
+		createdBy = sql.NullInt64{Int64: user.ID, Valid: true}
+	}
+
 	scanGroup, err := server.DatabaseProvider.CreateScanGroup(ctx, queries.CreateScanGroupParams{
 		ProjectID: request.Id,
-		CreatedBy: sql.NullInt64{Int64: user.ID, Valid: true},
+		CreatedBy: createdBy,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("error creating scan group: %w", err)

@@ -18,7 +18,7 @@ import (
 )
 
 func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInterface) error {
-	slog.Info("Starting to receive tasks", "client", client)
+	slog.Info("Starting to receive tasks")
 
 	for {
 		newCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -43,7 +43,6 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			scanGroup := queries.ScanGroup{
 				ID:        int64(task.JSON200.ScanGroup.Id),
 				ProjectID: int64(task.JSON200.ScanGroup.ProjectId),
-				CreatedBy: sql.NullInt64{Int64: int64(task.JSON200.ScanGroup.CreatedBy.Id), Valid: task.JSON200.ScanGroup.CreatedBy != nil},
 			}
 
 			var postgresScan *queries.PostgresScan
@@ -75,8 +74,11 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			}
 		case http.StatusAccepted:
 			slog.Debug("No task available yet, retrying in 5 seconds...")
+		case http.StatusUnauthorized:
+			slog.ErrorContext(ctx, "Received Unauthorized response from server", "response", string(task.Body))
+			return errors.New("error receiving task")
 		default:
-			slog.ErrorContext(ctx, "got invalid response from server", "response", task)
+			slog.ErrorContext(ctx, "Received invalid response from server", "response", string(task.Body))
 			return errors.New("error receiving task")
 		}
 

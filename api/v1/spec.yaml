@@ -214,6 +214,12 @@ paths:
             format: int32
             minimum: -1
             default: -1
+        - name: password
+          in: query
+          description: The password to filter
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Successful operation
@@ -223,6 +229,12 @@ paths:
                 $ref: '#/components/schemas/PaginatedBruteforcePasswords'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Specific password not found
           content:
             application/json:
               schema:
@@ -1211,7 +1223,6 @@ components:
         - username
         - password
         - last_bruteforce_id
-        - project_id
       properties:
         hash:
           type: string
@@ -1220,8 +1231,6 @@ components:
         password:
           type: string
         last_bruteforce_id:
-          type: integer
-        project_id:
           type: integer
     UpdateBruteforcedPassword:
       type: object

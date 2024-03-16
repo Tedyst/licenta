@@ -10,6 +10,7 @@ import (
 
 	"errors"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -53,20 +54,20 @@ func (q *remoteQuerier) UpdateScanStatus(ctx context.Context, params queries.Upd
 		return fmt.Errorf("cannot update scan status: %w", err)
 	}
 
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "UpdateScanStatus")
 
 	switch response.StatusCode() {
 	case http.StatusOK:
-		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
+		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200, "endpoint", "UpdateScanStatus")
 		return nil
 	default:
-		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body)
+		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body, "endpoint", "UpdateScanStatus")
 		return errors.New("error updating scan status")
 	}
 }
 
 func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.CreateScanResultParams) (*queries.ScanResult, error) {
-	slog.InfoContext(ctx, "Creating scan result", "params", params)
+	slog.InfoContext(ctx, "Creating scan result", "params", params, "endpoint", "CreateScanResult")
 
 	response, err := q.client.PostScanIdResultWithResponse(ctx, params.ScanID, generated.CreateScanResult{
 		Message:  params.Message,
@@ -76,11 +77,11 @@ func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.Cre
 		return nil, err
 	}
 
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "CreateScanResult")
 
 	switch response.StatusCode() {
 	case http.StatusOK:
-		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
+		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200, "endpoint", "CreateScanResult")
 		return &queries.ScanResult{
 			ID:        int64(response.JSON200.Scan.Id),
 			Severity:  int32(response.JSON200.Scan.Severity),
@@ -88,13 +89,13 @@ func (q *remoteQuerier) CreateScanResult(ctx context.Context, params queries.Cre
 			CreatedAt: pgtype.Timestamptz{Time: time.Now()},
 		}, nil
 	default:
-		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body)
+		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body, "endpoint", "CreateScanResult")
 		return nil, errors.New("error creating scan result")
 	}
 }
 
 func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg queries.CreateScanBruteforceResultParams) (*queries.ScanBruteforceResult, error) {
-	slog.InfoContext(ctx, "Creating bruteforce result", "params", arg)
+	slog.InfoContext(ctx, "Creating bruteforce result", "params", arg, "endpoint", "CreateScanBruteforceResult")
 
 	response, err := q.client.PostScanIdBruteforceresultsWithResponse(ctx, arg.ScanID, generated.CreateBruteforceScanResult{
 		Password: arg.Password.String,
@@ -108,7 +109,7 @@ func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg quer
 
 	switch response.StatusCode() {
 	case http.StatusOK:
-		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
+		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200, "endpoint", "CreateScanBruteforceResult")
 		return &queries.ScanBruteforceResult{
 			ID:        int64(response.JSON200.Bruteforcescanresult.Id),
 			ScanID:    arg.ScanID,
@@ -120,13 +121,13 @@ func (q *remoteQuerier) CreateScanBruteforceResult(ctx context.Context, arg quer
 			CreatedAt: q.scan.CreatedAt,
 		}, nil
 	default:
-		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body)
+		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body, "endpoint", "CreateScanBruteforceResult")
 		return nil, errors.New("error creating scan result")
 	}
 }
 
 func (q *remoteQuerier) UpdateScanBruteforceResult(ctx context.Context, params queries.UpdateScanBruteforceResultParams) error {
-	slog.InfoContext(ctx, "Updating bruteforce result", "params", params)
+	slog.InfoContext(ctx, "Updating bruteforce result", "params", params, "endpoint", "UpdateScanBruteforceResult")
 
 	response, err := q.client.PatchBruteforceresultsIdWithResponse(ctx, params.ID, generated.PatchBruteforceScanResult{
 		Password: params.Password.String,
@@ -139,10 +140,10 @@ func (q *remoteQuerier) UpdateScanBruteforceResult(ctx context.Context, params q
 
 	switch response.StatusCode() {
 	case http.StatusOK:
-		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200)
+		slog.InfoContext(ctx, "Received response", "status", response.StatusCode(), "body", response.JSON200, "endpoint", "UpdateScanBruteforceResult")
 		return nil
 	default:
-		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body)
+		slog.ErrorContext(ctx, "Received response", "status", response.StatusCode(), "body", response.Body, "endpoint", "UpdateScanBruteforceResult")
 		return errors.New("error creating scan result")
 	}
 }
@@ -153,7 +154,7 @@ func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg quer
 		return nil, err
 	}
 
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetCvesByProductAndVersion")
 
 	switch response.StatusCode() {
 	case http.StatusOK:
@@ -181,61 +182,13 @@ func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg quer
 	}
 }
 
-func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error) {
-	response, err := q.client.GetPostgresIdWithResponse(ctx, q.postgresScan.DatabaseID)
-	if err != nil {
-		return nil, errors.New("cannot get postgres database from server")
-	}
-
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
-
-	switch response.StatusCode() {
-	case http.StatusOK:
-		return &queries.GetPostgresDatabaseRow{
-			PostgresDatabase: queries.PostgresDatabase{
-				ID:           int64(response.JSON200.PostgresDatabase.Id),
-				ProjectID:    int64(response.JSON200.PostgresDatabase.ProjectId),
-				Host:         response.JSON200.PostgresDatabase.Host,
-				Port:         int32(response.JSON200.PostgresDatabase.Port),
-				DatabaseName: response.JSON200.PostgresDatabase.DatabaseName,
-				Username:     response.JSON200.PostgresDatabase.Username,
-				Password:     response.JSON200.PostgresDatabase.Password,
-				Version: sql.NullString{
-					String: response.JSON200.PostgresDatabase.Version,
-					Valid:  response.JSON200.PostgresDatabase.Version != "",
-				},
-			},
-		}, nil
-	default:
-		return nil, errors.New("error getting postgres database")
-	}
-}
-
-func (q *remoteQuerier) UpdatePostgresVersion(ctx context.Context, params queries.UpdatePostgresVersionParams) error {
-	response, err := q.client.PatchPostgresIdWithResponse(ctx, q.postgresScan.DatabaseID, generated.PatchPostgresDatabase{
-		Version: &params.Version.String,
-	})
-	if err != nil {
-		return err
-	}
-
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
-
-	switch response.StatusCode() {
-	case http.StatusOK:
-		return nil
-	default:
-		return errors.New("error updating postgres version")
-	}
-}
-
 func (q *remoteQuerier) GetProject(ctx context.Context, id int64) (*queries.Project, error) {
 	response, err := q.client.GetProjectIdWithResponse(ctx, id)
 	if err != nil {
 		return nil, errors.New("cannot get project")
 	}
 
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetProject")
 
 	switch response.StatusCode() {
 	case http.StatusOK:
@@ -246,37 +199,146 @@ func (q *remoteQuerier) GetProject(ctx context.Context, id int64) (*queries.Proj
 			Remote:         response.JSON200.Project.Remote,
 		}, nil
 	default:
-		return nil, errors.New("error updating postgres version")
+		return nil, errors.New("error getting project")
 	}
 }
 
-func (q *remoteQuerier) GetPostgresScanByScanID(ctx context.Context, scanID int64) (*queries.PostgresScan, error) {
-	return &queries.PostgresScan{
-		ID:         scanID,
-		DatabaseID: q.postgresScan.DatabaseID,
-	}, nil
-}
-
 func (q *remoteQuerier) GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.Worker, error) {
-	return nil, nil
+	return []*queries.Worker{}, nil
 }
 
 func (q *remoteQuerier) CreateBruteforcedPassword(ctx context.Context, arg queries.CreateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
-	return nil, nil
+	response, err := q.client.PostProjectIdBruteforcedPasswordWithResponse(ctx, q.scanGroup.ProjectID, generated.CreateBruteforcedPassword{
+		Password:         arg.Password.String,
+		Hash:             arg.Hash,
+		LastBruteforceId: int(arg.LastBruteforceID.Int64),
+		Username:         arg.Username,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "CreateBruteforcedPassword")
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return &queries.BruteforcedPassword{
+			ID: int64(response.JSON200.BruteforcedPassword.Id),
+			Password: sql.NullString{
+				String: response.JSON200.BruteforcedPassword.Password,
+				Valid:  response.JSON200.BruteforcedPassword.Password != "",
+			},
+			Hash: response.JSON200.BruteforcedPassword.Hash,
+			LastBruteforceID: sql.NullInt64{
+				Int64: int64(response.JSON200.BruteforcedPassword.LastBruteforceId),
+				Valid: response.JSON200.BruteforcedPassword.LastBruteforceId != 0,
+			},
+			ProjectID: sql.NullInt64{
+				Int64: int64(response.JSON200.BruteforcedPassword.ProjectId),
+				Valid: response.JSON200.BruteforcedPassword.ProjectId != 0,
+			},
+			Username: response.JSON200.BruteforcedPassword.Username,
+		}, nil
+	default:
+		return nil, errors.New("error creating bruteforced password")
+	}
 }
 
 func (q *remoteQuerier) GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error) {
-	return 0, nil
+	response, err := q.client.GetProjectIdBruteforcePasswordsWithResponse(ctx, projectID, &generated.GetProjectIdBruteforcePasswordsParams{})
+	if err != nil {
+		return 0, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetBruteforcePasswordsForProjectCount")
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return int64(response.JSON200.Count), nil
+	default:
+		return 0, errors.New("error getting bruteforce passwords")
+	}
 }
 
 func (q *remoteQuerier) GetBruteforcePasswordsPaginated(ctx context.Context, arg queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error) {
-	return nil, nil
+	lastId := int32(arg.LastID)
+	response, err := q.client.GetProjectIdBruteforcePasswordsWithResponse(ctx, q.scanGroup.ProjectID, &generated.GetProjectIdBruteforcePasswordsParams{
+		LastPasswordId: &lastId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetBruteforcePasswordsPaginated")
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		var result []*queries.DefaultBruteforcePassword
+		for _, password := range response.JSON200.Results {
+			result = append(result, &queries.DefaultBruteforcePassword{
+				ID:       int64(password.Id),
+				Password: password.Password,
+			})
+		}
+		return result, nil
+	default:
+		return nil, errors.New("error getting bruteforce passwords")
+	}
 }
 
 func (q *remoteQuerier) GetBruteforcedPasswords(ctx context.Context, arg queries.GetBruteforcedPasswordsParams) (*queries.BruteforcedPassword, error) {
-	return nil, nil
+	response, err := q.client.GetProjectIdBruteforcedPasswordWithResponse(ctx, q.scanGroup.ProjectID, &generated.GetProjectIdBruteforcedPasswordParams{
+		Hash:     arg.Hash,
+		Username: arg.Username,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetBruteforcedPasswords")
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return &queries.BruteforcedPassword{
+			ID: int64(response.JSON200.BruteforcedPassword.Id),
+			Password: sql.NullString{
+				String: response.JSON200.BruteforcedPassword.Password,
+				Valid:  response.JSON200.BruteforcedPassword.Password != "",
+			},
+			Hash: response.JSON200.BruteforcedPassword.Hash,
+			LastBruteforceID: sql.NullInt64{
+				Int64: int64(response.JSON200.BruteforcedPassword.LastBruteforceId),
+				Valid: response.JSON200.BruteforcedPassword.LastBruteforceId != 0,
+			},
+			ProjectID: sql.NullInt64{
+				Int64: int64(response.JSON200.BruteforcedPassword.ProjectId),
+				Valid: response.JSON200.BruteforcedPassword.ProjectId != 0,
+			},
+			Username: response.JSON200.BruteforcedPassword.Username,
+		}, nil
+	case http.StatusNotFound:
+		return nil, pgx.ErrNoRows
+	default:
+		return nil, errors.New("error getting bruteforced password")
+	}
 }
 
 func (q *remoteQuerier) GetSpecificBruteforcePasswordID(ctx context.Context, arg queries.GetSpecificBruteforcePasswordIDParams) (int64, error) {
-	return 0, nil
+	response, err := q.client.GetProjectIdBruteforcePasswordsWithResponse(ctx, arg.ProjectID, &generated.GetProjectIdBruteforcePasswordsParams{
+		Password: &arg.Password,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetSpecificBruteforcePasswordID")
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return int64(response.JSON200.Results[0].Id), nil
+	case http.StatusNotFound:
+		return 0, pgx.ErrNoRows
+	default:
+		return 0, errors.New("error getting bruteforced password")
+	}
 }

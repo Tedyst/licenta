@@ -11,6 +11,7 @@ import (
 	"github.com/tedyst/licenta/api"
 	"github.com/tedyst/licenta/api/auth"
 	"github.com/tedyst/licenta/api/auth/workerauth"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/cache"
 	database "github.com/tedyst/licenta/db"
@@ -73,14 +74,17 @@ var serveLocalCmd = &cobra.Command{
 
 		workerAuth := workerauth.NewWorkerAuth(waCacheProvider, db)
 
+		authorizationManager := authorization.NewAuthorizationManager(db)
+
 		app, err := api.Initialize(api.ApiConfig{
-			Debug:           viper.GetBool("debug"),
-			Origin:          viper.GetString("baseurl"),
-			TaskRunner:      taskRunner,
-			MessageExchange: localExchange,
-			WorkerAuth:      workerAuth,
-			UserAuth:        userAuth,
-			Database:        db,
+			Debug:                viper.GetBool("debug"),
+			Origin:               viper.GetString("baseurl"),
+			TaskRunner:           taskRunner,
+			MessageExchange:      localExchange,
+			WorkerAuth:           workerAuth,
+			UserAuth:             userAuth,
+			Database:             db,
+			AuthorizationManager: authorizationManager,
 		})
 		if err != nil {
 			return err

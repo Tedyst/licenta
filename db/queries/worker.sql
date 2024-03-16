@@ -35,3 +35,13 @@ FROM
 WHERE
     workers.token = $1;
 
+-- name: GetWorkerForProject :one
+SELECT
+    workers.*
+FROM
+    workers
+    INNER JOIN worker_projects ON workers.id = worker_projects.worker_id
+WHERE
+    worker_projects.project_id = $1
+    AND workers.token = $2;
+

@@ -63,6 +63,34 @@ func (q *Queries) GetWorkerByToken(ctx context.Context, token string) (*Worker, 
 	return &i, err
 }
 
+const getWorkerForProject = `-- name: GetWorkerForProject :one
+SELECT
+    workers.id, workers.token, workers.organization, workers.created_at
+FROM
+    workers
+    INNER JOIN worker_projects ON workers.id = worker_projects.worker_id
+WHERE
+    worker_projects.project_id = $1
+    AND workers.token = $2
+`
+
+type GetWorkerForProjectParams struct {
+	ProjectID int64  `json:"project_id"`
+	Token     string `json:"token"`
+}
+
+func (q *Queries) GetWorkerForProject(ctx context.Context, arg GetWorkerForProjectParams) (*Worker, error) {
+	row := q.db.QueryRow(ctx, getWorkerForProject, arg.ProjectID, arg.Token)
+	var i Worker
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Organization,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getWorkerForScan = `-- name: GetWorkerForScan :one
 SELECT
     workers.id, workers.token, workers.organization, workers.created_at

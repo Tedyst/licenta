@@ -24,7 +24,6 @@ require (
 	github.com/jackc/pgx/v5 v5.5.1
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/justinas/nosurf v1.1.1
-	github.com/nathanaelle/password v1.0.0
 	github.com/oapi-codegen/runtime v1.1.0
 	github.com/samber/slog-chi v1.6.1
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible

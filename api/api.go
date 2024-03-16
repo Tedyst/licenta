@@ -12,6 +12,7 @@ import (
 	"github.com/go-http-utils/etag"
 	"github.com/justinas/nosurf"
 	slogchi "github.com/samber/slog-chi"
+	"github.com/tedyst/licenta/api/authorization"
 	v1 "github.com/tedyst/licenta/api/v1"
 	"github.com/tedyst/licenta/api/v1/middleware/cache"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
@@ -32,6 +33,8 @@ type ApiConfig struct {
 
 	WorkerAuth workerAuth
 	UserAuth   userAuth
+
+	AuthorizationManager authorization.AuthorizationManager
 
 	Database db.TransactionQuerier
 }
@@ -88,13 +91,14 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	})
 
 	v1.RegisterHandler(apiRouter, v1.ApiV1Config{
-		Debug:            config.Debug,
-		BaseURL:          "",
-		TaskRunner:       config.TaskRunner,
-		MessageExchange:  config.MessageExchange,
-		WorkerAuth:       config.WorkerAuth,
-		UserAuth:         config.UserAuth,
-		DatabaseProvider: config.Database,
+		Debug:                config.Debug,
+		BaseURL:              "",
+		TaskRunner:           config.TaskRunner,
+		MessageExchange:      config.MessageExchange,
+		WorkerAuth:           config.WorkerAuth,
+		UserAuth:             config.UserAuth,
+		DatabaseProvider:     config.Database,
+		AuthorizationManager: config.AuthorizationManager,
 	})
 	return otelhttp.NewHandler(app, "api"), nil
 }

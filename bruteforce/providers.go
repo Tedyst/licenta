@@ -157,7 +157,7 @@ func (d *databasePasswordProvider) GetPasswordByHash(username, hash string) (str
 		Hash:     hash,
 		ProjectID: sql.NullInt64{
 			Int64: d.projectID,
-			Valid: true,
+			Valid: d.projectID != 0,
 		},
 	})
 	if err == pgx.ErrNoRows {

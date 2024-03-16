@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/api/v1/handlers"
 	"github.com/tedyst/licenta/db"
@@ -25,6 +26,8 @@ type ApiV1Config struct {
 	WorkerAuth workerAuth
 	UserAuth   userAuth
 
+	AuthorizationManager authorization.AuthorizationManager
+
 	DatabaseProvider db.TransactionQuerier
 }
 
@@ -40,11 +43,12 @@ type userAuth interface {
 
 func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
 	serverHandler := handlers.NewServerHandler(handlers.HandlerConfig{
-		DatabaseProvider: config.DatabaseProvider,
-		TaskRunner:       config.TaskRunner,
-		MessageExchange:  config.MessageExchange,
-		WorkerAuth:       config.WorkerAuth,
-		UserAuth:         config.UserAuth,
+		DatabaseProvider:     config.DatabaseProvider,
+		TaskRunner:           config.TaskRunner,
+		MessageExchange:      config.MessageExchange,
+		WorkerAuth:           config.WorkerAuth,
+		UserAuth:             config.UserAuth,
+		AuthorizationManager: config.AuthorizationManager,
 	})
 	api := generated.NewStrictHandlerWithOptions(serverHandler, nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {

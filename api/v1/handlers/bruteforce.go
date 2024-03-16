@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -14,6 +15,33 @@ func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context
 	lastid := -1
 	if request.Params.LastPasswordId != nil {
 		lastid = int(*request.Params.LastPasswordId)
+	}
+
+	if request.Params.Password != nil {
+		passId, err := server.DatabaseProvider.GetSpecificBruteforcePasswordID(ctx, queries.GetSpecificBruteforcePasswordIDParams{
+			Password: *request.Params.Password,
+		})
+		if err == pgx.ErrNoRows {
+			return generated.GetProjectIdBruteforcePasswords404JSONResponse{
+				Message: "Not found",
+				Success: false,
+			}, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		return generated.GetProjectIdBruteforcePasswords200JSONResponse{
+			Success: true,
+			Count:   1,
+			Results: []generated.BruteforcePassword{
+				{
+					Id:       passId,
+					Password: *request.Params.Password,
+				},
+			},
+			Next: nil,
+		}, nil
 	}
 
 	count, err := server.DatabaseProvider.GetBruteforcePasswordsForProjectCount(ctx, request.Id)
@@ -171,6 +199,31 @@ func (server *serverHandler) PatchBruteforcedPasswordsId(ctx context.Context, re
 }
 
 func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Context, request generated.PostProjectIdBruteforcedPasswordRequestObject) (generated.PostProjectIdBruteforcedPasswordResponseObject, error) {
+	worker, err := server.workerauth.GetWorker(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
+	if err != nil {
+		return generated.PostProjectIdBruteforcedPassword404JSONResponse{
+			Message: "Not found",
+			Success: false,
+		}, nil
+	}
+
+	hasPerm, err := server.authorization.WorkerHasPermissionForProject(ctx, project, worker, authorization.Worker)
+	if err != nil {
+		return nil, err
+	}
+
+	if !hasPerm {
+		return generated.PostProjectIdBruteforcedPassword401JSONResponse{
+			Message: "Not allowed to create bruteforced passwords",
+			Success: false,
+		}, nil
+	}
+
 	pass, err := server.DatabaseProvider.CreateBruteforcedPassword(ctx, queries.CreateBruteforcedPasswordParams{
 		Hash:      request.Body.Hash,
 		Username:  request.Body.Username,
@@ -181,6 +234,12 @@ func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Contex
 			Valid: true,
 		},
 	})
+	if err == pgx.ErrNoRows {
+		return generated.PostProjectIdBruteforcedPassword404JSONResponse{
+			Message: "Not found",
+			Success: false,
+		}, nil
+	}
 	if err != nil {
 		return nil, err
 	}

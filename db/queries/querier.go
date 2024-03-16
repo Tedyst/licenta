@@ -101,6 +101,7 @@ type Querier interface {
 	GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*GetUserByWebauthnCredentialIDRow, error)
 	GetWebauthnCredentialsByUserID(ctx context.Context, userID int64) ([]*WebauthnCredential, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
+	GetWorkerForProject(ctx context.Context, arg GetWorkerForProjectParams) (*Worker, error)
 	GetWorkerForScan(ctx context.Context, id int64) (*Worker, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error

@@ -145,10 +145,10 @@ func (server *serverHandler) PostScanIdResult(ctx context.Context, request gener
 	}
 
 	_, err := server.DatabaseProvider.GetScan(ctx, request.Id)
-	if err != nil {
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
-	if err != nil && err != pgx.ErrNoRows {
+	if err != nil {
 		return nil, err
 	}
 	if err == pgx.ErrNoRows {

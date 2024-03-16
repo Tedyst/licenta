@@ -14,6 +14,7 @@ const (
 	Admin
 	Viewer
 	None
+	Worker
 )
 
 type AuthorizationManager interface {
@@ -60,7 +61,15 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 }
 
 func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error) {
-	return false, nil
+	_, err := a.querier.GetWorkerForProject(ctx, queries.GetWorkerForProjectParams{
+		ProjectID: project.ID,
+		Token:     worker.Token,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (a *authorizationManagerImpl) UserPermissionsChanged(ctx context.Context, user *queries.User) error {
