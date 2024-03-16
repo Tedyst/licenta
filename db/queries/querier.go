@@ -81,6 +81,8 @@ type Querier interface {
 	GetPostgresScanByScanID(ctx context.Context, scanID int64) (*PostgresScan, error)
 	GetProject(ctx context.Context, id int64) (*Project, error)
 	GetProjectByOrganizationAndName(ctx context.Context, arg GetProjectByOrganizationAndNameParams) (*Project, error)
+	GetProjectInfoForMysqlScanByScanID(ctx context.Context, scanID int64) (*GetProjectInfoForMysqlScanByScanIDRow, error)
+	GetProjectInfoForPostgresScanByScanID(ctx context.Context, scanID int64) (*GetProjectInfoForPostgresScanByScanIDRow, error)
 	GetProjectMembers(ctx context.Context, projectID int64) ([]*ProjectMember, error)
 	GetProjectPermissionsForUser(ctx context.Context, arg GetProjectPermissionsForUserParams) (int16, error)
 	GetProjectUser(ctx context.Context, arg GetProjectUserParams) (*ProjectMember, error)

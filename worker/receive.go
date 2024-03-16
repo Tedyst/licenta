@@ -45,24 +45,14 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 				ProjectID: int64(task.JSON200.ScanGroup.ProjectId),
 			}
 
-			var postgresScan *queries.PostgresScan
-			if task.JSON200.Scan.PostgresScan != nil {
-				postgresScan = &queries.PostgresScan{
-					ID:         int64(task.JSON200.Scan.PostgresScan.Id),
-					DatabaseID: int64(task.JSON200.Scan.PostgresScan.DatabaseId),
-					ScanID:     int64(task.JSON200.Scan.Id),
-				}
-			}
-
-			slog.DebugContext(ctx, "Got task from remote server", "scan", scan, "postgres_scan", postgresScan)
+			slog.DebugContext(ctx, "Got task from remote server", "scan", scan)
 
 			localExchange := localexchange.NewLocalExchange()
 
 			database := &remoteQuerier{
-				client:       client,
-				scan:         &scan,
-				postgresScan: postgresScan,
-				scanGroup:    &scanGroup,
+				client:    client,
+				scan:      &scan,
+				scanGroup: &scanGroup,
 			}
 			passProvider := bruteforce.NewDatabaseBruteforceProvider(database)
 

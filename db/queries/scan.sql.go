@@ -145,15 +145,7 @@ SELECT
         FROM
             scan_results
         WHERE
-            scan_id = scans.id) AS maximum_severity,
-(
-        SELECT
-            COALESCE(id, 0)::bigint
-        FROM
-            postgres_scans
-        WHERE
-            postgres_scans.scan_id = scans.id
-        LIMIT 1) AS postgres_scan
+            scan_id = scans.id) AS maximum_severity
 FROM
     scans
 WHERE
@@ -163,7 +155,6 @@ WHERE
 type GetScanRow struct {
 	Scan            Scan  `json:"scan"`
 	MaximumSeverity int32 `json:"maximum_severity"`
-	PostgresScan    int64 `json:"postgres_scan"`
 }
 
 func (q *Queries) GetScan(ctx context.Context, id int64) (*GetScanRow, error) {
@@ -178,7 +169,6 @@ func (q *Queries) GetScan(ctx context.Context, id int64) (*GetScanRow, error) {
 		&i.Scan.CreatedAt,
 		&i.Scan.EndedAt,
 		&i.MaximumSeverity,
-		&i.PostgresScan,
 	)
 	return &i, err
 }

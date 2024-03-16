@@ -8,9 +8,11 @@ import (
 	"log/slog"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner/mysql"
 )
 
@@ -33,6 +35,9 @@ func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 	}
 
 	mysqlScan, err := queries.GetMysqlScanByScanID(ctx, scan.ID)
+	if err == pgx.ErrNoRows {
+		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get mysql scan: %w", err))
+	}
 	if err != nil {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get mysql scan: %w", err))
 	}
@@ -97,4 +102,45 @@ type mysqlSaver struct {
 
 func init() {
 	savers["mysql"] = NewMysqlSaver
+	creaters["mysql"] = CreateMysqlScan
+}
+
+type CreateMysqlScanQuerier interface {
+	GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.MysqlDatabase, error)
+	CreateScan(ctx context.Context, params queries.CreateScanParams) (*queries.Scan, error)
+	CreateMysqlScan(ctx context.Context, params queries.CreateMysqlScanParams) (*queries.MysqlScan, error)
+}
+
+func CreateMysqlScan(ctx context.Context, q BaseCreater, projectID int64, scanGroupID int64) ([]*queries.Scan, error) {
+	querier, ok := q.(CreateMysqlScanQuerier)
+	if !ok {
+		return nil, errors.New("querier is not a CreatePostgresScanQuerier")
+	}
+
+	scans := []*queries.Scan{}
+
+	mysql_databases, err := querier.GetMysqlDatabasesForProject(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting Mysql databases for project: %w", err)
+	}
+	for _, db := range mysql_databases {
+		scan, err := querier.CreateScan(ctx, queries.CreateScanParams{
+			Status:      models.SCAN_NOT_STARTED,
+			ScanGroupID: scanGroupID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+		}
+
+		_, err = querier.CreateMysqlScan(ctx, queries.CreateMysqlScanParams{
+			ScanID:     scan.ID,
+			DatabaseID: db.ID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+		}
+
+		scans = append(scans, scan)
+	}
+	return scans, nil
 }

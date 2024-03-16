@@ -131,6 +131,25 @@ type LoginUser struct {
 	Username string `json:"username" validate:"printascii,min=3,max=20"`
 }
 
+// MysqlDatabase defines model for MysqlDatabase.
+type MysqlDatabase struct {
+	CreatedAt    string `json:"created_at"`
+	DatabaseName string `json:"database_name"`
+	Host         string `json:"host"`
+	Id           int    `json:"id"`
+	Password     string `json:"password"`
+	Port         int    `json:"port"`
+	ProjectId    int    `json:"project_id"`
+	Username     string `json:"username"`
+	Version      string `json:"version"`
+}
+
+// MysqlScan defines model for MysqlScan.
+type MysqlScan struct {
+	DatabaseId int `json:"database_id"`
+	Id         int `json:"id"`
+}
+
 // Organization defines model for Organization.
 type Organization struct {
 	// CreatedAt The date the organization was created
@@ -188,6 +207,16 @@ type PatchBruteforceScanResult struct {
 	Password string `json:"password"`
 	Total    int    `json:"total"`
 	Tried    int    `json:"tried"`
+}
+
+// PatchMysqlDatabase defines model for PatchMysqlDatabase.
+type PatchMysqlDatabase struct {
+	DatabaseName *string `json:"database_name,omitempty"`
+	Host         *string `json:"host,omitempty"`
+	Password     *string `json:"password,omitempty"`
+	Port         *int    `json:"port,omitempty"`
+	Username     *string `json:"username,omitempty"`
+	Version      *string `json:"version,omitempty"`
 }
 
 // PatchPostgresDatabase defines model for PatchPostgresDatabase.
@@ -258,14 +287,13 @@ type RegisterUser struct {
 
 // Scan defines model for Scan.
 type Scan struct {
-	CreatedAt       string        `json:"created_at"`
-	EndedAt         string        `json:"ended_at"`
-	Error           string        `json:"error"`
-	Id              int           `json:"id"`
-	MaximumSeverity int           `json:"maximum_severity"`
-	PostgresScan    *PostgresScan `json:"postgres_scan,omitempty"`
-	ScanGroupId     int           `json:"scan_group_id"`
-	Status          int           `json:"status"`
+	CreatedAt       string `json:"created_at"`
+	EndedAt         string `json:"ended_at"`
+	Error           string `json:"error"`
+	Id              int    `json:"id"`
+	MaximumSeverity int    `json:"maximum_severity"`
+	ScanGroupId     int    `json:"scan_group_id"`
+	Status          int    `json:"status"`
 }
 
 // ScanGroup defines model for ScanGroup.
@@ -344,10 +372,22 @@ type User struct {
 	Username string `json:"username"`
 }
 
+// GetMysqlScansParams defines parameters for GetMysqlScans.
+type GetMysqlScansParams struct {
+	// Scan The scan ID to filter for
+	Scan int64 `form:"scan" json:"scan"`
+}
+
 // GetOrganizationsParams defines parameters for GetOrganizations.
 type GetOrganizationsParams struct {
 	// Name The organization name to filter for
 	Name *string `form:"name,omitempty" json:"name,omitempty"`
+}
+
+// GetPostgresScansParams defines parameters for GetPostgresScans.
+type GetPostgresScansParams struct {
+	// Scan The scan ID to filter for
+	Scan int64 `form:"scan" json:"scan"`
 }
 
 // GetProjectIdBruteforcePasswordsParams defines parameters for GetProjectIdBruteforcePasswords.
@@ -388,6 +428,9 @@ type PatchBruteforcedPasswordsIdJSONRequestBody = UpdateBruteforcedPassword
 
 // PatchBruteforceresultsIdJSONRequestBody defines body for PatchBruteforceresultsId for application/json ContentType.
 type PatchBruteforceresultsIdJSONRequestBody = PatchBruteforceScanResult
+
+// PatchMysqlIdJSONRequestBody defines body for PatchMysqlId for application/json ContentType.
+type PatchMysqlIdJSONRequestBody = PatchMysqlDatabase
 
 // PostOrganizationsJSONRequestBody defines body for PostOrganizations for application/json ContentType.
 type PostOrganizationsJSONRequestBody = CreateOrganization
@@ -496,6 +539,17 @@ type ClientInterface interface {
 	// GetCvesDbTypeVersion request
 	GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetMysqlScans request
+	GetMysqlScans(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMysqlId request
+	GetMysqlId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchMysqlIdWithBody request with any body
+	PatchMysqlIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchMysqlId(ctx context.Context, id int64, body PatchMysqlIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetOrganizations request
 	GetOrganizations(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -509,6 +563,9 @@ type ClientInterface interface {
 
 	// GetOrganizationsId request
 	GetOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPostgresScans request
+	GetPostgresScans(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetPostgresId request
 	GetPostgresId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -631,6 +688,54 @@ func (c *Client) GetCvesDbTypeVersion(ctx context.Context, dbType string, versio
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetMysqlScans(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMysqlScansRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMysqlId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMysqlIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchMysqlIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchMysqlIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchMysqlId(ctx context.Context, id int64, body PatchMysqlIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchMysqlIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetOrganizations(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrganizationsRequest(c.Server, params)
 	if err != nil {
@@ -681,6 +786,18 @@ func (c *Client) DeleteOrganizationsId(ctx context.Context, id int64, reqEditors
 
 func (c *Client) GetOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrganizationsIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPostgresScans(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPostgresScansRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1090,6 +1207,132 @@ func NewGetCvesDbTypeVersionRequest(server string, dbType string, version string
 	return req, nil
 }
 
+// NewGetMysqlScansRequest generates requests for GetMysqlScans
+func NewGetMysqlScansRequest(server string, params *GetMysqlScansParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mysql-scans")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scan", runtime.ParamLocationQuery, params.Scan); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetMysqlIdRequest generates requests for GetMysqlId
+func NewGetMysqlIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mysql/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchMysqlIdRequest calls the generic PatchMysqlId builder with application/json body
+func NewPatchMysqlIdRequest(server string, id int64, body PatchMysqlIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchMysqlIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchMysqlIdRequestWithBody generates requests for PatchMysqlId with any type of body
+func NewPatchMysqlIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mysql/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetOrganizationsRequest generates requests for GetOrganizations
 func NewGetOrganizationsRequest(server string, params *GetOrganizationsParams) (*http.Request, error) {
 	var err error
@@ -1237,6 +1480,51 @@ func NewGetOrganizationsIdRequest(server string, id int64) (*http.Request, error
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetPostgresScansRequest generates requests for GetPostgresScans
+func NewGetPostgresScansRequest(server string, params *GetPostgresScansParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/postgres-scans")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scan", runtime.ParamLocationQuery, params.Scan); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -2035,6 +2323,17 @@ type ClientWithResponsesInterface interface {
 	// GetCvesDbTypeVersionWithResponse request
 	GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error)
 
+	// GetMysqlScansWithResponse request
+	GetMysqlScansWithResponse(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*GetMysqlScansResponse, error)
+
+	// GetMysqlIdWithResponse request
+	GetMysqlIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetMysqlIdResponse, error)
+
+	// PatchMysqlIdWithBodyWithResponse request with any body
+	PatchMysqlIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchMysqlIdResponse, error)
+
+	PatchMysqlIdWithResponse(ctx context.Context, id int64, body PatchMysqlIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchMysqlIdResponse, error)
+
 	// GetOrganizationsWithResponse request
 	GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error)
 
@@ -2048,6 +2347,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetOrganizationsIdWithResponse request
 	GetOrganizationsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetOrganizationsIdResponse, error)
+
+	// GetPostgresScansWithResponse request
+	GetPostgresScansWithResponse(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*GetPostgresScansResponse, error)
 
 	// GetPostgresIdWithResponse request
 	GetPostgresIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetPostgresIdResponse, error)
@@ -2193,6 +2495,88 @@ func (r GetCvesDbTypeVersionResponse) StatusCode() int {
 	return 0
 }
 
+type GetMysqlScansResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Scans   []MysqlScan `json:"scans"`
+		Success bool        `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMysqlScansResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMysqlScansResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMysqlIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		MysqlDatabase MysqlDatabase `json:"mysql_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMysqlIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMysqlIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchMysqlIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		MysqlDatabase MysqlDatabase `json:"mysql_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchMysqlIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchMysqlIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetOrganizationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2293,6 +2677,33 @@ func (r GetOrganizationsIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetOrganizationsIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPostgresScansResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Scans   []PostgresScan `json:"scans"`
+		Success bool           `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPostgresScansResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPostgresScansResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2769,6 +3180,41 @@ func (c *ClientWithResponses) GetCvesDbTypeVersionWithResponse(ctx context.Conte
 	return ParseGetCvesDbTypeVersionResponse(rsp)
 }
 
+// GetMysqlScansWithResponse request returning *GetMysqlScansResponse
+func (c *ClientWithResponses) GetMysqlScansWithResponse(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*GetMysqlScansResponse, error) {
+	rsp, err := c.GetMysqlScans(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMysqlScansResponse(rsp)
+}
+
+// GetMysqlIdWithResponse request returning *GetMysqlIdResponse
+func (c *ClientWithResponses) GetMysqlIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetMysqlIdResponse, error) {
+	rsp, err := c.GetMysqlId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMysqlIdResponse(rsp)
+}
+
+// PatchMysqlIdWithBodyWithResponse request with arbitrary body returning *PatchMysqlIdResponse
+func (c *ClientWithResponses) PatchMysqlIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchMysqlIdResponse, error) {
+	rsp, err := c.PatchMysqlIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchMysqlIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchMysqlIdWithResponse(ctx context.Context, id int64, body PatchMysqlIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchMysqlIdResponse, error) {
+	rsp, err := c.PatchMysqlId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchMysqlIdResponse(rsp)
+}
+
 // GetOrganizationsWithResponse request returning *GetOrganizationsResponse
 func (c *ClientWithResponses) GetOrganizationsWithResponse(ctx context.Context, params *GetOrganizationsParams, reqEditors ...RequestEditorFn) (*GetOrganizationsResponse, error) {
 	rsp, err := c.GetOrganizations(ctx, params, reqEditors...)
@@ -2811,6 +3257,15 @@ func (c *ClientWithResponses) GetOrganizationsIdWithResponse(ctx context.Context
 		return nil, err
 	}
 	return ParseGetOrganizationsIdResponse(rsp)
+}
+
+// GetPostgresScansWithResponse request returning *GetPostgresScansResponse
+func (c *ClientWithResponses) GetPostgresScansWithResponse(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*GetPostgresScansResponse, error) {
+	rsp, err := c.GetPostgresScans(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPostgresScansResponse(rsp)
 }
 
 // GetPostgresIdWithResponse request returning *GetPostgresIdResponse
@@ -3148,6 +3603,142 @@ func ParseGetCvesDbTypeVersionResponse(rsp *http.Response) (*GetCvesDbTypeVersio
 	return response, nil
 }
 
+// ParseGetMysqlScansResponse parses an HTTP response from a GetMysqlScansWithResponse call
+func ParseGetMysqlScansResponse(rsp *http.Response) (*GetMysqlScansResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMysqlScansResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Scans   []MysqlScan `json:"scans"`
+			Success bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMysqlIdResponse parses an HTTP response from a GetMysqlIdWithResponse call
+func ParseGetMysqlIdResponse(rsp *http.Response) (*GetMysqlIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMysqlIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			MysqlDatabase MysqlDatabase `json:"mysql_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchMysqlIdResponse parses an HTTP response from a PatchMysqlIdWithResponse call
+func ParsePatchMysqlIdResponse(rsp *http.Response) (*PatchMysqlIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchMysqlIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			MysqlDatabase MysqlDatabase `json:"mysql_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetOrganizationsResponse parses an HTTP response from a GetOrganizationsWithResponse call
 func ParseGetOrganizationsResponse(rsp *http.Response) (*GetOrganizationsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -3287,6 +3878,49 @@ func ParseGetOrganizationsIdResponse(rsp *http.Response) (*GetOrganizationsIdRes
 		var dest struct {
 			Organization Organization `json:"organization"`
 			Success      bool         `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPostgresScansResponse parses an HTTP response from a GetPostgresScansWithResponse call
+func ParseGetPostgresScansResponse(rsp *http.Response) (*GetPostgresScansResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPostgresScansResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Scans   []PostgresScan `json:"scans"`
+			Success bool           `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -4024,6 +4658,15 @@ type ServerInterface interface {
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string)
+	// Get all postgres scans
+	// (GET /mysql-scans)
+	GetMysqlScans(w http.ResponseWriter, r *http.Request, params GetMysqlScansParams)
+	// Get mysql database by ID
+	// (GET /mysql/{id})
+	GetMysqlId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update mysql database by ID
+	// (PATCH /mysql/{id})
+	PatchMysqlId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all organizations that the user can see
 	// (GET /organizations)
 	GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams)
@@ -4036,6 +4679,9 @@ type ServerInterface interface {
 	// Get organization by ID
 	// (GET /organizations/{id})
 	GetOrganizationsId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get all postgres scans
+	// (GET /postgres-scans)
+	GetPostgresScans(w http.ResponseWriter, r *http.Request, params GetPostgresScansParams)
 	// Get postgres database by ID
 	// (GET /postgres/{id})
 	GetPostgresId(w http.ResponseWriter, r *http.Request, id int64)
@@ -4108,6 +4754,24 @@ func (_ Unimplemented) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get all postgres scans
+// (GET /mysql-scans)
+func (_ Unimplemented) GetMysqlScans(w http.ResponseWriter, r *http.Request, params GetMysqlScansParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get mysql database by ID
+// (GET /mysql/{id})
+func (_ Unimplemented) GetMysqlId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update mysql database by ID
+// (PATCH /mysql/{id})
+func (_ Unimplemented) PatchMysqlId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get all organizations that the user can see
 // (GET /organizations)
 func (_ Unimplemented) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) {
@@ -4129,6 +4793,12 @@ func (_ Unimplemented) DeleteOrganizationsId(w http.ResponseWriter, r *http.Requ
 // Get organization by ID
 // (GET /organizations/{id})
 func (_ Unimplemented) GetOrganizationsId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all postgres scans
+// (GET /postgres-scans)
+func (_ Unimplemented) GetPostgresScans(w http.ResponseWriter, r *http.Request, params GetPostgresScansParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4330,6 +5000,99 @@ func (siw *ServerInterfaceWrapper) GetCvesDbTypeVersion(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetMysqlScans operation middleware
+func (siw *ServerInterfaceWrapper) GetMysqlScans(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetMysqlScansParams
+
+	// ------------- Required query parameter "scan" -------------
+
+	if paramValue := r.URL.Query().Get("scan"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "scan"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "scan", r.URL.Query(), &params.Scan)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scan", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMysqlScans(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetMysqlId operation middleware
+func (siw *ServerInterfaceWrapper) GetMysqlId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMysqlId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchMysqlId operation middleware
+func (siw *ServerInterfaceWrapper) PatchMysqlId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchMysqlId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetOrganizations operation middleware
 func (siw *ServerInterfaceWrapper) GetOrganizations(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -4424,6 +5187,43 @@ func (siw *ServerInterfaceWrapper) GetOrganizationsId(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetOrganizationsId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetPostgresScans operation middleware
+func (siw *ServerInterfaceWrapper) GetPostgresScans(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPostgresScansParams
+
+	// ------------- Required query parameter "scan" -------------
+
+	if paramValue := r.URL.Query().Get("scan"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "scan"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "scan", r.URL.Query(), &params.Scan)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scan", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPostgresScans(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5057,6 +5857,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/cves/{dbType}/{version}", wrapper.GetCvesDbTypeVersion)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/mysql-scans", wrapper.GetMysqlScans)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/mysql/{id}", wrapper.GetMysqlId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/mysql/{id}", wrapper.PatchMysqlId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/organizations", wrapper.GetOrganizations)
 	})
 	r.Group(func(r chi.Router) {
@@ -5067,6 +5876,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/organizations/{id}", wrapper.GetOrganizationsId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/postgres-scans", wrapper.GetPostgresScans)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/postgres/{id}", wrapper.GetPostgresId)
@@ -5255,6 +6067,130 @@ func (response GetCvesDbTypeVersion404JSONResponse) VisitGetCvesDbTypeVersionRes
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetMysqlScansRequestObject struct {
+	Params GetMysqlScansParams
+}
+
+type GetMysqlScansResponseObject interface {
+	VisitGetMysqlScansResponse(w http.ResponseWriter) error
+}
+
+type GetMysqlScans200JSONResponse struct {
+	Scans   []MysqlScan `json:"scans"`
+	Success bool        `json:"success"`
+}
+
+func (response GetMysqlScans200JSONResponse) VisitGetMysqlScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMysqlScans401JSONResponse Error
+
+func (response GetMysqlScans401JSONResponse) VisitGetMysqlScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMysqlScans404JSONResponse Error
+
+func (response GetMysqlScans404JSONResponse) VisitGetMysqlScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMysqlIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetMysqlIdResponseObject interface {
+	VisitGetMysqlIdResponse(w http.ResponseWriter) error
+}
+
+type GetMysqlId200JSONResponse struct {
+	MysqlDatabase MysqlDatabase `json:"mysql_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response GetMysqlId200JSONResponse) VisitGetMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMysqlId401JSONResponse Error
+
+func (response GetMysqlId401JSONResponse) VisitGetMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMysqlId404JSONResponse Error
+
+func (response GetMysqlId404JSONResponse) VisitGetMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMysqlIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchMysqlIdJSONRequestBody
+}
+
+type PatchMysqlIdResponseObject interface {
+	VisitPatchMysqlIdResponse(w http.ResponseWriter) error
+}
+
+type PatchMysqlId200JSONResponse struct {
+	MysqlDatabase MysqlDatabase `json:"mysql_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response PatchMysqlId200JSONResponse) VisitPatchMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMysqlId400JSONResponse Error
+
+func (response PatchMysqlId400JSONResponse) VisitPatchMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMysqlId401JSONResponse Error
+
+func (response PatchMysqlId401JSONResponse) VisitPatchMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMysqlId404JSONResponse Error
+
+func (response PatchMysqlId404JSONResponse) VisitPatchMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetOrganizationsRequestObject struct {
 	Params GetOrganizationsParams
 }
@@ -5391,6 +6327,44 @@ func (response GetOrganizationsId401JSONResponse) VisitGetOrganizationsIdRespons
 type GetOrganizationsId404JSONResponse Error
 
 func (response GetOrganizationsId404JSONResponse) VisitGetOrganizationsIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPostgresScansRequestObject struct {
+	Params GetPostgresScansParams
+}
+
+type GetPostgresScansResponseObject interface {
+	VisitGetPostgresScansResponse(w http.ResponseWriter) error
+}
+
+type GetPostgresScans200JSONResponse struct {
+	Scans   []PostgresScan `json:"scans"`
+	Success bool           `json:"success"`
+}
+
+func (response GetPostgresScans200JSONResponse) VisitGetPostgresScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPostgresScans401JSONResponse Error
+
+func (response GetPostgresScans401JSONResponse) VisitGetPostgresScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPostgresScans404JSONResponse Error
+
+func (response GetPostgresScans404JSONResponse) VisitGetPostgresScansResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -6040,6 +7014,15 @@ type StrictServerInterface interface {
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(ctx context.Context, request GetCvesDbTypeVersionRequestObject) (GetCvesDbTypeVersionResponseObject, error)
+	// Get all postgres scans
+	// (GET /mysql-scans)
+	GetMysqlScans(ctx context.Context, request GetMysqlScansRequestObject) (GetMysqlScansResponseObject, error)
+	// Get mysql database by ID
+	// (GET /mysql/{id})
+	GetMysqlId(ctx context.Context, request GetMysqlIdRequestObject) (GetMysqlIdResponseObject, error)
+	// Update mysql database by ID
+	// (PATCH /mysql/{id})
+	PatchMysqlId(ctx context.Context, request PatchMysqlIdRequestObject) (PatchMysqlIdResponseObject, error)
 	// Get all organizations that the user can see
 	// (GET /organizations)
 	GetOrganizations(ctx context.Context, request GetOrganizationsRequestObject) (GetOrganizationsResponseObject, error)
@@ -6052,6 +7035,9 @@ type StrictServerInterface interface {
 	// Get organization by ID
 	// (GET /organizations/{id})
 	GetOrganizationsId(ctx context.Context, request GetOrganizationsIdRequestObject) (GetOrganizationsIdResponseObject, error)
+	// Get all postgres scans
+	// (GET /postgres-scans)
+	GetPostgresScans(ctx context.Context, request GetPostgresScansRequestObject) (GetPostgresScansResponseObject, error)
 	// Get postgres database by ID
 	// (GET /postgres/{id})
 	GetPostgresId(ctx context.Context, request GetPostgresIdRequestObject) (GetPostgresIdResponseObject, error)
@@ -6224,6 +7210,91 @@ func (sh *strictHandler) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Req
 	}
 }
 
+// GetMysqlScans operation middleware
+func (sh *strictHandler) GetMysqlScans(w http.ResponseWriter, r *http.Request, params GetMysqlScansParams) {
+	var request GetMysqlScansRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMysqlScans(ctx, request.(GetMysqlScansRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMysqlScans")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMysqlScansResponseObject); ok {
+		if err := validResponse.VisitGetMysqlScansResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMysqlId operation middleware
+func (sh *strictHandler) GetMysqlId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetMysqlIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMysqlId(ctx, request.(GetMysqlIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMysqlId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMysqlIdResponseObject); ok {
+		if err := validResponse.VisitGetMysqlIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchMysqlId operation middleware
+func (sh *strictHandler) PatchMysqlId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchMysqlIdRequestObject
+
+	request.Id = id
+
+	var body PatchMysqlIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchMysqlId(ctx, request.(PatchMysqlIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchMysqlId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchMysqlIdResponseObject); ok {
+		if err := validResponse.VisitPatchMysqlIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetOrganizations operation middleware
 func (sh *strictHandler) GetOrganizations(w http.ResponseWriter, r *http.Request, params GetOrganizationsParams) {
 	var request GetOrganizationsRequestObject
@@ -6326,6 +7397,32 @@ func (sh *strictHandler) GetOrganizationsId(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetOrganizationsIdResponseObject); ok {
 		if err := validResponse.VisitGetOrganizationsIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPostgresScans operation middleware
+func (sh *strictHandler) GetPostgresScans(w http.ResponseWriter, r *http.Request, params GetPostgresScansParams) {
+	var request GetPostgresScansRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPostgresScans(ctx, request.(GetPostgresScansRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPostgresScans")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPostgresScansResponseObject); ok {
+		if err := validResponse.VisitGetPostgresScansResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -6790,69 +7887,72 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"OCajxYFzf3P/vwAAAP//ZV/Bp895AAA=",
+	"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",
+	"KuUiigAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/saver"
 )
 
 func (server *serverHandler) GetProjectId(ctx context.Context, request generated.GetProjectIdRequestObject) (generated.GetProjectIdResponseObject, error) {
@@ -25,7 +26,7 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 	postgres_databases := make([]generated.PostgresDatabase, len(postgres_databases_q))
 	for i, db := range postgres_databases_q {
 		postgres_databases[i] = generated.PostgresDatabase{
-			CreatedAt:    db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			CreatedAt:    db.CreatedAt.Time.Format(time.RFC3339Nano),
 			Id:           int(db.ID),
 			DatabaseName: db.DatabaseName,
 			Host:         db.Host,
@@ -40,7 +41,7 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 	return generated.GetProjectId200JSONResponse{
 		Success: true,
 		Project: generated.Project{
-			CreatedAt:      project.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
+			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339Nano),
 			Id:             project.ID,
 			Name:           project.Name,
 			OrganizationId: project.OrganizationID,
@@ -109,44 +110,21 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 		return nil, fmt.Errorf("error creating scan group: %w", err)
 	}
 
-	var scans []*queries.Scan
-	var resultScans []generated.Scan
-
-	postgres_databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
+	scans, err := saver.CreateScans(ctx, server.DatabaseProvider, request.Id, scanGroup.ID, "all")
 	if err != nil {
-		return nil, fmt.Errorf("error getting postgres databases for project: %w", err)
+		return nil, fmt.Errorf("error creating scans: %w", err)
 	}
-	for _, db := range postgres_databases {
-		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
-			Status:      models.SCAN_NOT_STARTED,
-			ScanGroupID: scanGroup.ID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("error creating postgres scan: %w", err)
+
+	resultScans := make([]generated.Scan, len(scans))
+	for i, scan := range scans {
+		resultScans[i] = generated.Scan{
+			CreatedAt:   scan.CreatedAt.Time.Format(time.RFC3339Nano),
+			EndedAt:     scan.EndedAt.Time.Format(time.RFC3339Nano),
+			Error:       scan.Error.String,
+			Id:          int(scan.ID),
+			ScanGroupId: int(scan.ScanGroupID),
+			Status:      int(scan.Status),
 		}
-
-		postgresScan, err := server.DatabaseProvider.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
-			ScanID:     scan.ID,
-			DatabaseID: db.ID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("error creating postgres scan: %w", err)
-		}
-
-		resultScans = append(resultScans, generated.Scan{
-			CreatedAt:       db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-			EndedAt:         db.CreatedAt.Time.Format("2006-01-02T15:04:05Z"),
-			Error:           "",
-			Id:              int(scan.ID),
-			Status:          int(scan.Status),
-			MaximumSeverity: 0,
-			PostgresScan: &generated.PostgresScan{
-				Id:         int(postgresScan.ID),
-				DatabaseId: int(db.ID),
-			},
-		})
-
-		scans = append(scans, scan)
 	}
 
 	for _, scan := range scans {

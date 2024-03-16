@@ -141,6 +141,50 @@ func (q *Queries) GetPostgresScanByScanID(ctx context.Context, scanID int64) (*P
 	return &i, err
 }
 
+const getProjectInfoForPostgresScanByScanID = `-- name: GetProjectInfoForPostgresScanByScanID :one
+SELECT
+    projects.id, projects.name, projects.organization_id, projects.remote, projects.created_at,
+    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.version, postgres_databases.created_at,
+    postgres_scans.id, postgres_scans.scan_id, postgres_scans.database_id
+FROM
+    projects
+    JOIN postgres_databases ON postgres_databases.project_id = projects.id
+    JOIN postgres_scans ON postgres_scans.database_id = postgres_databases.id
+WHERE
+    postgres_scans.scan_id = $1
+`
+
+type GetProjectInfoForPostgresScanByScanIDRow struct {
+	Project          Project          `json:"project"`
+	PostgresDatabase PostgresDatabase `json:"postgres_database"`
+	PostgresScan     PostgresScan     `json:"postgres_scan"`
+}
+
+func (q *Queries) GetProjectInfoForPostgresScanByScanID(ctx context.Context, scanID int64) (*GetProjectInfoForPostgresScanByScanIDRow, error) {
+	row := q.db.QueryRow(ctx, getProjectInfoForPostgresScanByScanID, scanID)
+	var i GetProjectInfoForPostgresScanByScanIDRow
+	err := row.Scan(
+		&i.Project.ID,
+		&i.Project.Name,
+		&i.Project.OrganizationID,
+		&i.Project.Remote,
+		&i.Project.CreatedAt,
+		&i.PostgresDatabase.ID,
+		&i.PostgresDatabase.ProjectID,
+		&i.PostgresDatabase.Host,
+		&i.PostgresDatabase.Port,
+		&i.PostgresDatabase.DatabaseName,
+		&i.PostgresDatabase.Username,
+		&i.PostgresDatabase.Password,
+		&i.PostgresDatabase.Version,
+		&i.PostgresDatabase.CreatedAt,
+		&i.PostgresScan.ID,
+		&i.PostgresScan.ScanID,
+		&i.PostgresScan.DatabaseID,
+	)
+	return &i, err
+}
+
 const updatePostgresDatabase = `-- name: UpdatePostgresDatabase :exec
 UPDATE
     postgres_databases

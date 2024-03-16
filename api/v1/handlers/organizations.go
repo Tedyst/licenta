@@ -149,7 +149,7 @@ func (server *serverHandler) GetOrganizationsId(ctx context.Context, request gen
 	for i, project := range projects {
 		response.Organization.Projects[i] = generated.Project{
 			Id:             int64(project.ID),
-			CreatedAt:      project.CreatedAt.Time.Format("2006-01-02T15:04:05.000Z"),
+			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339Nano),
 			Name:           project.Name,
 			OrganizationId: int64(project.OrganizationID),
 			Remote:         project.Remote,

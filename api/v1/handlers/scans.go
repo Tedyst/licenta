@@ -24,19 +24,6 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 		}, nil
 	}
 
-	psScan, err := server.DatabaseProvider.GetPostgresScan(ctx, scan.PostgresScan)
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, fmt.Errorf("GetScannerPostgresScanScanid: error getting postgres scan: %w", err)
-	}
-
-	var postgresScan *generated.PostgresScan
-	if err != pgx.ErrNoRows {
-		postgresScan = &generated.PostgresScan{
-			DatabaseId: int(psScan.DatabaseID),
-			Id:         int(psScan.ID),
-		}
-	}
-
 	scanResultsQ, err := server.DatabaseProvider.GetScanResults(ctx, scan.Scan.ID)
 	if err != nil {
 		return nil, fmt.Errorf("GetScannerPostgresScanScanid: error getting scan results: %w", err)
@@ -78,7 +65,6 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 			Id:              int(scan.Scan.ID),
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
-			PostgresScan:    postgresScan,
 		},
 		Results:           scanResults,
 		BruteforceResults: bruteforceResults,

@@ -66,3 +66,15 @@ FROM
 WHERE
     mysql_databases.id = $1;
 
+-- name: GetProjectInfoForMysqlScanByScanID :one
+SELECT
+    sqlc.embed(projects),
+    sqlc.embed(mysql_databases),
+    sqlc.embed(mysql_scans)
+FROM
+    projects
+    JOIN mysql_databases ON mysql_databases.project_id = projects.id
+    JOIN mysql_scans ON mysql_scans.database_id = mysql_databases.id
+WHERE
+    mysql_scans.scan_id = $1;
+

@@ -7,12 +7,13 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
 
 func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error) {
-	response, err := q.client.GetPostgresIdWithResponse(ctx, q.postgresScan.DatabaseID)
+	response, err := q.client.GetPostgresIdWithResponse(ctx, id)
 	if err != nil {
 		return nil, errors.New("cannot get postgres database from server")
 	}
@@ -42,7 +43,7 @@ func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*que
 }
 
 func (q *remoteQuerier) UpdatePostgresVersion(ctx context.Context, params queries.UpdatePostgresVersionParams) error {
-	response, err := q.client.PatchPostgresIdWithResponse(ctx, q.postgresScan.DatabaseID, generated.PatchPostgresDatabase{
+	response, err := q.client.PatchPostgresIdWithResponse(ctx, params.ID, generated.PatchPostgresDatabase{
 		Version: &params.Version.String,
 	})
 	if err != nil {
@@ -60,8 +61,25 @@ func (q *remoteQuerier) UpdatePostgresVersion(ctx context.Context, params querie
 }
 
 func (q *remoteQuerier) GetPostgresScanByScanID(ctx context.Context, scanID int64) (*queries.PostgresScan, error) {
-	return &queries.PostgresScan{
-		ID:         scanID,
-		DatabaseID: q.postgresScan.DatabaseID,
-	}, nil
+	response, err := q.client.GetPostgresScansWithResponse(ctx, &generated.GetPostgresScansParams{
+		Scan: scanID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body))
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return &queries.PostgresScan{
+			ID:         int64(response.JSON200.Scans[0].Id),
+			ScanID:     scanID,
+			DatabaseID: int64(response.JSON200.Scans[0].DatabaseId),
+		}, nil
+	case http.StatusNotFound:
+		return nil, pgx.ErrNoRows
+	default:
+		return nil, errors.New("error getting postgres scan")
+	}
 }

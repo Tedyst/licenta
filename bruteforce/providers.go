@@ -146,7 +146,10 @@ func (d *databasePasswordProvider) SavePasswordHash(username, hash, password str
 			Int64: maxInternalID,
 			Valid: maxInternalID != 0,
 		},
-		ProjectID: sql.NullInt64{Valid: false},
+		ProjectID: sql.NullInt64{
+			Int64: d.projectID,
+			Valid: d.projectID != 0,
+		},
 	})
 	return err
 }

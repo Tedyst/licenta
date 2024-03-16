@@ -60,15 +60,7 @@ SELECT
         FROM
             scan_results
         WHERE
-            scan_id = scans.id) AS maximum_severity,
-(
-        SELECT
-            COALESCE(id, 0)::bigint
-        FROM
-            postgres_scans
-        WHERE
-            postgres_scans.scan_id = scans.id
-        LIMIT 1) AS postgres_scan
+            scan_id = scans.id) AS maximum_severity
 FROM
     scans
 WHERE

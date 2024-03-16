@@ -449,6 +449,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /postgres-scans:
+    get:
+      summary: Get all postgres scans
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+      parameters:
+        - name: scan
+          in: query
+          description: The scan ID to filter for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - scans
+                properties:
+                  success:
+                    type: boolean
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostgresScan'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /mysql-scans:
+    get:
+      summary: Get all postgres scans
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+      parameters:
+        - name: scan
+          in: query
+          description: The scan ID to filter for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - scans
+                properties:
+                  success:
+                    type: boolean
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MysqlScan'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /bruteforceresults/{id}:
     patch:
       summary: Update a bruteforce scan result by ID
@@ -907,6 +995,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /mysql/{id}:
+    get:
+      summary: Get mysql database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - mysql
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the mysql database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mysql_database
+                properties:
+                  success:
+                    type: boolean
+                  mysql_database:
+                    $ref: '#/components/schemas/MysqlDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update mysql database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - mysql
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the mysql database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The mysql database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchMysqlDatabase'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mysql_database
+                properties:
+                  success:
+                    type: boolean
+                  mysql_database:
+                    $ref: '#/components/schemas/MysqlDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /organizations:
     get:
       summary: Get all organizations that the user can see
@@ -1140,7 +1324,53 @@ components:
           type: string
         version:
           type: string
+    PatchMysqlDatabase:
+      type: object
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        version:
+          type: string
     PostgresDatabase:
+      type: object
+      required:
+        - id
+        - project_id
+        - host
+        - port
+        - database_name
+        - username
+        - password
+        - created_at
+        - version
+      properties:
+        id: 
+          type: integer
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        created_at: 
+          type: string
+        version:
+          type: string
+    MysqlDatabase:
       type: object
       required:
         - id
@@ -1356,11 +1586,19 @@ components:
           type: string
         maximum_severity:
           type: integer
-        postgres_scan:
-          $ref: "#/components/schemas/PostgresScan"
         scan_group_id:
           type: integer
     PostgresScan:
+      required:
+        - id
+        - database_id
+      type: object
+      properties:
+        id:
+          type: integer
+        database_id:
+          type: integer
+    MysqlScan:
       required:
         - id
         - database_id

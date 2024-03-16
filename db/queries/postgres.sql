@@ -66,3 +66,15 @@ FROM
 WHERE
     postgres_databases.id = $1;
 
+-- name: GetProjectInfoForPostgresScanByScanID :one
+SELECT
+    sqlc.embed(projects),
+    sqlc.embed(postgres_databases),
+    sqlc.embed(postgres_scans)
+FROM
+    projects
+    JOIN postgres_databases ON postgres_databases.project_id = projects.id
+    JOIN postgres_scans ON postgres_scans.database_id = postgres_databases.id
+WHERE
+    postgres_scans.scan_id = $1;
+

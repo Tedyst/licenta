@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -104,5 +105,42 @@ func (server *serverHandler) PatchPostgresId(ctx context.Context, request genera
 			ProjectId:    int(database.PostgresDatabase.ProjectID),
 			Version:      version.String,
 		},
+	}, nil
+}
+
+func (server *serverHandler) GetPostgresScans(ctx context.Context, request generated.GetPostgresScansRequestObject) (generated.GetPostgresScansResponseObject, error) {
+	worker, err := server.workerauth.GetWorker(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := server.DatabaseProvider.GetProjectInfoForPostgresScanByScanID(ctx, request.Params.Scan)
+	if err == pgx.ErrNoRows {
+		return generated.GetPostgresScans404JSONResponse{
+			Success: false,
+			Message: "Scan not found",
+		}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	hasPerm, err := server.authorization.WorkerHasPermissionForProject(ctx, &info.Project, worker, authorization.Worker)
+	if err != nil {
+		return nil, err
+	}
+	if !hasPerm {
+		return generated.GetPostgresScans401JSONResponse{
+			Success: false,
+			Message: "Worker does not have permission for project",
+		}, nil
+	}
+
+	return generated.GetPostgresScans200JSONResponse{
+		Success: true,
+		Scans: []generated.PostgresScan{{
+			DatabaseId: int(info.PostgresScan.DatabaseID),
+			Id:         int(info.PostgresScan.ID),
+		}},
 	}, nil
 }

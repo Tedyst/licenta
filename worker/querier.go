@@ -19,10 +19,9 @@ import (
 )
 
 type remoteQuerier struct {
-	client       generated.ClientWithResponsesInterface
-	scan         *queries.Scan
-	scanGroup    *queries.ScanGroup
-	postgresScan *queries.PostgresScan
+	client    generated.ClientWithResponsesInterface
+	scan      *queries.Scan
+	scanGroup *queries.ScanGroup
 }
 
 func (*remoteQuerier) UpdateBruteforcedPassword(ctx context.Context, arg queries.UpdateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
@@ -33,8 +32,7 @@ var _ saver.BaseQuerier = (*remoteQuerier)(nil)
 
 func (q *remoteQuerier) GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error) {
 	return &queries.GetScanRow{
-		Scan:         *q.scan,
-		PostgresScan: q.postgresScan.ID,
+		Scan: *q.scan,
 	}, nil
 }
 

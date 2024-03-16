@@ -141,6 +141,50 @@ func (q *Queries) GetMysqlScanByScanID(ctx context.Context, scanID int64) (*Mysq
 	return &i, err
 }
 
+const getProjectInfoForMysqlScanByScanID = `-- name: GetProjectInfoForMysqlScanByScanID :one
+SELECT
+    projects.id, projects.name, projects.organization_id, projects.remote, projects.created_at,
+    mysql_databases.id, mysql_databases.project_id, mysql_databases.host, mysql_databases.port, mysql_databases.database_name, mysql_databases.username, mysql_databases.password, mysql_databases.version, mysql_databases.created_at,
+    mysql_scans.id, mysql_scans.scan_id, mysql_scans.database_id
+FROM
+    projects
+    JOIN mysql_databases ON mysql_databases.project_id = projects.id
+    JOIN mysql_scans ON mysql_scans.database_id = mysql_databases.id
+WHERE
+    mysql_scans.scan_id = $1
+`
+
+type GetProjectInfoForMysqlScanByScanIDRow struct {
+	Project       Project       `json:"project"`
+	MysqlDatabase MysqlDatabase `json:"mysql_database"`
+	MysqlScan     MysqlScan     `json:"mysql_scan"`
+}
+
+func (q *Queries) GetProjectInfoForMysqlScanByScanID(ctx context.Context, scanID int64) (*GetProjectInfoForMysqlScanByScanIDRow, error) {
+	row := q.db.QueryRow(ctx, getProjectInfoForMysqlScanByScanID, scanID)
+	var i GetProjectInfoForMysqlScanByScanIDRow
+	err := row.Scan(
+		&i.Project.ID,
+		&i.Project.Name,
+		&i.Project.OrganizationID,
+		&i.Project.Remote,
+		&i.Project.CreatedAt,
+		&i.MysqlDatabase.ID,
+		&i.MysqlDatabase.ProjectID,
+		&i.MysqlDatabase.Host,
+		&i.MysqlDatabase.Port,
+		&i.MysqlDatabase.DatabaseName,
+		&i.MysqlDatabase.Username,
+		&i.MysqlDatabase.Password,
+		&i.MysqlDatabase.Version,
+		&i.MysqlDatabase.CreatedAt,
+		&i.MysqlScan.ID,
+		&i.MysqlScan.ScanID,
+		&i.MysqlScan.DatabaseID,
+	)
+	return &i, err
+}
+
 const updateMysqlDatabase = `-- name: UpdateMysqlDatabase :exec
 UPDATE
     mysql_databases

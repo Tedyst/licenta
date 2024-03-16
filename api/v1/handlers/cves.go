@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"time"
 
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -34,8 +35,8 @@ func (server *serverHandler) GetCvesDbTypeVersion(ctx context.Context, request g
 			CveId:        cve.NvdCfe.CveID,
 			Description:  cve.NvdCfe.Description,
 			Id:           int64(cve.NvdCfe.ID),
-			LastModified: cve.NvdCfe.LastModified.Time.Format("2006-01-02T15:04:05Z"),
-			PublishedAt:  cve.NvdCfe.Published.Time.Format("2006-01-02T15:04:05Z"),
+			LastModified: cve.NvdCfe.LastModified.Time.Format(time.RFC3339Nano),
+			PublishedAt:  cve.NvdCfe.Published.Time.Format(time.RFC3339Nano),
 		})
 	}
 

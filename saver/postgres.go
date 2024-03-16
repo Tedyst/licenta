@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner/postgres"
 )
 
@@ -32,6 +33,9 @@ func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforcePr
 	}
 
 	postgresScan, err := queries.GetPostgresScanByScanID(ctx, scan.ID)
+	if err == pgx.ErrNoRows {
+		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get postgres scan: %w", err))
+	}
 	if err != nil {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get postgres scan: %w", err))
 	}
@@ -96,4 +100,45 @@ type postgresSaver struct {
 
 func init() {
 	savers["postgres"] = NewPostgresSaver
+	creaters["postgres"] = CreatePostgresScan
+}
+
+type CreatePostgresScanQuerier interface {
+	BaseCreater
+	GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.PostgresDatabase, error)
+	CreatePostgresScan(ctx context.Context, params queries.CreatePostgresScanParams) (*queries.PostgresScan, error)
+}
+
+func CreatePostgresScan(ctx context.Context, q BaseCreater, projectID int64, scanGroupID int64) ([]*queries.Scan, error) {
+	querier, ok := q.(CreatePostgresScanQuerier)
+	if !ok {
+		return nil, errors.New("querier is not a CreatePostgresScanQuerier")
+	}
+
+	scans := []*queries.Scan{}
+
+	postgres_databases, err := querier.GetPostgresDatabasesForProject(ctx, projectID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting postgres databases for project: %w", err)
+	}
+	for _, db := range postgres_databases {
+		scan, err := querier.CreateScan(ctx, queries.CreateScanParams{
+			Status:      models.SCAN_NOT_STARTED,
+			ScanGroupID: scanGroupID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating postgres scan: %w", err)
+		}
+
+		_, err = querier.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
+			ScanID:     scan.ID,
+			DatabaseID: db.ID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating postgres scan: %w", err)
+		}
+
+		scans = append(scans, scan)
+	}
+	return scans, nil
 }
