@@ -24,9 +24,6 @@ linters:
 
 issues:
   exclude-rules:
-    - path: 'saver/(.+)\.go'
-      linters:
-        - dupl
     - path: 'api/v1/handlers/scanner_(.+)\.go'
       linters:
         - dupl

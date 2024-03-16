@@ -275,3 +275,38 @@ func (runner *baseSaver) ScanForPublicAccessOnly(ctx context.Context) error {
 
 	return nil
 }
+
+func CreateBaseScan[T any](
+	getDatabasesQuerier func(q BaseCreater) (func(context.Context, int64) ([]T, error), error),
+	createSpecificScan func(ctx context.Context, q BaseCreater, scanID int64, db T) (any, error),
+) CreaterFunc {
+	return func(ctx context.Context, q BaseCreater, projectID int64, scanGroupID int64) ([]*queries.Scan, error) {
+		scans := []*queries.Scan{}
+
+		getDatabases, err := getDatabasesQuerier(q)
+		if err != nil {
+			return nil, fmt.Errorf("could not get databases querier: %w", err)
+		}
+		databases, err := getDatabases(ctx, projectID)
+		if err != nil {
+			return nil, fmt.Errorf("error getting Mysql databases for project: %w", err)
+		}
+		for _, db := range databases {
+			scan, err := q.CreateScan(ctx, queries.CreateScanParams{
+				Status:      models.SCAN_NOT_STARTED,
+				ScanGroupID: scanGroupID,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+			}
+
+			_, err = createSpecificScan(ctx, q, scan.ID, db)
+			if err != nil {
+				return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+			}
+
+			scans = append(scans, scan)
+		}
+		return scans, nil
+	}
+}

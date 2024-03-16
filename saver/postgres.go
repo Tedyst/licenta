@@ -10,7 +10,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner/postgres"
 )
 
@@ -109,36 +108,22 @@ type CreatePostgresScanQuerier interface {
 	CreatePostgresScan(ctx context.Context, params queries.CreatePostgresScanParams) (*queries.PostgresScan, error)
 }
 
-func CreatePostgresScan(ctx context.Context, q BaseCreater, projectID int64, scanGroupID int64) ([]*queries.Scan, error) {
-	querier, ok := q.(CreatePostgresScanQuerier)
-	if !ok {
-		return nil, errors.New("querier is not a CreatePostgresScanQuerier")
-	}
-
-	scans := []*queries.Scan{}
-
-	postgres_databases, err := querier.GetPostgresDatabasesForProject(ctx, projectID)
-	if err != nil {
-		return nil, fmt.Errorf("error getting postgres databases for project: %w", err)
-	}
-	for _, db := range postgres_databases {
-		scan, err := querier.CreateScan(ctx, queries.CreateScanParams{
-			Status:      models.SCAN_NOT_STARTED,
-			ScanGroupID: scanGroupID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("error creating postgres scan: %w", err)
+var CreatePostgresScan = CreateBaseScan(
+	func(q BaseCreater) (func(context.Context, int64) ([]*queries.PostgresDatabase, error), error) {
+		mq, ok := q.(CreatePostgresScanQuerier)
+		if !ok {
+			return nil, errors.New("querier is not a CreatePostgresScanQuerier")
 		}
-
-		_, err = querier.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
-			ScanID:     scan.ID,
+		return mq.GetPostgresDatabasesForProject, nil
+	},
+	func(ctx context.Context, q BaseCreater, scanID int64, db *queries.PostgresDatabase) (any, error) {
+		mq, ok := q.(CreatePostgresScanQuerier)
+		if !ok {
+			return nil, errors.New("querier is not a CreatePostgresScanQuerier")
+		}
+		return mq.CreatePostgresScan(ctx, queries.CreatePostgresScanParams{
+			ScanID:     scanID,
 			DatabaseID: db.ID,
 		})
-		if err != nil {
-			return nil, fmt.Errorf("error creating postgres scan: %w", err)
-		}
-
-		scans = append(scans, scan)
-	}
-	return scans, nil
-}
+	},
+)

@@ -12,7 +12,6 @@ import (
 
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner/mysql"
 )
 
@@ -59,8 +58,8 @@ func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 
 	logger := slog.With(
 		"scan", scan.ID,
-		"Mysql_scan", mysqlScan.ID,
-		"Mysql_database_id", mysqlScan.DatabaseID,
+		"mysql_scan", mysqlScan.ID,
+		"mysql_database_id", mysqlScan.DatabaseID,
 	)
 
 	saver := &mysqlSaver{
@@ -106,41 +105,27 @@ func init() {
 }
 
 type CreateMysqlScanQuerier interface {
+	BaseCreater
 	GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.MysqlDatabase, error)
-	CreateScan(ctx context.Context, params queries.CreateScanParams) (*queries.Scan, error)
 	CreateMysqlScan(ctx context.Context, params queries.CreateMysqlScanParams) (*queries.MysqlScan, error)
 }
 
-func CreateMysqlScan(ctx context.Context, q BaseCreater, projectID int64, scanGroupID int64) ([]*queries.Scan, error) {
-	querier, ok := q.(CreateMysqlScanQuerier)
-	if !ok {
-		return nil, errors.New("querier is not a CreatePostgresScanQuerier")
-	}
-
-	scans := []*queries.Scan{}
-
-	mysql_databases, err := querier.GetMysqlDatabasesForProject(ctx, projectID)
-	if err != nil {
-		return nil, fmt.Errorf("error getting Mysql databases for project: %w", err)
-	}
-	for _, db := range mysql_databases {
-		scan, err := querier.CreateScan(ctx, queries.CreateScanParams{
-			Status:      models.SCAN_NOT_STARTED,
-			ScanGroupID: scanGroupID,
-		})
-		if err != nil {
-			return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+var CreateMysqlScan = CreateBaseScan(
+	func(q BaseCreater) (func(context.Context, int64) ([]*queries.MysqlDatabase, error), error) {
+		mq, ok := q.(CreateMysqlScanQuerier)
+		if !ok {
+			return nil, errors.New("querier is not a CreateMysqlScanQuerier")
 		}
-
-		_, err = querier.CreateMysqlScan(ctx, queries.CreateMysqlScanParams{
-			ScanID:     scan.ID,
+		return mq.GetMysqlDatabasesForProject, nil
+	},
+	func(ctx context.Context, q BaseCreater, scanID int64, db *queries.MysqlDatabase) (any, error) {
+		mq, ok := q.(CreateMysqlScanQuerier)
+		if !ok {
+			return nil, errors.New("querier is not a CreateMysqlScanQuerier")
+		}
+		return mq.CreateMysqlScan(ctx, queries.CreateMysqlScanParams{
+			ScanID:     scanID,
 			DatabaseID: db.ID,
 		})
-		if err != nil {
-			return nil, fmt.Errorf("error creating Mysql scan: %w", err)
-		}
-
-		scans = append(scans, scan)
-	}
-	return scans, nil
-}
+	},
+)
