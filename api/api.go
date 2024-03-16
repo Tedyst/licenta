@@ -53,6 +53,9 @@ type userAuth interface {
 	UpdatePassword(ctx context.Context, user *queries.User, newPassword string) error
 }
 
+const limitRatePerMinute = 100
+const timeout = 30 * time.Second
+
 func Initialize(config ApiConfig) (http.Handler, error) {
 	app := chi.NewRouter()
 	app.Use(middleware.RealIP)
@@ -67,10 +70,10 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	app.Use(middleware.GetHead)
 	app.Use(options.HandleOptions(config.Origin))
 	app.Use(requestid.RequestIDMiddleware)
-	app.Use(httprate.LimitByIP(100, 1*time.Minute))
+	app.Use(httprate.LimitByIP(limitRatePerMinute, 1*time.Minute))
 
 	if !config.Debug {
-		app.Use(middleware.Timeout(30 * time.Second))
+		app.Use(middleware.Timeout(timeout))
 	}
 	app.Use(config.WorkerAuth.Handler)
 

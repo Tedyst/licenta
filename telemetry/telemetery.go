@@ -83,7 +83,11 @@ func ShutdownTelemetry() error {
 	if tp != nil {
 		switch tp.(type) {
 		case *sdktrace.TracerProvider:
-			err := otel.GetTracerProvider().(*sdktrace.TracerProvider).Shutdown(context.Background())
+			p, ok := otel.GetTracerProvider().(*sdktrace.TracerProvider)
+			if !ok {
+				return fmt.Errorf("failed to cast TracerProvider to sdktrace.TracerProvider")
+			}
+			err := p.Shutdown(context.Background())
 			if err != nil {
 				return err
 			}
@@ -94,7 +98,11 @@ func ShutdownTelemetry() error {
 	if mp != nil {
 		switch mp.(type) {
 		case *sdkmetric.MeterProvider:
-			err := otel.GetMeterProvider().(*sdkmetric.MeterProvider).Shutdown(context.Background())
+			p, ok := otel.GetMeterProvider().(*sdkmetric.MeterProvider)
+			if !ok {
+				return fmt.Errorf("failed to cast MeterProvider to sdkmetric.MeterProvider")
+			}
+			err := p.Shutdown(context.Background())
 			if err != nil {
 				return err
 			}

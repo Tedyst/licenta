@@ -371,7 +371,10 @@ func (webn *webAuthn) HijackAuth(w http.ResponseWriter, r *http.Request, handled
 	}
 
 	storer := MustBeWebauthnStorer(webn.Authboss.Config.Storage.Server)
-	user := r.Context().Value(authboss.CTXKeyUser).(totp2fa.User)
+	user, ok := r.Context().Value(authboss.CTXKeyUser).(totp2fa.User)
+	if !ok {
+		return false, nil
+	}
 
 	rmIntf := r.Context().Value(authboss.CTXKeyValues)
 	if rmIntf == nil {

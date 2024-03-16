@@ -13,7 +13,7 @@ var deleteCveCmd = &cobra.Command{
 	Short: "Delete CVE from database",
 	Long: `This command allows you to delete a CVE from the database.
 
-This is needed since some vulnerabilites do not affect the actual product, but are still present in the NVD database. 
+This is needed since some vulnerabilities do not affect the actual product, but are still present in the NVD database. 
 For example: CVE-2009-2943, CVE-2010-3781.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {

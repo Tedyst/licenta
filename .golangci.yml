@@ -1,0 +1,35 @@
+linters:
+  enable-all: true
+  disable:
+    - funlen
+    - depguard
+    - godot
+    - lll
+    - gomnd
+    - nestif
+    - nlreturn
+    - wsl
+    - ifshort
+    - nosnakecase
+    - gci
+    - gochecknoinits
+    - tagliatelle
+    - gocognit
+    - inamedparam
+    - testpackage
+    - goconst
+    - gofumpt
+    - scopelint
+  fast: true
+
+issues:
+  exclude-rules:
+    - path: 'saver/(.+)\.go'
+      linters:
+        - dupl
+    - path: 'api/(.+)\.go'
+      linters:
+        - dupl
+    - path: 'worker/(.+)\.go'
+      linters:
+        - dupl

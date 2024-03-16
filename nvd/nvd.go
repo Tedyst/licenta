@@ -52,7 +52,7 @@ func DownloadCpeNext(ctx context.Context, product Product, startIndex int64) (io
 		return nil, err
 	}
 
-	if resp.StatusCode == 429 {
+	if resp.StatusCode == http.StatusTooManyRequests {
 		return nil, ErrRateLimit
 	}
 
@@ -84,7 +84,7 @@ func DownloadCVEsNext(ctx context.Context, product Product, cpe string, startInd
 		return nil, err
 	}
 
-	if resp.StatusCode == 429 {
+	if resp.StatusCode == http.StatusTooManyRequests {
 		return nil, ErrRateLimit
 	}
 

@@ -130,19 +130,20 @@ func Test_postgresUser_VerifyPassword(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		ttt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			u := &postgresUser{
-				super:    tt.fields.super,
-				name:     tt.fields.name,
-				password: tt.fields.password,
+				super:    ttt.fields.super,
+				name:     ttt.fields.name,
+				password: ttt.fields.password,
 			}
-			got, err := u.VerifyPassword(tt.args.password)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("postgresUser.VerifyPassword() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := u.VerifyPassword(ttt.args.password)
+			if (err != nil) != ttt.wantErr {
+				t.Errorf("postgresUser.VerifyPassword() error = %v, wantErr %v", err, ttt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("postgresUser.VerifyPassword() = %v, want %v", got, tt.want)
+			if got != ttt.want {
+				t.Errorf("postgresUser.VerifyPassword() = %v, want %v", got, ttt.want)
 			}
 		})
 	}

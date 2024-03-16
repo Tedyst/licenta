@@ -153,7 +153,10 @@ func (auth *authenticationProvider) Handler() http.Handler {
 }
 
 func (auth *authenticationProvider) GetUser(ctx context.Context) (*queries.User, error) {
-	r := ctx.Value(requestStorer{}).(*http.Request)
+	r, ok := ctx.Value(requestStorer{}).(*http.Request)
+	if !ok {
+		return nil, errors.New("request not found in context")
+	}
 	user, err := auth.authboss.CurrentUser(r)
 	if err != nil && !errors.Is(err, authboss.ErrUserNotFound) {
 		return nil, err
@@ -162,7 +165,11 @@ func (auth *authenticationProvider) GetUser(ctx context.Context) (*queries.User,
 		return nil, nil
 	}
 
-	return user.(*authbossUser).user, nil
+	u, ok := user.(*authbossUser)
+	if !ok {
+		return nil, errors.New("user not found")
+	}
+	return u.user, nil
 }
 
 func (auth *authenticationProvider) UpdatePassword(ctx context.Context, user *queries.User, newPassword string) error {

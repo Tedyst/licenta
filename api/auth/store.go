@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -43,22 +44,26 @@ func (a *authbossStorer) Load(ctx context.Context, key string) (authboss.User, e
 }
 
 func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
+	u, ok := user.(*authbossUser)
+	if !ok {
+		return errors.New("invalid user type")
+	}
 	return a.querier.UpdateUser(ctx, queries.UpdateUserParams{
-		ID:                user.(*authbossUser).user.ID,
-		Username:          user.(*authbossUser).user.Username,
-		Email:             user.(*authbossUser).user.Email,
-		Password:          user.(*authbossUser).user.Password,
-		RecoveryCodes:     user.(*authbossUser).user.RecoveryCodes,
-		TotpSecret:        user.(*authbossUser).user.TotpSecret,
-		RecoverSelector:   user.(*authbossUser).user.RecoverSelector,
-		RecoverVerifier:   user.(*authbossUser).user.RecoverVerifier,
-		RecoverExpiry:     user.(*authbossUser).user.RecoverExpiry,
-		LoginAttemptCount: user.(*authbossUser).user.LoginAttemptCount,
-		LoginLastAttempt:  user.(*authbossUser).user.LoginLastAttempt,
-		Locked:            user.(*authbossUser).user.Locked,
-		ConfirmSelector:   user.(*authbossUser).user.ConfirmSelector,
-		ConfirmVerifier:   user.(*authbossUser).user.ConfirmVerifier,
-		Confirmed:         user.(*authbossUser).user.Confirmed,
+		ID:                u.user.ID,
+		Username:          u.user.Username,
+		Email:             u.user.Email,
+		Password:          u.user.Password,
+		RecoveryCodes:     u.user.RecoveryCodes,
+		TotpSecret:        u.user.TotpSecret,
+		RecoverSelector:   u.user.RecoverSelector,
+		RecoverVerifier:   u.user.RecoverVerifier,
+		RecoverExpiry:     u.user.RecoverExpiry,
+		LoginAttemptCount: u.user.LoginAttemptCount,
+		LoginLastAttempt:  u.user.LoginLastAttempt,
+		Locked:            u.user.Locked,
+		ConfirmSelector:   u.user.ConfirmSelector,
+		ConfirmVerifier:   u.user.ConfirmVerifier,
+		Confirmed:         u.user.Confirmed,
 	})
 }
 
@@ -69,13 +74,17 @@ func (a *authbossStorer) New(ctx context.Context) authboss.User {
 }
 
 func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
-	if user.(*authbossUser).user.Username == "" || user.(*authbossUser).user.Email == "" || user.(*authbossUser).user.Password == "" {
+	u, ok := user.(*authbossUser)
+	if !ok {
+		return errors.New("invalid user type")
+	}
+	if u.user.Username == "" || u.user.Email == "" || u.user.Password == "" {
 		return authboss.ErrUserNotFound
 	}
 
 	_, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
-		Username: user.(*authbossUser).user.Username,
-		Email:    user.(*authbossUser).user.Email,
+		Username: u.user.Username,
+		Email:    u.user.Email,
 	})
 	if err != nil && err != pgx.ErrNoRows {
 		return err
@@ -85,22 +94,22 @@ func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
 	}
 
 	newUser, err := a.querier.CreateUser(ctx, queries.CreateUserParams{
-		Username:          user.(*authbossUser).user.Username,
-		Email:             user.(*authbossUser).user.Email,
-		Password:          user.(*authbossUser).user.Password,
-		RecoveryCodes:     user.(*authbossUser).user.RecoveryCodes,
-		TotpSecret:        user.(*authbossUser).user.TotpSecret,
-		RecoverSelector:   user.(*authbossUser).user.RecoverSelector,
-		RecoverVerifier:   user.(*authbossUser).user.RecoverVerifier,
-		RecoverExpiry:     user.(*authbossUser).user.RecoverExpiry,
-		LoginAttemptCount: user.(*authbossUser).user.LoginAttemptCount,
-		LoginLastAttempt:  user.(*authbossUser).user.LoginLastAttempt,
-		Locked:            user.(*authbossUser).user.Locked,
-		ConfirmSelector:   user.(*authbossUser).user.ConfirmSelector,
-		ConfirmVerifier:   user.(*authbossUser).user.ConfirmVerifier,
-		Confirmed:         user.(*authbossUser).user.Confirmed,
+		Username:          u.user.Username,
+		Email:             u.user.Email,
+		Password:          u.user.Password,
+		RecoveryCodes:     u.user.RecoveryCodes,
+		TotpSecret:        u.user.TotpSecret,
+		RecoverSelector:   u.user.RecoverSelector,
+		RecoverVerifier:   u.user.RecoverVerifier,
+		RecoverExpiry:     u.user.RecoverExpiry,
+		LoginAttemptCount: u.user.LoginAttemptCount,
+		LoginLastAttempt:  u.user.LoginLastAttempt,
+		Locked:            u.user.Locked,
+		ConfirmSelector:   u.user.ConfirmSelector,
+		ConfirmVerifier:   u.user.ConfirmVerifier,
+		Confirmed:         u.user.Confirmed,
 	})
-	user.(*authbossUser).user = newUser
+	u.user = newUser
 	return err
 }
 

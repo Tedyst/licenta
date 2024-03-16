@@ -126,12 +126,12 @@ var scanConfigLines = map[string]struct {
 			detail:   "password_encryption is off or set to md5. This may allow privilege escalation.",
 		},
 	},
-	"syncronous_commit": {
+	"synchronous_commit": {
 		value: func(s string) bool { return s == "off" },
 		diagnostic: postgresScanResult{
 			severity: scanner.SEVERITY_WARNING,
-			message:  "syncronous_commit is off.",
-			detail:   "syncronous_commit is off. This may cause a loss of data in case of crash.",
+			message:  "synchronous_commit is off.",
+			detail:   "synchronous_commit is off. This may cause a loss of data in case of crash.",
 		},
 	},
 	"TimeZone": {

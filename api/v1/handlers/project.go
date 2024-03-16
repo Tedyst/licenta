@@ -19,13 +19,13 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 		return nil, err
 	}
 
-	postgres_databases_q, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
+	postgresDatabasesQ, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
 	if err != nil {
 		return nil, err
 	}
-	postgres_databases := make([]generated.PostgresDatabase, len(postgres_databases_q))
-	for i, db := range postgres_databases_q {
-		postgres_databases[i] = generated.PostgresDatabase{
+	postgresDatabases := make([]generated.PostgresDatabase, len(postgresDatabasesQ))
+	for i, db := range postgresDatabasesQ {
+		postgresDatabases[i] = generated.PostgresDatabase{
 			CreatedAt:    db.CreatedAt.Time.Format(time.RFC3339Nano),
 			Id:           int(db.ID),
 			DatabaseName: db.DatabaseName,
@@ -46,7 +46,7 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 			Name:           project.Name,
 			OrganizationId: project.OrganizationID,
 		},
-		PostgresDatabases: postgres_databases,
+		PostgresDatabases: postgresDatabases,
 	}, nil
 }
 

@@ -9,15 +9,15 @@ import (
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	localExchange "github.com/tedyst/licenta/messages/local"
-	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/saver"
 	"github.com/tedyst/licenta/tasks/local"
 )
 
-var taskScanMysqlCmd = &cobra.Command{
-	Use:   "scanmysql [databaseID]",
-	Short: "Scan mysql DB task",
-	Long:  `This task will scan a mysql database.`,
-	Args:  cobra.ExactArgs(1),
+var taskCreateScan = &cobra.Command{
+	Use:   "createscan [scanType] [databaseID]",
+	Short: "Scan any DB task",
+	Long:  `This task will scan a specific database type.`,
+	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database := db.InitDatabase(viper.GetString("database"))
 
@@ -26,7 +26,7 @@ var taskScanMysqlCmd = &cobra.Command{
 
 		taskRunner := local.NewLocalRunner(true, nil, database, localExchange, bruteforceProvider)
 
-		dbid, err := strconv.ParseInt(args[0], 10, 64)
+		dbid, err := strconv.ParseInt(args[1], 10, 64)
 		if err != nil {
 			return err
 		}
@@ -43,26 +43,19 @@ var taskScanMysqlCmd = &cobra.Command{
 			return err
 		}
 
-		scan, err := database.CreateScan(cmd.Context(), queries.CreateScanParams{
-			Status:      models.SCAN_NOT_STARTED,
-			ScanGroupID: scanGroup.ID,
-		})
+		scans, err := saver.CreateScans(cmd.Context(), database, scanGroup.ID, -1, args[0])
 		if err != nil {
 			return err
 		}
 
-		_, err = database.CreateMysqlScan(cmd.Context(), queries.CreateMysqlScanParams{
-			ScanID:     scan.ID,
-			DatabaseID: dbid,
-		})
-		if err != nil {
-			return err
+		if len(scans) == 0 {
+			return nil
 		}
 
-		return taskRunner.RunSaverRemote(cmd.Context(), scan, "mysql")
+		return taskRunner.RunSaverRemote(cmd.Context(), scans[0], args[0])
 	},
 }
 
 func init() {
-	tasksCmd.AddCommand(taskScanMysqlCmd)
+	tasksCmd.AddCommand(taskCreateScan)
 }

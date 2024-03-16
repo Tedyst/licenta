@@ -11,7 +11,7 @@ import (
 
 type Credential = webauthn.Credential
 
-// WebauthnUser is an interface that can be implemented by a user
+// WebauthnUser is an interface that can be implemented by a user.
 type WebauthnUser interface {
 	authboss.User
 

@@ -29,7 +29,7 @@ func (server *serverHandler) GetCvesDbTypeVersion(ctx context.Context, request g
 		return nil, err
 	}
 
-	var result []generated.CVE
+	result := make([]generated.CVE, 0, len(cves))
 	for _, cve := range cves {
 		result = append(result, generated.CVE{
 			CveId:        cve.NvdCfe.CveID,

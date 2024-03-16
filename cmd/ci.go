@@ -15,6 +15,8 @@ import (
 	"github.com/tedyst/licenta/ci"
 )
 
+const v1Endpoint = "/api/v1"
+
 type csrfClient struct {
 	httpClient *http.Client
 	csrfToken  string
@@ -37,12 +39,12 @@ func initHttpCsrfClient() (*csrfClient, error) {
 		csrfToken: "",
 	}
 
-	url, err := url.Parse(viper.GetString("api") + "/api/v1")
+	url, err := url.Parse(viper.GetString("api") + v1Endpoint)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing url: %w", err)
 	}
 	optionsRequest, err := httpClient.httpClient.Do(&http.Request{
-		Method: "OPTIONS",
+		Method: http.MethodOptions,
 		URL:    url,
 	})
 	if err != nil {

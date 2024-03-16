@@ -99,7 +99,7 @@ func (br *bruteforcer) initialize(ctx context.Context) error {
 	return br.updateStatus(ctx)
 }
 
-func (br *bruteforcer) savePasswordHash(ctx context.Context, user scanner.User, password string) error {
+func (br *bruteforcer) savePasswordHash(_ context.Context, user scanner.User, password string) error {
 	username, err := user.GetUsername()
 	if err != nil {
 		return fmt.Errorf("could not get username: %w", err)
@@ -146,7 +146,7 @@ func (br *bruteforcer) BruteforcePasswordAllUsers(ctx context.Context) ([]scanne
 	return br.results, nil
 }
 
-func (br *bruteforcer) markStatusAsSolved(ctx context.Context, user scanner.User, password string, internalID int64) error {
+func (br *bruteforcer) markStatusAsSolved(_ context.Context, user scanner.User, password string, internalID int64) error {
 	br.statusLock.Lock()
 	defer br.statusLock.Unlock()
 	entry, ok := br.status[user]
@@ -160,7 +160,7 @@ func (br *bruteforcer) markStatusAsSolved(ctx context.Context, user scanner.User
 	return nil
 }
 
-func (br *bruteforcer) markIncreaseTried(ctx context.Context, user scanner.User, internalID int64) error {
+func (br *bruteforcer) markIncreaseTried(_ context.Context, user scanner.User, internalID int64) error {
 	br.statusLock.Lock()
 	defer br.statusLock.Unlock()
 	entry, ok := br.status[user]
@@ -175,7 +175,7 @@ func (br *bruteforcer) markIncreaseTried(ctx context.Context, user scanner.User,
 	return nil
 }
 
-func (br *bruteforcer) markStatusAsUnsolved(ctx context.Context, user scanner.User) error {
+func (br *bruteforcer) markStatusAsUnsolved(_ context.Context, user scanner.User) error {
 	br.statusLock.Lock()
 	defer br.statusLock.Unlock()
 	entry, ok := br.status[user]
@@ -188,7 +188,7 @@ func (br *bruteforcer) markStatusAsUnsolved(ctx context.Context, user scanner.Us
 	return nil
 }
 
-func (br *bruteforcer) setMaximumInternalID(ctx context.Context, user scanner.User, internalID int64) error {
+func (br *bruteforcer) setMaximumInternalID(_ context.Context, user scanner.User, internalID int64) error {
 	br.statusLock.Lock()
 	defer br.statusLock.Unlock()
 	entry, ok := br.status[user]
