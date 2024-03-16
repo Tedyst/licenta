@@ -2,7 +2,9 @@ package authorization
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/tedyst/licenta/cache"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -27,15 +29,48 @@ type AuthorizationManager interface {
 	WorkerPermissionsChanged(ctx context.Context, worker *queries.Worker) error
 }
 
+func cacheKeyForWorkerOrganization(worker *queries.Worker, organization *queries.Organization) string {
+	return "worker:" + worker.Token + ":organization:" + fmt.Sprint(organization.ID)
+}
+
+func cacheKeyForWorkerProject(worker *queries.Worker, project *queries.Project) string {
+	return "worker:" + worker.Token + ":project:" + fmt.Sprint(project.ID)
+}
+
+func cacheKeyForUserOrganization(user *queries.User, organization *queries.Organization) string {
+	return "user:" + fmt.Sprint(user.ID) + ":organization:" + fmt.Sprint(organization.ID)
+}
+
+func cacheKeyForUserProject(user *queries.User, project *queries.Project) string {
+	return "user:" + fmt.Sprint(user.ID) + ":project:" + fmt.Sprint(project.ID)
+}
+
+func cachePatternForUser(user *queries.User) string {
+	return "user:" + fmt.Sprint(user.ID) + ":.*"
+}
+
+func cachePatternForWorker(worker *queries.Worker) string {
+	return "worker:" + worker.Token + ":.*"
+}
+
 type authorizationManagerImpl struct {
+	cache   cache.CacheProvider[int16]
 	querier db.TransactionQuerier
 }
 
-func NewAuthorizationManager(querier db.TransactionQuerier) AuthorizationManager {
-	return &authorizationManagerImpl{querier: querier}
+func NewAuthorizationManager(querier db.TransactionQuerier, cache cache.CacheProvider[int16]) AuthorizationManager {
+	return &authorizationManagerImpl{querier: querier, cache: cache}
 }
 
 func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.Context, organization *queries.Organization, user *queries.User, permission RBACGroup) (bool, error) {
+	cached, ok, err := a.cache.Get(cacheKeyForUserOrganization(user, organization))
+	if err != nil {
+		return false, err
+	}
+	if ok {
+		return RBACGroup(cached) >= permission, nil
+	}
+
 	p, err := a.querier.GetOrganizationPermissionsForUser(ctx, queries.GetOrganizationPermissionsForUserParams{
 		OrganizationID: organization.ID,
 		UserID:         user.ID,
@@ -48,6 +83,14 @@ func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.
 }
 
 func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error) {
+	cached, ok, err := a.cache.Get(cacheKeyForUserProject(user, project))
+	if err != nil {
+		return false, err
+	}
+	if ok {
+		return RBACGroup(cached) >= permission, nil
+	}
+
 	p, err := a.querier.GetProjectPermissionsForUser(ctx, queries.GetProjectPermissionsForUserParams{
 		ProjectID:      project.ID,
 		UserID:         user.ID,
@@ -61,7 +104,15 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 }
 
 func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error) {
-	_, err := a.querier.GetWorkerForProject(ctx, queries.GetWorkerForProjectParams{
+	cached, ok, err := a.cache.Get(cacheKeyForWorkerProject(worker, project))
+	if err != nil {
+		return false, err
+	}
+	if ok {
+		return RBACGroup(cached) >= permission, nil
+	}
+
+	_, err = a.querier.GetWorkerForProject(ctx, queries.GetWorkerForProjectParams{
 		ProjectID: project.ID,
 		Token:     worker.Token,
 	})
@@ -73,9 +124,9 @@ func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Con
 }
 
 func (a *authorizationManagerImpl) UserPermissionsChanged(ctx context.Context, user *queries.User) error {
-	return nil
+	return a.cache.Invalidate(cachePatternForUser(user))
 }
 
 func (a *authorizationManagerImpl) WorkerPermissionsChanged(ctx context.Context, worker *queries.Worker) error {
-	return nil
+	return a.cache.Invalidate(cachePatternForWorker(worker))
 }

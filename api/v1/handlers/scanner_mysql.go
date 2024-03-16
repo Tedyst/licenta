@@ -113,8 +113,14 @@ func (server *serverHandler) GetMysqlScans(ctx context.Context, request generate
 	}
 
 	MysqlScan, err := server.DatabaseProvider.GetProjectInfoForMysqlScanByScanID(ctx, request.Params.Scan)
-	if err != nil {
-		return nil, err
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting Mysql scan: %w", err)
+	}
+	if err == pgx.ErrNoRows {
+		return generated.GetMysqlScans404JSONResponse{
+			Success: false,
+			Message: "Scan not found",
+		}, nil
 	}
 
 	hasPerm, err := server.authorization.WorkerHasPermissionForProject(ctx, &MysqlScan.Project, worker, authorization.Worker)

@@ -79,7 +79,11 @@ var serveLocalCmd = &cobra.Command{
 
 		workerAuth := workerauth.NewWorkerAuth(waCacheProvider, db)
 
-		authorizationManager := authorization.NewAuthorizationManager(db)
+		authorizationCache, err := cache.NewLocalCacheProvider[int16]()
+		if err != nil {
+			return err
+		}
+		authorizationManager := authorization.NewAuthorizationManager(db, authorizationCache)
 
 		app, err := api.Initialize(api.ApiConfig{
 			Debug:                viper.GetBool("debug"),

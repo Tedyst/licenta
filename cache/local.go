@@ -1,6 +1,10 @@
 package cache
 
-import lru "github.com/hashicorp/golang-lru/v2"
+import (
+	"regexp"
+
+	lru "github.com/hashicorp/golang-lru/v2"
+)
 
 const localCacheSize = 1000
 
@@ -33,7 +37,15 @@ func (l *localCacheProvider[T]) Set(key string, value T) error {
 	return nil
 }
 
-func (l *localCacheProvider[T]) Invalidate(key string) error {
-	l.cache.Remove(key)
+func (l *localCacheProvider[T]) Invalidate(pattern string) error {
+	regexp, err := regexp.Compile(pattern)
+	if err != nil {
+		return err
+	}
+	for _, k := range l.cache.Keys() {
+		if regexp.MatchString(k) {
+			l.cache.Remove(k)
+		}
+	}
 	return nil
 }
