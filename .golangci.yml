@@ -27,7 +27,7 @@ issues:
     - path: 'saver/(.+)\.go'
       linters:
         - dupl
-    - path: 'api/(.+)\.go'
+    - path: 'api/v1/handlers/scanner_(.+)\.go'
       linters:
         - dupl
     - path: 'worker/(.+)\.go'
