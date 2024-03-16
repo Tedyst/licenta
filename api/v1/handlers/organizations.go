@@ -37,7 +37,7 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 	for _, project := range projects {
 		organizationProjects[project.OrganizationID] = append(organizationProjects[project.OrganizationID], generated.Project{
 			Id:             int64(project.ID),
-			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339),
+			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339Nano),
 			Name:           project.Name,
 			OrganizationId: int64(project.OrganizationID),
 			Remote:         project.Remote,

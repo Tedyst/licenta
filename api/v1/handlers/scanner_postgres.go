@@ -28,7 +28,7 @@ func (server *serverHandler) GetPostgresId(ctx context.Context, request generate
 	return generated.GetPostgresId200JSONResponse{
 		Success: true,
 		PostgresDatabase: generated.PostgresDatabase{
-			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
+			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339Nano),
 			Host:         database.PostgresDatabase.Host,
 			DatabaseName: database.PostgresDatabase.DatabaseName,
 			Password:     database.PostgresDatabase.Password,
@@ -94,7 +94,7 @@ func (server *serverHandler) PatchPostgresId(ctx context.Context, request genera
 	return generated.PatchPostgresId200JSONResponse{
 		Success: true,
 		PostgresDatabase: generated.PostgresDatabase{
-			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339),
+			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339Nano),
 			Host:         host,
 			DatabaseName: databaseName,
 			Password:     password,

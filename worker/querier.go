@@ -47,7 +47,7 @@ func (q *remoteQuerier) UpdateScanStatus(ctx context.Context, params queries.Upd
 
 	response, err := q.client.PatchScanIdWithResponse(ctx, params.ID, generated.PatchScan{
 		Status:  int(params.Status),
-		EndedAt: params.EndedAt.Time.Format(time.RFC3339),
+		EndedAt: params.EndedAt.Time.Format(time.RFC3339Nano),
 		Error:   params.Error.String,
 	})
 	if err != nil {

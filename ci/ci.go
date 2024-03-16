@@ -32,11 +32,11 @@ func waitForScan(ctx context.Context, client generated.ClientWithResponsesInterf
 				return 0, errors.New("received error from remote server: " + response.JSON200.Scan.Error)
 			}
 			if response.JSON200.Scan.Status == int(models.SCAN_FINISHED) {
-				createdAt, err := time.Parse(time.RFC3339, response.JSON200.Scan.CreatedAt)
+				createdAt, err := time.Parse(time.RFC3339Nano, response.JSON200.Scan.CreatedAt)
 				if err != nil {
 					return 0, err
 				}
-				endedAt, err := time.Parse(time.RFC3339, response.JSON200.Scan.EndedAt)
+				endedAt, err := time.Parse(time.RFC3339Nano, response.JSON200.Scan.EndedAt)
 				if err != nil {
 					return 0, err
 				}

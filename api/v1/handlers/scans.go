@@ -45,7 +45,7 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 	scanResults := make([]generated.ScanResult, len(scanResultsQ))
 	for i, scanResult := range scanResultsQ {
 		scanResults[i] = generated.ScanResult{
-			CreatedAt:  scanResult.CreatedAt.Time.Format(time.RFC3339),
+			CreatedAt:  scanResult.CreatedAt.Time.Format(time.RFC3339Nano),
 			Id:         int(scanResult.ID),
 			Message:    scanResult.Message,
 			Severity:   int(scanResult.Severity),
@@ -72,8 +72,8 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 	return generated.GetScanId200JSONResponse{
 		Success: true,
 		Scan: generated.Scan{
-			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
+			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339Nano),
+			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339Nano),
 			Error:           scan.Scan.Error.String,
 			Id:              int(scan.Scan.ID),
 			Status:          int(scan.Scan.Status),
@@ -104,7 +104,7 @@ func (server *serverHandler) PatchScanId(ctx context.Context, request generated.
 		}, nil
 	}
 
-	t, err := time.Parse(time.RFC3339, request.Body.EndedAt)
+	t, err := time.Parse(time.RFC3339Nano, request.Body.EndedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +126,8 @@ func (server *serverHandler) PatchScanId(ctx context.Context, request generated.
 	return generated.PatchScanId200JSONResponse{
 		Success: true,
 		Scan: &generated.Scan{
-			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
+			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339Nano),
+			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339Nano),
 			Error:           scan.Scan.Error.String,
 			Id:              int(scan.Scan.ID),
 			Status:          int(scan.Scan.Status),
@@ -170,7 +170,7 @@ func (server *serverHandler) PostScanIdResult(ctx context.Context, request gener
 	return generated.PostScanIdResult200JSONResponse{
 		Success: true,
 		Scan: &generated.ScanResult{
-			CreatedAt: scanresult.CreatedAt.Time.Format(time.RFC3339),
+			CreatedAt: scanresult.CreatedAt.Time.Format(time.RFC3339Nano),
 			Id:        int(scanresult.ID),
 			Message:   scanresult.Message,
 			Severity:  int(scanresult.Severity),

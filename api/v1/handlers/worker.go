@@ -80,8 +80,8 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		Success: true,
 		Scan: generated.Scan{
 			Id:              int(scan.Scan.ID),
-			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339),
-			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339),
+			CreatedAt:       scan.Scan.CreatedAt.Time.Format(time.RFC3339Nano),
+			EndedAt:         scan.Scan.EndedAt.Time.Format(time.RFC3339Nano),
 			Error:           scan.Scan.Error.String,
 			PostgresScan:    postgresScanResponse,
 			Status:          int(scan.Scan.Status),
