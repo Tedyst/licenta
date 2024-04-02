@@ -24,8 +24,39 @@ type remoteQuerier struct {
 	scanGroup *queries.ScanGroup
 }
 
-func (*remoteQuerier) UpdateBruteforcedPassword(ctx context.Context, arg queries.UpdateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
-	return nil, nil
+func (q *remoteQuerier) UpdateBruteforcedPassword(ctx context.Context, arg queries.UpdateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
+	response, err := q.client.PatchBruteforcedPasswordsIdWithResponse(ctx, arg.ID, generated.PatchBruteforcedPasswordsIdJSONRequestBody{
+		LastBruteforceId: int(arg.LastBruteforceID.Int64),
+		Password:         arg.Password.String,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "CreateBruteforcedPassword")
+
+	switch response.StatusCode() {
+	case http.StatusOK:
+		return &queries.BruteforcedPassword{
+			ID: int64(response.JSON200.BruteforcedPassword.Id),
+			Password: sql.NullString{
+				String: response.JSON200.BruteforcedPassword.Password,
+				Valid:  response.JSON200.BruteforcedPassword.Password != "",
+			},
+			Hash: response.JSON200.BruteforcedPassword.Hash,
+			LastBruteforceID: sql.NullInt64{
+				Int64: int64(response.JSON200.BruteforcedPassword.LastBruteforceId),
+				Valid: response.JSON200.BruteforcedPassword.LastBruteforceId != 0,
+			},
+			ProjectID: sql.NullInt64{
+				Int64: int64(response.JSON200.BruteforcedPassword.ProjectId),
+				Valid: response.JSON200.BruteforcedPassword.ProjectId != 0,
+			},
+			Username: response.JSON200.BruteforcedPassword.Username,
+		}, nil
+	default:
+		return nil, errors.New("error creating bruteforced password")
+	}
 }
 
 var _ saver.BaseQuerier = (*remoteQuerier)(nil)

@@ -42,6 +42,45 @@ func (m *MockTransactionQuerier) EXPECT() *MockTransactionQuerierMockRecorder {
 	return m.recorder
 }
 
+// AddOrganizationUser mocks base method.
+func (m *MockTransactionQuerier) AddOrganizationUser(ctx context.Context, arg queries.AddOrganizationUserParams) (*queries.OrganizationMember, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddOrganizationUser", ctx, arg)
+	ret0, _ := ret[0].(*queries.OrganizationMember)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddOrganizationUser indicates an expected call of AddOrganizationUser.
+func (mr *MockTransactionQuerierMockRecorder) AddOrganizationUser(ctx, arg any) *TransactionQuerierAddOrganizationUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrganizationUser", reflect.TypeOf((*MockTransactionQuerier)(nil).AddOrganizationUser), ctx, arg)
+	return &TransactionQuerierAddOrganizationUserCall{Call: call}
+}
+
+// TransactionQuerierAddOrganizationUserCall wrap *gomock.Call
+type TransactionQuerierAddOrganizationUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierAddOrganizationUserCall) Return(arg0 *queries.OrganizationMember, arg1 error) *TransactionQuerierAddOrganizationUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierAddOrganizationUserCall) Do(f func(context.Context, queries.AddOrganizationUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierAddOrganizationUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierAddOrganizationUserCall) DoAndReturn(f func(context.Context, queries.AddOrganizationUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierAddOrganizationUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // AddUserToOrganization mocks base method.
 func (m *MockTransactionQuerier) AddUserToOrganization(ctx context.Context, arg queries.AddUserToOrganizationParams) error {
 	m.ctrl.T.Helper()
@@ -3926,6 +3965,84 @@ func (c *TransactionQuerierListUsersPaginatedCall) Do(f func(context.Context, qu
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *TransactionQuerierListUsersPaginatedCall) DoAndReturn(f func(context.Context, queries.ListUsersPaginatedParams) ([]*queries.User, error)) *TransactionQuerierListUsersPaginatedCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// RemoveOrganizationUser mocks base method.
+func (m *MockTransactionQuerier) RemoveOrganizationUser(ctx context.Context, arg queries.RemoveOrganizationUserParams) (*queries.OrganizationMember, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveOrganizationUser", ctx, arg)
+	ret0, _ := ret[0].(*queries.OrganizationMember)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RemoveOrganizationUser indicates an expected call of RemoveOrganizationUser.
+func (mr *MockTransactionQuerierMockRecorder) RemoveOrganizationUser(ctx, arg any) *TransactionQuerierRemoveOrganizationUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveOrganizationUser", reflect.TypeOf((*MockTransactionQuerier)(nil).RemoveOrganizationUser), ctx, arg)
+	return &TransactionQuerierRemoveOrganizationUserCall{Call: call}
+}
+
+// TransactionQuerierRemoveOrganizationUserCall wrap *gomock.Call
+type TransactionQuerierRemoveOrganizationUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierRemoveOrganizationUserCall) Return(arg0 *queries.OrganizationMember, arg1 error) *TransactionQuerierRemoveOrganizationUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierRemoveOrganizationUserCall) Do(f func(context.Context, queries.RemoveOrganizationUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierRemoveOrganizationUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierRemoveOrganizationUserCall) DoAndReturn(f func(context.Context, queries.RemoveOrganizationUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierRemoveOrganizationUserCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// SetOrganizationPermissionsForUser mocks base method.
+func (m *MockTransactionQuerier) SetOrganizationPermissionsForUser(ctx context.Context, arg queries.SetOrganizationPermissionsForUserParams) (*queries.OrganizationMember, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetOrganizationPermissionsForUser", ctx, arg)
+	ret0, _ := ret[0].(*queries.OrganizationMember)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SetOrganizationPermissionsForUser indicates an expected call of SetOrganizationPermissionsForUser.
+func (mr *MockTransactionQuerierMockRecorder) SetOrganizationPermissionsForUser(ctx, arg any) *TransactionQuerierSetOrganizationPermissionsForUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetOrganizationPermissionsForUser", reflect.TypeOf((*MockTransactionQuerier)(nil).SetOrganizationPermissionsForUser), ctx, arg)
+	return &TransactionQuerierSetOrganizationPermissionsForUserCall{Call: call}
+}
+
+// TransactionQuerierSetOrganizationPermissionsForUserCall wrap *gomock.Call
+type TransactionQuerierSetOrganizationPermissionsForUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *TransactionQuerierSetOrganizationPermissionsForUserCall) Return(arg0 *queries.OrganizationMember, arg1 error) *TransactionQuerierSetOrganizationPermissionsForUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *TransactionQuerierSetOrganizationPermissionsForUserCall) Do(f func(context.Context, queries.SetOrganizationPermissionsForUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierSetOrganizationPermissionsForUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *TransactionQuerierSetOrganizationPermissionsForUserCall) DoAndReturn(f func(context.Context, queries.SetOrganizationPermissionsForUserParams) (*queries.OrganizationMember, error)) *TransactionQuerierSetOrganizationPermissionsForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

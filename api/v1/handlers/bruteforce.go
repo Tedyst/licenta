@@ -176,7 +176,7 @@ func (server *serverHandler) GetProjectIdBruteforcedPassword(ctx context.Context
 }
 
 func (server *serverHandler) PatchBruteforcedPasswordsId(ctx context.Context, request generated.PatchBruteforcedPasswordsIdRequestObject) (generated.PatchBruteforcedPasswordsIdResponseObject, error) {
-	_, err := server.DatabaseProvider.UpdateBruteforcedPassword(ctx, queries.UpdateBruteforcedPasswordParams{
+	p, err := server.DatabaseProvider.UpdateBruteforcedPassword(ctx, queries.UpdateBruteforcedPasswordParams{
 		ID:       request.Id,
 		Password: sql.NullString{String: request.Body.Password, Valid: request.Body.Password != ""},
 		LastBruteforceID: sql.NullInt64{
@@ -195,6 +195,14 @@ func (server *serverHandler) PatchBruteforcedPasswordsId(ctx context.Context, re
 	}
 	return generated.PatchBruteforcedPasswordsId200JSONResponse{
 		Success: true,
+		BruteforcedPassword: &generated.BruteforcedPassword{
+			Hash:             p.Hash,
+			Id:               int(p.ID),
+			LastBruteforceId: int(p.LastBruteforceID.Int64),
+			Password:         p.Password.String,
+			ProjectId:        int(p.ProjectID.Int64),
+			Username:         p.Username,
+		},
 	}, nil
 }
 
