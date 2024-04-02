@@ -15,5 +15,8 @@ var userCmd = &cobra.Command{
 }
 
 func init() {
-	userCmd.Flags().String("database", "", "Database connection string")
+	userCmd.PersistentFlags().String("database", "", "Database connection string")
+	if err := userCmd.MarkPersistentFlagRequired("database"); err != nil {
+		panic(err)
+	}
 }

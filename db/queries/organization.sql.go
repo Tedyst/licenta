@@ -9,6 +9,32 @@ import (
 	"context"
 )
 
+const addOrganizationUser = `-- name: AddOrganizationUser :one
+INSERT INTO organization_members(organization_id, user_id, ROLE)
+    VALUES ($1, $2, $3)
+RETURNING
+    id, organization_id, user_id, role, created_at
+`
+
+type AddOrganizationUserParams struct {
+	OrganizationID int64 `json:"organization_id"`
+	UserID         int64 `json:"user_id"`
+	Role           int32 `json:"role"`
+}
+
+func (q *Queries) AddOrganizationUser(ctx context.Context, arg AddOrganizationUserParams) (*OrganizationMember, error) {
+	row := q.db.QueryRow(ctx, addOrganizationUser, arg.OrganizationID, arg.UserID, arg.Role)
+	var i OrganizationMember
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getOrganizationByName = `-- name: GetOrganizationByName :one
 SELECT
     id, name, created_at
@@ -134,7 +160,8 @@ SELECT
             COUNT(*)
         FROM
             scans
-            INNER JOIN projects ON scans.project_id = projects.id
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+            INNER JOIN projects ON scan_groups.project_id = projects.id
         WHERE
             projects.organization_id = organizations.id) AS scans,
 (
@@ -143,7 +170,8 @@ SELECT
         FROM
             scan_results
             INNER JOIN scans ON scan_results.scan_id = scans.id
-            INNER JOIN projects ON scans.project_id = projects.id
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+            INNER JOIN projects ON scan_groups.project_id = projects.id
         WHERE
             projects.organization_id = organizations.id) AS maximum_severity
 FROM
@@ -187,4 +215,61 @@ func (q *Queries) GetOrganizationsByUser(ctx context.Context, userID int64) ([]*
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeOrganizationUser = `-- name: RemoveOrganizationUser :one
+DELETE FROM organization_members
+WHERE organization_id = $1
+    AND user_id = $2
+RETURNING
+    id, organization_id, user_id, role, created_at
+`
+
+type RemoveOrganizationUserParams struct {
+	OrganizationID int64 `json:"organization_id"`
+	UserID         int64 `json:"user_id"`
+}
+
+func (q *Queries) RemoveOrganizationUser(ctx context.Context, arg RemoveOrganizationUserParams) (*OrganizationMember, error) {
+	row := q.db.QueryRow(ctx, removeOrganizationUser, arg.OrganizationID, arg.UserID)
+	var i OrganizationMember
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const setOrganizationPermissionsForUser = `-- name: SetOrganizationPermissionsForUser :one
+UPDATE
+    organization_members
+SET
+    ROLE = $3
+WHERE
+    organization_id = $1
+    AND user_id = $2
+RETURNING
+    id, organization_id, user_id, role, created_at
+`
+
+type SetOrganizationPermissionsForUserParams struct {
+	OrganizationID int64 `json:"organization_id"`
+	UserID         int64 `json:"user_id"`
+	Role           int32 `json:"role"`
+}
+
+func (q *Queries) SetOrganizationPermissionsForUser(ctx context.Context, arg SetOrganizationPermissionsForUserParams) (*OrganizationMember, error) {
+	row := q.db.QueryRow(ctx, setOrganizationPermissionsForUser, arg.OrganizationID, arg.UserID, arg.Role)
+	var i OrganizationMember
+	err := row.Scan(
+		&i.ID,
+		&i.OrganizationID,
+		&i.UserID,
+		&i.Role,
+		&i.CreatedAt,
+	)
+	return &i, err
 }

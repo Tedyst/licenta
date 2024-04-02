@@ -128,7 +128,7 @@ type LoginResponse = {
 	success: boolean;
 	totp?: boolean;
 	webauthn?: boolean;
-	error?: string;
+	message?: string;
 };
 
 export async function login(
@@ -143,7 +143,7 @@ export async function login(
 		},
 		body: JSON.stringify({ username, password, rm: String(remember) })
 	}).then((response) => {
-		if (response.ok) {
+		if (response?.ok) {
 			return response.json() as Promise<LoginResponse>;
 		}
 		throw new Error('Failed to fetch');
@@ -161,7 +161,7 @@ export async function registerTOTPBegin(): Promise<RegisterTOTPBeginResponse> {
 			'Content-Type': 'application/json'
 		}
 	}).then((response) => {
-		if (response.ok) {
+		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPBeginResponse>;
 		}
 		throw new Error('Failed to fetch');
@@ -296,6 +296,37 @@ export async function updateCurrentUser(): Promise<string> {
 		.catch((err) => {
 			return err.message;
 		});
+}
+
+export type RegisterUserResponse = {
+	success: boolean;
+	errors?: {
+		username?: string[];
+		email?: string[];
+		password?: string[];
+	};
+	message?: string;
+};
+
+export type RegisterUserRequest = {
+	username: string;
+	email: string;
+	password: string;
+};
+
+export async function registerUser({ username, email, password }: RegisterUserRequest) {
+	return await csrfFetch('/api/auth/register', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ username, email, password, confirm_password: password })
+	}).then((response) => {
+		if (response?.ok) {
+			return response.json() as Promise<RegisterUserResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
 }
 
 const client = createClient<paths>({ fetch: csrfFetch, baseUrl: '/api/v1' });

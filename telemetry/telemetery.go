@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
@@ -20,10 +21,12 @@ func initTracer(collectorEndpoint string) error {
 	var err error
 	var exporter sdktrace.SpanExporter
 	if collectorEndpoint == "" {
+		slog.Info("Using stdout trace exporter")
 		exporter, err = stdouttrace.New(
 			stdouttrace.WithPrettyPrint(),
 		)
 	} else {
+		slog.Info("Using otlp trace exporter with collector endpoint", "collectorEndpoint", collectorEndpoint)
 		exporter, err = otlptrace.New(
 			context.Background(),
 			otlptracegrpc.NewClient(

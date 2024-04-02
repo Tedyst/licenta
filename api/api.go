@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/httprate"
 	"github.com/go-http-utils/etag"
 	"github.com/justinas/nosurf"
+	"github.com/riandyrn/otelchi"
 	slogchi "github.com/samber/slog-chi"
 	"github.com/tedyst/licenta/api/authorization"
 	v1 "github.com/tedyst/licenta/api/v1"
@@ -21,7 +22,6 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
 	"github.com/tedyst/licenta/tasks"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 type ApiConfig struct {
@@ -58,6 +58,7 @@ const timeout = 30 * time.Second
 
 func Initialize(config ApiConfig) (http.Handler, error) {
 	app := chi.NewRouter()
+	app.Use(otelchi.Middleware("api", otelchi.WithRequestMethodInSpanName(true)))
 	app.Use(middleware.RealIP)
 	app.Use(slogchi.New(slog.Default()))
 	app.Use(middleware.Recoverer)
@@ -70,7 +71,9 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	app.Use(middleware.GetHead)
 	app.Use(options.HandleOptions(config.Origin))
 	app.Use(requestid.RequestIDMiddleware)
-	app.Use(httprate.LimitByIP(limitRatePerMinute, 1*time.Minute))
+	if !config.Debug {
+		app.Use(httprate.LimitByIP(limitRatePerMinute, 1*time.Minute))
+	}
 
 	if !config.Debug {
 		app.Use(middleware.Timeout(timeout))
@@ -89,7 +92,6 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	})
 
 	apiRouter := app.Route("/api/v1/", func(r chi.Router) {
-		// r.Use(app.Middlewares()...)
 		r.Use(config.UserAuth.APIMiddleware)
 	})
 
@@ -103,5 +105,5 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 		DatabaseProvider:     config.Database,
 		AuthorizationManager: config.AuthorizationManager,
 	})
-	return otelhttp.NewHandler(app, "api"), nil
+	return app, nil
 }

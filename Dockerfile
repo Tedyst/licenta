@@ -17,8 +17,8 @@ COPY extractors /app/extractors
 COPY messages /app/messages
 COPY models /app/models
 COPY nvd /app/nvd
-COPY rbac /app/rbac
 COPY scanner /app/scanner
+COPY saver /app/saver
 COPY tasks /app/tasks
 COPY telemetry /app/telemetry
 COPY templates /app/templates

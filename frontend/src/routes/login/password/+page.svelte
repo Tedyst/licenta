@@ -33,7 +33,7 @@
 		} else if (loginResponse.webauthn) {
 			goto('/login/webauthn');
 		} else {
-			error = loginResponse.error || null;
+			error = loginResponse.message || null;
 		}
 	};
 </script>

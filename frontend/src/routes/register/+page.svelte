@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { registerUser } from '$lib/client';
 	import { validateEmail, validatePassword, validateUsername } from '$lib/login/login';
 	import Register from '$lib/register/register.svelte';
 
@@ -12,7 +13,7 @@
 		password: null
 	};
 
-	const onSubmit = (e: SubmitEvent) => {
+	const onSubmit = async (e: SubmitEvent) => {
 		e.preventDefault();
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
@@ -24,7 +25,18 @@
 			return;
 		}
 
-		console.log(e);
+		let response = await registerUser({
+			username: formData.get('username') as string,
+			email: formData.get('email') as string,
+			password: formData.get('password') as string
+		});
+		if (response.success) {
+			window.location.href = '/login';
+		} else {
+			errors.username = response.errors?.username?.join(', ') || null;
+			errors.email = response.errors?.email?.join(', ') || null;
+			errors.password = response.errors?.password?.join(', ') || null;
+		}
 	};
 </script>
 

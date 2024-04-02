@@ -61,7 +61,7 @@ func Execute() {
 
 func bindFlags(cmd *cobra.Command, v *viper.Viper) {
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		configName := strings.ReplaceAll(f.Name, "-", "")
+		configName := strings.ReplaceAll(f.Name, "-", "_")
 
 		if !f.Changed && v.IsSet(configName) {
 			val := v.Get(configName)

@@ -37,7 +37,8 @@ SELECT
             COUNT(*)
         FROM
             scans
-            INNER JOIN projects ON scans.project_id = projects.id
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+            INNER JOIN projects ON scan_groups.project_id = projects.id
         WHERE
             projects.organization_id = organizations.id) AS scans,
 (
@@ -46,7 +47,8 @@ SELECT
         FROM
             scan_results
             INNER JOIN scans ON scan_results.scan_id = scans.id
-            INNER JOIN projects ON scans.project_id = projects.id
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+            INNER JOIN projects ON scan_groups.project_id = projects.id
         WHERE
             projects.organization_id = organizations.id) AS maximum_severity
 FROM
@@ -73,4 +75,28 @@ FROM
 WHERE
     organization_id = $1
     AND user_id = $2;
+
+-- name: SetOrganizationPermissionsForUser :one
+UPDATE
+    organization_members
+SET
+    ROLE = $3
+WHERE
+    organization_id = $1
+    AND user_id = $2
+RETURNING
+    *;
+
+-- name: RemoveOrganizationUser :one
+DELETE FROM organization_members
+WHERE organization_id = $1
+    AND user_id = $2
+RETURNING
+    *;
+
+-- name: AddOrganizationUser :one
+INSERT INTO organization_members(organization_id, user_id, ROLE)
+    VALUES ($1, $2, $3)
+RETURNING
+    *;
 

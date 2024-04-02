@@ -12,6 +12,7 @@ import (
 )
 
 type Querier interface {
+	AddOrganizationUser(ctx context.Context, arg AddOrganizationUserParams) (*OrganizationMember, error)
 	AddUserToOrganization(ctx context.Context, arg AddUserToOrganizationParams) error
 	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) (*Scan, error)
 	CountUsers(ctx context.Context) (int64, error)
@@ -111,6 +112,8 @@ type Querier interface {
 	InvalidateTOTPSecretForUser(ctx context.Context, userID int64) error
 	ListUsers(ctx context.Context) ([]*User, error)
 	ListUsersPaginated(ctx context.Context, arg ListUsersPaginatedParams) ([]*User, error)
+	RemoveOrganizationUser(ctx context.Context, arg RemoveOrganizationUserParams) (*OrganizationMember, error)
+	SetOrganizationPermissionsForUser(ctx context.Context, arg SetOrganizationPermissionsForUserParams) (*OrganizationMember, error)
 	UpdateBruteforcedPassword(ctx context.Context, arg UpdateBruteforcedPasswordParams) (*BruteforcedPassword, error)
 	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
 	UpdateMysqlDatabase(ctx context.Context, arg UpdateMysqlDatabaseParams) error
