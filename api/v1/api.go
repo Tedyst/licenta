@@ -64,11 +64,14 @@ func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
 				Message: message,
 			})
 			if err != nil {
-				panic(err)
+				slog.Error("Cannot marshal json object", "error", err)
+				w.Write([]byte("Internal server error"))
+				return
 			}
 			_, err = w.Write(data)
 			if err != nil {
-				panic(err)
+				slog.Error("Cannot write data", "error", err)
+				return
 			}
 		},
 		ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
@@ -90,11 +93,14 @@ func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
 				Message: message,
 			})
 			if err != nil {
-				panic(err)
+				slog.Error("Cannot marshal json object", "error", err)
+				w.Write([]byte("Internal server error"))
+				return
 			}
 			_, err = w.Write(data)
 			if err != nil {
-				panic(err)
+				slog.Error("Cannot write data", "error", err)
+				return
 			}
 		},
 	})
