@@ -123,6 +123,10 @@ func (d *databasePasswordProvider) SavePasswordHash(username, hash, password str
 	oldPW, err := d.database.GetBruteforcedPasswords(d.context, queries.GetBruteforcedPasswordsParams{
 		Username: username,
 		Hash:     hash,
+		ProjectID: sql.NullInt64{
+			Int64: d.projectID,
+			Valid: d.projectID != 0,
+		},
 	})
 	if err != nil && err != pgx.ErrNoRows {
 		return err

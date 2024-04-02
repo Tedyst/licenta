@@ -82,5 +82,17 @@ func (r *saverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, 
 		}
 	}
 
-	return r.RunSaverForPublic(ctx, scan, scanType)
+	err = r.RunSaverForPublic(ctx, scan, scanType)
+	if err != nil {
+		return err
+	}
+
+	if !project.Remote {
+		err = r.RunSaverRemote(ctx, scan, scanType)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
