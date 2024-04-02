@@ -7,28 +7,13 @@ import type {
 } from './webauthn';
 import { goto } from '$app/navigation';
 
-let token: string | null = null;
-
 export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
-	if (token == null || token === '') {
-		token = await getCSRFToken(input);
-	}
+	const token = await getCSRFToken(input);
 	return await fetch(input, {
 		...init,
 		headers: {
 			...init?.headers,
 			'X-CSRF-Token': token || ''
-		}
-	}).catch(async (err) => {
-		if (err.message === 'Failed to fetch') {
-			token = await getCSRFToken(input);
-			return fetch(input, {
-				...init,
-				headers: {
-					...init?.headers,
-					'X-CSRF-Token': token || ''
-				}
-			});
 		}
 	});
 }
@@ -180,7 +165,7 @@ export async function registerTOTPGetSecret(): Promise<RegisterTOTPGetSecretResp
 			'Content-Type': 'application/json'
 		}
 	}).then((response) => {
-		if (response.ok) {
+		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPGetSecretResponse>;
 		}
 		throw new Error('Failed to fetch');
@@ -200,7 +185,7 @@ export async function registerTOTPFinish(code: string): Promise<RegisterTOTPFini
 		},
 		body: JSON.stringify({ code })
 	}).then((response) => {
-		if (response.ok) {
+		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPFinishResponse>;
 		}
 		throw new Error('Failed to fetch');

@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/auth"
+	"github.com/tedyst/licenta/cache"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -17,8 +19,12 @@ var changepasswordCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		database := db.InitDatabase(viper.GetString("database"))
+		c, err := cache.NewLocalCacheProvider[queries.User]()
+		if err != nil {
+			return err
+		}
 
-		userAuth, err := auth.NewAuthenticationProvider("", database, nil, nil, nil, nil)
+		userAuth, err := auth.NewAuthenticationProvider("http://localhost:5000", database, nil, nil, nil, c)
 		if err != nil {
 			return err
 		}
@@ -32,6 +38,8 @@ var changepasswordCmd = &cobra.Command{
 		}
 
 		userAuth.UpdatePassword(cmd.Context(), user, args[1])
+
+		slog.Info("Password changed for user", "user", args[0])
 
 		return nil
 	},
