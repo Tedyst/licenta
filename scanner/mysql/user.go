@@ -22,7 +22,7 @@ var _ scanner.User = (*mysqlUser)(nil)
 func (u *mysqlUser) VerifyPassword(password string) (bool, error) {
 	switch u.auth_plugin {
 	case "caching_sha2_password":
-		return verifySHA2Password(u.password, password), nil
+		return verifySHA2Password(u.password, password)
 	default:
 		return false, errors.New("invalid auth plugin")
 	}

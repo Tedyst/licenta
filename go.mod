@@ -25,6 +25,7 @@ require (
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/justinas/nosurf v1.1.1
 	github.com/oapi-codegen/runtime v1.1.0
+	github.com/riandyrn/otelchi v0.5.1
 	github.com/samber/slog-chi v1.6.1
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	github.com/spf13/cobra v1.8.0
@@ -36,7 +37,6 @@ require (
 	github.com/volatiletech/authboss-clientstate v0.0.0-20230313034706-0b930a6c0713
 	github.com/volatiletech/authboss/v3 v3.4.0
 	github.com/xdg-go/scram v1.1.2
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1
 	go.opentelemetry.io/otel v1.21.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.44.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.21.0
@@ -140,7 +140,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pquerna/otp v1.4.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
-	github.com/riandyrn/otelchi v0.5.1 // indirect
 	github.com/riza-io/grpc-go v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect

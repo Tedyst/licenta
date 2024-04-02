@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 )
 
@@ -149,7 +150,7 @@ func myCryptGenhash(plaintext []byte, switchsalt []byte, numRounds int) []byte {
 	return resultingHash
 }
 
-func verifySHA2Password(hashedPassword string, password string) bool {
+func verifySHA2Password(hashedPassword string, password string) (bool, error) {
 	parts := bytes.Split([]byte(hashedPassword), []byte("$"))
 
 	rounds := ROUNDS_DEFAULT
@@ -164,16 +165,16 @@ func verifySHA2Password(hashedPassword string, password string) bool {
 	salt := make([]byte, hex.DecodedLen(len(parts[4])))
 	_, err = hex.Decode(salt, parts[4])
 	if err != nil {
-		panic(err)
+		return false, fmt.Errorf("cannot decode hex salt: %s", parts[4])
 	}
 
 	encodedHash := make([]byte, hex.DecodedLen(len(parts[5])))
 	_, err = hex.Decode(encodedHash, parts[5])
 	if err != nil {
-		panic(err)
+		return false, fmt.Errorf("cannot decode hex hash: %s", parts[5])
 	}
 
 	resultingHash := myCryptGenhash([]byte(password), salt, rounds)
 
-	return bytes.Equal(resultingHash, encodedHash)
+	return bytes.Equal(resultingHash, encodedHash), nil
 }
