@@ -1,7 +1,6 @@
 package buildid
 
 import (
-	"log/slog"
 	"net/http"
 
 	"runtime/debug"
@@ -12,7 +11,6 @@ func BuildIDMiddleware(next http.Handler) http.Handler {
 		b, ok := debug.ReadBuildInfo()
 		if ok {
 			for _, setting := range b.Settings {
-				slog.DebugContext(r.Context(), "BuildInfo", "Key", setting.Key, "Value", setting.Value)
 				switch setting.Key {
 				case "vcs.revision":
 					w.Header().Set("X-Revision", setting.Value)
