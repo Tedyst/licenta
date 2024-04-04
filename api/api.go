@@ -15,6 +15,7 @@ import (
 	slogchi "github.com/samber/slog-chi"
 	"github.com/tedyst/licenta/api/authorization"
 	v1 "github.com/tedyst/licenta/api/v1"
+	buildid "github.com/tedyst/licenta/api/v1/middleware/buildID"
 	"github.com/tedyst/licenta/api/v1/middleware/cache"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
@@ -59,6 +60,7 @@ const timeout = 30 * time.Second
 func Initialize(config ApiConfig) (http.Handler, error) {
 	app := chi.NewRouter()
 	app.Use(otelchi.Middleware("api", otelchi.WithRequestMethodInSpanName(true)))
+	app.Use(buildid.BuildIDMiddleware)
 	app.Use(middleware.RealIP)
 	app.Use(slogchi.New(slog.Default()))
 	app.Use(middleware.Recoverer)
