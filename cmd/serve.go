@@ -21,9 +21,9 @@ import (
 	"github.com/tedyst/licenta/tasks/local"
 )
 
-var serveLocalCmd = &cobra.Command{
-	Use:   "servelocal",
-	Short: "Run the server using the development configuration",
+var serveCmd = &cobra.Command{
+	Use:   "serve",
+	Short: "Run the server using the prod configuration",
 	Long:  `This command starts the API server and waits for requests. It uses all of the local implementations of the dependencies.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		db := database.InitDatabase(viper.GetString("database"))
@@ -45,12 +45,21 @@ var serveLocalCmd = &cobra.Command{
 		}
 
 		localExchange := localExchange.NewLocalExchange()
-		brutefroceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
+		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
 
-		taskRunner := local.NewLocalRunner(viper.GetBool("debug"), email.NewConsoleEmailSender(
-			"no-reply@localhost",
-			"no-reply@localhost",
-		), db, localExchange, brutefroceProvider)
+		emailSender := email.NewSendGridEmailSender(
+			viper.GetString("email.sendgrid"),
+			viper.GetString("email.senderName"),
+			viper.GetString("email.sender"),
+		)
+
+		taskRunner := local.NewLocalRunner(
+			viper.GetBool("debug"),
+			emailSender,
+			db,
+			localExchange,
+			bruteforceProvider,
+		)
 
 		userCacheProvider, err := cache.NewLocalCacheProvider[queries.User]()
 		if err != nil {
@@ -100,6 +109,11 @@ var serveLocalCmd = &cobra.Command{
 }
 
 func init() {
+	serveLocalCmd.Flags().String("email.sendgrid", "", "Sendgrid API Key")
+
+	serveLocalCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
+	serveLocalCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
+
 	serveLocalCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
 
 	serveLocalCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
@@ -115,5 +129,5 @@ func init() {
 		panic(err)
 	}
 
-	rootCmd.AddCommand(serveLocalCmd)
+	rootCmd.AddCommand(serveCmd)
 }

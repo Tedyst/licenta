@@ -13,27 +13,27 @@ import (
 	"github.com/tedyst/licenta/extractors/git"
 )
 
-type gitQuerier interface {
+type GitQuerier interface {
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, params queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)
 	CreateGitCommitForProject(ctx context.Context, params queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)
 	CreateGitResultForCommit(ctx context.Context, params []queries.CreateGitResultForCommitParams) (int64, error)
 }
 
-type gitRunner struct {
-	queries gitQuerier
+type GitRunner struct {
+	queries GitQuerier
 
 	FileScannerProvider func(opts ...file.Option) (*file.FileScanner, error)
 	GitScannerProvider  func(repoUrl string, fileScanner git.FileScanner, options ...git.Option) (*git.GitScan, error)
 }
 
-func NewGitRunner(queries gitQuerier) *gitRunner {
-	return &gitRunner{
+func NewGitRunner(queries GitQuerier) *GitRunner {
+	return &GitRunner{
 		queries:            queries,
 		GitScannerProvider: git.New,
 	}
 }
 
-func (r *gitRunner) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
+func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
 	if repo == nil {
 		return errors.New("repo is nil")
 	}

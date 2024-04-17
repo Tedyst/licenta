@@ -16,10 +16,7 @@ type TaskRunner interface {
 }
 
 type EmailTasksRunner interface {
-	SendResetEmail(ctx context.Context, address string, subject string, html string, text string) error
-	SendCVEVulnerabilityEmail(ctx context.Context, project *queries.Project) error
-	SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error
-	SendCVEMailsToAllProjects(ctx context.Context) error
+	SendEmail(ctx context.Context, address string, subject string, html string, text string) error
 }
 
 type DockerTasksRunner interface {

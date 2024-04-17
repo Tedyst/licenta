@@ -12,6 +12,14 @@ INSERT INTO project_docker_scanned_layers(project_id, layer_hash)
 RETURNING
     *;
 
+-- name: GetDockerImage :one
+SELECT
+    *
+FROM
+    project_docker_images
+WHERE
+    id = $1;
+
 -- name: GetDockerImagesForProject :many
 SELECT
     *

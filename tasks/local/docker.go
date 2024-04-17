@@ -16,29 +16,29 @@ import (
 	"github.com/tedyst/licenta/extractors/file"
 )
 
-type dockerRunner struct {
-	queries dockerQuerier
+type DockerRunner struct {
+	queries DockerQuerier
 
 	FileScannerProvider   func(opts ...file.Option) (*file.FileScanner, error)
 	DockerScannerProvider func(ctx context.Context, fileScanner docker.FileScanner, imageName string, opts ...docker.Option) (*docker.DockerScan, error)
 }
 
-type dockerQuerier interface {
+type DockerQuerier interface {
 	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
 	UpdateDockerLayerScanForProject(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)
 	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, params []queries.CreateDockerLayerResultsForProjectParams) (int64, error)
 }
 
-func NewDockerRunner(queries dockerQuerier) *dockerRunner {
-	return &dockerRunner{
+func NewDockerRunner(queries DockerQuerier) *DockerRunner {
+	return &DockerRunner{
 		queries:               queries,
 		FileScannerProvider:   file.NewScanner,
 		DockerScannerProvider: docker.NewScanner,
 	}
 }
 
-func (r *dockerRunner) ScanDockerRepository(ctx context.Context, image *queries.ProjectDockerImage) (err error) {
+func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.ProjectDockerImage) (err error) {
 	if image == nil {
 		return errors.New("image is nil")
 	}

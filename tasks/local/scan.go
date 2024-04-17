@@ -12,7 +12,7 @@ import (
 	"github.com/tedyst/licenta/saver"
 )
 
-type saverRunner struct {
+type SaverRunner struct {
 	queries            SaverQuerier
 	messageExchange    messages.Exchange
 	bruteforceProvider bruteforce.BruteforceProvider
@@ -24,15 +24,15 @@ type SaverQuerier interface {
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.Worker, error)
 }
 
-func NewSaverRunner(queries SaverQuerier, messageExchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *saverRunner {
-	return &saverRunner{
+func NewSaverRunner(queries SaverQuerier, messageExchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *SaverRunner {
+	return &SaverRunner{
 		queries:            queries,
 		messageExchange:    messageExchange,
 		bruteforceProvider: bruteforceProvider,
 	}
 }
 
-func (r *saverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
+func (r *SaverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
 	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (r *saverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, sc
 	return saver.Scan(ctx)
 }
 
-func (r *saverRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
+func (r *SaverRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
 	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType)
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (r *saverRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan,
 	return saver.ScanForPublicAccessOnly(ctx)
 }
 
-func (r *saverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
+func (r *SaverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
 	scanGroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
 	if err != nil {
 		return err

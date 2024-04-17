@@ -7,7 +7,7 @@ import (
 )
 
 type emailTaskRunner interface {
-	SendResetEmail(ctx context.Context, address string, subject string, html string, text string) error
+	SendEmail(ctx context.Context, address string, subject string, html string, text string) error
 }
 
 type authbossMailer struct {

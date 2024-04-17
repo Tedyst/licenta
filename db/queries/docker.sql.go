@@ -133,6 +133,38 @@ func (q *Queries) DeleteDockerImageForProject(ctx context.Context, arg DeleteDoc
 	return err
 }
 
+const getDockerImage = `-- name: GetDockerImage :one
+SELECT
+    id, project_id, docker_image, username, password, min_probability, use_default_words_reduce_probability, use_default_words_increase_probability, use_default_passwords_completely_ignore, use_default_usernames_completely_ignore, probaility_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
+FROM
+    project_docker_images
+WHERE
+    id = $1
+`
+
+func (q *Queries) GetDockerImage(ctx context.Context, id int64) (*ProjectDockerImage, error) {
+	row := q.db.QueryRow(ctx, getDockerImage, id)
+	var i ProjectDockerImage
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.DockerImage,
+		&i.Username,
+		&i.Password,
+		&i.MinProbability,
+		&i.UseDefaultWordsReduceProbability,
+		&i.UseDefaultWordsIncreaseProbability,
+		&i.UseDefaultPasswordsCompletelyIgnore,
+		&i.UseDefaultUsernamesCompletelyIgnore,
+		&i.ProbailityDecreaseMultiplier,
+		&i.ProbabilityIncreaseMultiplier,
+		&i.EntropyThreshold,
+		&i.LogisticGrowthRate,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getDockerImagesForProject = `-- name: GetDockerImagesForProject :many
 SELECT
     id, project_id, docker_image, username, password, min_probability, use_default_words_reduce_probability, use_default_words_increase_probability, use_default_passwords_completely_ignore, use_default_usernames_completely_ignore, probaility_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at

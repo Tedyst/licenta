@@ -1,0 +1,41 @@
+syntax = "proto3";
+option go_package = ".;nats";
+
+message RunSaverRemoteMessage {
+    int64 scanId = 1;
+    string scanType = 2;
+}
+
+message RunSaverForPublicMessage {
+    int64 scanId = 1;
+    string scanType = 2;
+}
+
+message ScheduleSaverRunMessage {
+    int64 scanId = 1;
+    string scanType = 2;
+}
+
+message UpdateNVDVulnerabilitiesForProductMessage {
+    int64 productId = 1;
+}
+
+message ScanGitRepositoryMessage {
+    int64 repoId = 1;
+}
+
+message ScanDockerRepoMessage {
+    int64 imageId = 1;
+}
+
+message SendEmailMessage {
+    string address = 1;
+    string subject = 2;
+    string text = 3;
+    string html = 4;
+}
+
+message MessageHeader {
+    map<string, string> metadata = 1;
+    int32 retries = 2;
+}

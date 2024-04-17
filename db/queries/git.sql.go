@@ -134,6 +134,30 @@ func (q *Queries) GetGitRepositoriesForProject(ctx context.Context, projectID in
 	return items, nil
 }
 
+const getGitRepository = `-- name: GetGitRepository :one
+SELECT
+    id, project_id, git_repository, username, password, private_key, created_at
+FROM
+    project_git_repositories
+WHERE
+    id = $1
+`
+
+func (q *Queries) GetGitRepository(ctx context.Context, id int64) (*ProjectGitRepository, error) {
+	row := q.db.QueryRow(ctx, getGitRepository, id)
+	var i ProjectGitRepository
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.GitRepository,
+		&i.Username,
+		&i.Password,
+		&i.PrivateKey,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getGitScannedCommitsForProject = `-- name: GetGitScannedCommitsForProject :many
 SELECT
     commit_hash

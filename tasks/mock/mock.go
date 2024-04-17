@@ -5,6 +5,7 @@
 //
 //	mockgen -source=tasks.go -package mock -typed -destination mock/mock.go
 //
+
 // Package mock is a generated GoMock package.
 package mock
 
@@ -49,31 +50,31 @@ func (m *MockTaskRunner) RunSaverForPublic(ctx context.Context, scan *queries.Sc
 }
 
 // RunSaverForPublic indicates an expected call of RunSaverForPublic.
-func (mr *MockTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *TaskRunnerRunSaverForPublicCall {
+func (mr *MockTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *MockTaskRunnerRunSaverForPublicCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverForPublic", reflect.TypeOf((*MockTaskRunner)(nil).RunSaverForPublic), ctx, scan, scanType)
-	return &TaskRunnerRunSaverForPublicCall{Call: call}
+	return &MockTaskRunnerRunSaverForPublicCall{Call: call}
 }
 
-// TaskRunnerRunSaverForPublicCall wrap *gomock.Call
-type TaskRunnerRunSaverForPublicCall struct {
+// MockTaskRunnerRunSaverForPublicCall wrap *gomock.Call
+type MockTaskRunnerRunSaverForPublicCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerRunSaverForPublicCall) Return(arg0 error) *TaskRunnerRunSaverForPublicCall {
+func (c *MockTaskRunnerRunSaverForPublicCall) Return(arg0 error) *MockTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverForPublicCall {
+func (c *MockTaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverForPublicCall {
+func (c *MockTaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -87,31 +88,31 @@ func (m *MockTaskRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan,
 }
 
 // RunSaverRemote indicates an expected call of RunSaverRemote.
-func (mr *MockTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *TaskRunnerRunSaverRemoteCall {
+func (mr *MockTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *MockTaskRunnerRunSaverRemoteCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverRemote", reflect.TypeOf((*MockTaskRunner)(nil).RunSaverRemote), ctx, scan, scanType)
-	return &TaskRunnerRunSaverRemoteCall{Call: call}
+	return &MockTaskRunnerRunSaverRemoteCall{Call: call}
 }
 
-// TaskRunnerRunSaverRemoteCall wrap *gomock.Call
-type TaskRunnerRunSaverRemoteCall struct {
+// MockTaskRunnerRunSaverRemoteCall wrap *gomock.Call
+type MockTaskRunnerRunSaverRemoteCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerRunSaverRemoteCall) Return(arg0 error) *TaskRunnerRunSaverRemoteCall {
+func (c *MockTaskRunnerRunSaverRemoteCall) Return(arg0 error) *MockTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverRemoteCall {
+func (c *MockTaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *TaskRunnerRunSaverRemoteCall {
+func (c *MockTaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -125,31 +126,31 @@ func (m *MockTaskRunner) ScanDockerRepository(ctx context.Context, image *querie
 }
 
 // ScanDockerRepository indicates an expected call of ScanDockerRepository.
-func (mr *MockTaskRunnerMockRecorder) ScanDockerRepository(ctx, image any) *TaskRunnerScanDockerRepositoryCall {
+func (mr *MockTaskRunnerMockRecorder) ScanDockerRepository(ctx, image any) *MockTaskRunnerScanDockerRepositoryCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanDockerRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanDockerRepository), ctx, image)
-	return &TaskRunnerScanDockerRepositoryCall{Call: call}
+	return &MockTaskRunnerScanDockerRepositoryCall{Call: call}
 }
 
-// TaskRunnerScanDockerRepositoryCall wrap *gomock.Call
-type TaskRunnerScanDockerRepositoryCall struct {
+// MockTaskRunnerScanDockerRepositoryCall wrap *gomock.Call
+type MockTaskRunnerScanDockerRepositoryCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerScanDockerRepositoryCall) Return(arg0 error) *TaskRunnerScanDockerRepositoryCall {
+func (c *MockTaskRunnerScanDockerRepositoryCall) Return(arg0 error) *MockTaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.ProjectDockerImage) error) *TaskRunnerScanDockerRepositoryCall {
+func (c *MockTaskRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.ProjectDockerImage) error) *MockTaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectDockerImage) error) *TaskRunnerScanDockerRepositoryCall {
+func (c *MockTaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectDockerImage) error) *MockTaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -163,31 +164,31 @@ func (m *MockTaskRunner) ScanGitRepository(ctx context.Context, repo *queries.Pr
 }
 
 // ScanGitRepository indicates an expected call of ScanGitRepository.
-func (mr *MockTaskRunnerMockRecorder) ScanGitRepository(ctx, repo any) *TaskRunnerScanGitRepositoryCall {
+func (mr *MockTaskRunnerMockRecorder) ScanGitRepository(ctx, repo any) *MockTaskRunnerScanGitRepositoryCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanGitRepository), ctx, repo)
-	return &TaskRunnerScanGitRepositoryCall{Call: call}
+	return &MockTaskRunnerScanGitRepositoryCall{Call: call}
 }
 
-// TaskRunnerScanGitRepositoryCall wrap *gomock.Call
-type TaskRunnerScanGitRepositoryCall struct {
+// MockTaskRunnerScanGitRepositoryCall wrap *gomock.Call
+type MockTaskRunnerScanGitRepositoryCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerScanGitRepositoryCall) Return(arg0 error) *TaskRunnerScanGitRepositoryCall {
+func (c *MockTaskRunnerScanGitRepositoryCall) Return(arg0 error) *MockTaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
+func (c *MockTaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.ProjectGitRepository) error) *MockTaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectGitRepository) error) *TaskRunnerScanGitRepositoryCall {
+func (c *MockTaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectGitRepository) error) *MockTaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -201,183 +202,69 @@ func (m *MockTaskRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Sca
 }
 
 // ScheduleSaverRun indicates an expected call of ScheduleSaverRun.
-func (mr *MockTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *TaskRunnerScheduleSaverRunCall {
+func (mr *MockTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *MockTaskRunnerScheduleSaverRunCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSaverRun", reflect.TypeOf((*MockTaskRunner)(nil).ScheduleSaverRun), ctx, scan, scanType)
-	return &TaskRunnerScheduleSaverRunCall{Call: call}
+	return &MockTaskRunnerScheduleSaverRunCall{Call: call}
 }
 
-// TaskRunnerScheduleSaverRunCall wrap *gomock.Call
-type TaskRunnerScheduleSaverRunCall struct {
+// MockTaskRunnerScheduleSaverRunCall wrap *gomock.Call
+type MockTaskRunnerScheduleSaverRunCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerScheduleSaverRunCall) Return(arg0 error) *TaskRunnerScheduleSaverRunCall {
+func (c *MockTaskRunnerScheduleSaverRunCall) Return(arg0 error) *MockTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *TaskRunnerScheduleSaverRunCall {
+func (c *MockTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *TaskRunnerScheduleSaverRunCall {
+func (c *MockTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
-// SendCVEMailsToAllProjectMembers mocks base method.
-func (m *MockTaskRunner) SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error {
+// SendEmail mocks base method.
+func (m *MockTaskRunner) SendEmail(ctx context.Context, address, subject, html, text string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjectMembers", ctx, projectID)
+	ret := m.ctrl.Call(m, "SendEmail", ctx, address, subject, html, text)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SendCVEMailsToAllProjectMembers indicates an expected call of SendCVEMailsToAllProjectMembers.
-func (mr *MockTaskRunnerMockRecorder) SendCVEMailsToAllProjectMembers(ctx, projectID any) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+// SendEmail indicates an expected call of SendEmail.
+func (mr *MockTaskRunnerMockRecorder) SendEmail(ctx, address, subject, html, text any) *MockTaskRunnerSendEmailCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjectMembers", reflect.TypeOf((*MockTaskRunner)(nil).SendCVEMailsToAllProjectMembers), ctx, projectID)
-	return &TaskRunnerSendCVEMailsToAllProjectMembersCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEmail", reflect.TypeOf((*MockTaskRunner)(nil).SendEmail), ctx, address, subject, html, text)
+	return &MockTaskRunnerSendEmailCall{Call: call}
 }
 
-// TaskRunnerSendCVEMailsToAllProjectMembersCall wrap *gomock.Call
-type TaskRunnerSendCVEMailsToAllProjectMembersCall struct {
+// MockTaskRunnerSendEmailCall wrap *gomock.Call
+type MockTaskRunnerSendEmailCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerSendCVEMailsToAllProjectMembersCall) Return(arg0 error) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+func (c *MockTaskRunnerSendEmailCall) Return(arg0 error) *MockTaskRunnerSendEmailCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerSendCVEMailsToAllProjectMembersCall) Do(f func(context.Context, int64) error) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
+func (c *MockTaskRunnerSendEmailCall) Do(f func(context.Context, string, string, string, string) error) *MockTaskRunnerSendEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerSendCVEMailsToAllProjectMembersCall) DoAndReturn(f func(context.Context, int64) error) *TaskRunnerSendCVEMailsToAllProjectMembersCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SendCVEMailsToAllProjects mocks base method.
-func (m *MockTaskRunner) SendCVEMailsToAllProjects(ctx context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjects", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendCVEMailsToAllProjects indicates an expected call of SendCVEMailsToAllProjects.
-func (mr *MockTaskRunnerMockRecorder) SendCVEMailsToAllProjects(ctx any) *TaskRunnerSendCVEMailsToAllProjectsCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjects", reflect.TypeOf((*MockTaskRunner)(nil).SendCVEMailsToAllProjects), ctx)
-	return &TaskRunnerSendCVEMailsToAllProjectsCall{Call: call}
-}
-
-// TaskRunnerSendCVEMailsToAllProjectsCall wrap *gomock.Call
-type TaskRunnerSendCVEMailsToAllProjectsCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TaskRunnerSendCVEMailsToAllProjectsCall) Return(arg0 error) *TaskRunnerSendCVEMailsToAllProjectsCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TaskRunnerSendCVEMailsToAllProjectsCall) Do(f func(context.Context) error) *TaskRunnerSendCVEMailsToAllProjectsCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerSendCVEMailsToAllProjectsCall) DoAndReturn(f func(context.Context) error) *TaskRunnerSendCVEMailsToAllProjectsCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SendCVEVulnerabilityEmail mocks base method.
-func (m *MockTaskRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *queries.Project) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendCVEVulnerabilityEmail", ctx, project)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendCVEVulnerabilityEmail indicates an expected call of SendCVEVulnerabilityEmail.
-func (mr *MockTaskRunnerMockRecorder) SendCVEVulnerabilityEmail(ctx, project any) *TaskRunnerSendCVEVulnerabilityEmailCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEVulnerabilityEmail", reflect.TypeOf((*MockTaskRunner)(nil).SendCVEVulnerabilityEmail), ctx, project)
-	return &TaskRunnerSendCVEVulnerabilityEmailCall{Call: call}
-}
-
-// TaskRunnerSendCVEVulnerabilityEmailCall wrap *gomock.Call
-type TaskRunnerSendCVEVulnerabilityEmailCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Return(arg0 error) *TaskRunnerSendCVEVulnerabilityEmailCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TaskRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *queries.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *queries.Project) error) *TaskRunnerSendCVEVulnerabilityEmailCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SendResetEmail mocks base method.
-func (m *MockTaskRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendResetEmail", ctx, address, subject, html, text)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendResetEmail indicates an expected call of SendResetEmail.
-func (mr *MockTaskRunnerMockRecorder) SendResetEmail(ctx, address, subject, html, text any) *TaskRunnerSendResetEmailCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendResetEmail", reflect.TypeOf((*MockTaskRunner)(nil).SendResetEmail), ctx, address, subject, html, text)
-	return &TaskRunnerSendResetEmailCall{Call: call}
-}
-
-// TaskRunnerSendResetEmailCall wrap *gomock.Call
-type TaskRunnerSendResetEmailCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *TaskRunnerSendResetEmailCall) Return(arg0 error) *TaskRunnerSendResetEmailCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *TaskRunnerSendResetEmailCall) Do(f func(context.Context, string, string, string, string) error) *TaskRunnerSendResetEmailCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerSendResetEmailCall) DoAndReturn(f func(context.Context, string, string, string, string) error) *TaskRunnerSendResetEmailCall {
+func (c *MockTaskRunnerSendEmailCall) DoAndReturn(f func(context.Context, string, string, string, string) error) *MockTaskRunnerSendEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -391,31 +278,31 @@ func (m *MockTaskRunner) UpdateNVDVulnerabilitiesForProduct(ctx context.Context,
 }
 
 // UpdateNVDVulnerabilitiesForProduct indicates an expected call of UpdateNVDVulnerabilitiesForProduct.
-func (mr *MockTaskRunnerMockRecorder) UpdateNVDVulnerabilitiesForProduct(ctx, product any) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (mr *MockTaskRunnerMockRecorder) UpdateNVDVulnerabilitiesForProduct(ctx, product any) *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNVDVulnerabilitiesForProduct", reflect.TypeOf((*MockTaskRunner)(nil).UpdateNVDVulnerabilitiesForProduct), ctx, product)
-	return &TaskRunnerUpdateNVDVulnerabilitiesForProductCall{Call: call}
+	return &MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall{Call: call}
 }
 
-// TaskRunnerUpdateNVDVulnerabilitiesForProductCall wrap *gomock.Call
-type TaskRunnerUpdateNVDVulnerabilitiesForProductCall struct {
+// MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall wrap *gomock.Call
+type MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *TaskRunnerUpdateNVDVulnerabilitiesForProductCall) Return(arg0 error) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (c *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall) Return(arg0 error) *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *TaskRunnerUpdateNVDVulnerabilitiesForProductCall) Do(f func(context.Context, nvd.Product) error) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (c *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall) Do(f func(context.Context, nvd.Product) error) *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *TaskRunnerUpdateNVDVulnerabilitiesForProductCall) DoAndReturn(f func(context.Context, nvd.Product) error) *TaskRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (c *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall) DoAndReturn(f func(context.Context, nvd.Product) error) *MockTaskRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -443,154 +330,40 @@ func (m *MockEmailTasksRunner) EXPECT() *MockEmailTasksRunnerMockRecorder {
 	return m.recorder
 }
 
-// SendCVEMailsToAllProjectMembers mocks base method.
-func (m *MockEmailTasksRunner) SendCVEMailsToAllProjectMembers(ctx context.Context, projectID int64) error {
+// SendEmail mocks base method.
+func (m *MockEmailTasksRunner) SendEmail(ctx context.Context, address, subject, html, text string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjectMembers", ctx, projectID)
+	ret := m.ctrl.Call(m, "SendEmail", ctx, address, subject, html, text)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SendCVEMailsToAllProjectMembers indicates an expected call of SendCVEMailsToAllProjectMembers.
-func (mr *MockEmailTasksRunnerMockRecorder) SendCVEMailsToAllProjectMembers(ctx, projectID any) *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall {
+// SendEmail indicates an expected call of SendEmail.
+func (mr *MockEmailTasksRunnerMockRecorder) SendEmail(ctx, address, subject, html, text any) *MockEmailTasksRunnerSendEmailCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjectMembers", reflect.TypeOf((*MockEmailTasksRunner)(nil).SendCVEMailsToAllProjectMembers), ctx, projectID)
-	return &EmailTasksRunnerSendCVEMailsToAllProjectMembersCall{Call: call}
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendEmail", reflect.TypeOf((*MockEmailTasksRunner)(nil).SendEmail), ctx, address, subject, html, text)
+	return &MockEmailTasksRunnerSendEmailCall{Call: call}
 }
 
-// EmailTasksRunnerSendCVEMailsToAllProjectMembersCall wrap *gomock.Call
-type EmailTasksRunnerSendCVEMailsToAllProjectMembersCall struct {
+// MockEmailTasksRunnerSendEmailCall wrap *gomock.Call
+type MockEmailTasksRunnerSendEmailCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall) Return(arg0 error) *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall {
+func (c *MockEmailTasksRunnerSendEmailCall) Return(arg0 error) *MockEmailTasksRunnerSendEmailCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall) Do(f func(context.Context, int64) error) *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall {
+func (c *MockEmailTasksRunnerSendEmailCall) Do(f func(context.Context, string, string, string, string) error) *MockEmailTasksRunnerSendEmailCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall) DoAndReturn(f func(context.Context, int64) error) *EmailTasksRunnerSendCVEMailsToAllProjectMembersCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SendCVEMailsToAllProjects mocks base method.
-func (m *MockEmailTasksRunner) SendCVEMailsToAllProjects(ctx context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendCVEMailsToAllProjects", ctx)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendCVEMailsToAllProjects indicates an expected call of SendCVEMailsToAllProjects.
-func (mr *MockEmailTasksRunnerMockRecorder) SendCVEMailsToAllProjects(ctx any) *EmailTasksRunnerSendCVEMailsToAllProjectsCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEMailsToAllProjects", reflect.TypeOf((*MockEmailTasksRunner)(nil).SendCVEMailsToAllProjects), ctx)
-	return &EmailTasksRunnerSendCVEMailsToAllProjectsCall{Call: call}
-}
-
-// EmailTasksRunnerSendCVEMailsToAllProjectsCall wrap *gomock.Call
-type EmailTasksRunnerSendCVEMailsToAllProjectsCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *EmailTasksRunnerSendCVEMailsToAllProjectsCall) Return(arg0 error) *EmailTasksRunnerSendCVEMailsToAllProjectsCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *EmailTasksRunnerSendCVEMailsToAllProjectsCall) Do(f func(context.Context) error) *EmailTasksRunnerSendCVEMailsToAllProjectsCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *EmailTasksRunnerSendCVEMailsToAllProjectsCall) DoAndReturn(f func(context.Context) error) *EmailTasksRunnerSendCVEMailsToAllProjectsCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SendCVEVulnerabilityEmail mocks base method.
-func (m *MockEmailTasksRunner) SendCVEVulnerabilityEmail(ctx context.Context, project *queries.Project) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendCVEVulnerabilityEmail", ctx, project)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendCVEVulnerabilityEmail indicates an expected call of SendCVEVulnerabilityEmail.
-func (mr *MockEmailTasksRunnerMockRecorder) SendCVEVulnerabilityEmail(ctx, project any) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendCVEVulnerabilityEmail", reflect.TypeOf((*MockEmailTasksRunner)(nil).SendCVEVulnerabilityEmail), ctx, project)
-	return &EmailTasksRunnerSendCVEVulnerabilityEmailCall{Call: call}
-}
-
-// EmailTasksRunnerSendCVEVulnerabilityEmailCall wrap *gomock.Call
-type EmailTasksRunnerSendCVEVulnerabilityEmailCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Return(arg0 error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) Do(f func(context.Context, *queries.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *EmailTasksRunnerSendCVEVulnerabilityEmailCall) DoAndReturn(f func(context.Context, *queries.Project) error) *EmailTasksRunnerSendCVEVulnerabilityEmailCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// SendResetEmail mocks base method.
-func (m *MockEmailTasksRunner) SendResetEmail(ctx context.Context, address, subject, html, text string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendResetEmail", ctx, address, subject, html, text)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SendResetEmail indicates an expected call of SendResetEmail.
-func (mr *MockEmailTasksRunnerMockRecorder) SendResetEmail(ctx, address, subject, html, text any) *EmailTasksRunnerSendResetEmailCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendResetEmail", reflect.TypeOf((*MockEmailTasksRunner)(nil).SendResetEmail), ctx, address, subject, html, text)
-	return &EmailTasksRunnerSendResetEmailCall{Call: call}
-}
-
-// EmailTasksRunnerSendResetEmailCall wrap *gomock.Call
-type EmailTasksRunnerSendResetEmailCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *EmailTasksRunnerSendResetEmailCall) Return(arg0 error) *EmailTasksRunnerSendResetEmailCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *EmailTasksRunnerSendResetEmailCall) Do(f func(context.Context, string, string, string, string) error) *EmailTasksRunnerSendResetEmailCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *EmailTasksRunnerSendResetEmailCall) DoAndReturn(f func(context.Context, string, string, string, string) error) *EmailTasksRunnerSendResetEmailCall {
+func (c *MockEmailTasksRunnerSendEmailCall) DoAndReturn(f func(context.Context, string, string, string, string) error) *MockEmailTasksRunnerSendEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -627,31 +400,31 @@ func (m *MockDockerTasksRunner) ScanDockerRepository(ctx context.Context, image 
 }
 
 // ScanDockerRepository indicates an expected call of ScanDockerRepository.
-func (mr *MockDockerTasksRunnerMockRecorder) ScanDockerRepository(ctx, image any) *DockerTasksRunnerScanDockerRepositoryCall {
+func (mr *MockDockerTasksRunnerMockRecorder) ScanDockerRepository(ctx, image any) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanDockerRepository", reflect.TypeOf((*MockDockerTasksRunner)(nil).ScanDockerRepository), ctx, image)
-	return &DockerTasksRunnerScanDockerRepositoryCall{Call: call}
+	return &MockDockerTasksRunnerScanDockerRepositoryCall{Call: call}
 }
 
-// DockerTasksRunnerScanDockerRepositoryCall wrap *gomock.Call
-type DockerTasksRunnerScanDockerRepositoryCall struct {
+// MockDockerTasksRunnerScanDockerRepositoryCall wrap *gomock.Call
+type MockDockerTasksRunnerScanDockerRepositoryCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *DockerTasksRunnerScanDockerRepositoryCall) Return(arg0 error) *DockerTasksRunnerScanDockerRepositoryCall {
+func (c *MockDockerTasksRunnerScanDockerRepositoryCall) Return(arg0 error) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *DockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
+func (c *MockDockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.ProjectDockerImage) error) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *DockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectDockerImage) error) *DockerTasksRunnerScanDockerRepositoryCall {
+func (c *MockDockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectDockerImage) error) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -688,31 +461,31 @@ func (m *MockGitTasksRunner) ScanGitRepository(ctx context.Context, repo *querie
 }
 
 // ScanGitRepository indicates an expected call of ScanGitRepository.
-func (mr *MockGitTasksRunnerMockRecorder) ScanGitRepository(ctx, repo any) *GitTasksRunnerScanGitRepositoryCall {
+func (mr *MockGitTasksRunnerMockRecorder) ScanGitRepository(ctx, repo any) *MockGitTasksRunnerScanGitRepositoryCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockGitTasksRunner)(nil).ScanGitRepository), ctx, repo)
-	return &GitTasksRunnerScanGitRepositoryCall{Call: call}
+	return &MockGitTasksRunnerScanGitRepositoryCall{Call: call}
 }
 
-// GitTasksRunnerScanGitRepositoryCall wrap *gomock.Call
-type GitTasksRunnerScanGitRepositoryCall struct {
+// MockGitTasksRunnerScanGitRepositoryCall wrap *gomock.Call
+type MockGitTasksRunnerScanGitRepositoryCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *GitTasksRunnerScanGitRepositoryCall) Return(arg0 error) *GitTasksRunnerScanGitRepositoryCall {
+func (c *MockGitTasksRunnerScanGitRepositoryCall) Return(arg0 error) *MockGitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *GitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
+func (c *MockGitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.ProjectGitRepository) error) *MockGitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *GitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectGitRepository) error) *GitTasksRunnerScanGitRepositoryCall {
+func (c *MockGitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.ProjectGitRepository) error) *MockGitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -749,31 +522,31 @@ func (m *MockVulnerabilityTasksRunner) UpdateNVDVulnerabilitiesForProduct(ctx co
 }
 
 // UpdateNVDVulnerabilitiesForProduct indicates an expected call of UpdateNVDVulnerabilitiesForProduct.
-func (mr *MockVulnerabilityTasksRunnerMockRecorder) UpdateNVDVulnerabilitiesForProduct(ctx, product any) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (mr *MockVulnerabilityTasksRunnerMockRecorder) UpdateNVDVulnerabilitiesForProduct(ctx, product any) *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateNVDVulnerabilitiesForProduct", reflect.TypeOf((*MockVulnerabilityTasksRunner)(nil).UpdateNVDVulnerabilitiesForProduct), ctx, product)
-	return &VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall{Call: call}
+	return &MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall{Call: call}
 }
 
-// VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall wrap *gomock.Call
-type VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall struct {
+// MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall wrap *gomock.Call
+type MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) Return(arg0 error) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (c *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) Return(arg0 error) *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) Do(f func(context.Context, nvd.Product) error) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (c *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) Do(f func(context.Context, nvd.Product) error) *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) DoAndReturn(f func(context.Context, nvd.Product) error) *VulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
+func (c *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall) DoAndReturn(f func(context.Context, nvd.Product) error) *MockVulnerabilityTasksRunnerUpdateNVDVulnerabilitiesForProductCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -810,31 +583,31 @@ func (m *MockScannerTaskRunner) RunSaverForPublic(ctx context.Context, scan *que
 }
 
 // RunSaverForPublic indicates an expected call of RunSaverForPublic.
-func (mr *MockScannerTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *ScannerTaskRunnerRunSaverForPublicCall {
+func (mr *MockScannerTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *MockScannerTaskRunnerRunSaverForPublicCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverForPublic", reflect.TypeOf((*MockScannerTaskRunner)(nil).RunSaverForPublic), ctx, scan, scanType)
-	return &ScannerTaskRunnerRunSaverForPublicCall{Call: call}
+	return &MockScannerTaskRunnerRunSaverForPublicCall{Call: call}
 }
 
-// ScannerTaskRunnerRunSaverForPublicCall wrap *gomock.Call
-type ScannerTaskRunnerRunSaverForPublicCall struct {
+// MockScannerTaskRunnerRunSaverForPublicCall wrap *gomock.Call
+type MockScannerTaskRunnerRunSaverForPublicCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *ScannerTaskRunnerRunSaverForPublicCall) Return(arg0 error) *ScannerTaskRunnerRunSaverForPublicCall {
+func (c *MockScannerTaskRunnerRunSaverForPublicCall) Return(arg0 error) *MockScannerTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverForPublicCall {
+func (c *MockScannerTaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverForPublicCall {
+func (c *MockScannerTaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerRunSaverForPublicCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -848,31 +621,31 @@ func (m *MockScannerTaskRunner) RunSaverRemote(ctx context.Context, scan *querie
 }
 
 // RunSaverRemote indicates an expected call of RunSaverRemote.
-func (mr *MockScannerTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *ScannerTaskRunnerRunSaverRemoteCall {
+func (mr *MockScannerTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *MockScannerTaskRunnerRunSaverRemoteCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverRemote", reflect.TypeOf((*MockScannerTaskRunner)(nil).RunSaverRemote), ctx, scan, scanType)
-	return &ScannerTaskRunnerRunSaverRemoteCall{Call: call}
+	return &MockScannerTaskRunnerRunSaverRemoteCall{Call: call}
 }
 
-// ScannerTaskRunnerRunSaverRemoteCall wrap *gomock.Call
-type ScannerTaskRunnerRunSaverRemoteCall struct {
+// MockScannerTaskRunnerRunSaverRemoteCall wrap *gomock.Call
+type MockScannerTaskRunnerRunSaverRemoteCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *ScannerTaskRunnerRunSaverRemoteCall) Return(arg0 error) *ScannerTaskRunnerRunSaverRemoteCall {
+func (c *MockScannerTaskRunnerRunSaverRemoteCall) Return(arg0 error) *MockScannerTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverRemoteCall {
+func (c *MockScannerTaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerRunSaverRemoteCall {
+func (c *MockScannerTaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerRunSaverRemoteCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -886,31 +659,31 @@ func (m *MockScannerTaskRunner) ScheduleSaverRun(ctx context.Context, scan *quer
 }
 
 // ScheduleSaverRun indicates an expected call of ScheduleSaverRun.
-func (mr *MockScannerTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *ScannerTaskRunnerScheduleSaverRunCall {
+func (mr *MockScannerTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *MockScannerTaskRunnerScheduleSaverRunCall {
 	mr.mock.ctrl.T.Helper()
 	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSaverRun", reflect.TypeOf((*MockScannerTaskRunner)(nil).ScheduleSaverRun), ctx, scan, scanType)
-	return &ScannerTaskRunnerScheduleSaverRunCall{Call: call}
+	return &MockScannerTaskRunnerScheduleSaverRunCall{Call: call}
 }
 
-// ScannerTaskRunnerScheduleSaverRunCall wrap *gomock.Call
-type ScannerTaskRunnerScheduleSaverRunCall struct {
+// MockScannerTaskRunnerScheduleSaverRunCall wrap *gomock.Call
+type MockScannerTaskRunnerScheduleSaverRunCall struct {
 	*gomock.Call
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *ScannerTaskRunnerScheduleSaverRunCall) Return(arg0 error) *ScannerTaskRunnerScheduleSaverRunCall {
+func (c *MockScannerTaskRunnerScheduleSaverRunCall) Return(arg0 error) *MockScannerTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Return(arg0)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *ScannerTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerScheduleSaverRunCall {
+func (c *MockScannerTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *ScannerTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *ScannerTaskRunnerScheduleSaverRunCall {
+func (c *MockScannerTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerScheduleSaverRunCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -9,23 +9,23 @@ import (
 )
 
 type localRunner struct {
-	saverRunner
-	nvdRunner
-	gitRunner
+	SaverRunner
+	NvdRunner
+	GitRunner
 	emailRunner
-	dockerRunner
+	DockerRunner
 
 	queries db.TransactionQuerier
 }
 
 func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *localRunner {
 	return &localRunner{
-		nvdRunner:    *NewNVDRunner(queries),
-		gitRunner:    *NewGitRunner(queries),
+		NvdRunner:    *NewNVDRunner(queries),
+		GitRunner:    *NewGitRunner(queries),
 		emailRunner:  *NewEmailRunner(emailSender),
-		dockerRunner: *NewDockerRunner(queries),
+		DockerRunner: *NewDockerRunner(queries),
 		queries:      queries,
-		saverRunner:  *NewSaverRunner(queries, exchange, bruteforceProvider),
+		SaverRunner:  *NewSaverRunner(queries, exchange, bruteforceProvider),
 	}
 }
 
