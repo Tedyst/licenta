@@ -1286,6 +1286,45 @@ func (c *MockTransactionQuerierDeleteOrganizationCall) DoAndReturn(f func(contex
 	return c
 }
 
+// DeleteProject mocks base method.
+func (m *MockTransactionQuerier) DeleteProject(ctx context.Context, id int64) (*queries.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteProject", ctx, id)
+	ret0, _ := ret[0].(*queries.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteProject indicates an expected call of DeleteProject.
+func (mr *MockTransactionQuerierMockRecorder) DeleteProject(ctx, id any) *MockTransactionQuerierDeleteProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteProject", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteProject), ctx, id)
+	return &MockTransactionQuerierDeleteProjectCall{Call: call}
+}
+
+// MockTransactionQuerierDeleteProjectCall wrap *gomock.Call
+type MockTransactionQuerierDeleteProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierDeleteProjectCall) Return(arg0 *queries.Project, arg1 error) *MockTransactionQuerierDeleteProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierDeleteProjectCall) Do(f func(context.Context, int64) (*queries.Project, error)) *MockTransactionQuerierDeleteProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierDeleteProjectCall) DoAndReturn(f func(context.Context, int64) (*queries.Project, error)) *MockTransactionQuerierDeleteProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteRememberMeTokenByUserAndToken mocks base method.
 func (m *MockTransactionQuerier) DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg queries.DeleteRememberMeTokenByUserAndTokenParams) error {
 	m.ctrl.T.Helper()

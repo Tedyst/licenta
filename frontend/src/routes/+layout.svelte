@@ -3,6 +3,7 @@
 	import { theme } from '../lib/stores';
 	import { browser } from '$app/environment';
 	import { PlausibleAnalytics } from '@accuser/svelte-plausible-analytics';
+	import Toast from 'svelte-daisy-toast';
 
 	$: if (browser) {
 		document.documentElement.setAttribute('data-theme', $theme);
@@ -18,6 +19,8 @@
 	domain="laptop.tedyst.ro"
 	enabled={true}
 />
+
+<Toast position="top-end" />
 
 <svelte:head>
 	<script>

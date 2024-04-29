@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { components } from '$lib/api/v1';
+	import client from '$lib/client';
+	import { toast } from 'svelte-daisy-toast';
 	import TrashCan from 'svelte-material-icons/TrashCan.svelte';
 
 	export let organization: components['schemas']['Organization'];
@@ -8,7 +10,26 @@
 	let dialog: HTMLDialogElement;
 
 	let deleteProject = () => {
-		console.log(project);
+		client.DELETE('/projects/{id}', { params: { path: { id: project.id } } }).then((res) => {
+			if (res.data?.success) {
+				window.location.href = '/dashboard/{organization.name}';
+				toast({
+					closable: true,
+					duration: 5000,
+					message: 'Project deleted successfully',
+					title: 'Success',
+					type: 'success'
+				});
+			} else {
+				toast({
+					closable: true,
+					duration: 5000,
+					message: res.error?.message || 'Could not delete project',
+					title: 'Error',
+					type: 'error'
+				});
+			}
+		});
 	};
 </script>
 
@@ -33,7 +54,7 @@
 			<button
 				type="button"
 				class="mr-5 inline place-content-center text-red-500"
-				on:click|preventDefault={deleteProject}
+				on:click|preventDefault={() => dialog?.showModal()}
 			>
 				<TrashCan size={25} />
 			</button>

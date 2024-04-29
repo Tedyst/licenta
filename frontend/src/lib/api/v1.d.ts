@@ -610,6 +610,37 @@ export interface paths {
         };
       };
     };
+    /** Delete project by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the project */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Project not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
   };
   "/projects/{id}/bruteforced-password": {
     /** Get bruteforced password for a project */

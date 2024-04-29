@@ -44,6 +44,7 @@ type Querier interface {
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
 	DeleteOrganization(ctx context.Context, id int64) error
+	DeleteProject(ctx context.Context, id int64) (*Project, error)
 	DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg DeleteRememberMeTokenByUserAndTokenParams) error
 	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error

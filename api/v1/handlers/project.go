@@ -192,3 +192,40 @@ func (server *serverHandler) PostProjects(ctx context.Context, request generated
 		},
 	}, nil
 }
+
+func (server *serverHandler) DeleteProjectsId(ctx context.Context, request generated.DeleteProjectsIdRequestObject) (generated.DeleteProjectsIdResponseObject, error) {
+	user, err := server.userAuth.GetUser(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting project: %w", err)
+	}
+
+	ok, err := server.authorization.UserHasPermissionForProject(ctx, project, user, authorization.Admin)
+	if err != nil {
+		return nil, fmt.Errorf("error checking permissions: %w", err)
+	}
+
+	if !ok {
+		return generated.DeleteProjectsId401JSONResponse{
+			Message: "Not allowed to delete project",
+			Success: false,
+		}, nil
+	}
+
+	_, err = server.DatabaseProvider.DeleteProject(ctx, request.Id)
+	if err != nil {
+		return nil, fmt.Errorf("error deleting project: %w", err)
+	}
+
+	return generated.DeleteProjectsId204JSONResponse{
+		Success: true,
+	}, nil
+}

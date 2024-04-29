@@ -69,3 +69,9 @@ INSERT INTO projects(organization_id, name, remote)
 RETURNING
     *;
 
+-- name: DeleteProject :one
+DELETE FROM projects
+WHERE id = $1
+RETURNING
+    *;
+

@@ -4,13 +4,64 @@
 	import ListMembers from '$lib/utils/ListMembers.svelte';
 	import OrganizationProject from '$lib/utils/OrganizationProject.svelte';
 	import OrganizationSettings from '$lib/utils/OrganizationSettings.svelte';
+	import { toast } from 'svelte-daisy-toast';
 
 	let editRoleAction = (role: 'Owner' | 'Admin' | 'Viewer' | 'None', userId: number) => {
-		console.log(role, userId);
+		if (!$currentOrganization) return;
+		client
+			.POST('/organizations/{id}/edit-user', {
+				params: { path: { id: $currentOrganization?.id } },
+				body: { id: userId, role }
+			})
+			.then((res) => {
+				if (res.data?.success) {
+					updateOrganizations();
+					toast({
+						closable: true,
+						duration: 5000,
+						message: 'User role edited successfully',
+						title: 'Success',
+						type: 'success'
+					});
+				} else {
+					toast({
+						closable: true,
+						duration: 5000,
+						message: res.error?.message || 'Could not edit user role',
+						title: 'Error',
+						type: 'error'
+					});
+				}
+			});
 	};
 
 	let addUserAction = (email: string) => {
-		console.log(email);
+		if (!$currentOrganization) return;
+		client
+			.POST('/organizations/{id}/add-user', {
+				params: { path: { id: $currentOrganization?.id } },
+				body: { email }
+			})
+			.then((res) => {
+				if (res.data?.success) {
+					updateOrganizations();
+					toast({
+						closable: true,
+						duration: 5000,
+						message: 'User added successfully',
+						title: 'Success',
+						type: 'success'
+					});
+				} else {
+					toast({
+						closable: true,
+						duration: 5000,
+						message: res.error?.message || 'Could not add user',
+						title: 'Error',
+						type: 'error'
+					});
+				}
+			});
 	};
 
 	let deleteUserAction = (userId: number) => {
@@ -21,8 +72,23 @@
 				body: { id: userId }
 			})
 			.then((res) => {
-				if (res.data?.success) {
-					updateOrganizations();
+				updateOrganizations();
+				if (res.response.status === 204) {
+					toast({
+						closable: true,
+						duration: 5000,
+						message: 'User deleted successfully',
+						title: 'Success',
+						type: 'success'
+					});
+				} else {
+					toast({
+						closable: true,
+						duration: 5000,
+						message: res.error?.message || 'Could not delete user',
+						title: 'Error',
+						type: 'error'
+					});
 				}
 			});
 	};
@@ -47,7 +113,7 @@
 		</div>
 	</div>
 
-	{#each $currentOrganization.projects as project, i}
+	{#each $currentOrganization.projects as project}
 		<OrganizationProject organization={$currentOrganization} {project} />
 	{/each}
 

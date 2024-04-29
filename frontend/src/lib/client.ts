@@ -6,6 +6,7 @@ import type {
 	PublicKeyCredentialRequestOptionsJSON
 } from './webauthn';
 import { goto } from '$app/navigation';
+import { toast } from 'svelte-daisy-toast';
 
 export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
 	const token = await getCSRFToken(input);
@@ -15,6 +16,15 @@ export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | u
 			...init?.headers,
 			'X-CSRF-Token': token || ''
 		}
+	}).catch((err) => {
+		toast({
+			closable: true,
+			duration: 5000,
+			message: 'Failed to fetch',
+			title: 'Error',
+			type: 'error'
+		});
+		throw err;
 	});
 }
 
