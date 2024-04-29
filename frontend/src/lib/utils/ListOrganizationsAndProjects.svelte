@@ -38,6 +38,9 @@
 							<li><a href="/dashboard/{organization.name}/{project.name}">{project.name}</a></li>
 						</ul>
 					{/each}
+					{#if organization.projects.length === 0}
+						<div class="text-center text-md font-medium">No projects found</div>
+					{/if}
 				</div>
 			</div>
 		</li>

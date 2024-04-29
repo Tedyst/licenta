@@ -207,7 +207,7 @@ type RememberMeToken struct {
 
 type ResetPasswordToken struct {
 	ID        uuid.UUID          `json:"id"`
-	UserID    sql.NullInt64      `json:"user_id"`
+	UserID    int64              `json:"user_id"`
 	Valid     bool               `json:"valid"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }

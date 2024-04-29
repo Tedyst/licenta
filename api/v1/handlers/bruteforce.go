@@ -11,7 +11,7 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 )
 
-func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context, request generated.GetProjectIdBruteforcePasswordsRequestObject) (generated.GetProjectIdBruteforcePasswordsResponseObject, error) {
+func (server *serverHandler) GetProjectsIdBruteforcePasswords(ctx context.Context, request generated.GetProjectsIdBruteforcePasswordsRequestObject) (generated.GetProjectsIdBruteforcePasswordsResponseObject, error) {
 	lastid := -1
 	if request.Params.LastPasswordId != nil {
 		lastid = int(*request.Params.LastPasswordId)
@@ -22,7 +22,7 @@ func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context
 			Password: *request.Params.Password,
 		})
 		if err == pgx.ErrNoRows {
-			return generated.GetProjectIdBruteforcePasswords404JSONResponse{
+			return generated.GetProjectsIdBruteforcePasswords404JSONResponse{
 				Message: "Not found",
 				Success: false,
 			}, nil
@@ -31,7 +31,7 @@ func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context
 			return nil, err
 		}
 
-		return generated.GetProjectIdBruteforcePasswords200JSONResponse{
+		return generated.GetProjectsIdBruteforcePasswords200JSONResponse{
 			Success: true,
 			Count:   1,
 			Results: []generated.BruteforcePassword{
@@ -84,7 +84,7 @@ func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context
 		}
 	}
 	if len(results) == 0 {
-		return generated.GetProjectIdBruteforcePasswords200JSONResponse{
+		return generated.GetProjectsIdBruteforcePasswords200JSONResponse{
 			Success: true,
 			Count:   int(count),
 			Results: []generated.BruteforcePassword{},
@@ -92,8 +92,8 @@ func (server *serverHandler) GetProjectIdBruteforcePasswords(ctx context.Context
 		}, nil
 	}
 	lastReturnedID := int(results[len(results)-1].Id)
-	nextURL := "/api/v1/project/" + strconv.Itoa(int(request.Id)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID)
-	return generated.GetProjectIdBruteforcePasswords200JSONResponse{
+	nextURL := "/api/v1/projects/" + strconv.Itoa(int(request.Id)) + "/bruteforce-passwords?last_id=" + strconv.Itoa(lastReturnedID)
+	return generated.GetProjectsIdBruteforcePasswords200JSONResponse{
 		Success: true,
 		Count:   int(count),
 		Next:    &nextURL,
@@ -146,14 +146,14 @@ func (server *serverHandler) PostScanIdBruteforceresults(ctx context.Context, re
 	}, nil
 }
 
-func (server *serverHandler) GetProjectIdBruteforcedPassword(ctx context.Context, request generated.GetProjectIdBruteforcedPasswordRequestObject) (generated.GetProjectIdBruteforcedPasswordResponseObject, error) {
+func (server *serverHandler) GetProjectsIdBruteforcedPassword(ctx context.Context, request generated.GetProjectsIdBruteforcedPasswordRequestObject) (generated.GetProjectsIdBruteforcedPasswordResponseObject, error) {
 	pass, err := server.DatabaseProvider.GetBruteforcedPasswords(ctx, queries.GetBruteforcedPasswordsParams{
 		Hash:      request.Params.Hash,
 		Username:  request.Params.Username,
 		ProjectID: sql.NullInt64{Int64: request.Id, Valid: true},
 	})
 	if err == pgx.ErrNoRows {
-		return generated.GetProjectIdBruteforcedPassword404JSONResponse{
+		return generated.GetProjectsIdBruteforcedPassword404JSONResponse{
 			Message: "Not found",
 			Success: false,
 		}, nil
@@ -162,7 +162,7 @@ func (server *serverHandler) GetProjectIdBruteforcedPassword(ctx context.Context
 		return nil, err
 	}
 
-	return generated.GetProjectIdBruteforcedPassword200JSONResponse{
+	return generated.GetProjectsIdBruteforcedPassword200JSONResponse{
 		Success: true,
 		BruteforcedPassword: generated.BruteforcedPassword{
 			Hash:             pass.Hash,
@@ -206,7 +206,7 @@ func (server *serverHandler) PatchBruteforcedPasswordsId(ctx context.Context, re
 	}, nil
 }
 
-func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Context, request generated.PostProjectIdBruteforcedPasswordRequestObject) (generated.PostProjectIdBruteforcedPasswordResponseObject, error) {
+func (server *serverHandler) PostProjectsIdBruteforcedPassword(ctx context.Context, request generated.PostProjectsIdBruteforcedPasswordRequestObject) (generated.PostProjectsIdBruteforcedPasswordResponseObject, error) {
 	worker, err := server.workerauth.GetWorker(ctx)
 	if err != nil {
 		return nil, err
@@ -214,7 +214,7 @@ func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Contex
 
 	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
 	if err != nil {
-		return generated.PostProjectIdBruteforcedPassword404JSONResponse{
+		return generated.PostProjectsIdBruteforcedPassword404JSONResponse{
 			Message: "Not found",
 			Success: false,
 		}, nil
@@ -226,7 +226,7 @@ func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Contex
 	}
 
 	if !hasPerm {
-		return generated.PostProjectIdBruteforcedPassword401JSONResponse{
+		return generated.PostProjectsIdBruteforcedPassword401JSONResponse{
 			Message: "Not allowed to create bruteforced passwords",
 			Success: false,
 		}, nil
@@ -243,7 +243,7 @@ func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Contex
 		},
 	})
 	if err == pgx.ErrNoRows {
-		return generated.PostProjectIdBruteforcedPassword404JSONResponse{
+		return generated.PostProjectsIdBruteforcedPassword404JSONResponse{
 			Message: "Not found",
 			Success: false,
 		}, nil
@@ -252,7 +252,7 @@ func (server *serverHandler) PostProjectIdBruteforcedPassword(ctx context.Contex
 		return nil, err
 	}
 
-	return generated.PostProjectIdBruteforcedPassword200JSONResponse{
+	return generated.PostProjectsIdBruteforcedPassword200JSONResponse{
 		Success: true,
 		BruteforcedPassword: &generated.BruteforcedPassword{
 			Hash:             request.Body.Hash,

@@ -109,23 +109,23 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-	serveLocalCmd.Flags().String("email.sendgrid", "", "Sendgrid API Key")
+	serveCmd.Flags().String("email.sendgrid", "", "Sendgrid API Key")
 
-	serveLocalCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
-	serveLocalCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
+	serveCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
+	serveCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
 
-	serveLocalCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
+	serveCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
 
-	serveLocalCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
+	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
-	serveLocalCmd.Flags().String("database", "", "Database connection string")
+	serveCmd.Flags().String("database", "", "Database connection string")
 
-	serveLocalCmd.Flags().String("hash-key", "", "Hash key used for signing Cookies")
-	if err := serveLocalCmd.MarkFlagRequired("hash-key"); err != nil {
+	serveCmd.Flags().String("hash-key", "", "Hash key used for signing Cookies")
+	if err := serveCmd.MarkFlagRequired("hash-key"); err != nil {
 		panic(err)
 	}
-	serveLocalCmd.Flags().String("encrypt-key", "", "Encrypt key used for signing Cookies")
-	if err := serveLocalCmd.MarkFlagRequired("encrypt-key"); err != nil {
+	serveCmd.Flags().String("encrypt-key", "", "Encrypt key used for signing Cookies")
+	if err := serveCmd.MarkFlagRequired("encrypt-key"); err != nil {
 		panic(err)
 	}
 

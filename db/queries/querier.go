@@ -30,6 +30,7 @@ type Querier interface {
 	CreateNvdCveCPE(ctx context.Context, arg CreateNvdCveCPEParams) (*NvdCveCpe, error)
 	CreateOrganization(ctx context.Context, name string) (*Organization, error)
 	CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error)
+	CreateProject(ctx context.Context, arg CreateProjectParams) (*Project, error)
 	CreateRememberMeToken(ctx context.Context, arg CreateRememberMeTokenParams) (*RememberMeToken, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, error)
@@ -46,6 +47,7 @@ type Querier interface {
 	DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg DeleteRememberMeTokenByUserAndTokenParams) error
 	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetAllOrganizationMembersForOrganizationsThatContainUser(ctx context.Context, userID int64) ([]*GetAllOrganizationMembersForOrganizationsThatContainUserRow, error)
 	GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*Project, error)
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
 	GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error)
@@ -101,6 +103,7 @@ type Querier interface {
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)
 	GetUserByConfirmSelector(ctx context.Context, confirmSelector sql.NullString) (*User, error)
+	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByRecoverSelector(ctx context.Context, recoverSelector sql.NullString) (*User, error)
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
 	GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*GetUserByWebauthnCredentialIDRow, error)

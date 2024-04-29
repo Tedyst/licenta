@@ -27,6 +27,11 @@ const (
 	WorkerAuthScopes  = "workerAuth.Scopes"
 )
 
+// AddUserToOrganization defines model for AddUserToOrganization.
+type AddUserToOrganization struct {
+	Email string `json:"email"`
+}
+
 // BruteforcePassword defines model for BruteforcePassword.
 type BruteforcePassword struct {
 	// Id The internal ID of the bruteforce password
@@ -104,10 +109,22 @@ type CreateOrganization struct {
 	Name string `json:"name" validate:"min=4,alphanum,max=32,lowercase"`
 }
 
+// CreateProject defines model for CreateProject.
+type CreateProject struct {
+	Name           string `json:"name"`
+	OrganizationId int    `json:"organization_id"`
+}
+
 // CreateScanResult defines model for CreateScanResult.
 type CreateScanResult struct {
 	Message  string `json:"message"`
 	Severity int    `json:"severity"`
+}
+
+// EditUserRoleInOrganization defines model for EditUserRoleInOrganization.
+type EditUserRoleInOrganization struct {
+	Id   int    `json:"id"`
+	Role string `json:"role"`
 }
 
 // Error defines model for Error.
@@ -156,7 +173,8 @@ type Organization struct {
 	CreatedAt string `json:"created_at"`
 
 	// Id The internal ID of the organization
-	Id int64 `json:"id"`
+	Id      int64              `json:"id"`
+	Members []OrganizationUser `json:"members"`
 
 	// Name The name of the organization
 	Name     string            `json:"name"`
@@ -170,6 +188,21 @@ type OrganizationStats struct {
 	Projects    int `json:"projects"`
 	Scans       int `json:"scans"`
 	Users       int `json:"users"`
+}
+
+// OrganizationUser defines model for OrganizationUser.
+type OrganizationUser struct {
+	// Email The email of the user
+	Email string `json:"email"`
+
+	// Id The user ID
+	Id int64 `json:"id"`
+
+	// Role The role of the user
+	Role string `json:"role"`
+
+	// Username The user name for login
+	Username string `json:"username"`
 }
 
 // PaginatedBruteforcePasswords defines model for PaginatedBruteforcePasswords.
@@ -285,6 +318,11 @@ type RegisterUser struct {
 	Username string `json:"username" validate:"alphanum,min=3,max=20"`
 }
 
+// RemoveUserFromOrganization defines model for RemoveUserFromOrganization.
+type RemoveUserFromOrganization struct {
+	Id int `json:"id"`
+}
+
 // Scan defines model for Scan.
 type Scan struct {
 	CreatedAt       string `json:"created_at"`
@@ -350,20 +388,11 @@ type UpdatePostgresVersion struct {
 
 // User defines model for User.
 type User struct {
-	// Admin Whether the user is an admin
-	Admin bool `json:"admin"`
-
 	// Email The email of the user
 	Email string `json:"email"`
 
-	// FirstName The first name of the user
-	FirstName *string `json:"firstName,omitempty"`
-
 	// Id The user ID
 	Id int64 `json:"id"`
-
-	// LastName The last name of the user
-	LastName *string `json:"lastName,omitempty"`
 
 	// Phone The phone number of the user
 	Phone *string `json:"phone,omitempty"`
@@ -390,8 +419,8 @@ type GetPostgresScansParams struct {
 	Scan int64 `form:"scan" json:"scan"`
 }
 
-// GetProjectIdBruteforcePasswordsParams defines parameters for GetProjectIdBruteforcePasswords.
-type GetProjectIdBruteforcePasswordsParams struct {
+// GetProjectsIdBruteforcePasswordsParams defines parameters for GetProjectsIdBruteforcePasswords.
+type GetProjectsIdBruteforcePasswordsParams struct {
 	// LastPasswordId The last ID of the item to return
 	LastPasswordId *int32 `form:"last_password_id,omitempty" json:"last_password_id,omitempty"`
 
@@ -399,8 +428,8 @@ type GetProjectIdBruteforcePasswordsParams struct {
 	Password *string `form:"password,omitempty" json:"password,omitempty"`
 }
 
-// GetProjectIdBruteforcedPasswordParams defines parameters for GetProjectIdBruteforcedPassword.
-type GetProjectIdBruteforcedPasswordParams struct {
+// GetProjectsIdBruteforcedPasswordParams defines parameters for GetProjectsIdBruteforcedPassword.
+type GetProjectsIdBruteforcedPasswordParams struct {
 	// Hash The hash to filter
 	Hash string `form:"hash" json:"hash"`
 
@@ -435,11 +464,23 @@ type PatchMysqlIdJSONRequestBody = PatchMysqlDatabase
 // PostOrganizationsJSONRequestBody defines body for PostOrganizations for application/json ContentType.
 type PostOrganizationsJSONRequestBody = CreateOrganization
 
+// PostOrganizationsIdAddUserJSONRequestBody defines body for PostOrganizationsIdAddUser for application/json ContentType.
+type PostOrganizationsIdAddUserJSONRequestBody = AddUserToOrganization
+
+// DeleteOrganizationsIdDeleteUserJSONRequestBody defines body for DeleteOrganizationsIdDeleteUser for application/json ContentType.
+type DeleteOrganizationsIdDeleteUserJSONRequestBody = RemoveUserFromOrganization
+
+// PostOrganizationsIdEditUserJSONRequestBody defines body for PostOrganizationsIdEditUser for application/json ContentType.
+type PostOrganizationsIdEditUserJSONRequestBody = EditUserRoleInOrganization
+
 // PatchPostgresIdJSONRequestBody defines body for PatchPostgresId for application/json ContentType.
 type PatchPostgresIdJSONRequestBody = PatchPostgresDatabase
 
-// PostProjectIdBruteforcedPasswordJSONRequestBody defines body for PostProjectIdBruteforcedPassword for application/json ContentType.
-type PostProjectIdBruteforcedPasswordJSONRequestBody = CreateBruteforcedPassword
+// PostProjectsJSONRequestBody defines body for PostProjects for application/json ContentType.
+type PostProjectsJSONRequestBody = CreateProject
+
+// PostProjectsIdBruteforcedPasswordJSONRequestBody defines body for PostProjectsIdBruteforcedPassword for application/json ContentType.
+type PostProjectsIdBruteforcedPasswordJSONRequestBody = CreateBruteforcedPassword
 
 // PatchScanIdJSONRequestBody defines body for PatchScanId for application/json ContentType.
 type PatchScanIdJSONRequestBody = PatchScan
@@ -564,6 +605,21 @@ type ClientInterface interface {
 	// GetOrganizationsId request
 	GetOrganizationsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostOrganizationsIdAddUserWithBody request with any body
+	PostOrganizationsIdAddUserWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostOrganizationsIdAddUser(ctx context.Context, id int64, body PostOrganizationsIdAddUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteOrganizationsIdDeleteUserWithBody request with any body
+	DeleteOrganizationsIdDeleteUserWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DeleteOrganizationsIdDeleteUser(ctx context.Context, id int64, body DeleteOrganizationsIdDeleteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostOrganizationsIdEditUserWithBody request with any body
+	PostOrganizationsIdEditUserWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostOrganizationsIdEditUser(ctx context.Context, id int64, body PostOrganizationsIdEditUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetPostgresScans request
 	GetPostgresScans(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -575,22 +631,27 @@ type ClientInterface interface {
 
 	PatchPostgresId(ctx context.Context, id int64, body PatchPostgresIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectId request
-	GetProjectId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostProjectsWithBody request with any body
+	PostProjectsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectIdBruteforcePasswords request
-	GetProjectIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PostProjects(ctx context.Context, body PostProjectsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetProjectIdBruteforcedPassword request
-	GetProjectIdBruteforcedPassword(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetProjectsId request
+	GetProjectsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectIdBruteforcedPasswordWithBody request with any body
-	PostProjectIdBruteforcedPasswordWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetProjectsIdBruteforcePasswords request
+	GetProjectsIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectsIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	PostProjectIdBruteforcedPassword(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetProjectsIdBruteforcedPassword request
+	GetProjectsIdBruteforcedPassword(ctx context.Context, id int64, params *GetProjectsIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostProjectIdRun request
-	PostProjectIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PostProjectsIdBruteforcedPasswordWithBody request with any body
+	PostProjectsIdBruteforcedPasswordWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostProjectsIdBruteforcedPassword(ctx context.Context, id int64, body PostProjectsIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostProjectsIdRun request
+	PostProjectsIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetScanId request
 	GetScanId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -796,6 +857,78 @@ func (c *Client) GetOrganizationsId(ctx context.Context, id int64, reqEditors ..
 	return c.Client.Do(req)
 }
 
+func (c *Client) PostOrganizationsIdAddUserWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostOrganizationsIdAddUserRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostOrganizationsIdAddUser(ctx context.Context, id int64, body PostOrganizationsIdAddUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostOrganizationsIdAddUserRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteOrganizationsIdDeleteUserWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteOrganizationsIdDeleteUserRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteOrganizationsIdDeleteUser(ctx context.Context, id int64, body DeleteOrganizationsIdDeleteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteOrganizationsIdDeleteUserRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostOrganizationsIdEditUserWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostOrganizationsIdEditUserRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostOrganizationsIdEditUser(ctx context.Context, id int64, body PostOrganizationsIdEditUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostOrganizationsIdEditUserRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetPostgresScans(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetPostgresScansRequest(c.Server, params)
 	if err != nil {
@@ -844,8 +977,8 @@ func (c *Client) PatchPostgresId(ctx context.Context, id int64, body PatchPostgr
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetProjectId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProjectIdRequest(c.Server, id)
+func (c *Client) PostProjectsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectsRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -856,8 +989,8 @@ func (c *Client) GetProjectId(ctx context.Context, id int64, reqEditors ...Reque
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetProjectIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProjectIdBruteforcePasswordsRequest(c.Server, id, params)
+func (c *Client) PostProjects(ctx context.Context, body PostProjectsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectsRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -868,8 +1001,8 @@ func (c *Client) GetProjectIdBruteforcePasswords(ctx context.Context, id int64, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetProjectIdBruteforcedPassword(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetProjectIdBruteforcedPasswordRequest(c.Server, id, params)
+func (c *Client) GetProjectsId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectsIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -880,8 +1013,8 @@ func (c *Client) GetProjectIdBruteforcedPassword(ctx context.Context, id int64, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostProjectIdBruteforcedPasswordWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostProjectIdBruteforcedPasswordRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) GetProjectsIdBruteforcePasswords(ctx context.Context, id int64, params *GetProjectsIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectsIdBruteforcePasswordsRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -892,8 +1025,8 @@ func (c *Client) PostProjectIdBruteforcedPasswordWithBody(ctx context.Context, i
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostProjectIdBruteforcedPassword(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostProjectIdBruteforcedPasswordRequest(c.Server, id, body)
+func (c *Client) GetProjectsIdBruteforcedPassword(ctx context.Context, id int64, params *GetProjectsIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetProjectsIdBruteforcedPasswordRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
 	}
@@ -904,8 +1037,32 @@ func (c *Client) PostProjectIdBruteforcedPassword(ctx context.Context, id int64,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostProjectIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostProjectIdRunRequest(c.Server, id)
+func (c *Client) PostProjectsIdBruteforcedPasswordWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectsIdBruteforcedPasswordRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostProjectsIdBruteforcedPassword(ctx context.Context, id int64, body PostProjectsIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectsIdBruteforcedPasswordRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostProjectsIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostProjectsIdRunRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1490,6 +1647,147 @@ func NewGetOrganizationsIdRequest(server string, id int64) (*http.Request, error
 	return req, nil
 }
 
+// NewPostOrganizationsIdAddUserRequest calls the generic PostOrganizationsIdAddUser builder with application/json body
+func NewPostOrganizationsIdAddUserRequest(server string, id int64, body PostOrganizationsIdAddUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostOrganizationsIdAddUserRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPostOrganizationsIdAddUserRequestWithBody generates requests for PostOrganizationsIdAddUser with any type of body
+func NewPostOrganizationsIdAddUserRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations/%s/add-user", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteOrganizationsIdDeleteUserRequest calls the generic DeleteOrganizationsIdDeleteUser builder with application/json body
+func NewDeleteOrganizationsIdDeleteUserRequest(server string, id int64, body DeleteOrganizationsIdDeleteUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeleteOrganizationsIdDeleteUserRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewDeleteOrganizationsIdDeleteUserRequestWithBody generates requests for DeleteOrganizationsIdDeleteUser with any type of body
+func NewDeleteOrganizationsIdDeleteUserRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations/%s/delete-user", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostOrganizationsIdEditUserRequest calls the generic PostOrganizationsIdEditUser builder with application/json body
+func NewPostOrganizationsIdEditUserRequest(server string, id int64, body PostOrganizationsIdEditUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostOrganizationsIdEditUserRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPostOrganizationsIdEditUserRequestWithBody generates requests for PostOrganizationsIdEditUser with any type of body
+func NewPostOrganizationsIdEditUserRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organizations/%s/edit-user", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetPostgresScansRequest generates requests for GetPostgresScans
 func NewGetPostgresScansRequest(server string, params *GetPostgresScansParams) (*http.Request, error) {
 	var err error
@@ -1616,8 +1914,48 @@ func NewPatchPostgresIdRequestWithBody(server string, id int64, contentType stri
 	return req, nil
 }
 
-// NewGetProjectIdRequest generates requests for GetProjectId
-func NewGetProjectIdRequest(server string, id int64) (*http.Request, error) {
+// NewPostProjectsRequest calls the generic PostProjects builder with application/json body
+func NewPostProjectsRequest(server string, body PostProjectsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostProjectsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostProjectsRequestWithBody generates requests for PostProjects with any type of body
+func NewPostProjectsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/projects")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetProjectsIdRequest generates requests for GetProjectsId
+func NewGetProjectsIdRequest(server string, id int64) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1632,7 +1970,7 @@ func NewGetProjectIdRequest(server string, id int64) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/project/%s", pathParam0)
+	operationPath := fmt.Sprintf("/projects/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1650,8 +1988,8 @@ func NewGetProjectIdRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
-// NewGetProjectIdBruteforcePasswordsRequest generates requests for GetProjectIdBruteforcePasswords
-func NewGetProjectIdBruteforcePasswordsRequest(server string, id int64, params *GetProjectIdBruteforcePasswordsParams) (*http.Request, error) {
+// NewGetProjectsIdBruteforcePasswordsRequest generates requests for GetProjectsIdBruteforcePasswords
+func NewGetProjectsIdBruteforcePasswordsRequest(server string, id int64, params *GetProjectsIdBruteforcePasswordsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1666,7 +2004,7 @@ func NewGetProjectIdBruteforcePasswordsRequest(server string, id int64, params *
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/project/%s/bruteforce-passwords", pathParam0)
+	operationPath := fmt.Sprintf("/projects/%s/bruteforce-passwords", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1722,8 +2060,8 @@ func NewGetProjectIdBruteforcePasswordsRequest(server string, id int64, params *
 	return req, nil
 }
 
-// NewGetProjectIdBruteforcedPasswordRequest generates requests for GetProjectIdBruteforcedPassword
-func NewGetProjectIdBruteforcedPasswordRequest(server string, id int64, params *GetProjectIdBruteforcedPasswordParams) (*http.Request, error) {
+// NewGetProjectsIdBruteforcedPasswordRequest generates requests for GetProjectsIdBruteforcedPassword
+func NewGetProjectsIdBruteforcedPasswordRequest(server string, id int64, params *GetProjectsIdBruteforcedPasswordParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1738,7 +2076,7 @@ func NewGetProjectIdBruteforcedPasswordRequest(server string, id int64, params *
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/project/%s/bruteforced-password", pathParam0)
+	operationPath := fmt.Sprintf("/projects/%s/bruteforced-password", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1786,19 +2124,19 @@ func NewGetProjectIdBruteforcedPasswordRequest(server string, id int64, params *
 	return req, nil
 }
 
-// NewPostProjectIdBruteforcedPasswordRequest calls the generic PostProjectIdBruteforcedPassword builder with application/json body
-func NewPostProjectIdBruteforcedPasswordRequest(server string, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody) (*http.Request, error) {
+// NewPostProjectsIdBruteforcedPasswordRequest calls the generic PostProjectsIdBruteforcedPassword builder with application/json body
+func NewPostProjectsIdBruteforcedPasswordRequest(server string, id int64, body PostProjectsIdBruteforcedPasswordJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewPostProjectIdBruteforcedPasswordRequestWithBody(server, id, "application/json", bodyReader)
+	return NewPostProjectsIdBruteforcedPasswordRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewPostProjectIdBruteforcedPasswordRequestWithBody generates requests for PostProjectIdBruteforcedPassword with any type of body
-func NewPostProjectIdBruteforcedPasswordRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+// NewPostProjectsIdBruteforcedPasswordRequestWithBody generates requests for PostProjectsIdBruteforcedPassword with any type of body
+func NewPostProjectsIdBruteforcedPasswordRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1813,7 +2151,7 @@ func NewPostProjectIdBruteforcedPasswordRequestWithBody(server string, id int64,
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/project/%s/bruteforced-password", pathParam0)
+	operationPath := fmt.Sprintf("/projects/%s/bruteforced-password", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1833,8 +2171,8 @@ func NewPostProjectIdBruteforcedPasswordRequestWithBody(server string, id int64,
 	return req, nil
 }
 
-// NewPostProjectIdRunRequest generates requests for PostProjectIdRun
-func NewPostProjectIdRunRequest(server string, id int64) (*http.Request, error) {
+// NewPostProjectsIdRunRequest generates requests for PostProjectsIdRun
+func NewPostProjectsIdRunRequest(server string, id int64) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1849,7 +2187,7 @@ func NewPostProjectIdRunRequest(server string, id int64) (*http.Request, error) 
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/project/%s/run", pathParam0)
+	operationPath := fmt.Sprintf("/projects/%s/run", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2348,6 +2686,21 @@ type ClientWithResponsesInterface interface {
 	// GetOrganizationsIdWithResponse request
 	GetOrganizationsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetOrganizationsIdResponse, error)
 
+	// PostOrganizationsIdAddUserWithBodyWithResponse request with any body
+	PostOrganizationsIdAddUserWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrganizationsIdAddUserResponse, error)
+
+	PostOrganizationsIdAddUserWithResponse(ctx context.Context, id int64, body PostOrganizationsIdAddUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsIdAddUserResponse, error)
+
+	// DeleteOrganizationsIdDeleteUserWithBodyWithResponse request with any body
+	DeleteOrganizationsIdDeleteUserWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdDeleteUserResponse, error)
+
+	DeleteOrganizationsIdDeleteUserWithResponse(ctx context.Context, id int64, body DeleteOrganizationsIdDeleteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdDeleteUserResponse, error)
+
+	// PostOrganizationsIdEditUserWithBodyWithResponse request with any body
+	PostOrganizationsIdEditUserWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrganizationsIdEditUserResponse, error)
+
+	PostOrganizationsIdEditUserWithResponse(ctx context.Context, id int64, body PostOrganizationsIdEditUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsIdEditUserResponse, error)
+
 	// GetPostgresScansWithResponse request
 	GetPostgresScansWithResponse(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*GetPostgresScansResponse, error)
 
@@ -2359,22 +2712,27 @@ type ClientWithResponsesInterface interface {
 
 	PatchPostgresIdWithResponse(ctx context.Context, id int64, body PatchPostgresIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchPostgresIdResponse, error)
 
-	// GetProjectIdWithResponse request
-	GetProjectIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetProjectIdResponse, error)
+	// PostProjectsWithBodyWithResponse request with any body
+	PostProjectsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectsResponse, error)
 
-	// GetProjectIdBruteforcePasswordsWithResponse request
-	GetProjectIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcePasswordsResponse, error)
+	PostProjectsWithResponse(ctx context.Context, body PostProjectsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectsResponse, error)
 
-	// GetProjectIdBruteforcedPasswordWithResponse request
-	GetProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcedPasswordResponse, error)
+	// GetProjectsIdWithResponse request
+	GetProjectsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetProjectsIdResponse, error)
 
-	// PostProjectIdBruteforcedPasswordWithBodyWithResponse request with any body
-	PostProjectIdBruteforcedPasswordWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error)
+	// GetProjectsIdBruteforcePasswordsWithResponse request
+	GetProjectsIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectsIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectsIdBruteforcePasswordsResponse, error)
 
-	PostProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error)
+	// GetProjectsIdBruteforcedPasswordWithResponse request
+	GetProjectsIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, params *GetProjectsIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*GetProjectsIdBruteforcedPasswordResponse, error)
 
-	// PostProjectIdRunWithResponse request
-	PostProjectIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectIdRunResponse, error)
+	// PostProjectsIdBruteforcedPasswordWithBodyWithResponse request with any body
+	PostProjectsIdBruteforcedPasswordWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectsIdBruteforcedPasswordResponse, error)
+
+	PostProjectsIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, body PostProjectsIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectsIdBruteforcedPasswordResponse, error)
+
+	// PostProjectsIdRunWithResponse request
+	PostProjectsIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectsIdRunResponse, error)
 
 	// GetScanIdWithResponse request
 	GetScanIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetScanIdResponse, error)
@@ -2683,6 +3041,87 @@ func (r GetOrganizationsIdResponse) StatusCode() int {
 	return 0
 }
 
+type PostOrganizationsIdAddUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Success bool `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostOrganizationsIdAddUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostOrganizationsIdAddUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteOrganizationsIdDeleteUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Success bool `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteOrganizationsIdDeleteUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteOrganizationsIdDeleteUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostOrganizationsIdEditUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Success bool `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostOrganizationsIdEditUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostOrganizationsIdEditUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetPostgresScansResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2765,7 +3204,34 @@ func (r PatchPostgresIdResponse) StatusCode() int {
 	return 0
 }
 
-type GetProjectIdResponse struct {
+type PostProjectsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Project Project `json:"project"`
+		Success bool    `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostProjectsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostProjectsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetProjectsIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -2778,7 +3244,7 @@ type GetProjectIdResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetProjectIdResponse) Status() string {
+func (r GetProjectsIdResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2786,14 +3252,14 @@ func (r GetProjectIdResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetProjectIdResponse) StatusCode() int {
+func (r GetProjectsIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetProjectIdBruteforcePasswordsResponse struct {
+type GetProjectsIdBruteforcePasswordsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *PaginatedBruteforcePasswords
@@ -2802,7 +3268,7 @@ type GetProjectIdBruteforcePasswordsResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetProjectIdBruteforcePasswordsResponse) Status() string {
+func (r GetProjectsIdBruteforcePasswordsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2810,14 +3276,14 @@ func (r GetProjectIdBruteforcePasswordsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetProjectIdBruteforcePasswordsResponse) StatusCode() int {
+func (r GetProjectsIdBruteforcePasswordsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetProjectIdBruteforcedPasswordResponse struct {
+type GetProjectsIdBruteforcedPasswordResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -2829,7 +3295,7 @@ type GetProjectIdBruteforcedPasswordResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetProjectIdBruteforcedPasswordResponse) Status() string {
+func (r GetProjectsIdBruteforcedPasswordResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2837,14 +3303,14 @@ func (r GetProjectIdBruteforcedPasswordResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetProjectIdBruteforcedPasswordResponse) StatusCode() int {
+func (r GetProjectsIdBruteforcedPasswordResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PostProjectIdBruteforcedPasswordResponse struct {
+type PostProjectsIdBruteforcedPasswordResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -2857,7 +3323,7 @@ type PostProjectIdBruteforcedPasswordResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostProjectIdBruteforcedPasswordResponse) Status() string {
+func (r PostProjectsIdBruteforcedPasswordResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2865,14 +3331,14 @@ func (r PostProjectIdBruteforcedPasswordResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostProjectIdBruteforcedPasswordResponse) StatusCode() int {
+func (r PostProjectsIdBruteforcedPasswordResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type PostProjectIdRunResponse struct {
+type PostProjectsIdRunResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
@@ -2885,7 +3351,7 @@ type PostProjectIdRunResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r PostProjectIdRunResponse) Status() string {
+func (r PostProjectsIdRunResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2893,7 +3359,7 @@ func (r PostProjectIdRunResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PostProjectIdRunResponse) StatusCode() int {
+func (r PostProjectsIdRunResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3259,6 +3725,57 @@ func (c *ClientWithResponses) GetOrganizationsIdWithResponse(ctx context.Context
 	return ParseGetOrganizationsIdResponse(rsp)
 }
 
+// PostOrganizationsIdAddUserWithBodyWithResponse request with arbitrary body returning *PostOrganizationsIdAddUserResponse
+func (c *ClientWithResponses) PostOrganizationsIdAddUserWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrganizationsIdAddUserResponse, error) {
+	rsp, err := c.PostOrganizationsIdAddUserWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostOrganizationsIdAddUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostOrganizationsIdAddUserWithResponse(ctx context.Context, id int64, body PostOrganizationsIdAddUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsIdAddUserResponse, error) {
+	rsp, err := c.PostOrganizationsIdAddUser(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostOrganizationsIdAddUserResponse(rsp)
+}
+
+// DeleteOrganizationsIdDeleteUserWithBodyWithResponse request with arbitrary body returning *DeleteOrganizationsIdDeleteUserResponse
+func (c *ClientWithResponses) DeleteOrganizationsIdDeleteUserWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdDeleteUserResponse, error) {
+	rsp, err := c.DeleteOrganizationsIdDeleteUserWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteOrganizationsIdDeleteUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) DeleteOrganizationsIdDeleteUserWithResponse(ctx context.Context, id int64, body DeleteOrganizationsIdDeleteUserJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteOrganizationsIdDeleteUserResponse, error) {
+	rsp, err := c.DeleteOrganizationsIdDeleteUser(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteOrganizationsIdDeleteUserResponse(rsp)
+}
+
+// PostOrganizationsIdEditUserWithBodyWithResponse request with arbitrary body returning *PostOrganizationsIdEditUserResponse
+func (c *ClientWithResponses) PostOrganizationsIdEditUserWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrganizationsIdEditUserResponse, error) {
+	rsp, err := c.PostOrganizationsIdEditUserWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostOrganizationsIdEditUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostOrganizationsIdEditUserWithResponse(ctx context.Context, id int64, body PostOrganizationsIdEditUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrganizationsIdEditUserResponse, error) {
+	rsp, err := c.PostOrganizationsIdEditUser(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostOrganizationsIdEditUserResponse(rsp)
+}
+
 // GetPostgresScansWithResponse request returning *GetPostgresScansResponse
 func (c *ClientWithResponses) GetPostgresScansWithResponse(ctx context.Context, params *GetPostgresScansParams, reqEditors ...RequestEditorFn) (*GetPostgresScansResponse, error) {
 	rsp, err := c.GetPostgresScans(ctx, params, reqEditors...)
@@ -3294,57 +3811,74 @@ func (c *ClientWithResponses) PatchPostgresIdWithResponse(ctx context.Context, i
 	return ParsePatchPostgresIdResponse(rsp)
 }
 
-// GetProjectIdWithResponse request returning *GetProjectIdResponse
-func (c *ClientWithResponses) GetProjectIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetProjectIdResponse, error) {
-	rsp, err := c.GetProjectId(ctx, id, reqEditors...)
+// PostProjectsWithBodyWithResponse request with arbitrary body returning *PostProjectsResponse
+func (c *ClientWithResponses) PostProjectsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectsResponse, error) {
+	rsp, err := c.PostProjectsWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetProjectIdResponse(rsp)
+	return ParsePostProjectsResponse(rsp)
 }
 
-// GetProjectIdBruteforcePasswordsWithResponse request returning *GetProjectIdBruteforcePasswordsResponse
-func (c *ClientWithResponses) GetProjectIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcePasswordsResponse, error) {
-	rsp, err := c.GetProjectIdBruteforcePasswords(ctx, id, params, reqEditors...)
+func (c *ClientWithResponses) PostProjectsWithResponse(ctx context.Context, body PostProjectsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectsResponse, error) {
+	rsp, err := c.PostProjects(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetProjectIdBruteforcePasswordsResponse(rsp)
+	return ParsePostProjectsResponse(rsp)
 }
 
-// GetProjectIdBruteforcedPasswordWithResponse request returning *GetProjectIdBruteforcedPasswordResponse
-func (c *ClientWithResponses) GetProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, params *GetProjectIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*GetProjectIdBruteforcedPasswordResponse, error) {
-	rsp, err := c.GetProjectIdBruteforcedPassword(ctx, id, params, reqEditors...)
+// GetProjectsIdWithResponse request returning *GetProjectsIdResponse
+func (c *ClientWithResponses) GetProjectsIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetProjectsIdResponse, error) {
+	rsp, err := c.GetProjectsId(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetProjectIdBruteforcedPasswordResponse(rsp)
+	return ParseGetProjectsIdResponse(rsp)
 }
 
-// PostProjectIdBruteforcedPasswordWithBodyWithResponse request with arbitrary body returning *PostProjectIdBruteforcedPasswordResponse
-func (c *ClientWithResponses) PostProjectIdBruteforcedPasswordWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error) {
-	rsp, err := c.PostProjectIdBruteforcedPasswordWithBody(ctx, id, contentType, body, reqEditors...)
+// GetProjectsIdBruteforcePasswordsWithResponse request returning *GetProjectsIdBruteforcePasswordsResponse
+func (c *ClientWithResponses) GetProjectsIdBruteforcePasswordsWithResponse(ctx context.Context, id int64, params *GetProjectsIdBruteforcePasswordsParams, reqEditors ...RequestEditorFn) (*GetProjectsIdBruteforcePasswordsResponse, error) {
+	rsp, err := c.GetProjectsIdBruteforcePasswords(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostProjectIdBruteforcedPasswordResponse(rsp)
+	return ParseGetProjectsIdBruteforcePasswordsResponse(rsp)
 }
 
-func (c *ClientWithResponses) PostProjectIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, body PostProjectIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectIdBruteforcedPasswordResponse, error) {
-	rsp, err := c.PostProjectIdBruteforcedPassword(ctx, id, body, reqEditors...)
+// GetProjectsIdBruteforcedPasswordWithResponse request returning *GetProjectsIdBruteforcedPasswordResponse
+func (c *ClientWithResponses) GetProjectsIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, params *GetProjectsIdBruteforcedPasswordParams, reqEditors ...RequestEditorFn) (*GetProjectsIdBruteforcedPasswordResponse, error) {
+	rsp, err := c.GetProjectsIdBruteforcedPassword(ctx, id, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostProjectIdBruteforcedPasswordResponse(rsp)
+	return ParseGetProjectsIdBruteforcedPasswordResponse(rsp)
 }
 
-// PostProjectIdRunWithResponse request returning *PostProjectIdRunResponse
-func (c *ClientWithResponses) PostProjectIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectIdRunResponse, error) {
-	rsp, err := c.PostProjectIdRun(ctx, id, reqEditors...)
+// PostProjectsIdBruteforcedPasswordWithBodyWithResponse request with arbitrary body returning *PostProjectsIdBruteforcedPasswordResponse
+func (c *ClientWithResponses) PostProjectsIdBruteforcedPasswordWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostProjectsIdBruteforcedPasswordResponse, error) {
+	rsp, err := c.PostProjectsIdBruteforcedPasswordWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePostProjectIdRunResponse(rsp)
+	return ParsePostProjectsIdBruteforcedPasswordResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostProjectsIdBruteforcedPasswordWithResponse(ctx context.Context, id int64, body PostProjectsIdBruteforcedPasswordJSONRequestBody, reqEditors ...RequestEditorFn) (*PostProjectsIdBruteforcedPasswordResponse, error) {
+	rsp, err := c.PostProjectsIdBruteforcedPassword(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostProjectsIdBruteforcedPasswordResponse(rsp)
+}
+
+// PostProjectsIdRunWithResponse request returning *PostProjectsIdRunResponse
+func (c *ClientWithResponses) PostProjectsIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectsIdRunResponse, error) {
+	rsp, err := c.PostProjectsIdRun(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostProjectsIdRunResponse(rsp)
 }
 
 // GetScanIdWithResponse request returning *GetScanIdResponse
@@ -3903,6 +4437,153 @@ func ParseGetOrganizationsIdResponse(rsp *http.Response) (*GetOrganizationsIdRes
 	return response, nil
 }
 
+// ParsePostOrganizationsIdAddUserResponse parses an HTTP response from a PostOrganizationsIdAddUserWithResponse call
+func ParsePostOrganizationsIdAddUserResponse(rsp *http.Response) (*PostOrganizationsIdAddUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostOrganizationsIdAddUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteOrganizationsIdDeleteUserResponse parses an HTTP response from a DeleteOrganizationsIdDeleteUserWithResponse call
+func ParseDeleteOrganizationsIdDeleteUserResponse(rsp *http.Response) (*DeleteOrganizationsIdDeleteUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteOrganizationsIdDeleteUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostOrganizationsIdEditUserResponse parses an HTTP response from a PostOrganizationsIdEditUserWithResponse call
+func ParsePostOrganizationsIdEditUserResponse(rsp *http.Response) (*PostOrganizationsIdEditUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostOrganizationsIdEditUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetPostgresScansResponse parses an HTTP response from a GetPostgresScansWithResponse call
 func ParseGetPostgresScansResponse(rsp *http.Response) (*GetPostgresScansResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4039,15 +4720,58 @@ func ParsePatchPostgresIdResponse(rsp *http.Response) (*PatchPostgresIdResponse,
 	return response, nil
 }
 
-// ParseGetProjectIdResponse parses an HTTP response from a GetProjectIdWithResponse call
-func ParseGetProjectIdResponse(rsp *http.Response) (*GetProjectIdResponse, error) {
+// ParsePostProjectsResponse parses an HTTP response from a PostProjectsWithResponse call
+func ParsePostProjectsResponse(rsp *http.Response) (*PostProjectsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetProjectIdResponse{
+	response := &PostProjectsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Project Project `json:"project"`
+			Success bool    `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetProjectsIdResponse parses an HTTP response from a GetProjectsIdWithResponse call
+func ParseGetProjectsIdResponse(rsp *http.Response) (*GetProjectsIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetProjectsIdResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4083,15 +4807,15 @@ func ParseGetProjectIdResponse(rsp *http.Response) (*GetProjectIdResponse, error
 	return response, nil
 }
 
-// ParseGetProjectIdBruteforcePasswordsResponse parses an HTTP response from a GetProjectIdBruteforcePasswordsWithResponse call
-func ParseGetProjectIdBruteforcePasswordsResponse(rsp *http.Response) (*GetProjectIdBruteforcePasswordsResponse, error) {
+// ParseGetProjectsIdBruteforcePasswordsResponse parses an HTTP response from a GetProjectsIdBruteforcePasswordsWithResponse call
+func ParseGetProjectsIdBruteforcePasswordsResponse(rsp *http.Response) (*GetProjectsIdBruteforcePasswordsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetProjectIdBruteforcePasswordsResponse{
+	response := &GetProjectsIdBruteforcePasswordsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4123,15 +4847,15 @@ func ParseGetProjectIdBruteforcePasswordsResponse(rsp *http.Response) (*GetProje
 	return response, nil
 }
 
-// ParseGetProjectIdBruteforcedPasswordResponse parses an HTTP response from a GetProjectIdBruteforcedPasswordWithResponse call
-func ParseGetProjectIdBruteforcedPasswordResponse(rsp *http.Response) (*GetProjectIdBruteforcedPasswordResponse, error) {
+// ParseGetProjectsIdBruteforcedPasswordResponse parses an HTTP response from a GetProjectsIdBruteforcedPasswordWithResponse call
+func ParseGetProjectsIdBruteforcedPasswordResponse(rsp *http.Response) (*GetProjectsIdBruteforcedPasswordResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetProjectIdBruteforcedPasswordResponse{
+	response := &GetProjectsIdBruteforcedPasswordResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4166,15 +4890,15 @@ func ParseGetProjectIdBruteforcedPasswordResponse(rsp *http.Response) (*GetProje
 	return response, nil
 }
 
-// ParsePostProjectIdBruteforcedPasswordResponse parses an HTTP response from a PostProjectIdBruteforcedPasswordWithResponse call
-func ParsePostProjectIdBruteforcedPasswordResponse(rsp *http.Response) (*PostProjectIdBruteforcedPasswordResponse, error) {
+// ParsePostProjectsIdBruteforcedPasswordResponse parses an HTTP response from a PostProjectsIdBruteforcedPasswordWithResponse call
+func ParsePostProjectsIdBruteforcedPasswordResponse(rsp *http.Response) (*PostProjectsIdBruteforcedPasswordResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostProjectIdBruteforcedPasswordResponse{
+	response := &PostProjectsIdBruteforcedPasswordResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4216,15 +4940,15 @@ func ParsePostProjectIdBruteforcedPasswordResponse(rsp *http.Response) (*PostPro
 	return response, nil
 }
 
-// ParsePostProjectIdRunResponse parses an HTTP response from a PostProjectIdRunWithResponse call
-func ParsePostProjectIdRunResponse(rsp *http.Response) (*PostProjectIdRunResponse, error) {
+// ParsePostProjectsIdRunResponse parses an HTTP response from a PostProjectsIdRunWithResponse call
+func ParsePostProjectsIdRunResponse(rsp *http.Response) (*PostProjectsIdRunResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PostProjectIdRunResponse{
+	response := &PostProjectsIdRunResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -4679,6 +5403,15 @@ type ServerInterface interface {
 	// Get organization by ID
 	// (GET /organizations/{id})
 	GetOrganizationsId(w http.ResponseWriter, r *http.Request, id int64)
+	// Add a user to an organization
+	// (POST /organizations/{id}/add-user)
+	PostOrganizationsIdAddUser(w http.ResponseWriter, r *http.Request, id int64)
+	// Delete a user from an organization
+	// (DELETE /organizations/{id}/delete-user)
+	DeleteOrganizationsIdDeleteUser(w http.ResponseWriter, r *http.Request, id int64)
+	// Edit a user's role in an organization
+	// (POST /organizations/{id}/edit-user)
+	PostOrganizationsIdEditUser(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all postgres scans
 	// (GET /postgres-scans)
 	GetPostgresScans(w http.ResponseWriter, r *http.Request, params GetPostgresScansParams)
@@ -4688,21 +5421,24 @@ type ServerInterface interface {
 	// Update postgres database by ID
 	// (PATCH /postgres/{id})
 	PatchPostgresId(w http.ResponseWriter, r *http.Request, id int64)
+	// Create a new project
+	// (POST /projects)
+	PostProjects(w http.ResponseWriter, r *http.Request)
 	// Get project by ID
-	// (GET /project/{id})
-	GetProjectId(w http.ResponseWriter, r *http.Request, id int64)
+	// (GET /projects/{id})
+	GetProjectsId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all bruteforce passwords associated with a project
-	// (GET /project/{id}/bruteforce-passwords)
-	GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams)
+	// (GET /projects/{id}/bruteforce-passwords)
+	GetProjectsIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectsIdBruteforcePasswordsParams)
 	// Get bruteforced password for a project
-	// (GET /project/{id}/bruteforced-password)
-	GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcedPasswordParams)
+	// (GET /projects/{id}/bruteforced-password)
+	GetProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectsIdBruteforcedPasswordParams)
 	// Create a bruteforced password for a project
-	// (POST /project/{id}/bruteforced-password)
-	PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64)
+	// (POST /projects/{id}/bruteforced-password)
+	PostProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64)
 	// Run all extractors and scanners for a project
-	// (POST /project/{id}/run)
-	PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64)
+	// (POST /projects/{id}/run)
+	PostProjectsIdRun(w http.ResponseWriter, r *http.Request, id int64)
 	// Get a scan by ID
 	// (GET /scan/{id})
 	GetScanId(w http.ResponseWriter, r *http.Request, id int64)
@@ -4796,6 +5532,24 @@ func (_ Unimplemented) GetOrganizationsId(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Add a user to an organization
+// (POST /organizations/{id}/add-user)
+func (_ Unimplemented) PostOrganizationsIdAddUser(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete a user from an organization
+// (DELETE /organizations/{id}/delete-user)
+func (_ Unimplemented) DeleteOrganizationsIdDeleteUser(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Edit a user's role in an organization
+// (POST /organizations/{id}/edit-user)
+func (_ Unimplemented) PostOrganizationsIdEditUser(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get all postgres scans
 // (GET /postgres-scans)
 func (_ Unimplemented) GetPostgresScans(w http.ResponseWriter, r *http.Request, params GetPostgresScansParams) {
@@ -4814,33 +5568,39 @@ func (_ Unimplemented) PatchPostgresId(w http.ResponseWriter, r *http.Request, i
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Create a new project
+// (POST /projects)
+func (_ Unimplemented) PostProjects(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get project by ID
-// (GET /project/{id})
-func (_ Unimplemented) GetProjectId(w http.ResponseWriter, r *http.Request, id int64) {
+// (GET /projects/{id})
+func (_ Unimplemented) GetProjectsId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Get all bruteforce passwords associated with a project
-// (GET /project/{id}/bruteforce-passwords)
-func (_ Unimplemented) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams) {
+// (GET /projects/{id}/bruteforce-passwords)
+func (_ Unimplemented) GetProjectsIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectsIdBruteforcePasswordsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Get bruteforced password for a project
-// (GET /project/{id}/bruteforced-password)
-func (_ Unimplemented) GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcedPasswordParams) {
+// (GET /projects/{id}/bruteforced-password)
+func (_ Unimplemented) GetProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectsIdBruteforcedPasswordParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Create a bruteforced password for a project
-// (POST /project/{id}/bruteforced-password)
-func (_ Unimplemented) PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64) {
+// (POST /projects/{id}/bruteforced-password)
+func (_ Unimplemented) PostProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 // Run all extractors and scanners for a project
-// (POST /project/{id}/run)
-func (_ Unimplemented) PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64) {
+// (POST /projects/{id}/run)
+func (_ Unimplemented) PostProjectsIdRun(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -5196,6 +5956,90 @@ func (siw *ServerInterfaceWrapper) GetOrganizationsId(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// PostOrganizationsIdAddUser operation middleware
+func (siw *ServerInterfaceWrapper) PostOrganizationsIdAddUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostOrganizationsIdAddUser(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteOrganizationsIdDeleteUser operation middleware
+func (siw *ServerInterfaceWrapper) DeleteOrganizationsIdDeleteUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteOrganizationsIdDeleteUser(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostOrganizationsIdEditUser operation middleware
+func (siw *ServerInterfaceWrapper) PostOrganizationsIdEditUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostOrganizationsIdEditUser(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetPostgresScans operation middleware
 func (siw *ServerInterfaceWrapper) GetPostgresScans(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -5289,8 +6133,25 @@ func (siw *ServerInterfaceWrapper) PatchPostgresId(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// GetProjectId operation middleware
-func (siw *ServerInterfaceWrapper) GetProjectId(w http.ResponseWriter, r *http.Request) {
+// PostProjects operation middleware
+func (siw *ServerInterfaceWrapper) PostProjects(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostProjects(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetProjectsId operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectsId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -5307,7 +6168,7 @@ func (siw *ServerInterfaceWrapper) GetProjectId(w http.ResponseWriter, r *http.R
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetProjectId(w, r, id)
+		siw.Handler.GetProjectsId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5317,8 +6178,8 @@ func (siw *ServerInterfaceWrapper) GetProjectId(w http.ResponseWriter, r *http.R
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// GetProjectIdBruteforcePasswords operation middleware
-func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request) {
+// GetProjectsIdBruteforcePasswords operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectsIdBruteforcePasswords(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -5335,7 +6196,7 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcePasswords(w http.Respon
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetProjectIdBruteforcePasswordsParams
+	var params GetProjectsIdBruteforcePasswordsParams
 
 	// ------------- Optional query parameter "last_password_id" -------------
 
@@ -5354,7 +6215,7 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcePasswords(w http.Respon
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetProjectIdBruteforcePasswords(w, r, id, params)
+		siw.Handler.GetProjectsIdBruteforcePasswords(w, r, id, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5364,8 +6225,8 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcePasswords(w http.Respon
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// GetProjectIdBruteforcedPassword operation middleware
-func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request) {
+// GetProjectsIdBruteforcedPassword operation middleware
+func (siw *ServerInterfaceWrapper) GetProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -5382,7 +6243,7 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcedPassword(w http.Respon
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetProjectIdBruteforcedPasswordParams
+	var params GetProjectsIdBruteforcedPasswordParams
 
 	// ------------- Required query parameter "hash" -------------
 
@@ -5415,7 +6276,7 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcedPassword(w http.Respon
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetProjectIdBruteforcedPassword(w, r, id, params)
+		siw.Handler.GetProjectsIdBruteforcedPassword(w, r, id, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5425,8 +6286,8 @@ func (siw *ServerInterfaceWrapper) GetProjectIdBruteforcedPassword(w http.Respon
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// PostProjectIdBruteforcedPassword operation middleware
-func (siw *ServerInterfaceWrapper) PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request) {
+// PostProjectsIdBruteforcedPassword operation middleware
+func (siw *ServerInterfaceWrapper) PostProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -5443,7 +6304,7 @@ func (siw *ServerInterfaceWrapper) PostProjectIdBruteforcedPassword(w http.Respo
 	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostProjectIdBruteforcedPassword(w, r, id)
+		siw.Handler.PostProjectsIdBruteforcedPassword(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5453,8 +6314,8 @@ func (siw *ServerInterfaceWrapper) PostProjectIdBruteforcedPassword(w http.Respo
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
-// PostProjectIdRun operation middleware
-func (siw *ServerInterfaceWrapper) PostProjectIdRun(w http.ResponseWriter, r *http.Request) {
+// PostProjectsIdRun operation middleware
+func (siw *ServerInterfaceWrapper) PostProjectsIdRun(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var err error
@@ -5471,7 +6332,7 @@ func (siw *ServerInterfaceWrapper) PostProjectIdRun(w http.ResponseWriter, r *ht
 	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostProjectIdRun(w, r, id)
+		siw.Handler.PostProjectsIdRun(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5878,6 +6739,15 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/organizations/{id}", wrapper.GetOrganizationsId)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/organizations/{id}/add-user", wrapper.PostOrganizationsIdAddUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/organizations/{id}/delete-user", wrapper.DeleteOrganizationsIdDeleteUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/organizations/{id}/edit-user", wrapper.PostOrganizationsIdEditUser)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/postgres-scans", wrapper.GetPostgresScans)
 	})
 	r.Group(func(r chi.Router) {
@@ -5887,19 +6757,22 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Patch(options.BaseURL+"/postgres/{id}", wrapper.PatchPostgresId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/project/{id}", wrapper.GetProjectId)
+		r.Post(options.BaseURL+"/projects", wrapper.PostProjects)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/project/{id}/bruteforce-passwords", wrapper.GetProjectIdBruteforcePasswords)
+		r.Get(options.BaseURL+"/projects/{id}", wrapper.GetProjectsId)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/project/{id}/bruteforced-password", wrapper.GetProjectIdBruteforcedPassword)
+		r.Get(options.BaseURL+"/projects/{id}/bruteforce-passwords", wrapper.GetProjectsIdBruteforcePasswords)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/project/{id}/bruteforced-password", wrapper.PostProjectIdBruteforcedPassword)
+		r.Get(options.BaseURL+"/projects/{id}/bruteforced-password", wrapper.GetProjectsIdBruteforcedPassword)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/project/{id}/run", wrapper.PostProjectIdRun)
+		r.Post(options.BaseURL+"/projects/{id}/bruteforced-password", wrapper.PostProjectsIdBruteforcedPassword)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/projects/{id}/run", wrapper.PostProjectsIdRun)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/scan/{id}", wrapper.GetScanId)
@@ -6333,6 +7206,147 @@ func (response GetOrganizationsId404JSONResponse) VisitGetOrganizationsIdRespons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PostOrganizationsIdAddUserRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PostOrganizationsIdAddUserJSONRequestBody
+}
+
+type PostOrganizationsIdAddUserResponseObject interface {
+	VisitPostOrganizationsIdAddUserResponse(w http.ResponseWriter) error
+}
+
+type PostOrganizationsIdAddUser200JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response PostOrganizationsIdAddUser200JSONResponse) VisitPostOrganizationsIdAddUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdAddUser400JSONResponse Error
+
+func (response PostOrganizationsIdAddUser400JSONResponse) VisitPostOrganizationsIdAddUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdAddUser401JSONResponse Error
+
+func (response PostOrganizationsIdAddUser401JSONResponse) VisitPostOrganizationsIdAddUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdAddUser404JSONResponse Error
+
+func (response PostOrganizationsIdAddUser404JSONResponse) VisitPostOrganizationsIdAddUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsIdDeleteUserRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *DeleteOrganizationsIdDeleteUserJSONRequestBody
+}
+
+type DeleteOrganizationsIdDeleteUserResponseObject interface {
+	VisitDeleteOrganizationsIdDeleteUserResponse(w http.ResponseWriter) error
+}
+
+type DeleteOrganizationsIdDeleteUser200JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteOrganizationsIdDeleteUser200JSONResponse) VisitDeleteOrganizationsIdDeleteUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsIdDeleteUser400JSONResponse Error
+
+func (response DeleteOrganizationsIdDeleteUser400JSONResponse) VisitDeleteOrganizationsIdDeleteUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsIdDeleteUser401JSONResponse Error
+
+func (response DeleteOrganizationsIdDeleteUser401JSONResponse) VisitDeleteOrganizationsIdDeleteUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteOrganizationsIdDeleteUser404JSONResponse Error
+
+func (response DeleteOrganizationsIdDeleteUser404JSONResponse) VisitDeleteOrganizationsIdDeleteUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdEditUserRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PostOrganizationsIdEditUserJSONRequestBody
+}
+
+type PostOrganizationsIdEditUserResponseObject interface {
+	VisitPostOrganizationsIdEditUserResponse(w http.ResponseWriter) error
+}
+
+type PostOrganizationsIdEditUser200JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response PostOrganizationsIdEditUser200JSONResponse) VisitPostOrganizationsIdEditUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdEditUser400JSONResponse Error
+
+func (response PostOrganizationsIdEditUser400JSONResponse) VisitPostOrganizationsIdEditUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdEditUser401JSONResponse Error
+
+func (response PostOrganizationsIdEditUser401JSONResponse) VisitPostOrganizationsIdEditUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostOrganizationsIdEditUser404JSONResponse Error
+
+func (response PostOrganizationsIdEditUser404JSONResponse) VisitPostOrganizationsIdEditUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetPostgresScansRequestObject struct {
 	Params GetPostgresScansParams
 }
@@ -6457,209 +7471,247 @@ func (response PatchPostgresId404JSONResponse) VisitPatchPostgresIdResponse(w ht
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdRequestObject struct {
+type PostProjectsRequestObject struct {
+	Body *PostProjectsJSONRequestBody
+}
+
+type PostProjectsResponseObject interface {
+	VisitPostProjectsResponse(w http.ResponseWriter) error
+}
+
+type PostProjects201JSONResponse struct {
+	Project Project `json:"project"`
+	Success bool    `json:"success"`
+}
+
+func (response PostProjects201JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjects400JSONResponse Error
+
+func (response PostProjects400JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostProjects401JSONResponse Error
+
+func (response PostProjects401JSONResponse) VisitPostProjectsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetProjectsIdRequestObject struct {
 	Id int64 `json:"id"`
 }
 
-type GetProjectIdResponseObject interface {
-	VisitGetProjectIdResponse(w http.ResponseWriter) error
+type GetProjectsIdResponseObject interface {
+	VisitGetProjectsIdResponse(w http.ResponseWriter) error
 }
 
-type GetProjectId200JSONResponse struct {
+type GetProjectsId200JSONResponse struct {
 	PostgresDatabases []PostgresDatabase `json:"postgres_databases"`
 	Project           Project            `json:"project"`
 	Success           bool               `json:"success"`
 }
 
-func (response GetProjectId200JSONResponse) VisitGetProjectIdResponse(w http.ResponseWriter) error {
+func (response GetProjectsId200JSONResponse) VisitGetProjectsIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectId401JSONResponse Error
+type GetProjectsId401JSONResponse Error
 
-func (response GetProjectId401JSONResponse) VisitGetProjectIdResponse(w http.ResponseWriter) error {
+func (response GetProjectsId401JSONResponse) VisitGetProjectsIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectId404JSONResponse Error
+type GetProjectsId404JSONResponse Error
 
-func (response GetProjectId404JSONResponse) VisitGetProjectIdResponse(w http.ResponseWriter) error {
+func (response GetProjectsId404JSONResponse) VisitGetProjectsIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdBruteforcePasswordsRequestObject struct {
+type GetProjectsIdBruteforcePasswordsRequestObject struct {
 	Id     int64 `json:"id"`
-	Params GetProjectIdBruteforcePasswordsParams
+	Params GetProjectsIdBruteforcePasswordsParams
 }
 
-type GetProjectIdBruteforcePasswordsResponseObject interface {
-	VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error
+type GetProjectsIdBruteforcePasswordsResponseObject interface {
+	VisitGetProjectsIdBruteforcePasswordsResponse(w http.ResponseWriter) error
 }
 
-type GetProjectIdBruteforcePasswords200JSONResponse PaginatedBruteforcePasswords
+type GetProjectsIdBruteforcePasswords200JSONResponse PaginatedBruteforcePasswords
 
-func (response GetProjectIdBruteforcePasswords200JSONResponse) VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
+func (response GetProjectsIdBruteforcePasswords200JSONResponse) VisitGetProjectsIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdBruteforcePasswords401JSONResponse Error
+type GetProjectsIdBruteforcePasswords401JSONResponse Error
 
-func (response GetProjectIdBruteforcePasswords401JSONResponse) VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
+func (response GetProjectsIdBruteforcePasswords401JSONResponse) VisitGetProjectsIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdBruteforcePasswords404JSONResponse Error
+type GetProjectsIdBruteforcePasswords404JSONResponse Error
 
-func (response GetProjectIdBruteforcePasswords404JSONResponse) VisitGetProjectIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
+func (response GetProjectsIdBruteforcePasswords404JSONResponse) VisitGetProjectsIdBruteforcePasswordsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdBruteforcedPasswordRequestObject struct {
+type GetProjectsIdBruteforcedPasswordRequestObject struct {
 	Id     int64 `json:"id"`
-	Params GetProjectIdBruteforcedPasswordParams
+	Params GetProjectsIdBruteforcedPasswordParams
 }
 
-type GetProjectIdBruteforcedPasswordResponseObject interface {
-	VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error
+type GetProjectsIdBruteforcedPasswordResponseObject interface {
+	VisitGetProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error
 }
 
-type GetProjectIdBruteforcedPassword200JSONResponse struct {
+type GetProjectsIdBruteforcedPassword200JSONResponse struct {
 	BruteforcedPassword BruteforcedPassword `json:"bruteforced_password"`
 	Success             bool                `json:"success"`
 }
 
-func (response GetProjectIdBruteforcedPassword200JSONResponse) VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response GetProjectsIdBruteforcedPassword200JSONResponse) VisitGetProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdBruteforcedPassword401JSONResponse Error
+type GetProjectsIdBruteforcedPassword401JSONResponse Error
 
-func (response GetProjectIdBruteforcedPassword401JSONResponse) VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response GetProjectsIdBruteforcedPassword401JSONResponse) VisitGetProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetProjectIdBruteforcedPassword404JSONResponse Error
+type GetProjectsIdBruteforcedPassword404JSONResponse Error
 
-func (response GetProjectIdBruteforcedPassword404JSONResponse) VisitGetProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response GetProjectsIdBruteforcedPassword404JSONResponse) VisitGetProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdBruteforcedPasswordRequestObject struct {
+type PostProjectsIdBruteforcedPasswordRequestObject struct {
 	Id   int64 `json:"id"`
-	Body *PostProjectIdBruteforcedPasswordJSONRequestBody
+	Body *PostProjectsIdBruteforcedPasswordJSONRequestBody
 }
 
-type PostProjectIdBruteforcedPasswordResponseObject interface {
-	VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error
+type PostProjectsIdBruteforcedPasswordResponseObject interface {
+	VisitPostProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error
 }
 
-type PostProjectIdBruteforcedPassword200JSONResponse struct {
+type PostProjectsIdBruteforcedPassword200JSONResponse struct {
 	BruteforcedPassword *BruteforcedPassword `json:"bruteforced_password,omitempty"`
 	Success             bool                 `json:"success"`
 }
 
-func (response PostProjectIdBruteforcedPassword200JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdBruteforcedPassword200JSONResponse) VisitPostProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdBruteforcedPassword400JSONResponse Error
+type PostProjectsIdBruteforcedPassword400JSONResponse Error
 
-func (response PostProjectIdBruteforcedPassword400JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdBruteforcedPassword400JSONResponse) VisitPostProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdBruteforcedPassword401JSONResponse Error
+type PostProjectsIdBruteforcedPassword401JSONResponse Error
 
-func (response PostProjectIdBruteforcedPassword401JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdBruteforcedPassword401JSONResponse) VisitPostProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdBruteforcedPassword404JSONResponse Error
+type PostProjectsIdBruteforcedPassword404JSONResponse Error
 
-func (response PostProjectIdBruteforcedPassword404JSONResponse) VisitPostProjectIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdBruteforcedPassword404JSONResponse) VisitPostProjectsIdBruteforcedPasswordResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdRunRequestObject struct {
+type PostProjectsIdRunRequestObject struct {
 	Id int64 `json:"id"`
 }
 
-type PostProjectIdRunResponseObject interface {
-	VisitPostProjectIdRunResponse(w http.ResponseWriter) error
+type PostProjectsIdRunResponseObject interface {
+	VisitPostProjectsIdRunResponse(w http.ResponseWriter) error
 }
 
-type PostProjectIdRun200JSONResponse struct {
+type PostProjectsIdRun200JSONResponse struct {
 	ScanGroup *ScanGroup `json:"scan_group,omitempty"`
 	Success   bool       `json:"success"`
 }
 
-func (response PostProjectIdRun200JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdRun200JSONResponse) VisitPostProjectsIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdRun400JSONResponse Error
+type PostProjectsIdRun400JSONResponse Error
 
-func (response PostProjectIdRun400JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdRun400JSONResponse) VisitPostProjectsIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdRun401JSONResponse Error
+type PostProjectsIdRun401JSONResponse Error
 
-func (response PostProjectIdRun401JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdRun401JSONResponse) VisitPostProjectsIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostProjectIdRun404JSONResponse Error
+type PostProjectsIdRun404JSONResponse Error
 
-func (response PostProjectIdRun404JSONResponse) VisitPostProjectIdRunResponse(w http.ResponseWriter) error {
+func (response PostProjectsIdRun404JSONResponse) VisitPostProjectsIdRunResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -7035,6 +8087,15 @@ type StrictServerInterface interface {
 	// Get organization by ID
 	// (GET /organizations/{id})
 	GetOrganizationsId(ctx context.Context, request GetOrganizationsIdRequestObject) (GetOrganizationsIdResponseObject, error)
+	// Add a user to an organization
+	// (POST /organizations/{id}/add-user)
+	PostOrganizationsIdAddUser(ctx context.Context, request PostOrganizationsIdAddUserRequestObject) (PostOrganizationsIdAddUserResponseObject, error)
+	// Delete a user from an organization
+	// (DELETE /organizations/{id}/delete-user)
+	DeleteOrganizationsIdDeleteUser(ctx context.Context, request DeleteOrganizationsIdDeleteUserRequestObject) (DeleteOrganizationsIdDeleteUserResponseObject, error)
+	// Edit a user's role in an organization
+	// (POST /organizations/{id}/edit-user)
+	PostOrganizationsIdEditUser(ctx context.Context, request PostOrganizationsIdEditUserRequestObject) (PostOrganizationsIdEditUserResponseObject, error)
 	// Get all postgres scans
 	// (GET /postgres-scans)
 	GetPostgresScans(ctx context.Context, request GetPostgresScansRequestObject) (GetPostgresScansResponseObject, error)
@@ -7044,21 +8105,24 @@ type StrictServerInterface interface {
 	// Update postgres database by ID
 	// (PATCH /postgres/{id})
 	PatchPostgresId(ctx context.Context, request PatchPostgresIdRequestObject) (PatchPostgresIdResponseObject, error)
+	// Create a new project
+	// (POST /projects)
+	PostProjects(ctx context.Context, request PostProjectsRequestObject) (PostProjectsResponseObject, error)
 	// Get project by ID
-	// (GET /project/{id})
-	GetProjectId(ctx context.Context, request GetProjectIdRequestObject) (GetProjectIdResponseObject, error)
+	// (GET /projects/{id})
+	GetProjectsId(ctx context.Context, request GetProjectsIdRequestObject) (GetProjectsIdResponseObject, error)
 	// Get all bruteforce passwords associated with a project
-	// (GET /project/{id}/bruteforce-passwords)
-	GetProjectIdBruteforcePasswords(ctx context.Context, request GetProjectIdBruteforcePasswordsRequestObject) (GetProjectIdBruteforcePasswordsResponseObject, error)
+	// (GET /projects/{id}/bruteforce-passwords)
+	GetProjectsIdBruteforcePasswords(ctx context.Context, request GetProjectsIdBruteforcePasswordsRequestObject) (GetProjectsIdBruteforcePasswordsResponseObject, error)
 	// Get bruteforced password for a project
-	// (GET /project/{id}/bruteforced-password)
-	GetProjectIdBruteforcedPassword(ctx context.Context, request GetProjectIdBruteforcedPasswordRequestObject) (GetProjectIdBruteforcedPasswordResponseObject, error)
+	// (GET /projects/{id}/bruteforced-password)
+	GetProjectsIdBruteforcedPassword(ctx context.Context, request GetProjectsIdBruteforcedPasswordRequestObject) (GetProjectsIdBruteforcedPasswordResponseObject, error)
 	// Create a bruteforced password for a project
-	// (POST /project/{id}/bruteforced-password)
-	PostProjectIdBruteforcedPassword(ctx context.Context, request PostProjectIdBruteforcedPasswordRequestObject) (PostProjectIdBruteforcedPasswordResponseObject, error)
+	// (POST /projects/{id}/bruteforced-password)
+	PostProjectsIdBruteforcedPassword(ctx context.Context, request PostProjectsIdBruteforcedPasswordRequestObject) (PostProjectsIdBruteforcedPasswordResponseObject, error)
 	// Run all extractors and scanners for a project
-	// (POST /project/{id}/run)
-	PostProjectIdRun(ctx context.Context, request PostProjectIdRunRequestObject) (PostProjectIdRunResponseObject, error)
+	// (POST /projects/{id}/run)
+	PostProjectsIdRun(ctx context.Context, request PostProjectsIdRunRequestObject) (PostProjectsIdRunResponseObject, error)
 	// Get a scan by ID
 	// (GET /scan/{id})
 	GetScanId(ctx context.Context, request GetScanIdRequestObject) (GetScanIdResponseObject, error)
@@ -7404,6 +8468,105 @@ func (sh *strictHandler) GetOrganizationsId(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// PostOrganizationsIdAddUser operation middleware
+func (sh *strictHandler) PostOrganizationsIdAddUser(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostOrganizationsIdAddUserRequestObject
+
+	request.Id = id
+
+	var body PostOrganizationsIdAddUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostOrganizationsIdAddUser(ctx, request.(PostOrganizationsIdAddUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostOrganizationsIdAddUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostOrganizationsIdAddUserResponseObject); ok {
+		if err := validResponse.VisitPostOrganizationsIdAddUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteOrganizationsIdDeleteUser operation middleware
+func (sh *strictHandler) DeleteOrganizationsIdDeleteUser(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteOrganizationsIdDeleteUserRequestObject
+
+	request.Id = id
+
+	var body DeleteOrganizationsIdDeleteUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteOrganizationsIdDeleteUser(ctx, request.(DeleteOrganizationsIdDeleteUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteOrganizationsIdDeleteUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteOrganizationsIdDeleteUserResponseObject); ok {
+		if err := validResponse.VisitDeleteOrganizationsIdDeleteUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostOrganizationsIdEditUser operation middleware
+func (sh *strictHandler) PostOrganizationsIdEditUser(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostOrganizationsIdEditUserRequestObject
+
+	request.Id = id
+
+	var body PostOrganizationsIdEditUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostOrganizationsIdEditUser(ctx, request.(PostOrganizationsIdEditUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostOrganizationsIdEditUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostOrganizationsIdEditUserResponseObject); ok {
+		if err := validResponse.VisitPostOrganizationsIdEditUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetPostgresScans operation middleware
 func (sh *strictHandler) GetPostgresScans(w http.ResponseWriter, r *http.Request, params GetPostgresScansParams) {
 	var request GetPostgresScansRequestObject
@@ -7489,93 +8652,11 @@ func (sh *strictHandler) PatchPostgresId(w http.ResponseWriter, r *http.Request,
 	}
 }
 
-// GetProjectId operation middleware
-func (sh *strictHandler) GetProjectId(w http.ResponseWriter, r *http.Request, id int64) {
-	var request GetProjectIdRequestObject
+// PostProjects operation middleware
+func (sh *strictHandler) PostProjects(w http.ResponseWriter, r *http.Request) {
+	var request PostProjectsRequestObject
 
-	request.Id = id
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetProjectId(ctx, request.(GetProjectIdRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetProjectId")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetProjectIdResponseObject); ok {
-		if err := validResponse.VisitGetProjectIdResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetProjectIdBruteforcePasswords operation middleware
-func (sh *strictHandler) GetProjectIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcePasswordsParams) {
-	var request GetProjectIdBruteforcePasswordsRequestObject
-
-	request.Id = id
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetProjectIdBruteforcePasswords(ctx, request.(GetProjectIdBruteforcePasswordsRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetProjectIdBruteforcePasswords")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetProjectIdBruteforcePasswordsResponseObject); ok {
-		if err := validResponse.VisitGetProjectIdBruteforcePasswordsResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetProjectIdBruteforcedPassword operation middleware
-func (sh *strictHandler) GetProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectIdBruteforcedPasswordParams) {
-	var request GetProjectIdBruteforcedPasswordRequestObject
-
-	request.Id = id
-	request.Params = params
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetProjectIdBruteforcedPassword(ctx, request.(GetProjectIdBruteforcedPasswordRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetProjectIdBruteforcedPassword")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetProjectIdBruteforcedPasswordResponseObject); ok {
-		if err := validResponse.VisitGetProjectIdBruteforcedPasswordResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// PostProjectIdBruteforcedPassword operation middleware
-func (sh *strictHandler) PostProjectIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64) {
-	var request PostProjectIdBruteforcedPasswordRequestObject
-
-	request.Id = id
-
-	var body PostProjectIdBruteforcedPasswordJSONRequestBody
+	var body PostProjectsJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -7583,18 +8664,18 @@ func (sh *strictHandler) PostProjectIdBruteforcedPassword(w http.ResponseWriter,
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostProjectIdBruteforcedPassword(ctx, request.(PostProjectIdBruteforcedPasswordRequestObject))
+		return sh.ssi.PostProjects(ctx, request.(PostProjectsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostProjectIdBruteforcedPassword")
+		handler = middleware(handler, "PostProjects")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostProjectIdBruteforcedPasswordResponseObject); ok {
-		if err := validResponse.VisitPostProjectIdBruteforcedPasswordResponse(w); err != nil {
+	} else if validResponse, ok := response.(PostProjectsResponseObject); ok {
+		if err := validResponse.VisitPostProjectsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7602,25 +8683,138 @@ func (sh *strictHandler) PostProjectIdBruteforcedPassword(w http.ResponseWriter,
 	}
 }
 
-// PostProjectIdRun operation middleware
-func (sh *strictHandler) PostProjectIdRun(w http.ResponseWriter, r *http.Request, id int64) {
-	var request PostProjectIdRunRequestObject
+// GetProjectsId operation middleware
+func (sh *strictHandler) GetProjectsId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetProjectsIdRequestObject
 
 	request.Id = id
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostProjectIdRun(ctx, request.(PostProjectIdRunRequestObject))
+		return sh.ssi.GetProjectsId(ctx, request.(GetProjectsIdRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostProjectIdRun")
+		handler = middleware(handler, "GetProjectsId")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostProjectIdRunResponseObject); ok {
-		if err := validResponse.VisitPostProjectIdRunResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetProjectsIdResponseObject); ok {
+		if err := validResponse.VisitGetProjectsIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetProjectsIdBruteforcePasswords operation middleware
+func (sh *strictHandler) GetProjectsIdBruteforcePasswords(w http.ResponseWriter, r *http.Request, id int64, params GetProjectsIdBruteforcePasswordsParams) {
+	var request GetProjectsIdBruteforcePasswordsRequestObject
+
+	request.Id = id
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectsIdBruteforcePasswords(ctx, request.(GetProjectsIdBruteforcePasswordsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectsIdBruteforcePasswords")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectsIdBruteforcePasswordsResponseObject); ok {
+		if err := validResponse.VisitGetProjectsIdBruteforcePasswordsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetProjectsIdBruteforcedPassword operation middleware
+func (sh *strictHandler) GetProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64, params GetProjectsIdBruteforcedPasswordParams) {
+	var request GetProjectsIdBruteforcedPasswordRequestObject
+
+	request.Id = id
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetProjectsIdBruteforcedPassword(ctx, request.(GetProjectsIdBruteforcedPasswordRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetProjectsIdBruteforcedPassword")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetProjectsIdBruteforcedPasswordResponseObject); ok {
+		if err := validResponse.VisitGetProjectsIdBruteforcedPasswordResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostProjectsIdBruteforcedPassword operation middleware
+func (sh *strictHandler) PostProjectsIdBruteforcedPassword(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostProjectsIdBruteforcedPasswordRequestObject
+
+	request.Id = id
+
+	var body PostProjectsIdBruteforcedPasswordJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjectsIdBruteforcedPassword(ctx, request.(PostProjectsIdBruteforcedPasswordRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjectsIdBruteforcedPassword")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostProjectsIdBruteforcedPasswordResponseObject); ok {
+		if err := validResponse.VisitPostProjectsIdBruteforcedPasswordResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostProjectsIdRun operation middleware
+func (sh *strictHandler) PostProjectsIdRun(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PostProjectsIdRunRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostProjectsIdRun(ctx, request.(PostProjectsIdRunRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostProjectsIdRun")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostProjectsIdRunResponseObject); ok {
+		if err := validResponse.VisitPostProjectsIdRunResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7887,72 +9081,76 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"KuUiigAA",
+	"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",
+	"AP//MRTAP1ScAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

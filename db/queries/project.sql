@@ -63,3 +63,9 @@ WHERE
     id = $1
 LIMIT 1;
 
+-- name: CreateProject :one
+INSERT INTO projects(organization_id, name, remote)
+    VALUES ($1, $2, $3)
+RETURNING
+    *;
+

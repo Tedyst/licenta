@@ -68,7 +68,7 @@ func waitForScan(ctx context.Context, client generated.ClientWithResponsesInterf
 func ProjectRunAndWaitResults(ctx context.Context, client generated.ClientWithResponsesInterface, projectID int) (int, error) {
 	slog.InfoContext(ctx, "Starting project run", "project", projectID)
 
-	response, err := client.PostProjectIdRunWithResponse(ctx, int64(projectID))
+	response, err := client.PostProjectsIdRunWithResponse(ctx, int64(projectID))
 	if err != nil {
 		return 0, err
 	}

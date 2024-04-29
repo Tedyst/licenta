@@ -48,6 +48,27 @@ WHERE
                 WHERE
                     user_id = $1));
 
+-- name: GetAllOrganizationMembersForOrganizationsThatContainUser :many
+SELECT
+    *
+FROM
+    organization_members
+    INNER JOIN users ON organization_members.user_id = users.id
+WHERE
+    organization_id IN (
+        SELECT
+            id
+        FROM
+            organizations
+        WHERE
+            id IN (
+                SELECT
+                    organization_id
+                FROM
+                    organization_members
+                WHERE
+                    organization_members.user_id = $1));
+
 -- name: DeleteOrganization :exec
 DELETE FROM organizations
 WHERE id = $1;

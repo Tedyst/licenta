@@ -149,13 +149,49 @@ export interface paths {
       };
     };
   };
-  "/project/{id}/bruteforce-passwords": {
+  "/projects": {
+    /** Create a new project */
+    post: {
+      /** @description The project object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateProject"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              project: components["schemas"]["Project"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/projects/{id}/bruteforce-passwords": {
     /** Get all bruteforce passwords associated with a project */
     get: {
       parameters: {
         query?: {
           /** @description The last ID of the item to return */
           last_password_id?: number;
+          /** @description The password to filter */
+          password?: string;
         };
         path: {
           /** @description The ID of the project */
@@ -171,6 +207,12 @@ export interface paths {
         };
         /** @description Unauthorized */
         401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Specific password not found */
+        404: {
           content: {
             "application/json": components["schemas"]["Error"];
           };
@@ -344,6 +386,74 @@ export interface paths {
       };
     };
   };
+  "/postgres-scans": {
+    /** Get all postgres scans */
+    get: {
+      parameters: {
+        query: {
+          /** @description The scan ID to filter for */
+          scan: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              scans: components["schemas"]["PostgresScan"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/mysql-scans": {
+    /** Get all postgres scans */
+    get: {
+      parameters: {
+        query: {
+          /** @description The scan ID to filter for */
+          scan: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              scans: components["schemas"]["MysqlScan"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/bruteforceresults/{id}": {
     /** Update a bruteforce scan result by ID */
     patch: {
@@ -426,7 +536,7 @@ export interface paths {
       };
     };
   };
-  "/project/{id}/run": {
+  "/projects/{id}/run": {
     /** Run all extractors and scanners for a project */
     post: {
       parameters: {
@@ -466,7 +576,7 @@ export interface paths {
       };
     };
   };
-  "/project/{id}": {
+  "/projects/{id}": {
     /** Get project by ID */
     get: {
       parameters: {
@@ -501,7 +611,7 @@ export interface paths {
       };
     };
   };
-  "/project/{id}/bruteforced-password": {
+  "/projects/{id}/bruteforced-password": {
     /** Get bruteforced password for a project */
     get: {
       parameters: {
@@ -709,6 +819,84 @@ export interface paths {
       };
     };
   };
+  "/mysql/{id}": {
+    /** Get mysql database by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the mysql database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mysql_database: components["schemas"]["MysqlDatabase"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update mysql database by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the mysql database */
+          id: number;
+        };
+      };
+      /** @description The mysql database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchMysqlDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mysql_database: components["schemas"]["MysqlDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/organizations": {
     /** Get all organizations that the user can see */
     get: {
@@ -834,12 +1022,161 @@ export interface paths {
       };
     };
   };
+  "/organizations/{id}/add-user": {
+    /** Add a user to an organization */
+    post: {
+      parameters: {
+        path: {
+          /** @description The ID of the organization */
+          id: number;
+        };
+      };
+      /** @description The user object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["AddUserToOrganization"];
+        };
+      };
+      responses: {
+        /** @description successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Organization not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/organizations/{id}/edit-user": {
+    /** Edit a user's role in an organization */
+    post: {
+      parameters: {
+        path: {
+          /** @description The ID of the organization */
+          id: number;
+        };
+      };
+      /** @description The user object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["EditUserRoleInOrganization"];
+        };
+      };
+      responses: {
+        /** @description successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Organization not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/organizations/{id}/delete-user": {
+    /** Delete a user from an organization */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the organization */
+          id: number;
+        };
+      };
+      /** @description The user object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["RemoveUserFromOrganization"];
+        };
+      };
+      responses: {
+        /** @description successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Organization not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    EditUserRoleInOrganization: {
+      id: number;
+      role: string;
+    };
+    AddUserToOrganization: {
+      email: string;
+    };
+    RemoveUserFromOrganization: {
+      id: number;
+    };
+    CreateProject: {
+      name: string;
+      organization_id: number;
+    };
     Project: {
       /**
        * Format: int64
@@ -905,7 +1242,26 @@ export interface components {
       password?: string;
       version?: string;
     };
+    PatchMysqlDatabase: {
+      host?: string;
+      port?: number;
+      database_name?: string;
+      username?: string;
+      password?: string;
+      version?: string;
+    };
     PostgresDatabase: {
+      id: number;
+      project_id: number;
+      host: string;
+      port: number;
+      database_name: string;
+      username: string;
+      password: string;
+      created_at: string;
+      version: string;
+    };
+    MysqlDatabase: {
       id: number;
       project_id: number;
       host: string;
@@ -938,7 +1294,6 @@ export interface components {
       username: string;
       password: string;
       last_bruteforce_id: number;
-      project_id: number;
     };
     UpdateBruteforcedPassword: {
       last_bruteforce_id: number;
@@ -985,10 +1340,13 @@ export interface components {
       created_at: string;
       ended_at: string;
       maximum_severity: number;
-      postgres_scan?: components["schemas"]["PostgresScan"];
       scan_group_id: number;
     };
     PostgresScan: {
+      id: number;
+      database_id: number;
+    };
+    MysqlScan: {
       id: number;
       database_id: number;
     };
@@ -1039,30 +1397,15 @@ export interface components {
        */
       username: string;
       /**
-       * @description The first name of the user
-       * @example John
-       */
-      firstName?: string;
-      /**
-       * @description The last name of the user
-       * @example Doe
-       */
-      lastName?: string;
-      /**
        * @description The email of the user
        * @example null
        */
       email: string;
       /**
        * @description The phone number of the user
-       * @example null
+       * @example 1234567890
        */
       phone?: string;
-      /**
-       * @description Whether the user is an admin
-       * @example false
-       */
-      admin: boolean;
     };
     CreateOrganization: {
       /**
@@ -1096,6 +1439,30 @@ export interface components {
       created_at: string;
       projects: components["schemas"]["Project"][];
       stats: components["schemas"]["OrganizationStats"];
+      members: components["schemas"]["OrganizationUser"][];
+    };
+    OrganizationUser: {
+      /**
+       * Format: int64
+       * @description The user ID
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description The user name for login
+       * @example john_doe
+       */
+      username: string;
+      /**
+       * @description The email of the user
+       * @example null
+       */
+      email: string;
+      /**
+       * @description The role of the user
+       * @example Owner
+       */
+      role: string;
     };
     ChangePasswordLoggedIn: {
       /**

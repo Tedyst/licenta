@@ -167,6 +167,40 @@ func (q *Queries) GetUserByConfirmSelector(ctx context.Context, confirmSelector 
 	return &i, err
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT
+  id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at
+FROM
+  users
+WHERE
+  email = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.Email,
+		&i.RecoveryCodes,
+		&i.TotpSecret,
+		&i.RecoverSelector,
+		&i.RecoverVerifier,
+		&i.RecoverExpiry,
+		&i.LoginAttemptCount,
+		&i.LoginLastAttempt,
+		&i.Locked,
+		&i.ConfirmSelector,
+		&i.ConfirmVerifier,
+		&i.Confirmed,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getUserByRecoverSelector = `-- name: GetUserByRecoverSelector :one
 SELECT
   id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, created_at

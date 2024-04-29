@@ -13,7 +13,7 @@ import (
 	"github.com/tedyst/licenta/saver"
 )
 
-func (server *serverHandler) GetProjectId(ctx context.Context, request generated.GetProjectIdRequestObject) (generated.GetProjectIdResponseObject, error) {
+func (server *serverHandler) GetProjectsId(ctx context.Context, request generated.GetProjectsIdRequestObject) (generated.GetProjectsIdResponseObject, error) {
 	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 		}
 	}
 
-	return generated.GetProjectId200JSONResponse{
+	return generated.GetProjectsId200JSONResponse{
 		Success: true,
 		Project: generated.Project{
 			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339Nano),
@@ -50,7 +50,7 @@ func (server *serverHandler) GetProjectId(ctx context.Context, request generated
 	}, nil
 }
 
-func (server *serverHandler) PostProjectIdRun(ctx context.Context, request generated.PostProjectIdRunRequestObject) (generated.PostProjectIdRunResponseObject, error) {
+func (server *serverHandler) PostProjectsIdRun(ctx context.Context, request generated.PostProjectsIdRunRequestObject) (generated.PostProjectsIdRunResponseObject, error) {
 	user, err := server.userAuth.GetUser(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("error getting user: %w", err)
@@ -62,7 +62,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 
 	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
 	if err != nil {
-		return generated.PostProjectIdRun404JSONResponse{
+		return generated.PostProjectsIdRun404JSONResponse{
 			Message: "Project not found",
 			Success: false,
 		}, nil
@@ -74,7 +74,7 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 			return nil, fmt.Errorf("error checking permissions: %w", err)
 		}
 		if !authorized {
-			return generated.PostProjectIdRun401JSONResponse{
+			return generated.PostProjectsIdRun401JSONResponse{
 				Message: "Not allowed to run scans on this project",
 				Success: false,
 			}, nil
@@ -85,13 +85,13 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 			return nil, fmt.Errorf("error checking permissions: %w", err)
 		}
 		if !authorized {
-			return generated.PostProjectIdRun401JSONResponse{
+			return generated.PostProjectsIdRun401JSONResponse{
 				Message: "Not allowed to run scans on this project",
 				Success: false,
 			}, nil
 		}
 	} else {
-		return generated.PostProjectIdRun401JSONResponse{
+		return generated.PostProjectsIdRun401JSONResponse{
 			Message: "Not allowed to run scans on this project",
 			Success: false,
 		}, nil
@@ -138,11 +138,57 @@ func (server *serverHandler) PostProjectIdRun(ctx context.Context, request gener
 		}()
 	}
 
-	return generated.PostProjectIdRun200JSONResponse{
+	return generated.PostProjectsIdRun200JSONResponse{
 		Success: true,
 		ScanGroup: &generated.ScanGroup{
 			Id:    int(scanGroup.ID),
 			Scans: resultScans,
+		},
+	}, nil
+}
+
+func (server *serverHandler) PostProjects(ctx context.Context, request generated.PostProjectsRequestObject) (generated.PostProjectsResponseObject, error) {
+	user, err := server.userAuth.GetUser(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	organization, err := server.DatabaseProvider.GetOrganization(ctx, int64(request.Body.OrganizationId))
+	if err != nil {
+		return nil, fmt.Errorf("error getting organization: %w", err)
+	}
+
+	ok, err := server.authorization.UserHasPermissionForOrganization(ctx, organization, user, authorization.Admin)
+	if err != nil {
+		return nil, fmt.Errorf("error checking permissions: %w", err)
+	}
+
+	if !ok {
+		return generated.PostProjects401JSONResponse{
+			Message: "Not allowed to create projects in this organization",
+			Success: false,
+		}, nil
+	}
+
+	project, err := server.DatabaseProvider.CreateProject(ctx, queries.CreateProjectParams{
+		Name:           request.Body.Name,
+		OrganizationID: int64(request.Body.OrganizationId),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error creating project: %w", err)
+	}
+
+	return generated.PostProjects201JSONResponse{
+		Success: true,
+		Project: generated.Project{
+			CreatedAt:      project.CreatedAt.Time.Format(time.RFC3339Nano),
+			Id:             project.ID,
+			Name:           project.Name,
+			OrganizationId: project.OrganizationID,
 		},
 	}, nil
 }

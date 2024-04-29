@@ -7,7 +7,6 @@ package queries
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -20,8 +19,8 @@ RETURNING
 `
 
 type CreateResetPasswordTokenParams struct {
-	ID     uuid.UUID     `json:"id"`
-	UserID sql.NullInt64 `json:"user_id"`
+	ID     uuid.UUID `json:"id"`
+	UserID int64     `json:"user_id"`
 }
 
 func (q *Queries) CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error) {

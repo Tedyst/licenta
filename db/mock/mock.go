@@ -744,6 +744,45 @@ func (c *MockTransactionQuerierCreatePostgresScanCall) DoAndReturn(f func(contex
 	return c
 }
 
+// CreateProject mocks base method.
+func (m *MockTransactionQuerier) CreateProject(ctx context.Context, arg queries.CreateProjectParams) (*queries.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateProject indicates an expected call of CreateProject.
+func (mr *MockTransactionQuerierMockRecorder) CreateProject(ctx, arg any) *MockTransactionQuerierCreateProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateProject), ctx, arg)
+	return &MockTransactionQuerierCreateProjectCall{Call: call}
+}
+
+// MockTransactionQuerierCreateProjectCall wrap *gomock.Call
+type MockTransactionQuerierCreateProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreateProjectCall) Return(arg0 *queries.Project, arg1 error) *MockTransactionQuerierCreateProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreateProjectCall) Do(f func(context.Context, queries.CreateProjectParams) (*queries.Project, error)) *MockTransactionQuerierCreateProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreateProjectCall) DoAndReturn(f func(context.Context, queries.CreateProjectParams) (*queries.Project, error)) *MockTransactionQuerierCreateProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateRememberMeToken mocks base method.
 func (m *MockTransactionQuerier) CreateRememberMeToken(ctx context.Context, arg queries.CreateRememberMeTokenParams) (*queries.RememberMeToken, error) {
 	m.ctrl.T.Helper()
@@ -1395,6 +1434,45 @@ func (c *MockTransactionQuerierEndTransactionCall) Do(f func(context.Context, bo
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierEndTransactionCall) DoAndReturn(f func(context.Context, bool) error) *MockTransactionQuerierEndTransactionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetAllOrganizationMembersForOrganizationsThatContainUser mocks base method.
+func (m *MockTransactionQuerier) GetAllOrganizationMembersForOrganizationsThatContainUser(ctx context.Context, userID int64) ([]*queries.GetAllOrganizationMembersForOrganizationsThatContainUserRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllOrganizationMembersForOrganizationsThatContainUser", ctx, userID)
+	ret0, _ := ret[0].([]*queries.GetAllOrganizationMembersForOrganizationsThatContainUserRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllOrganizationMembersForOrganizationsThatContainUser indicates an expected call of GetAllOrganizationMembersForOrganizationsThatContainUser.
+func (mr *MockTransactionQuerierMockRecorder) GetAllOrganizationMembersForOrganizationsThatContainUser(ctx, userID any) *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllOrganizationMembersForOrganizationsThatContainUser", reflect.TypeOf((*MockTransactionQuerier)(nil).GetAllOrganizationMembersForOrganizationsThatContainUser), ctx, userID)
+	return &MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall{Call: call}
+}
+
+// MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall wrap *gomock.Call
+type MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall) Return(arg0 []*queries.GetAllOrganizationMembersForOrganizationsThatContainUserRow, arg1 error) *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall) Do(f func(context.Context, int64) ([]*queries.GetAllOrganizationMembersForOrganizationsThatContainUserRow, error)) *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetAllOrganizationMembersForOrganizationsThatContainUserRow, error)) *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatContainUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3540,6 +3618,45 @@ func (c *MockTransactionQuerierGetUserByConfirmSelectorCall) Do(f func(context.C
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierGetUserByConfirmSelectorCall) DoAndReturn(f func(context.Context, sql.NullString) (*queries.User, error)) *MockTransactionQuerierGetUserByConfirmSelectorCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetUserByEmail mocks base method.
+func (m *MockTransactionQuerier) GetUserByEmail(ctx context.Context, email string) (*queries.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByEmail", ctx, email)
+	ret0, _ := ret[0].(*queries.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByEmail indicates an expected call of GetUserByEmail.
+func (mr *MockTransactionQuerierMockRecorder) GetUserByEmail(ctx, email any) *MockTransactionQuerierGetUserByEmailCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockTransactionQuerier)(nil).GetUserByEmail), ctx, email)
+	return &MockTransactionQuerierGetUserByEmailCall{Call: call}
+}
+
+// MockTransactionQuerierGetUserByEmailCall wrap *gomock.Call
+type MockTransactionQuerierGetUserByEmailCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetUserByEmailCall) Return(arg0 *queries.User, arg1 error) *MockTransactionQuerierGetUserByEmailCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetUserByEmailCall) Do(f func(context.Context, string) (*queries.User, error)) *MockTransactionQuerierGetUserByEmailCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetUserByEmailCall) DoAndReturn(f func(context.Context, string) (*queries.User, error)) *MockTransactionQuerierGetUserByEmailCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

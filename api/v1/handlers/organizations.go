@@ -33,6 +33,11 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 		return nil, fmt.Errorf("error getting organizations: %w", err)
 	}
 
+	members, err := server.DatabaseProvider.GetAllOrganizationMembersForOrganizationsThatContainUser(ctx, user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting organizations: %w", err)
+	}
+
 	organizationProjects := map[int64][]generated.Project{}
 	for _, project := range projects {
 		organizationProjects[project.OrganizationID] = append(organizationProjects[project.OrganizationID], generated.Project{
@@ -41,6 +46,16 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 			Name:           project.Name,
 			OrganizationId: int64(project.OrganizationID),
 			Remote:         project.Remote,
+		})
+	}
+
+	organizationMembers := map[int64][]generated.OrganizationUser{}
+	for _, member := range members {
+		organizationMembers[member.OrganizationID] = append(organizationMembers[member.OrganizationID], generated.OrganizationUser{
+			Id:       int64(member.ID),
+			Role:     authorization.RBACGroup(member.Role).String(),
+			Email:    member.Email,
+			Username: member.Username,
 		})
 	}
 
@@ -53,6 +68,10 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 		if !ok {
 			val = []generated.Project{}
 		}
+		vm, ok := organizationMembers[int64(org.Organization.ID)]
+		if !ok {
+			vm = []generated.OrganizationUser{}
+		}
 		response.Organizations = append(response.Organizations, generated.Organization{
 			Id:       int64(org.Organization.ID),
 			Name:     org.Organization.Name,
@@ -63,6 +82,8 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 				Scans:       int(org.Scans),
 				Users:       int(org.Users),
 			},
+			Members:   vm,
+			CreatedAt: org.Organization.CreatedAt.Time.Format(time.RFC3339Nano),
 		})
 	}
 
@@ -249,6 +270,236 @@ func (server *serverHandler) PostOrganizations(ctx context.Context, request gene
 			Id:   int64(organization.ID),
 			Name: organization.Name,
 		},
+		Success: true,
+	}, nil
+}
+
+func (server *serverHandler) PostOrganizationsIdAddUser(ctx context.Context, request generated.PostOrganizationsIdAddUserRequestObject) (generated.PostOrganizationsIdAddUserResponseObject, error) {
+	err := valid.Struct(request)
+	if err != nil {
+		return generated.PostOrganizationsIdAddUser400JSONResponse{
+			Success: false,
+			Message: "Validation error: " + err.Error(),
+		}, nil
+	}
+
+	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
+	if err != nil {
+		return nil, fmt.Errorf("error checking permissions: %w", err)
+	}
+	if user == nil {
+		return generated.PostOrganizationsIdAddUser401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
+	}
+	if organization == nil {
+		return &generated.PostOrganizationsIdAddUser401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
+	}
+	if !hasPerm {
+		if hasViewPerm {
+			return &generated.PostOrganizationsIdAddUser401JSONResponse{
+				Success: false,
+				Message: "Forbidden",
+			}, nil
+		}
+		return &generated.PostOrganizationsIdAddUser404JSONResponse{
+			Success: false,
+			Message: "Organization not found",
+		}, nil
+	}
+
+	newUser, err := server.DatabaseProvider.GetUserByEmail(ctx, request.Body.Email)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+	if newUser == nil {
+		return &generated.PostOrganizationsIdAddUser404JSONResponse{
+			Success: false,
+			Message: "User not found",
+		}, nil
+	}
+
+	err = server.DatabaseProvider.AddUserToOrganization(ctx, queries.AddUserToOrganizationParams{
+		OrganizationID: organization.ID,
+		UserID:         newUser.ID,
+		Role:           int32(authorization.None),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error adding user to organization: %w", err)
+	}
+
+	return &generated.PostOrganizationsIdAddUser200JSONResponse{
+		Success: true,
+	}, nil
+}
+
+func (server *serverHandler) PostOrganizationsIdEditUser(ctx context.Context, request generated.PostOrganizationsIdEditUserRequestObject) (generated.PostOrganizationsIdEditUserResponseObject, error) {
+	err := valid.Struct(request)
+	if err != nil {
+		return generated.PostOrganizationsIdEditUser400JSONResponse{
+			Success: false,
+			Message: "Validation error: " + err.Error(),
+		}, nil
+	}
+
+	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
+	if err != nil {
+		return nil, fmt.Errorf("error checking permissions: %w", err)
+	}
+	if user == nil {
+		return generated.PostOrganizationsIdEditUser401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
+	}
+	if organization == nil {
+		return &generated.PostOrganizationsIdEditUser401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
+	}
+	if !hasPerm {
+		if hasViewPerm {
+			return &generated.PostOrganizationsIdEditUser401JSONResponse{
+				Success: false,
+				Message: "Forbidden",
+			}, nil
+		}
+		return &generated.PostOrganizationsIdEditUser404JSONResponse{
+			Success: false,
+			Message: "Organization not found",
+		}, nil
+	}
+
+	newUser, err := server.DatabaseProvider.GetUser(ctx, int64(request.Body.Id))
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+	if newUser == nil {
+		return &generated.PostOrganizationsIdEditUser404JSONResponse{
+			Success: false,
+			Message: "User not found",
+		}, nil
+	}
+
+	if newUser.ID == user.ID {
+		return &generated.PostOrganizationsIdEditUser400JSONResponse{
+			Success: false,
+			Message: "Cannot edit yourself",
+		}, nil
+	}
+
+	var role authorization.RBACGroup
+	switch request.Body.Role {
+	case "Owner":
+		role = authorization.Owner
+	case "Admin":
+		role = authorization.Admin
+	case "Viewer":
+		role = authorization.Viewer
+	case "None":
+		role = authorization.None
+	default:
+		return &generated.PostOrganizationsIdEditUser400JSONResponse{
+			Success: false,
+			Message: "Invalid role",
+		}, nil
+	}
+
+	_, err = server.DatabaseProvider.SetOrganizationPermissionsForUser(ctx, queries.SetOrganizationPermissionsForUserParams{
+		OrganizationID: organization.ID,
+		UserID:         newUser.ID,
+		Role:           int32(role),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error updating user role: %w", err)
+	}
+
+	if role == authorization.Owner {
+		_, err = server.DatabaseProvider.SetOrganizationPermissionsForUser(ctx, queries.SetOrganizationPermissionsForUserParams{
+			OrganizationID: organization.ID,
+			UserID:         user.ID,
+			Role:           int32(authorization.Admin),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error updating user role: %w", err)
+		}
+	}
+
+	return &generated.PostOrganizationsIdEditUser200JSONResponse{
+		Success: true,
+	}, nil
+}
+
+func (server *serverHandler) DeleteOrganizationsIdDeleteUser(ctx context.Context, request generated.DeleteOrganizationsIdDeleteUserRequestObject) (generated.DeleteOrganizationsIdDeleteUserResponseObject, error) {
+	err := valid.Struct(request)
+	if err != nil {
+		return generated.DeleteOrganizationsIdDeleteUser400JSONResponse{
+			Success: false,
+			Message: "Validation error: " + err.Error(),
+		}, nil
+	}
+
+	user, organization, hasPerm, hasViewPerm, err := server.checkForOrganizationPermission(ctx, request.Id, authorization.Admin)
+	if err != nil {
+		return nil, fmt.Errorf("error checking permissions: %w", err)
+	}
+	if user == nil {
+		return generated.DeleteOrganizationsIdDeleteUser401JSONResponse{
+			Message: "Unauthorized",
+			Success: false,
+		}, nil
+	}
+	if organization == nil {
+		return &generated.DeleteOrganizationsIdDeleteUser401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
+	}
+	if !hasPerm {
+		if hasViewPerm {
+			return &generated.DeleteOrganizationsIdDeleteUser401JSONResponse{
+				Success: false,
+				Message: "Forbidden",
+			}, nil
+		}
+		return &generated.DeleteOrganizationsIdDeleteUser404JSONResponse{
+			Success: false,
+			Message: "Organization not found",
+		}, nil
+	}
+
+	if user.ID == int64(request.Body.Id) {
+		return &generated.DeleteOrganizationsIdDeleteUser400JSONResponse{
+			Success: false,
+			Message: "Cannot remove yourself",
+		}, nil
+	}
+
+	newUser, err := server.DatabaseProvider.GetUser(ctx, int64(request.Body.Id))
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+	if newUser == nil {
+		return &generated.DeleteOrganizationsIdDeleteUser404JSONResponse{
+			Success: false,
+			Message: "User not found",
+		}, nil
+	}
+
+	_, err = server.DatabaseProvider.RemoveOrganizationUser(ctx, queries.RemoveOrganizationUserParams{
+		OrganizationID: organization.ID,
+		UserID:         newUser.ID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error removing user from organization: %w", err)
+	}
+
+	return &generated.DeleteOrganizationsIdDeleteUser200JSONResponse{
 		Success: true,
 	}, nil
 }

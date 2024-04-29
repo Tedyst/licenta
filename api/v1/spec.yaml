@@ -190,7 +190,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{id}/bruteforce-passwords:
+  /projects:
+    post:
+      summary: Create a new project
+      security:
+        - sessionAuth: []
+      tags:
+        - project
+      requestBody:
+        description: The project object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProject'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - project
+                properties:
+                  success:
+                    type: boolean
+                  project:
+                    $ref: '#/components/schemas/Project'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /projects/{id}/bruteforce-passwords:
     get:
       summary: Get all bruteforce passwords associated with a project
       security:
@@ -641,7 +682,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{id}/run:
+  /projects/{id}/run:
     post:
       summary: Run all extractors and scanners for a project
       security:
@@ -689,7 +730,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{id}:
+  /projects/{id}:
     get:
       summary: Get project by ID
       security:
@@ -736,7 +777,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /project/{id}/bruteforced-password:
+  /projects/{id}/bruteforced-password:
     get:
       summary: Get bruteforced password for a project
       security:
@@ -1248,8 +1289,198 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /organizations/{id}/add-user:
+    post:
+      summary: Add a user to an organization
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddUserToOrganization'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /organizations/{id}/edit-user:
+    post:
+      summary: Edit a user's role in an organization
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditUserRoleInOrganization'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /organizations/{id}/delete-user:
+    delete:
+      summary: Delete a user from an organization
+      security:
+        - sessionAuth: []
+      tags:
+        - organization
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the organization
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The user object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveUserFromOrganization'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Organization not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
+    EditUserRoleInOrganization:
+      type: object
+      required:
+        - id
+        - role
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+    AddUserToOrganization:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+    RemoveUserFromOrganization:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+    CreateProject:
+      type: object
+      required:
+        - name
+        - organization_id
+      properties:
+        name:
+          type: string
+        organization_id:
+          type: integer
     Project:
       required:
         - id
@@ -1671,14 +1902,6 @@ components:
           type: string
           description: The user name for login
           example: john_doe
-        firstName:
-          type: string
-          description: The first name of the user
-          example: John
-        lastName:
-          type: string
-          description: The last name of the user
-          example: Doe
         email:
           type: string
           description: The email of the user
@@ -1686,11 +1909,7 @@ components:
         phone:
           type: string
           description: The phone number of the user
-          example:
-        admin:
-          type: boolean
-          description: Whether the user is an admin
-          example: false
+          example: +1234567890
     CreateOrganization:
       required:
         - name
@@ -1723,6 +1942,7 @@ components:
         - created_at
         - projects
         - stats
+        - members
       properties:
         id:
           type: integer
@@ -1743,6 +1963,34 @@ components:
             $ref: "#/components/schemas/Project"
         stats:
           $ref: '#/components/schemas/OrganizationStats'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationUser'
+    OrganizationUser:
+      required:
+        - id
+        - username
+        - email
+        - role
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The user ID
+          example: 1
+        username:
+          type: string
+          description: The user name for login
+          example: john_doe
+        email:
+          type: string
+          description: The email of the user
+          example:
+        role:
+          type: string
+          description: The role of the user
+          example: Owner
     ChangePasswordLoggedIn:
       required:
         - old_password

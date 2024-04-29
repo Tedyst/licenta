@@ -2,7 +2,18 @@ CREATE TABLE users(
     id bigserial PRIMARY KEY,
     username text NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    email text NOT NULL,
+    email text NOT NULL UNIQUE,
+    recovery_codes text,
+    totp_secret text,
+    recover_selector text UNIQUE,
+    recover_verifier text UNIQUE,
+    recover_expiry timestamp with time zone,
+    login_attempt_count integer NOT NULL DEFAULT 0,
+    login_last_attempt timestamp with time zone,
+    locked timestamp with time zone,
+    confirm_selector text UNIQUE,
+    confirm_verifier text UNIQUE,
+    confirmed boolean NOT NULL DEFAULT FALSE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -10,25 +21,16 @@ CREATE INDEX users_username_idx ON users(username);
 
 CREATE INDEX users_email_idx ON users(email);
 
-CREATE TABLE sessions(
-    id uuid PRIMARY KEY,
-    user_id bigint REFERENCES users(id),
-    scope text[] NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX sessions_user_id_idx ON sessions(user_id);
-
 CREATE TABLE reset_password_tokens(
     id uuid PRIMARY KEY,
-    user_id bigint REFERENCES users(id),
+    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     valid boolean NOT NULL DEFAULT TRUE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE totp_secret_tokens(
     id bigserial PRIMARY KEY,
-    user_id bigint REFERENCES users(id) NOT NULL UNIQUE,
+    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL UNIQUE,
     valid boolean NOT NULL DEFAULT TRUE,
     totp_secret text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -44,8 +46,8 @@ CREATE INDEX organizations_name_idx ON organizations(name);
 
 CREATE TABLE organization_members(
     id bigserial PRIMARY KEY,
-    organization_id bigint REFERENCES organizations(id) NOT NULL,
-    user_id bigint REFERENCES users(id) NOT NULL,
+    organization_id bigint REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     role integer NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -56,6 +58,7 @@ CREATE TABLE projects(
     id bigserial PRIMARY KEY,
     name text NOT NULL,
     organization_id bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    remote boolean NOT NULL DEFAULT FALSE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -66,7 +69,7 @@ CREATE INDEX projects_name_orgianization_id_idx ON projects(name, organization_i
 CREATE TABLE project_members(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    user_id bigint REFERENCES users(id) NOT NULL,
+    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     role smallint NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -91,7 +94,7 @@ CREATE TABLE project_git_scanned_commits(
 CREATE TABLE project_git_results(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    commit bigint REFERENCES project_git_scanned_commits(id) NOT NULL,
+    commit bigint REFERENCES project_git_scanned_commits(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
     line text NOT NULL,
     line_number integer NOT NULL,
@@ -197,29 +200,55 @@ CREATE TABLE postgres_databases(
     database_name text NOT NULL,
     username text NOT NULL,
     password text NOT NULL,
+    version text,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE postgres_scan(
+CREATE TABLE scan_groups(
     id bigserial PRIMARY KEY,
-    postgres_database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    created_by bigint REFERENCES users(id) ON DELETE CASCADE,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE workers(
+    id bigserial PRIMARY KEY,
+    token text NOT NULL UNIQUE,
+    organization bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE scans(
+    id bigserial PRIMARY KEY,
+    scan_group_id bigint NOT NULL REFERENCES scan_groups(id) ON DELETE CASCADE,
     status integer NOT NULL,
     error text,
+    worker_id bigint REFERENCES workers(id) ON DELETE CASCADE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ended_at timestamp with time zone
 );
 
-CREATE TABLE postgres_scan_results(
+CREATE TABLE postgres_scans(
     id bigserial PRIMARY KEY,
-    postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE
+);
+
+CREATE TABLE scan_results(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     severity integer NOT NULL,
     message text NOT NULL,
+    scan_source integer NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE postgres_scan_bruteforce_results(
+CREATE INDEX scan_results_scan_id_idx ON scan_results(scan_id);
+
+CREATE TABLE scan_bruteforce_results(
     id bigserial PRIMARY KEY,
-    postgres_scan_id bigint NOT NULL REFERENCES postgres_scan(id) ON DELETE CASCADE,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    scan_type integer NOT NULL,
     username text NOT NULL,
     password text,
     total integer NOT NULL,
@@ -233,6 +262,56 @@ CREATE TABLE bruteforced_passwords(
     username text NOT NULL,
     password text,
     last_bruteforce_id bigint,
-    UNIQUE (hash, username)
+    project_id bigint REFERENCES projects(id) ON DELETE CASCADE,
+    UNIQUE (hash, username, project_id)
+);
+
+CREATE TABLE worker_projects(
+    id bigserial PRIMARY KEY,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    worker_id bigint NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE remember_me_tokens(
+    id bigserial PRIMARY KEY,
+    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    token text NOT NULL UNIQUE,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE webauthn_credentials(
+    id bigserial PRIMARY KEY,
+    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    credential_id bytea NOT NULL UNIQUE,
+    public_key bytea NOT NULL,
+    attestation_type text NOT NULL,
+    transport text[] NOT NULL,
+    user_present boolean NOT NULL,
+    user_verified boolean NOT NULL,
+    backup_eligible boolean NOT NULL,
+    backup_state boolean NOT NULL,
+    aa_guid bytea NOT NULL,
+    sign_count integer NOT NULL,
+    clone_warning boolean NOT NULL,
+    attachment text NOT NULL
+);
+
+CREATE TABLE mysql_databases(
+    id bigserial PRIMARY KEY,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    host text NOT NULL,
+    port integer NOT NULL,
+    database_name text NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    version text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE mysql_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    database_id bigint NOT NULL REFERENCES mysql_databases(id) ON DELETE CASCADE
 );
 

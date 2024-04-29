@@ -212,7 +212,7 @@ func (q *remoteQuerier) GetCvesByProductAndVersion(ctx context.Context, arg quer
 }
 
 func (q *remoteQuerier) GetProject(ctx context.Context, id int64) (*queries.Project, error) {
-	response, err := q.client.GetProjectIdWithResponse(ctx, id)
+	response, err := q.client.GetProjectsIdWithResponse(ctx, id)
 	if err != nil {
 		return nil, errors.New("cannot get project")
 	}
@@ -237,7 +237,7 @@ func (q *remoteQuerier) GetWorkersForProject(ctx context.Context, projectID int6
 }
 
 func (q *remoteQuerier) CreateBruteforcedPassword(ctx context.Context, arg queries.CreateBruteforcedPasswordParams) (*queries.BruteforcedPassword, error) {
-	response, err := q.client.PostProjectIdBruteforcedPasswordWithResponse(ctx, q.scanGroup.ProjectID, generated.CreateBruteforcedPassword{
+	response, err := q.client.PostProjectsIdBruteforcedPasswordWithResponse(ctx, q.scanGroup.ProjectID, generated.CreateBruteforcedPassword{
 		Password:         arg.Password.String,
 		Hash:             arg.Hash,
 		LastBruteforceId: int(arg.LastBruteforceID.Int64),
@@ -274,7 +274,7 @@ func (q *remoteQuerier) CreateBruteforcedPassword(ctx context.Context, arg queri
 }
 
 func (q *remoteQuerier) GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error) {
-	response, err := q.client.GetProjectIdBruteforcePasswordsWithResponse(ctx, projectID, &generated.GetProjectIdBruteforcePasswordsParams{})
+	response, err := q.client.GetProjectsIdBruteforcePasswordsWithResponse(ctx, projectID, &generated.GetProjectsIdBruteforcePasswordsParams{})
 	if err != nil {
 		return 0, err
 	}
@@ -291,7 +291,7 @@ func (q *remoteQuerier) GetBruteforcePasswordsForProjectCount(ctx context.Contex
 
 func (q *remoteQuerier) GetBruteforcePasswordsPaginated(ctx context.Context, arg queries.GetBruteforcePasswordsPaginatedParams) ([]*queries.DefaultBruteforcePassword, error) {
 	lastId := int32(arg.LastID)
-	response, err := q.client.GetProjectIdBruteforcePasswordsWithResponse(ctx, q.scanGroup.ProjectID, &generated.GetProjectIdBruteforcePasswordsParams{
+	response, err := q.client.GetProjectsIdBruteforcePasswordsWithResponse(ctx, q.scanGroup.ProjectID, &generated.GetProjectsIdBruteforcePasswordsParams{
 		LastPasswordId: &lastId,
 	})
 	if err != nil {
@@ -316,7 +316,7 @@ func (q *remoteQuerier) GetBruteforcePasswordsPaginated(ctx context.Context, arg
 }
 
 func (q *remoteQuerier) GetBruteforcedPasswords(ctx context.Context, arg queries.GetBruteforcedPasswordsParams) (*queries.BruteforcedPassword, error) {
-	response, err := q.client.GetProjectIdBruteforcedPasswordWithResponse(ctx, q.scanGroup.ProjectID, &generated.GetProjectIdBruteforcedPasswordParams{
+	response, err := q.client.GetProjectsIdBruteforcedPasswordWithResponse(ctx, q.scanGroup.ProjectID, &generated.GetProjectsIdBruteforcedPasswordParams{
 		Hash:     arg.Hash,
 		Username: arg.Username,
 	})
@@ -353,7 +353,7 @@ func (q *remoteQuerier) GetBruteforcedPasswords(ctx context.Context, arg queries
 }
 
 func (q *remoteQuerier) GetSpecificBruteforcePasswordID(ctx context.Context, arg queries.GetSpecificBruteforcePasswordIDParams) (int64, error) {
-	response, err := q.client.GetProjectIdBruteforcePasswordsWithResponse(ctx, arg.ProjectID, &generated.GetProjectIdBruteforcePasswordsParams{
+	response, err := q.client.GetProjectsIdBruteforcePasswordsWithResponse(ctx, arg.ProjectID, &generated.GetProjectsIdBruteforcePasswordsParams{
 		Password: &arg.Password,
 	})
 	if err != nil {

@@ -19,6 +19,40 @@ const (
 	Worker
 )
 
+func (r RBACGroup) String() string {
+	switch r {
+	case Owner:
+		return "Owner"
+	case Admin:
+		return "Admin"
+	case Viewer:
+		return "Viewer"
+	case None:
+		return "None"
+	case Worker:
+		return "Worker"
+	default:
+		return "Unknown"
+	}
+}
+
+func hasPermission(required RBACGroup, actual RBACGroup) bool {
+	switch required {
+	case Owner:
+		return actual == Owner
+	case Admin:
+		return actual == Owner || actual == Admin
+	case Viewer:
+		return actual == Owner || actual == Admin || actual == Viewer
+	case None:
+		return actual == None
+	case Worker:
+		return actual == Worker
+	default:
+		return false
+	}
+}
+
 type AuthorizationManager interface {
 	UserHasPermissionForOrganization(ctx context.Context, organization *queries.Organization, user *queries.User, permission RBACGroup) (bool, error)
 	UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error)
@@ -68,7 +102,7 @@ func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.
 		return false, err
 	}
 	if ok {
-		return RBACGroup(cached) >= permission, nil
+		return hasPermission(permission, RBACGroup(cached)), nil
 	}
 
 	p, err := a.querier.GetOrganizationPermissionsForUser(ctx, queries.GetOrganizationPermissionsForUserParams{
@@ -79,7 +113,7 @@ func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.
 		return false, err
 	}
 
-	return RBACGroup(p) >= permission, nil
+	return hasPermission(permission, RBACGroup(p)), nil
 }
 
 func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error) {
@@ -88,7 +122,7 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 		return false, err
 	}
 	if ok {
-		return RBACGroup(cached) >= permission, nil
+		return hasPermission(permission, RBACGroup(cached)), nil
 	}
 
 	p, err := a.querier.GetProjectPermissionsForUser(ctx, queries.GetProjectPermissionsForUserParams{
@@ -100,7 +134,7 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 		return false, err
 	}
 
-	return RBACGroup(p) >= permission, nil
+	return hasPermission(permission, RBACGroup(p)), nil
 }
 
 func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error) {
@@ -109,7 +143,7 @@ func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Con
 		return false, err
 	}
 	if ok {
-		return RBACGroup(cached) >= permission, nil
+		return hasPermission(permission, RBACGroup(cached)), nil
 	}
 
 	_, err = a.querier.GetWorkerForProject(ctx, queries.GetWorkerForProjectParams{

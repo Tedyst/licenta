@@ -7,6 +7,9 @@ package queries
 
 import (
 	"context"
+	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const addUserToOrganization = `-- name: AddUserToOrganization :exec
@@ -47,6 +50,94 @@ WHERE id = $1
 func (q *Queries) DeleteOrganization(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteOrganization, id)
 	return err
+}
+
+const getAllOrganizationMembersForOrganizationsThatContainUser = `-- name: GetAllOrganizationMembersForOrganizationsThatContainUser :many
+SELECT
+    organization_members.id, organization_id, user_id, role, organization_members.created_at, users.id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, users.created_at
+FROM
+    organization_members
+    INNER JOIN users ON organization_members.user_id = users.id
+WHERE
+    organization_id IN (
+        SELECT
+            id
+        FROM
+            organizations
+        WHERE
+            id IN (
+                SELECT
+                    organization_id
+                FROM
+                    organization_members
+                WHERE
+                    organization_members.user_id = $1))
+`
+
+type GetAllOrganizationMembersForOrganizationsThatContainUserRow struct {
+	ID                int64              `json:"id"`
+	OrganizationID    int64              `json:"organization_id"`
+	UserID            int64              `json:"user_id"`
+	Role              int32              `json:"role"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	ID_2              int64              `json:"id_2"`
+	Username          string             `json:"username"`
+	Password          string             `json:"password"`
+	Email             string             `json:"email"`
+	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
+	TotpSecret        sql.NullString     `json:"totp_secret"`
+	RecoverSelector   sql.NullString     `json:"recover_selector"`
+	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
+	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
+	LoginAttemptCount int32              `json:"login_attempt_count"`
+	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
+	Locked            pgtype.Timestamptz `json:"locked"`
+	ConfirmSelector   sql.NullString     `json:"confirm_selector"`
+	ConfirmVerifier   sql.NullString     `json:"confirm_verifier"`
+	Confirmed         bool               `json:"confirmed"`
+	CreatedAt_2       pgtype.Timestamptz `json:"created_at_2"`
+}
+
+func (q *Queries) GetAllOrganizationMembersForOrganizationsThatContainUser(ctx context.Context, userID int64) ([]*GetAllOrganizationMembersForOrganizationsThatContainUserRow, error) {
+	rows, err := q.db.Query(ctx, getAllOrganizationMembersForOrganizationsThatContainUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetAllOrganizationMembersForOrganizationsThatContainUserRow
+	for rows.Next() {
+		var i GetAllOrganizationMembersForOrganizationsThatContainUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.OrganizationID,
+			&i.UserID,
+			&i.Role,
+			&i.CreatedAt,
+			&i.ID_2,
+			&i.Username,
+			&i.Password,
+			&i.Email,
+			&i.RecoveryCodes,
+			&i.TotpSecret,
+			&i.RecoverSelector,
+			&i.RecoverVerifier,
+			&i.RecoverExpiry,
+			&i.LoginAttemptCount,
+			&i.LoginLastAttempt,
+			&i.Locked,
+			&i.ConfirmSelector,
+			&i.ConfirmVerifier,
+			&i.Confirmed,
+			&i.CreatedAt_2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAllOrganizationProjectsForUser = `-- name: GetAllOrganizationProjectsForUser :many
