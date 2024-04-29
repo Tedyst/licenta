@@ -15,7 +15,7 @@
 						<div class="ml-4 text-2xl text-info">{organization.name}</div>
 					</div>
 					<div
-						class="mr-0 inline-grid grid-cols-1 grid-rows-4 sm:grid-cols-2 sm:grid-rows-2 md:grid-cols-4 md:grid-rows-1 grow-0 gap-2"
+						class="mr-0 inline-grid grid-cols-1 grid-rows-3 sm:grid-cols-2 sm:grid-rows-2 md:grid-cols-4 md:grid-rows-1 grow-0 gap-2"
 					>
 						<div class="inline-grid w-max gap-4">
 							<div class="stat-title text-sm">Users</div>
@@ -28,10 +28,6 @@
 						<div class="inline-grid w-max gap-4">
 							<div class="stat-title text-sm">Scans</div>
 							<div class="stat-value text-success text-base">{organization.stats?.scans}</div>
-						</div>
-						<div class="inline-grid w-max gap-4">
-							<div class="stat-title text-sm">Failed Scans</div>
-							<div class="stat-value text-error text-base">{organization.stats?.failed_scans}</div>
 						</div>
 					</div>
 				</div>

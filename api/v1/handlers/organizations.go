@@ -77,10 +77,9 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 			Name:     org.Organization.Name,
 			Projects: val,
 			Stats: generated.OrganizationStats{
-				FailedScans: int(org.MaximumSeverity),
-				Projects:    int(org.Projects),
-				Scans:       int(org.Scans),
-				Users:       int(org.Users),
+				Projects: int(org.Projects),
+				Scans:    int(org.Scans),
+				Users:    int(org.Users),
 			},
 			Members:   vm,
 			CreatedAt: org.Organization.CreatedAt.Time.Format(time.RFC3339Nano),
@@ -104,7 +103,7 @@ func (server *serverHandler) checkForOrganizationPermission(ctx context.Context,
 		return user, nil, false, false, fmt.Errorf("error getting organization: %w", err)
 	}
 
-	if organization == nil {
+	if err == pgx.ErrNoRows {
 		return user, nil, false, false, nil
 	}
 
@@ -174,6 +173,7 @@ func (server *serverHandler) GetOrganizationsId(ctx context.Context, request gen
 			Name:           project.Name,
 			OrganizationId: int64(project.OrganizationID),
 			Remote:         project.Remote,
+			Scans:          int(project.Scans),
 		}
 	}
 
@@ -316,7 +316,7 @@ func (server *serverHandler) PostOrganizationsIdAddUser(ctx context.Context, req
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("error getting user: %w", err)
 	}
-	if newUser == nil {
+	if err == pgx.ErrNoRows {
 		return &generated.PostOrganizationsIdAddUser404JSONResponse{
 			Success: false,
 			Message: "User not found",
@@ -379,7 +379,7 @@ func (server *serverHandler) PostOrganizationsIdEditUser(ctx context.Context, re
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("error getting user: %w", err)
 	}
-	if newUser == nil {
+	if err == pgx.ErrNoRows {
 		return &generated.PostOrganizationsIdEditUser404JSONResponse{
 			Success: false,
 			Message: "User not found",
@@ -484,7 +484,7 @@ func (server *serverHandler) DeleteOrganizationsIdDeleteUser(ctx context.Context
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("error getting user: %w", err)
 	}
-	if newUser == nil {
+	if err == pgx.ErrNoRows {
 		return &generated.DeleteOrganizationsIdDeleteUser404JSONResponse{
 			Success: false,
 			Message: "User not found",

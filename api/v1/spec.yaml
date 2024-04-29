@@ -1526,6 +1526,7 @@ components:
         - organization_id
         - created_at
         - remote
+        - scans
       properties:
         id:
           type: integer
@@ -1549,6 +1550,10 @@ components:
           type: boolean
           description: Whether to use the workers associated with the project instead of the default ones
           example: false
+        scans:
+          type: integer
+          description: The number of scans that have been run on the project
+          example: 0
     CVE:
       required:
         - id
@@ -1963,15 +1968,12 @@ components:
         - users
         - projects
         - scans
-        - failed_scans
       properties:
         users:
           type: integer
         projects:
           type: integer
         scans:
-          type: integer
-        failed_scans:
           type: integer
     Organization:
       required:

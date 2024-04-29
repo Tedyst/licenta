@@ -7,6 +7,8 @@ package queries
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createProject = `-- name: CreateProject :one
@@ -201,6 +203,46 @@ func (q *Queries) GetProjectUser(ctx context.Context, arg GetProjectUserParams) 
 		&i.UserID,
 		&i.Role,
 		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getProjectWithStats = `-- name: GetProjectWithStats :one
+SELECT
+    id, name, organization_id, remote, created_at,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+        WHERE
+            scan_groups.project_id = projects.id) AS scans
+FROM
+    projects
+WHERE
+    projects.id = $1
+`
+
+type GetProjectWithStatsRow struct {
+	ID             int64              `json:"id"`
+	Name           string             `json:"name"`
+	OrganizationID int64              `json:"organization_id"`
+	Remote         bool               `json:"remote"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	Scans          int64              `json:"scans"`
+}
+
+func (q *Queries) GetProjectWithStats(ctx context.Context, id int64) (*GetProjectWithStatsRow, error) {
+	row := q.db.QueryRow(ctx, getProjectWithStats, id)
+	var i GetProjectWithStatsRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.OrganizationID,
+		&i.Remote,
+		&i.CreatedAt,
+		&i.Scans,
 	)
 	return &i, err
 }

@@ -205,28 +205,46 @@ func (q *Queries) GetOrganization(ctx context.Context, id int64) (*Organization,
 
 const getOrganizationProjects = `-- name: GetOrganizationProjects :many
 SELECT
-    id, name, organization_id, remote, created_at
+    id, name, organization_id, remote, created_at,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+        WHERE
+            scan_groups.project_id = projects.id) AS scans
 FROM
     projects
 WHERE
     organization_id = $1
 `
 
-func (q *Queries) GetOrganizationProjects(ctx context.Context, organizationID int64) ([]*Project, error) {
+type GetOrganizationProjectsRow struct {
+	ID             int64              `json:"id"`
+	Name           string             `json:"name"`
+	OrganizationID int64              `json:"organization_id"`
+	Remote         bool               `json:"remote"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	Scans          int64              `json:"scans"`
+}
+
+func (q *Queries) GetOrganizationProjects(ctx context.Context, organizationID int64) ([]*GetOrganizationProjectsRow, error) {
 	rows, err := q.db.Query(ctx, getOrganizationProjects, organizationID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*Project
+	var items []*GetOrganizationProjectsRow
 	for rows.Next() {
-		var i Project
+		var i GetOrganizationProjectsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.OrganizationID,
 			&i.Remote,
 			&i.CreatedAt,
+			&i.Scans,
 		); err != nil {
 			return nil, err
 		}

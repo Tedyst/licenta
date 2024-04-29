@@ -63,6 +63,22 @@ WHERE
     id = $1
 LIMIT 1;
 
+-- name: GetProjectWithStats :one
+SELECT
+    *,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+        WHERE
+            scan_groups.project_id = projects.id) AS scans
+FROM
+    projects
+WHERE
+    projects.id = $1;
+
 -- name: CreateProject :one
 INSERT INTO projects(organization_id, name, remote)
     VALUES ($1, $2, $3)

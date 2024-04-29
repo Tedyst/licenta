@@ -11,7 +11,7 @@
 
 	let deleteProject = () => {
 		client.DELETE('/projects/{id}', { params: { path: { id: project.id } } }).then((res) => {
-			if (res.data?.success) {
+			if (res.response.status === 204) {
 				window.location.href = '/dashboard/{organization.name}';
 				toast({
 					closable: true,
@@ -44,10 +44,6 @@
 				<div class="inline-grid w-max gap-4">
 					<div class="stat-title text-sm">Scans</div>
 					<div class="stat-value text-success text-base">0</div>
-				</div>
-				<div class="inline-grid w-max gap-4">
-					<div class="stat-title text-sm">Failed Scans</div>
-					<div class="stat-value text-error text-base">0</div>
 				</div>
 			</div>
 			<div class="divider divider-horizontal" />

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { components } from '$lib/api/v1';
 	import client from '$lib/client';
+	import { toast } from 'svelte-daisy-toast';
 
 	export let organization: components['schemas']['Organization'];
 
@@ -12,6 +13,21 @@
 			.then((response) => {
 				if (response.data?.success) {
 					window.location.href = '/dashboard';
+					toast({
+						closable: true,
+						duration: 5000,
+						message: 'Organization deleted successfully',
+						title: 'Success',
+						type: 'success'
+					});
+				} else {
+					toast({
+						closable: true,
+						duration: 5000,
+						message: response.error?.message || 'Could not delete organization',
+						title: 'Error',
+						type: 'error'
+					});
 				}
 			});
 	};

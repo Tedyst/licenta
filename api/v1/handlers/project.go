@@ -14,7 +14,7 @@ import (
 )
 
 func (server *serverHandler) GetProjectsId(ctx context.Context, request generated.GetProjectsIdRequestObject) (generated.GetProjectsIdResponseObject, error) {
-	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
+	project, err := server.DatabaseProvider.GetProjectWithStats(ctx, request.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -45,6 +45,7 @@ func (server *serverHandler) GetProjectsId(ctx context.Context, request generate
 			Id:             project.ID,
 			Name:           project.Name,
 			OrganizationId: project.OrganizationID,
+			Scans:          int(project.Scans),
 		},
 		PostgresDatabases: postgresDatabases,
 	}, nil
@@ -189,6 +190,7 @@ func (server *serverHandler) PostProjects(ctx context.Context, request generated
 			Id:             project.ID,
 			Name:           project.Name,
 			OrganizationId: project.OrganizationID,
+			Scans:          0,
 		},
 	}, nil
 }
