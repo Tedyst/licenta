@@ -47,7 +47,6 @@ func (server *serverHandler) GetProjectsId(ctx context.Context, request generate
 			OrganizationId: project.OrganizationID,
 			Scans:          int(project.Scans),
 		},
-		PostgresDatabases: postgresDatabases,
 	}, nil
 }
 

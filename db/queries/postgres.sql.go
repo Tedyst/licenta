@@ -10,6 +10,48 @@ import (
 	"database/sql"
 )
 
+const createPostgresDatabase = `-- name: CreatePostgresDatabase :one
+INSERT INTO postgres_databases(project_id, database_name, host, port, username, PASSWORD, version)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING
+    id, project_id, host, port, database_name, username, password, version, created_at
+`
+
+type CreatePostgresDatabaseParams struct {
+	ProjectID    int64          `json:"project_id"`
+	DatabaseName string         `json:"database_name"`
+	Host         string         `json:"host"`
+	Port         int32          `json:"port"`
+	Username     string         `json:"username"`
+	Password     string         `json:"password"`
+	Version      sql.NullString `json:"version"`
+}
+
+func (q *Queries) CreatePostgresDatabase(ctx context.Context, arg CreatePostgresDatabaseParams) (*PostgresDatabase, error) {
+	row := q.db.QueryRow(ctx, createPostgresDatabase,
+		arg.ProjectID,
+		arg.DatabaseName,
+		arg.Host,
+		arg.Port,
+		arg.Username,
+		arg.Password,
+		arg.Version,
+	)
+	var i PostgresDatabase
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.Host,
+		&i.Port,
+		&i.DatabaseName,
+		&i.Username,
+		&i.Password,
+		&i.Version,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const createPostgresScan = `-- name: CreatePostgresScan :one
 INSERT INTO postgres_scans(scan_id, database_id)
     VALUES ($1, $2)

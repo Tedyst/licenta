@@ -78,3 +78,9 @@ FROM
 WHERE
     postgres_scans.scan_id = $1;
 
+-- name: CreatePostgresDatabase :one
+INSERT INTO postgres_databases(project_id, database_name, host, port, username, PASSWORD, version)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING
+    *;
+

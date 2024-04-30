@@ -10,6 +10,48 @@ import (
 	"database/sql"
 )
 
+const createMysqlDatabase = `-- name: CreateMysqlDatabase :one
+INSERT INTO mysql_databases(project_id, database_name, host, port, username, PASSWORD, version)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING
+    id, project_id, host, port, database_name, username, password, version, created_at
+`
+
+type CreateMysqlDatabaseParams struct {
+	ProjectID    int64          `json:"project_id"`
+	DatabaseName string         `json:"database_name"`
+	Host         string         `json:"host"`
+	Port         int32          `json:"port"`
+	Username     string         `json:"username"`
+	Password     string         `json:"password"`
+	Version      sql.NullString `json:"version"`
+}
+
+func (q *Queries) CreateMysqlDatabase(ctx context.Context, arg CreateMysqlDatabaseParams) (*MysqlDatabase, error) {
+	row := q.db.QueryRow(ctx, createMysqlDatabase,
+		arg.ProjectID,
+		arg.DatabaseName,
+		arg.Host,
+		arg.Port,
+		arg.Username,
+		arg.Password,
+		arg.Version,
+	)
+	var i MysqlDatabase
+	err := row.Scan(
+		&i.ID,
+		&i.ProjectID,
+		&i.Host,
+		&i.Port,
+		&i.DatabaseName,
+		&i.Username,
+		&i.Password,
+		&i.Version,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const createMysqlScan = `-- name: CreateMysqlScan :one
 INSERT INTO mysql_scans(scan_id, database_id)
     VALUES ($1, $2)

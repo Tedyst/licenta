@@ -1,16 +1,15 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Swagger Test
-  description: A sample API
-  termsOfService: https://swagger.io/terms/
+  title: Licenta API
+  description: API for the licenta project
   contact:
-    name: Swagger API Team
-    email: apiteam@swagger.io
-    url: https://swagger.io
+    name: Stoica Tedy
+    email: stoicatedy@gmail.com
+    url: https://tedyst.ro
   license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
+    name: MIT
+    url: https://opensource.org/licenses/MIT
 servers:
   - url: http://localhost:5000/api/v1
 paths:
@@ -755,16 +754,11 @@ paths:
                 required:
                   - success
                   - project
-                  - postgres_databases
                 properties:
                   success:
                     type: boolean
                   project:
                     $ref: '#/components/schemas/Project'
-                  postgres_databases:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/PostgresDatabase'
         "401":
           description: Unauthorized
           content:
@@ -978,6 +972,83 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /postgres:
+    get:
+      summary: Get all postgres databases for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - postgres
+      parameters:
+        - name: project
+          in: query
+          description: The projects to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - postgres_databases
+                properties:
+                  success:
+                    type: boolean
+                  postgres_databases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostgresDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new postgres database
+      security:
+        - sessionAuth: []
+      tags:
+        - postgres
+      requestBody:
+        description: The postgres database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresDatabase'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - postgres_database
+                properties:
+                  success:
+                    type: boolean
+                  postgres_database:
+                    $ref: '#/components/schemas/PostgresDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /postgres/{id}:
     get:
       summary: Get postgres database by ID
@@ -1070,6 +1141,83 @@ paths:
                 $ref: '#/components/schemas/Error'
         "404":
           description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /mysql:
+    get:
+      summary: Get all mysql databases for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - mysql
+      parameters:
+        - name: project
+          in: query
+          description: The projects to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mysql_databases
+                properties:
+                  success:
+                    type: boolean
+                  mysql_databases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MysqlDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new mysql database
+      security:
+        - sessionAuth: []
+      tags:
+        - mysql
+      requestBody:
+        description: The mysql database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMysqlDatabase'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mysql_database
+                properties:
+                  success:
+                    type: boolean
+                  mysql_database:
+                    $ref: '#/components/schemas/MysqlDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -1613,6 +1761,28 @@ components:
           type: string
         version:
           type: string
+    CreatePostgresDatabase:
+      type: object
+      required:
+        - project_id
+        - host
+        - port
+        - database_name
+        - username
+        - password
+      properties:
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
     PostgresDatabase:
       type: object
       required:
@@ -1643,6 +1813,28 @@ components:
         created_at: 
           type: string
         version:
+          type: string
+    CreateMysqlDatabase:
+      type: object
+      required:
+        - project_id
+        - host
+        - port
+        - database_name
+        - username
+        - password
+      properties:
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
           type: string
     MysqlDatabase:
       type: object

@@ -142,3 +142,76 @@ func (server *serverHandler) GetMysqlScans(ctx context.Context, request generate
 		}},
 	}, nil
 }
+
+func (server *serverHandler) GetMysql(ctx context.Context, request generated.GetMysqlRequestObject) (generated.GetMysqlResponseObject, error) {
+	_, project, response, err := checkUserHasProjectPermission[generated.GetMysql401JSONResponse](server, ctx, int64(request.Params.Project), authorization.Viewer)
+	if err != nil {
+		return nil, err
+	}
+	if response.Success == false {
+		return response, nil
+	}
+
+	databases, err := server.DatabaseProvider.GetMysqlDatabasesForProject(ctx, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	mysqlDatabases := make([]generated.MysqlDatabase, 0, len(databases))
+	for i, db := range databases {
+		mysqlDatabases[i] = generated.MysqlDatabase{
+			CreatedAt:    db.CreatedAt.Time.Format(time.RFC3339Nano),
+			Host:         db.Host,
+			DatabaseName: db.DatabaseName,
+			Password:     db.Password,
+			Id:           int(db.ID),
+			Port:         int(db.Port),
+			Username:     db.Username,
+			Version:      db.Version.String,
+			ProjectId:    int(db.ProjectID),
+		}
+	}
+
+	return generated.GetMysql200JSONResponse{
+		Success:        true,
+		MysqlDatabases: mysqlDatabases,
+	}, nil
+}
+
+func (server *serverHandler) PostMysql(ctx context.Context, request generated.PostMysqlRequestObject) (generated.PostMysqlResponseObject, error) {
+	_, project, response, err := checkUserHasProjectPermission[generated.PostMysql401JSONResponse](server, ctx, int64(request.Body.ProjectId), authorization.Admin)
+	if err != nil {
+		return nil, err
+	}
+	if response.Success == false {
+		return response, nil
+	}
+
+	db, err := server.DatabaseProvider.CreateMysqlDatabase(ctx, queries.CreateMysqlDatabaseParams{
+		Host:         request.Body.Host,
+		Username:     request.Body.Username,
+		Password:     request.Body.Password,
+		DatabaseName: request.Body.DatabaseName,
+		Port:         int32(request.Body.Port),
+		Version:      sql.NullString{Valid: false},
+		ProjectID:    project.ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.PostMysql201JSONResponse{
+		Success: true,
+		MysqlDatabase: generated.MysqlDatabase{
+			CreatedAt:    time.Now().Format(time.RFC3339Nano),
+			Host:         db.Host,
+			DatabaseName: db.DatabaseName,
+			Password:     db.Password,
+			Id:           int(db.ID),
+			Port:         int(db.Port),
+			Username:     db.Username,
+			Version:      db.Version.String,
+			ProjectId:    int(db.ProjectID),
+		},
+	}, nil
+}

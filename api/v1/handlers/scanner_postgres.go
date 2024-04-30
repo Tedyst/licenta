@@ -144,3 +144,77 @@ func (server *serverHandler) GetPostgresScans(ctx context.Context, request gener
 		}},
 	}, nil
 }
+
+func (server *serverHandler) GetPostgres(ctx context.Context, request generated.GetPostgresRequestObject) (generated.GetPostgresResponseObject, error) {
+	_, project, response, err := checkUserHasProjectPermission[generated.GetPostgres401JSONResponse](server, ctx, int64(request.Params.Project), authorization.Viewer)
+	if err != nil {
+		return nil, err
+	}
+	if response.Success == false {
+		return response, nil
+	}
+
+	databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	postgresDatabases := make([]generated.PostgresDatabase, 0, len(databases))
+	for i, db := range databases {
+		postgresDatabases[i] = generated.PostgresDatabase{
+			CreatedAt:    db.CreatedAt.Time.Format(time.RFC3339Nano),
+			DatabaseName: db.DatabaseName,
+			Host:         db.Host,
+			Password:     db.Password,
+			Port:         int(db.Port),
+			ProjectId:    int(db.ProjectID),
+			Username:     db.Username,
+			Version:      db.Version.String,
+			Id:           int(db.ID),
+		}
+	}
+
+	return generated.GetPostgres200JSONResponse{
+		Success:           true,
+		PostgresDatabases: postgresDatabases,
+	}, nil
+}
+
+func (server *serverHandler) PostPostgres(ctx context.Context, request generated.PostPostgresRequestObject) (generated.PostPostgresResponseObject, error) {
+	_, project, response, err := checkUserHasProjectPermission[generated.PostPostgres401JSONResponse](server, ctx, int64(request.Body.ProjectId), authorization.Admin)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Success == false {
+		return response, nil
+	}
+
+	db, err := server.DatabaseProvider.CreatePostgresDatabase(ctx, queries.CreatePostgresDatabaseParams{
+		Host:         request.Body.Host,
+		Username:     request.Body.Username,
+		ProjectID:    project.ID,
+		DatabaseName: request.Body.DatabaseName,
+		Port:         int32(request.Body.Port),
+		Password:     request.Body.Password,
+		Version:      sql.NullString{Valid: false},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.PostPostgres201JSONResponse{
+		Success: true,
+		PostgresDatabase: generated.PostgresDatabase{
+			CreatedAt:    time.Now().Format(time.RFC3339Nano),
+			Host:         db.Host,
+			DatabaseName: db.DatabaseName,
+			Password:     db.Password,
+			Id:           int(db.ID),
+			Port:         int(db.Port),
+			Username:     db.Username,
+			Version:      db.Version.String,
+			ProjectId:    int(db.ProjectID),
+		},
+	}, nil
+}

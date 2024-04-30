@@ -510,6 +510,45 @@ func (c *MockTransactionQuerierCreateGitResultForCommitCall) DoAndReturn(f func(
 	return c
 }
 
+// CreateMysqlDatabase mocks base method.
+func (m *MockTransactionQuerier) CreateMysqlDatabase(ctx context.Context, arg queries.CreateMysqlDatabaseParams) (*queries.MysqlDatabase, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMysqlDatabase", ctx, arg)
+	ret0, _ := ret[0].(*queries.MysqlDatabase)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateMysqlDatabase indicates an expected call of CreateMysqlDatabase.
+func (mr *MockTransactionQuerierMockRecorder) CreateMysqlDatabase(ctx, arg any) *MockTransactionQuerierCreateMysqlDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMysqlDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateMysqlDatabase), ctx, arg)
+	return &MockTransactionQuerierCreateMysqlDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierCreateMysqlDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierCreateMysqlDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreateMysqlDatabaseCall) Return(arg0 *queries.MysqlDatabase, arg1 error) *MockTransactionQuerierCreateMysqlDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreateMysqlDatabaseCall) Do(f func(context.Context, queries.CreateMysqlDatabaseParams) (*queries.MysqlDatabase, error)) *MockTransactionQuerierCreateMysqlDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreateMysqlDatabaseCall) DoAndReturn(f func(context.Context, queries.CreateMysqlDatabaseParams) (*queries.MysqlDatabase, error)) *MockTransactionQuerierCreateMysqlDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateMysqlScan mocks base method.
 func (m *MockTransactionQuerier) CreateMysqlScan(ctx context.Context, arg queries.CreateMysqlScanParams) (*queries.MysqlScan, error) {
 	m.ctrl.T.Helper()
@@ -701,6 +740,45 @@ func (c *MockTransactionQuerierCreateOrganizationCall) Do(f func(context.Context
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierCreateOrganizationCall) DoAndReturn(f func(context.Context, string) (*queries.Organization, error)) *MockTransactionQuerierCreateOrganizationCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreatePostgresDatabase mocks base method.
+func (m *MockTransactionQuerier) CreatePostgresDatabase(ctx context.Context, arg queries.CreatePostgresDatabaseParams) (*queries.PostgresDatabase, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreatePostgresDatabase", ctx, arg)
+	ret0, _ := ret[0].(*queries.PostgresDatabase)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreatePostgresDatabase indicates an expected call of CreatePostgresDatabase.
+func (mr *MockTransactionQuerierMockRecorder) CreatePostgresDatabase(ctx, arg any) *MockTransactionQuerierCreatePostgresDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePostgresDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).CreatePostgresDatabase), ctx, arg)
+	return &MockTransactionQuerierCreatePostgresDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierCreatePostgresDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierCreatePostgresDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreatePostgresDatabaseCall) Return(arg0 *queries.PostgresDatabase, arg1 error) *MockTransactionQuerierCreatePostgresDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreatePostgresDatabaseCall) Do(f func(context.Context, queries.CreatePostgresDatabaseParams) (*queries.PostgresDatabase, error)) *MockTransactionQuerierCreatePostgresDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreatePostgresDatabaseCall) DoAndReturn(f func(context.Context, queries.CreatePostgresDatabaseParams) (*queries.PostgresDatabase, error)) *MockTransactionQuerierCreatePostgresDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

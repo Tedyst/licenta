@@ -78,3 +78,9 @@ FROM
 WHERE
     mysql_scans.scan_id = $1;
 
+-- name: CreateMysqlDatabase :one
+INSERT INTO mysql_databases(project_id, database_name, host, port, username, PASSWORD, version)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING
+    *;
+
