@@ -67,9 +67,9 @@ WHERE
     AND user_id = $2
 LIMIT 1;
 
--- name: GetOrganizationPermissionsForUser :one
+-- name: GetOrganizationPermissionForUser :one
 SELECT
-    organization_members.role::smallint AS role
+    ROLE
 FROM
     organization_members
 WHERE

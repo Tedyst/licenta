@@ -144,35 +144,23 @@ func (q *Queries) GetProjectMembers(ctx context.Context, projectID int64) ([]*Pr
 	return items, nil
 }
 
-const getProjectPermissionsForUser = `-- name: GetProjectPermissionsForUser :one
+const getProjectPermissionForUser = `-- name: GetProjectPermissionForUser :one
 SELECT
-    MIN(ROLE)::smallint AS role
-FROM (
-    SELECT
-        project_members.role AS role
-    FROM
-        project_members
-    WHERE
-        project_members.project_id = $1
-        AND project_members.user_id = $2
-    UNION
-    SELECT
-        organization_members.role AS role
-    FROM
-        organization_members
-    WHERE
-        organization_id = $3
-        AND user_id = $2) AS role
+    ROLE
+FROM
+    project_members
+WHERE
+    project_id = $1
+    AND user_id = $2
 `
 
-type GetProjectPermissionsForUserParams struct {
-	ProjectID      int64 `json:"project_id"`
-	UserID         int64 `json:"user_id"`
-	OrganizationID int64 `json:"organization_id"`
+type GetProjectPermissionForUserParams struct {
+	ProjectID int64 `json:"project_id"`
+	UserID    int64 `json:"user_id"`
 }
 
-func (q *Queries) GetProjectPermissionsForUser(ctx context.Context, arg GetProjectPermissionsForUserParams) (int16, error) {
-	row := q.db.QueryRow(ctx, getProjectPermissionsForUser, arg.ProjectID, arg.UserID, arg.OrganizationID)
+func (q *Queries) GetProjectPermissionForUser(ctx context.Context, arg GetProjectPermissionForUserParams) (int16, error) {
+	row := q.db.QueryRow(ctx, getProjectPermissionForUser, arg.ProjectID, arg.UserID)
 	var role int16
 	err := row.Scan(&role)
 	return role, err

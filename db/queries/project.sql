@@ -34,25 +34,14 @@ WHERE
     AND user_id = $2
 LIMIT 1;
 
--- name: GetProjectPermissionsForUser :one
+-- name: GetProjectPermissionForUser :one
 SELECT
-    MIN(ROLE)::smallint AS role
-FROM (
-    SELECT
-        project_members.role AS role
-    FROM
-        project_members
-    WHERE
-        project_members.project_id = $1
-        AND project_members.user_id = $2
-    UNION
-    SELECT
-        organization_members.role AS role
-    FROM
-        organization_members
-    WHERE
-        organization_id = $3
-        AND user_id = $2) AS role;
+    ROLE
+FROM
+    project_members
+WHERE
+    project_id = $1
+    AND user_id = $2;
 
 -- name: GetProject :one
 SELECT

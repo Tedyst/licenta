@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/cache"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
@@ -105,15 +106,18 @@ func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.
 		return hasPermission(permission, RBACGroup(cached)), nil
 	}
 
-	p, err := a.querier.GetOrganizationPermissionsForUser(ctx, queries.GetOrganizationPermissionsForUserParams{
+	p, err := a.querier.GetOrganizationPermissionForUser(ctx, queries.GetOrganizationPermissionForUserParams{
 		OrganizationID: organization.ID,
 		UserID:         user.ID,
 	})
-	if err != nil {
+	if err != nil && err != pgx.ErrNoRows {
 		return false, err
 	}
+	if err == pgx.ErrNoRows {
+		return false, a.cache.Set(cacheKeyForUserOrganization(user, organization), int16(None))
+	}
 
-	return hasPermission(permission, RBACGroup(p)), nil
+	return hasPermission(permission, RBACGroup(p)), a.cache.Set(cacheKeyForUserOrganization(user, organization), int16(p))
 }
 
 func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error) {
@@ -125,16 +129,28 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 		return hasPermission(permission, RBACGroup(cached)), nil
 	}
 
-	p, err := a.querier.GetProjectPermissionsForUser(ctx, queries.GetProjectPermissionsForUserParams{
-		ProjectID:      project.ID,
-		UserID:         user.ID,
-		OrganizationID: project.OrganizationID,
+	p, err := a.querier.GetProjectPermissionForUser(ctx, queries.GetProjectPermissionForUserParams{
+		ProjectID: project.ID,
+		UserID:    user.ID,
 	})
-	if err != nil {
+	if err != nil && err != pgx.ErrNoRows {
 		return false, err
 	}
+	if err == pgx.ErrNoRows {
+		p2, err := a.querier.GetOrganizationPermissionForUser(ctx, queries.GetOrganizationPermissionForUserParams{
+			OrganizationID: project.OrganizationID,
+			UserID:         user.ID,
+		})
+		if err != nil && err != pgx.ErrNoRows {
+			return false, err
+		}
+		if err == pgx.ErrNoRows {
+			return false, a.cache.Set(cacheKeyForUserProject(user, project), int16(None))
+		}
+		p = int16(p2)
+	}
 
-	return hasPermission(permission, RBACGroup(p)), nil
+	return hasPermission(permission, RBACGroup(p)), a.cache.Set(cacheKeyForUserProject(user, project), int16(p))
 }
 
 func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error) {

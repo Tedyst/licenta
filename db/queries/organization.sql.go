@@ -87,9 +87,9 @@ func (q *Queries) GetOrganizationMembers(ctx context.Context, organizationID int
 	return items, nil
 }
 
-const getOrganizationPermissionsForUser = `-- name: GetOrganizationPermissionsForUser :one
+const getOrganizationPermissionForUser = `-- name: GetOrganizationPermissionForUser :one
 SELECT
-    organization_members.role::smallint AS role
+    ROLE
 FROM
     organization_members
 WHERE
@@ -97,14 +97,14 @@ WHERE
     AND user_id = $2
 `
 
-type GetOrganizationPermissionsForUserParams struct {
+type GetOrganizationPermissionForUserParams struct {
 	OrganizationID int64 `json:"organization_id"`
 	UserID         int64 `json:"user_id"`
 }
 
-func (q *Queries) GetOrganizationPermissionsForUser(ctx context.Context, arg GetOrganizationPermissionsForUserParams) (int16, error) {
-	row := q.db.QueryRow(ctx, getOrganizationPermissionsForUser, arg.OrganizationID, arg.UserID)
-	var role int16
+func (q *Queries) GetOrganizationPermissionForUser(ctx context.Context, arg GetOrganizationPermissionForUserParams) (int32, error) {
+	row := q.db.QueryRow(ctx, getOrganizationPermissionForUser, arg.OrganizationID, arg.UserID)
+	var role int32
 	err := row.Scan(&role)
 	return role, err
 }
