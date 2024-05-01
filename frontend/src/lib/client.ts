@@ -1,4 +1,8 @@
-import createClient from 'openapi-fetch';
+import createClient, {
+	type MergedOptions,
+	type Middleware,
+	type MiddlewareRequest
+} from 'openapi-fetch';
 import type { paths } from './api/v1';
 import { organizations, user } from './stores';
 import type {
@@ -324,6 +328,39 @@ export async function registerUser({ username, email, password }: RegisterUserRe
 	});
 }
 
-const client = createClient<paths>({ fetch: csrfFetch, baseUrl: '/api/v1' });
+const csrfMiddlware = {
+	token: '',
+	async onRequest(req: MiddlewareRequest) {
+		const { headers, ...reqOptions } = req;
+
+		await navigator.locks.request('csrf', async () => {
+			if (this.token === '') {
+				this.token = (await getCSRFToken(req.url)) || 'null';
+			}
+		});
+
+		return new Request(req, {
+			...reqOptions,
+			headers: {
+				...headers,
+				'X-CSRF-Token': this.token
+			}
+		});
+	},
+	async onResponse(res: Response) {
+		await navigator.locks.request('csrf', async () => {
+			if (res.headers.has('X-CSRF-Token')) {
+				this.token = res.headers.get('X-CSRF-Token') || '';
+			}
+		});
+		return res;
+	}
+};
+
+const client = createClient<paths>({
+	baseUrl: '/api/v1'
+});
+
+client.use(csrfMiddlware);
 
 export default client;

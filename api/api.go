@@ -62,7 +62,12 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 	app.Use(otelchi.Middleware("api", otelchi.WithRequestMethodInSpanName(true)))
 	app.Use(buildid.BuildIDMiddleware)
 	app.Use(middleware.RealIP)
-	app.Use(slogchi.New(slog.Default()))
+	app.Use(slogchi.NewWithConfig(slog.Default(), slogchi.Config{
+		WithUserAgent: true,
+		WithRequestID: false,
+		WithSpanID:    true,
+		WithTraceID:   true,
+	}))
 	app.Use(middleware.Recoverer)
 	app.Use(cache.CacheControlHeaderMiddleware)
 	app.Use(func(h http.Handler) http.Handler {
