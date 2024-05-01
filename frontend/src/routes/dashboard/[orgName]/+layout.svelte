@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { LayoutData } from '../$types';
-	import { organizations, currentOrganization } from '$lib/stores';
+	import type { LayoutData } from './$types';
 	export let data: LayoutData;
+	import { organizations, currentOrganization } from '$lib/stores';
 
 	$: $currentOrganization = $organizations?.filter((v) => v.name == data.orgName).at(0) || null;
 </script>

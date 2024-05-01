@@ -61,7 +61,7 @@
 <form
 	autocomplete="off"
 	on:submit|preventDefault={onSubmit}
-	class="flex gap-2 flex-col overflow-auto"
+	class="flex gap-2 flex-col overflow-auto p-1"
 >
 	<label class="input input-bordered flex items-center gap-2">
 		<Server />

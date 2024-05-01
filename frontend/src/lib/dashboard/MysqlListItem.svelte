@@ -39,7 +39,7 @@
 </script>
 
 <div
-	class="card bg-base-100 text-lg font-bold flex flex-col gap-3 shadow-xl grow place-content-around"
+	class="card bg-base-100 text-lg font-bold flex flex-col gap-3 shadow-xl grow place-content-around mt-1 mb-1"
 >
 	<div class="card-body flex-col lg:flex-row">
 		<div class="flex flex-row items-center gap-3 grow">

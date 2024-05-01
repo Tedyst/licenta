@@ -1,10 +1,18 @@
 <script lang="ts">
 	import type { LayoutData } from '../$types';
-	import { currentOrganization, currentProject } from '$lib/stores';
+	import { currentMysqlDatabases, currentOrganization, currentProject } from '$lib/stores';
+	import client from '$lib/client';
 	export let data: LayoutData;
 
 	$: $currentProject =
 		$currentOrganization?.projects.filter((v) => v.name == data.projectName).at(0) || null;
+
+	$: if ($currentProject)
+		client
+			.GET('/mysql', { params: { query: { project: $currentProject?.id } } })
+			.then((response) => {
+				$currentMysqlDatabases = response.data?.mysql_databases || [];
+			});
 </script>
 
 {#if $currentOrganization === null}
