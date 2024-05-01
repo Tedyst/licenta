@@ -84,3 +84,7 @@ INSERT INTO mysql_databases(project_id, database_name, host, port, username, PAS
 RETURNING
     *;
 
+-- name: DeleteMysqlDatabase :exec
+DELETE FROM mysql_databases
+WHERE id = $1;
+

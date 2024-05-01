@@ -44,6 +44,7 @@ type Querier interface {
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
 	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
+	DeleteMysqlDatabase(ctx context.Context, id int64) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
 	DeleteOrganization(ctx context.Context, id int64) error
 	DeleteProject(ctx context.Context, id int64) (*Project, error)

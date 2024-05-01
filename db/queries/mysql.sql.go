@@ -71,6 +71,16 @@ func (q *Queries) CreateMysqlScan(ctx context.Context, arg CreateMysqlScanParams
 	return &i, err
 }
 
+const deleteMysqlDatabase = `-- name: DeleteMysqlDatabase :exec
+DELETE FROM mysql_databases
+WHERE id = $1
+`
+
+func (q *Queries) DeleteMysqlDatabase(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deleteMysqlDatabase, id)
+	return err
+}
+
 const getMysqlDatabase = `-- name: GetMysqlDatabase :one
 SELECT
     mysql_databases.id, mysql_databases.project_id, mysql_databases.host, mysql_databases.port, mysql_databases.database_name, mysql_databases.username, mysql_databases.password, mysql_databases.version, mysql_databases.created_at,

@@ -7,3 +7,6 @@ export const user = writable<components['schemas']['User'] | null>(null);
 export const organizations = writable<components['schemas']['Organization'][] | null>(null);
 
 export const currentOrganization = writable<components['schemas']['Organization'] | null>(null);
+export const currentProject = writable<components['schemas']['Project'] | null>(null);
+
+export const currentMysqlDatabases = writable<components['schemas']['MysqlDatabase'][]>([]);

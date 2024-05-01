@@ -157,7 +157,7 @@ func (server *serverHandler) GetMysql(ctx context.Context, request generated.Get
 		return nil, err
 	}
 
-	mysqlDatabases := make([]generated.MysqlDatabase, 0, len(databases))
+	mysqlDatabases := make([]generated.MysqlDatabase, len(databases))
 	for i, db := range databases {
 		mysqlDatabases[i] = generated.MysqlDatabase{
 			CreatedAt:    db.CreatedAt.Time.Format(time.RFC3339Nano),
@@ -213,5 +213,41 @@ func (server *serverHandler) PostMysql(ctx context.Context, request generated.Po
 			Version:      db.Version.String,
 			ProjectId:    int(db.ProjectID),
 		},
+	}, nil
+}
+
+func (server *serverHandler) DeleteMysqlId(ctx context.Context, request generated.DeleteMysqlIdRequestObject) (generated.DeleteMysqlIdResponseObject, error) {
+	database, err := server.DatabaseProvider.GetMysqlDatabase(ctx, request.Id)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting Mysql database: %w", err)
+	}
+	if err == pgx.ErrNoRows {
+		return generated.DeleteMysqlId404JSONResponse{
+			Success: false,
+			Message: "Database not found",
+		}, nil
+	}
+
+	_, project, response, err := checkUserHasProjectPermission[generated.DeleteMysqlId401JSONResponse](server, ctx, int64(database.MysqlDatabase.ProjectID), authorization.Admin)
+	if err != nil {
+		return nil, err
+	}
+	if response.Success == false {
+		return response, nil
+	}
+	if project.ID != database.MysqlDatabase.ProjectID {
+		return generated.DeleteMysqlId401JSONResponse{
+			Success: false,
+			Message: "Database not found in project",
+		}, nil
+	}
+
+	err = server.DatabaseProvider.DeleteMysqlDatabase(ctx, database.MysqlDatabase.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.DeleteMysqlId204JSONResponse{
+		Success: true,
 	}, nil
 }

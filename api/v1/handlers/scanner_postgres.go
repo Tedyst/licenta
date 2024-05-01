@@ -159,7 +159,7 @@ func (server *serverHandler) GetPostgres(ctx context.Context, request generated.
 		return nil, err
 	}
 
-	postgresDatabases := make([]generated.PostgresDatabase, 0, len(databases))
+	postgresDatabases := make([]generated.PostgresDatabase, len(databases))
 	for i, db := range databases {
 		postgresDatabases[i] = generated.PostgresDatabase{
 			CreatedAt:    db.CreatedAt.Time.Format(time.RFC3339Nano),

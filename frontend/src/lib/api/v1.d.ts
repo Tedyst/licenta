@@ -592,7 +592,6 @@ export interface paths {
             "application/json": {
               success: boolean;
               project: components["schemas"]["Project"];
-              postgres_databases: components["schemas"]["PostgresDatabase"][];
             };
           };
         };
@@ -772,6 +771,66 @@ export interface paths {
       };
     };
   };
+  "/postgres": {
+    /** Get all postgres databases for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The projects to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              postgres_databases: components["schemas"]["PostgresDatabase"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new postgres database */
+    post: {
+      /** @description The postgres database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreatePostgresDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              postgres_database: components["schemas"]["PostgresDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/postgres/{id}": {
     /** Get postgres database by ID */
     get: {
@@ -850,6 +909,66 @@ export interface paths {
       };
     };
   };
+  "/mysql": {
+    /** Get all mysql databases for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The projects to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mysql_databases: components["schemas"]["MysqlDatabase"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new mysql database */
+    post: {
+      /** @description The mysql database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateMysqlDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mysql_database: components["schemas"]["MysqlDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/mysql/{id}": {
     /** Get mysql database by ID */
     get: {
@@ -866,6 +985,37 @@ export interface paths {
             "application/json": {
               success: boolean;
               mysql_database: components["schemas"]["MysqlDatabase"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Delete mysql database by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the mysql database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
             };
           };
         };
@@ -1236,6 +1386,11 @@ export interface components {
        * @example false
        */
       remote: boolean;
+      /**
+       * @description The number of scans that have been run on the project
+       * @example 0
+       */
+      scans: number;
     };
     CVE: {
       /**
@@ -1281,6 +1436,14 @@ export interface components {
       password?: string;
       version?: string;
     };
+    CreatePostgresDatabase: {
+      project_id: number;
+      host: string;
+      port: number;
+      database_name: string;
+      username: string;
+      password: string;
+    };
     PostgresDatabase: {
       id: number;
       project_id: number;
@@ -1291,6 +1454,14 @@ export interface components {
       password: string;
       created_at: string;
       version: string;
+    };
+    CreateMysqlDatabase: {
+      project_id: number;
+      host: string;
+      port: number;
+      database_name: string;
+      username: string;
+      password: string;
     };
     MysqlDatabase: {
       id: number;
@@ -1449,7 +1620,6 @@ export interface components {
       users: number;
       projects: number;
       scans: number;
-      failed_scans: number;
     };
     Organization: {
       /**

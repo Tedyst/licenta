@@ -1318,6 +1318,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete mysql database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - mysql
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the mysql database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /organizations:
     get:
       summary: Get all organizations that the user can see

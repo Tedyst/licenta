@@ -631,6 +631,9 @@ type ClientInterface interface {
 	// GetMysqlScans request
 	GetMysqlScans(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteMysqlId request
+	DeleteMysqlId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetMysqlId request
 	GetMysqlId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -846,6 +849,18 @@ func (c *Client) PostMysql(ctx context.Context, body PostMysqlJSONRequestBody, r
 
 func (c *Client) GetMysqlScans(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetMysqlScansRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteMysqlId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteMysqlIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1630,6 +1645,40 @@ func NewGetMysqlScansRequest(server string, params *GetMysqlScansParams) (*http.
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteMysqlIdRequest generates requests for DeleteMysqlId
+func NewDeleteMysqlIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mysql/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -3019,6 +3068,9 @@ type ClientWithResponsesInterface interface {
 	// GetMysqlScansWithResponse request
 	GetMysqlScansWithResponse(ctx context.Context, params *GetMysqlScansParams, reqEditors ...RequestEditorFn) (*GetMysqlScansResponse, error)
 
+	// DeleteMysqlIdWithResponse request
+	DeleteMysqlIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteMysqlIdResponse, error)
+
 	// GetMysqlIdWithResponse request
 	GetMysqlIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetMysqlIdResponse, error)
 
@@ -3293,6 +3345,32 @@ func (r GetMysqlScansResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetMysqlScansResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteMysqlIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteMysqlIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteMysqlIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4178,6 +4256,15 @@ func (c *ClientWithResponses) GetMysqlScansWithResponse(ctx context.Context, par
 	return ParseGetMysqlScansResponse(rsp)
 }
 
+// DeleteMysqlIdWithResponse request returning *DeleteMysqlIdResponse
+func (c *ClientWithResponses) DeleteMysqlIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteMysqlIdResponse, error) {
+	rsp, err := c.DeleteMysqlId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteMysqlIdResponse(rsp)
+}
+
 // GetMysqlIdWithResponse request returning *GetMysqlIdResponse
 func (c *ClientWithResponses) GetMysqlIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetMysqlIdResponse, error) {
 	rsp, err := c.GetMysqlId(ctx, id, reqEditors...)
@@ -4797,6 +4884,48 @@ func ParseGetMysqlScansResponse(rsp *http.Response) (*GetMysqlScansResponse, err
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteMysqlIdResponse parses an HTTP response from a DeleteMysqlIdWithResponse call
+func ParseDeleteMysqlIdResponse(rsp *http.Response) (*DeleteMysqlIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteMysqlIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest Error
@@ -6148,6 +6277,9 @@ type ServerInterface interface {
 	// Get all postgres scans
 	// (GET /mysql-scans)
 	GetMysqlScans(w http.ResponseWriter, r *http.Request, params GetMysqlScansParams)
+	// Delete mysql database by ID
+	// (DELETE /mysql/{id})
+	DeleteMysqlId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get mysql database by ID
 	// (GET /mysql/{id})
 	GetMysqlId(w http.ResponseWriter, r *http.Request, id int64)
@@ -6277,6 +6409,12 @@ func (_ Unimplemented) PostMysql(w http.ResponseWriter, r *http.Request) {
 // Get all postgres scans
 // (GET /mysql-scans)
 func (_ Unimplemented) GetMysqlScans(w http.ResponseWriter, r *http.Request, params GetMysqlScansParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete mysql database by ID
+// (DELETE /mysql/{id})
+func (_ Unimplemented) DeleteMysqlId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -6644,6 +6782,34 @@ func (siw *ServerInterfaceWrapper) GetMysqlScans(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetMysqlScans(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteMysqlId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMysqlId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteMysqlId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -7665,6 +7831,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/mysql-scans", wrapper.GetMysqlScans)
 	})
 	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/mysql/{id}", wrapper.DeleteMysqlId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/mysql/{id}", wrapper.GetMysqlId)
 	})
 	r.Group(func(r chi.Router) {
@@ -7992,6 +8161,43 @@ func (response GetMysqlScans401JSONResponse) VisitGetMysqlScansResponse(w http.R
 type GetMysqlScans404JSONResponse Error
 
 func (response GetMysqlScans404JSONResponse) VisitGetMysqlScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMysqlIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteMysqlIdResponseObject interface {
+	VisitDeleteMysqlIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteMysqlId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteMysqlId204JSONResponse) VisitDeleteMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMysqlId401JSONResponse Error
+
+func (response DeleteMysqlId401JSONResponse) VisitDeleteMysqlIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMysqlId404JSONResponse Error
+
+func (response DeleteMysqlId404JSONResponse) VisitDeleteMysqlIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -9198,6 +9404,9 @@ type StrictServerInterface interface {
 	// Get all postgres scans
 	// (GET /mysql-scans)
 	GetMysqlScans(ctx context.Context, request GetMysqlScansRequestObject) (GetMysqlScansResponseObject, error)
+	// Delete mysql database by ID
+	// (DELETE /mysql/{id})
+	DeleteMysqlId(ctx context.Context, request DeleteMysqlIdRequestObject) (DeleteMysqlIdResponseObject, error)
 	// Get mysql database by ID
 	// (GET /mysql/{id})
 	GetMysqlId(ctx context.Context, request GetMysqlIdRequestObject) (GetMysqlIdResponseObject, error)
@@ -9488,6 +9697,32 @@ func (sh *strictHandler) GetMysqlScans(w http.ResponseWriter, r *http.Request, p
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetMysqlScansResponseObject); ok {
 		if err := validResponse.VisitGetMysqlScansResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteMysqlId operation middleware
+func (sh *strictHandler) DeleteMysqlId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteMysqlIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteMysqlId(ctx, request.(DeleteMysqlIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteMysqlId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteMysqlIdResponseObject); ok {
+		if err := validResponse.VisitDeleteMysqlIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -10359,78 +10594,78 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
