@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { components } from '$lib/api/v1';
 	import client from '$lib/client';
 	import { currentProject, currentMysqlDatabases } from '$lib/stores';
 

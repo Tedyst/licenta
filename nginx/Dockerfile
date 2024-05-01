@@ -3,7 +3,7 @@ FROM node:latest AS sveltebuilder
 WORKDIR /app/frontend
 
 COPY frontend/package.json frontend/package-lock.json /app/
-RUN npm install
+RUN npm ci
 COPY frontend/ /app/frontend
 COPY api/ /app/api
 RUN npm run build
