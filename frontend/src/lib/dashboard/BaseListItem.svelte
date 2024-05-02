@@ -1,16 +1,12 @@
 <script lang="ts">
-	import type { components } from '$lib/api/v1';
-
 	import TrashCan from 'svelte-material-icons/TrashCan.svelte';
 	import Pencil from 'svelte-material-icons/Pencil.svelte';
 
-	import MysqlIcon from '$lib/images/mysql-icon.svg';
-	import EditMysqlDatabase from './EditMysqlDatabase.svelte';
-	import client from '$lib/client';
-	import { currentMysqlDatabases } from '$lib/stores';
-	import { toast } from 'svelte-daisy-toast';
-
-	export let mysqlDatabase: components['schemas']['MysqlDatabase'];
+	export let databaseUrl: string;
+	export let databaseType: string;
+	export let databaseIcon: string;
+	export let databaseID: number;
+	export let deleteAction: (id: number) => void;
 
 	let editComponent: HTMLDivElement;
 	let modal: HTMLDialogElement;
@@ -20,21 +16,9 @@
 		editComponent.classList.toggle('flex');
 	};
 
-	const deleteDatabase = (id: number) => {
-		client.DELETE('/mysql/{id}', { params: { path: { id } } }).then((response) => {
-			if (response.error) {
-				console.error(response.error);
-				return;
-			}
-			$currentMysqlDatabases = $currentMysqlDatabases.filter((db) => db.id !== id);
-			modal.close();
-			toast({
-				closable: true,
-				duration: 5000,
-				message: 'Database deleted successfully',
-				type: 'success'
-			});
-		});
+	const deleteDatabase = () => {
+		deleteAction(databaseID);
+		modal.close();
 	};
 </script>
 
@@ -44,12 +28,10 @@
 	<div class="card-body flex-col lg:flex-row">
 		<div class="flex flex-row items-center gap-3 grow">
 			<div class="flex flex-col">
-				<img src={MysqlIcon} alt="Mysql" class="h-[30px] w-[30px]" />
-				<div class="text-xs">MySQL</div>
+				<img src={databaseIcon} alt="Mysql" class="h-[30px] w-[30px]" />
+				<div class="text-xs">{databaseType}</div>
 			</div>
-			<h2 class="overflow-auto">
-				mysql://{mysqlDatabase.username}@****:{mysqlDatabase.host}:{mysqlDatabase.port}/{mysqlDatabase.database_name}
-			</h2>
+			<h2 class="overflow-auto">{databaseUrl}</h2>
 		</div>
 		<div class="flex flex-col">
 			<div class="lg:hidden divider divider-vertical" />
@@ -73,16 +55,14 @@
 		</div>
 	</div>
 	<div class="hidden justify-center align-middle pb-8" bind:this={editComponent}>
-		<EditMysqlDatabase {mysqlDatabase} />
+		<slot name="editbox" />
 	</div>
 </div>
 
 <dialog class="modal" bind:this={modal}>
 	<div class="modal-box">
 		<h3 class="font-bold text-lg">
-			Are you sure that you want to delete the database <b
-				>mysql://{mysqlDatabase.username}@****:{mysqlDatabase.host}:{mysqlDatabase.port}/{mysqlDatabase.database_name}</b
-			>?
+			Are you sure that you want to delete the database <b>{databaseUrl}</b>?
 		</h3>
 		<p class="py-4">Press ESC key or click the button below to close</p>
 		<div class="modal-action">
@@ -90,8 +70,7 @@
 				<button class="btn">No</button>
 				<button
 					class="btn bg-red-500 text-black"
-					on:click|stopPropagation|preventDefault={() => deleteDatabase(mysqlDatabase.id)}
-					>Yes</button
+					on:click|stopPropagation|preventDefault={() => deleteDatabase()}>Yes</button
 				>
 			</form>
 		</div>
