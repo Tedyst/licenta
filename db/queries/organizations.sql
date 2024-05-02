@@ -58,7 +58,8 @@ WHERE
 
 -- name: GetAllOrganizationMembersForOrganizationsThatContainUser :many
 SELECT
-    *
+    sqlc.embed(users),
+    sqlc.embed(organization_members)
 FROM
     organization_members
     INNER JOIN users ON organization_members.user_id = users.id

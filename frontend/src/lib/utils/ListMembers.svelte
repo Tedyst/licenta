@@ -10,14 +10,7 @@
 	let selectElement: HTMLSelectElement;
 	let addUserInput: string = '';
 
-	let members: components['schemas']['OrganizationUser'][] = [
-		{
-			id: 1,
-			username: 'Tedyst',
-			email: 'stoicatedy@gmail.com',
-			role: 'Admin'
-		}
-	];
+	export let members: components['schemas']['OrganizationUser'][];
 
 	let currentUserRole = members
 		.filter((member: components['schemas']['OrganizationUser']) => member.email === $user?.email)

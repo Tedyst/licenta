@@ -51,11 +51,11 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 
 	organizationMembers := map[int64][]generated.OrganizationUser{}
 	for _, member := range members {
-		organizationMembers[member.OrganizationID] = append(organizationMembers[member.OrganizationID], generated.OrganizationUser{
-			Id:       int64(member.ID),
-			Role:     authorization.RBACGroup(member.Role).String(),
-			Email:    member.Email,
-			Username: member.Username,
+		organizationMembers[member.OrganizationMember.OrganizationID] = append(organizationMembers[member.OrganizationMember.OrganizationID], generated.OrganizationUser{
+			Id:       int64(member.User.ID),
+			Role:     authorization.RBACGroup(member.OrganizationMember.Role).String(),
+			Email:    member.User.Email,
+			Username: member.User.Username,
 		})
 	}
 
@@ -320,6 +320,20 @@ func (server *serverHandler) PostOrganizationsIdAddUser(ctx context.Context, req
 		return &generated.PostOrganizationsIdAddUser404JSONResponse{
 			Success: false,
 			Message: "User not found",
+		}, nil
+	}
+
+	_, err = server.DatabaseProvider.GetOrganizationPermissionForUser(ctx, queries.GetOrganizationPermissionForUserParams{
+		OrganizationID: organization.ID,
+		UserID:         newUser.ID,
+	})
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+	if err == nil {
+		return &generated.PostOrganizationsIdAddUser400JSONResponse{
+			Success: false,
+			Message: "User already in organization",
 		}, nil
 	}
 

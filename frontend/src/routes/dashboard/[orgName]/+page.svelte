@@ -132,6 +132,11 @@
 	<div class="flex-col flex lg:flex-row w-full">
 		<OrganizationSettings organization={$currentOrganization} />
 		<div class="divider divider-horizontal" />
-		<ListMembers {editRoleAction} {addUserAction} {deleteUserAction} />
+		<ListMembers
+			{editRoleAction}
+			{addUserAction}
+			{deleteUserAction}
+			members={$currentOrganization.members}
+		/>
 	</div>
 {/if}

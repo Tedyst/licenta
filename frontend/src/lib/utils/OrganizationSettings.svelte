@@ -11,8 +11,7 @@
 		client
 			.DELETE('/organizations/{id}', { params: { path: { id: organization.id } } })
 			.then((response) => {
-				if (response.data?.success) {
-					window.location.href = '/dashboard';
+				if (response.response.status === 204) {
 					toast({
 						closable: true,
 						duration: 5000,
@@ -20,6 +19,9 @@
 						title: 'Success',
 						type: 'success'
 					});
+					setTimeout(() => {
+						window.location.href = '/organizations';
+					}, 2000);
 				} else {
 					toast({
 						closable: true,

@@ -30,7 +30,6 @@
 				<div class="collapse-content">
 					<ul class="m-0 p-0 before:hidden">
 						<li><a href="/dashboard/{organization.name}">Information</a></li>
-						<li><a href="/dashboard/{organization.name}/settings">Settings</a></li>
 						<li class="divider m-0 flex-nowrap shrink-0 opacity-100 bg-inherit" />
 					</ul>
 					{#each organization.projects as project}

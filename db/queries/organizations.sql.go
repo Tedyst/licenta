@@ -7,7 +7,6 @@ package queries
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -54,7 +53,8 @@ func (q *Queries) DeleteOrganization(ctx context.Context, id int64) error {
 
 const getAllOrganizationMembersForOrganizationsThatContainUser = `-- name: GetAllOrganizationMembersForOrganizationsThatContainUser :many
 SELECT
-    organization_members.id, organization_id, user_id, role, organization_members.created_at, users.id, username, password, email, recovery_codes, totp_secret, recover_selector, recover_verifier, recover_expiry, login_attempt_count, login_last_attempt, locked, confirm_selector, confirm_verifier, confirmed, users.created_at
+    users.id, users.username, users.password, users.email, users.recovery_codes, users.totp_secret, users.recover_selector, users.recover_verifier, users.recover_expiry, users.login_attempt_count, users.login_last_attempt, users.locked, users.confirm_selector, users.confirm_verifier, users.confirmed, users.created_at,
+    organization_members.id, organization_members.organization_id, organization_members.user_id, organization_members.role, organization_members.created_at
 FROM
     organization_members
     INNER JOIN users ON organization_members.user_id = users.id
@@ -75,27 +75,8 @@ WHERE
 `
 
 type GetAllOrganizationMembersForOrganizationsThatContainUserRow struct {
-	ID                int64              `json:"id"`
-	OrganizationID    int64              `json:"organization_id"`
-	UserID            int64              `json:"user_id"`
-	Role              int32              `json:"role"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	ID_2              int64              `json:"id_2"`
-	Username          string             `json:"username"`
-	Password          string             `json:"password"`
-	Email             string             `json:"email"`
-	RecoveryCodes     sql.NullString     `json:"recovery_codes"`
-	TotpSecret        sql.NullString     `json:"totp_secret"`
-	RecoverSelector   sql.NullString     `json:"recover_selector"`
-	RecoverVerifier   sql.NullString     `json:"recover_verifier"`
-	RecoverExpiry     pgtype.Timestamptz `json:"recover_expiry"`
-	LoginAttemptCount int32              `json:"login_attempt_count"`
-	LoginLastAttempt  pgtype.Timestamptz `json:"login_last_attempt"`
-	Locked            pgtype.Timestamptz `json:"locked"`
-	ConfirmSelector   sql.NullString     `json:"confirm_selector"`
-	ConfirmVerifier   sql.NullString     `json:"confirm_verifier"`
-	Confirmed         bool               `json:"confirmed"`
-	CreatedAt_2       pgtype.Timestamptz `json:"created_at_2"`
+	User               User               `json:"user"`
+	OrganizationMember OrganizationMember `json:"organization_member"`
 }
 
 func (q *Queries) GetAllOrganizationMembersForOrganizationsThatContainUser(ctx context.Context, userID int64) ([]*GetAllOrganizationMembersForOrganizationsThatContainUserRow, error) {
@@ -108,27 +89,27 @@ func (q *Queries) GetAllOrganizationMembersForOrganizationsThatContainUser(ctx c
 	for rows.Next() {
 		var i GetAllOrganizationMembersForOrganizationsThatContainUserRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.OrganizationID,
-			&i.UserID,
-			&i.Role,
-			&i.CreatedAt,
-			&i.ID_2,
-			&i.Username,
-			&i.Password,
-			&i.Email,
-			&i.RecoveryCodes,
-			&i.TotpSecret,
-			&i.RecoverSelector,
-			&i.RecoverVerifier,
-			&i.RecoverExpiry,
-			&i.LoginAttemptCount,
-			&i.LoginLastAttempt,
-			&i.Locked,
-			&i.ConfirmSelector,
-			&i.ConfirmVerifier,
-			&i.Confirmed,
-			&i.CreatedAt_2,
+			&i.User.ID,
+			&i.User.Username,
+			&i.User.Password,
+			&i.User.Email,
+			&i.User.RecoveryCodes,
+			&i.User.TotpSecret,
+			&i.User.RecoverSelector,
+			&i.User.RecoverVerifier,
+			&i.User.RecoverExpiry,
+			&i.User.LoginAttemptCount,
+			&i.User.LoginLastAttempt,
+			&i.User.Locked,
+			&i.User.ConfirmSelector,
+			&i.User.ConfirmVerifier,
+			&i.User.Confirmed,
+			&i.User.CreatedAt,
+			&i.OrganizationMember.ID,
+			&i.OrganizationMember.OrganizationID,
+			&i.OrganizationMember.UserID,
+			&i.OrganizationMember.Role,
+			&i.OrganizationMember.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
