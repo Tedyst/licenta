@@ -27,7 +27,7 @@
 >
 	<div class="card-body flex-col lg:flex-row">
 		<div class="flex flex-row items-center gap-3 grow">
-			<div class="flex flex-col">
+			<div class="flex flex-col items-center">
 				<img src={databaseIcon} alt="Mysql" class="h-[30px] w-[30px]" />
 				<div class="text-xs">{databaseType}</div>
 			</div>

@@ -10,3 +10,4 @@ export const currentOrganization = writable<components['schemas']['Organization'
 export const currentProject = writable<components['schemas']['Project'] | null>(null);
 
 export const currentMysqlDatabases = writable<components['schemas']['MysqlDatabase'][]>([]);
+export const currentPostgresDatabases = writable<components['schemas']['PostgresDatabase'][]>([]);

@@ -1,6 +1,11 @@
 <script lang="ts">
 	import type { LayoutData } from '../$types';
-	import { currentMysqlDatabases, currentOrganization, currentProject } from '$lib/stores';
+	import {
+		currentMysqlDatabases,
+		currentOrganization,
+		currentPostgresDatabases,
+		currentProject
+	} from '$lib/stores';
 	import client from '$lib/client';
 	export let data: LayoutData;
 
@@ -12,6 +17,12 @@
 			.GET('/mysql', { params: { query: { project: $currentProject?.id } } })
 			.then((response) => {
 				$currentMysqlDatabases = response.data?.mysql_databases || [];
+			});
+	$: if ($currentProject)
+		client
+			.GET('/postgres', { params: { query: { project: $currentProject?.id } } })
+			.then((response) => {
+				$currentPostgresDatabases = response.data?.postgres_databases || [];
 			});
 </script>
 

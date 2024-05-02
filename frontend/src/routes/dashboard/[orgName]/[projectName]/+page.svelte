@@ -1,8 +1,10 @@
 <script lang="ts">
-	import { currentMysqlDatabases } from '$lib/stores';
+	import { currentMysqlDatabases, currentPostgresDatabases } from '$lib/stores';
 
-	import MysqlListItem from '$lib/dashboard/MysqlListDatabase.svelte';
-	import CreateMysqlDatabase from '$lib/dashboard/MysqlCreateDatabase.svelte';
+	import MysqlListDatabase from '$lib/dashboard/MysqlListDatabase.svelte';
+	import MysqlCreateDatabase from '$lib/dashboard/MysqlCreateDatabase.svelte';
+	import PostgresCreateDatabase from '$lib/dashboard/PostgresCreateDatabase.svelte';
+	import PostgresListDatabase from '$lib/dashboard/PostgresListDatabase.svelte';
 
 	let selectedDatabaseType: 'MySQL' | 'PostgreSQL' | 'none' = 'none';
 </script>
@@ -10,7 +12,10 @@
 project
 
 {#each $currentMysqlDatabases as mysqlDatabase}
-	<MysqlListItem {mysqlDatabase} />
+	<MysqlListDatabase {mysqlDatabase} />
+{/each}
+{#each $currentPostgresDatabases as postgresDatabase}
+	<PostgresListDatabase {postgresDatabase} />
 {/each}
 
 <div class="card w-full md:w-96 bg-base-100 shadow-xl">
@@ -21,7 +26,9 @@ project
 			<option value="PostgreSQL">PostgreSQL</option>
 		</select>
 		{#if selectedDatabaseType === 'MySQL'}
-			<CreateMysqlDatabase />
+			<MysqlCreateDatabase />
+		{:else if selectedDatabaseType === 'PostgreSQL'}
+			<PostgresCreateDatabase />
 		{/if}
 	</div>
 </div>
