@@ -1,35 +1,20 @@
 <script lang="ts">
-	import { user, organizations } from '$lib/stores';
+	export let user: components['schemas']['User'] | undefined;
+	export let serverError = '';
+	export let organizations: components['schemas']['Organization'][] = [];
+
 	import { theme } from '../../lib/stores';
 	import GravatarImage from '$lib/utils/GravatarImage.svelte';
 
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { updateCurrentUser, updateOrganizations } from '../../lib/client';
-
 	import { pa } from '@accuser/svelte-plausible-analytics';
 	import ListOrganizationsAndProjects from '$lib/utils/ListOrganizationsAndProjects.svelte';
+	import type { components } from '$lib/api/v1';
 	const { addEvent } = pa;
 
 	function toggleTheme() {
 		addEvent('theme-toggle');
 		theme.set($theme === 'dark' ? 'light' : 'dark');
 	}
-
-	let serverError = '';
-	onMount(async () => {
-		if ($user && $organizations) {
-			return;
-		}
-
-		let results = await Promise.all([updateCurrentUser(), updateOrganizations()]);
-		if (results[0] === 'Unauthorized' || results[1] === 'Unauthorized') {
-			goto('/login');
-			return;
-		}
-
-		serverError = results[0] || results[1] || '';
-	});
 </script>
 
 <div class="drawer md:drawer-open">
@@ -59,11 +44,6 @@
 				<ul class="menu menu-horizontal hidden md:inline-block">
 					<li><a href="/projects">Projects</a></li>
 				</ul>
-				{#if $user?.admin}
-					<ul class="menu menu-horizontal hidden md:inline-block">
-						<li><a href="/admin">Admin</a></li>
-					</ul>
-				{/if}
 			</div>
 
 			<label class="swap swap-rotate mr-5">
@@ -105,7 +85,7 @@
 			<div class="dropdown dropdown-hover dropdown-end">
 				<div class="avatar">
 					<div tabindex="0" role="button" class="w-10 rounded-full">
-						<GravatarImage email={$user?.email} />
+						<GravatarImage email={user?.email} />
 					</div>
 				</div>
 				<ul
@@ -119,7 +99,7 @@
 			</div>
 		</div>
 		<div class="m-4">
-			{#if serverError !== ''}
+			{#if serverError}
 				<div role="alert" class="alert alert-error mb-4">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -148,13 +128,10 @@
 
 			<li class="mb-4 md:hidden"><a href="/dashboard">Organizations</a></li>
 			<li class="mb-4 md:hidden"><a href="/dashboard">Projects</a></li>
-			{#if $user?.admin}
-				<li class="mb-4 md:hidden"><a href="/dashboard">Admin</a></li>
-			{/if}
 
 			<li class="divider md:hidden m-0 flex-nowrap shrink-0 opacity-100 bg-inherit" />
 
-			<ListOrganizationsAndProjects />
+			<ListOrganizationsAndProjects {organizations} />
 		</ul>
 	</div>
 </div>

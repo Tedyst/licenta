@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { organizations } from '$lib/stores';
+	export let organizations: components['schemas']['Organization'][] = [];
+
 	import { page } from '$app/stores';
+	import type { components } from '$lib/api/v1';
 
 	function shouldBeChecked(i: number, orgName: string) {
 		if ($page.data?.orgName) return $page.data.orgName === orgName;
@@ -8,11 +10,11 @@
 	}
 </script>
 
-{#if $organizations}
-	{#if $organizations.length === 0}
+{#if organizations}
+	{#if organizations.length === 0}
 		<div class="text-center text-md font-medium">No organizations found</div>
 	{/if}
-	{#each $organizations as organization, i}
+	{#each organizations as organization, i}
 		{#if i !== 0}
 			<li class="divider m-0 flex-nowrap shrink-0 opacity-100 bg-inherit" />
 		{/if}

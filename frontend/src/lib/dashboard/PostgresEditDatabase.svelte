@@ -1,16 +1,17 @@
 <script lang="ts">
+	export let project: components['schemas']['Project'] | null;
 	import type { components } from '$lib/api/v1';
 	import client from '$lib/client';
-	import { currentProject, currentPostgresDatabases } from '$lib/stores';
 
 	import { toast } from 'svelte-daisy-toast';
 	import BaseEditItem from './BaseEditItem.svelte';
 	import type { Field } from './BaseEditItem.svelte';
+	import { invalidate } from '$app/navigation';
 
 	export let postgresDatabase: components['schemas']['PostgresDatabase'];
 
 	const editAction = (id: number, data: Record<Field, string>) => {
-		if (!$currentProject) return;
+		if (!project) return;
 
 		client
 			.PATCH('/postgres/{id}', {
@@ -33,10 +34,7 @@
 					});
 					return;
 				}
-				let postgresDatabasesCopy = [...$currentPostgresDatabases];
-				let index = postgresDatabasesCopy.findIndex((md) => md.id === postgresDatabase.id);
-				postgresDatabasesCopy[index] = response.data?.postgres_database;
-				$currentPostgresDatabases = postgresDatabasesCopy;
+				invalidate('app:postgres');
 				toast({
 					closable: true,
 					duration: 5000,

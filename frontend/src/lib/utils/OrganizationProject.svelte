@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { components } from '$lib/api/v1';
 	import client from '$lib/client';
 	import { toast } from 'svelte-daisy-toast';
@@ -10,9 +11,9 @@
 	let dialog: HTMLDialogElement;
 
 	let deleteProject = () => {
-		client.DELETE('/projects/{id}', { params: { path: { id: project.id } } }).then((res) => {
+		client.DELETE('/projects/{id}', { params: { path: { id: project.id } } }).then(async (res) => {
 			if (res.response.status === 204) {
-				window.location.href = '/dashboard/{organization.name}';
+				await goto(`/dashboard/${organization.name}`);
 				toast({
 					closable: true,
 					duration: 5000,

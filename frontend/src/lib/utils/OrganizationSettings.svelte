@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import type { components } from '$lib/api/v1';
 	import client from '$lib/client';
 	import { toast } from 'svelte-daisy-toast';
@@ -19,8 +20,8 @@
 						title: 'Success',
 						type: 'success'
 					});
-					setTimeout(() => {
-						window.location.href = '/organizations';
+					setTimeout(async () => {
+						await goto('/organizations');
 					}, 2000);
 				} else {
 					toast({

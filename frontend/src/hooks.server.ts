@@ -1,5 +1,6 @@
 import { minify } from 'html-minifier';
 import { building } from '$app/environment';
+import type { HandleFetch } from '@sveltejs/kit';
 
 const minification_options = {
 	collapseBooleanAttributes: true,
@@ -25,6 +26,9 @@ export async function handle({ event, resolve }) {
 	let page = '';
 
 	return resolve(event, {
+		filterSerializedResponseHeaders: (name: string, value: string) => {
+			return true;
+		},
 		transformPageChunk: ({ html, done }) => {
 			page += html;
 			if (done) {

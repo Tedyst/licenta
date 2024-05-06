@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { user } from '$lib/stores';
+	import type { PageData } from './$types';
+	export let data: PageData;
 </script>
 
 <div>
 	<h1>Dashboard</h1>
 
-	<p>Logged in as {$user?.username}</p>
+	<p>Logged in as {data.user.username}</p>
 </div>
 
 <svelte:head>

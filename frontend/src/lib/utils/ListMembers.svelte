@@ -2,7 +2,6 @@
 	import type { components } from '$lib/api/v1';
 	import GravatarImage from './GravatarImage.svelte';
 	import TrashCan from 'svelte-material-icons/TrashCan.svelte';
-	import { user } from '$lib/stores';
 
 	let modal: HTMLDialogElement | null = null;
 	let modalUser: components['schemas']['OrganizationUser'] | null = null;
@@ -11,9 +10,12 @@
 	let addUserInput: string = '';
 
 	export let members: components['schemas']['OrganizationUser'][];
+	export let currentUser: components['schemas']['User'] | null = null;
 
 	let currentUserRole = members
-		.filter((member: components['schemas']['OrganizationUser']) => member.email === $user?.email)
+		.filter(
+			(member: components['schemas']['OrganizationUser']) => member.email === currentUser?.email
+		)
 		?.at(0)?.role;
 	const canEditOwner = currentUserRole === 'Owner';
 	const canEditAdmin = currentUserRole === 'Owner' || currentUserRole === 'Admin';
@@ -74,7 +76,7 @@
 						<td>
 							<select
 								class="select w-full max-w-xs"
-								disabled={!canEditNone}
+								disabled={!canEditNone || member.email === currentUser?.email}
 								on:change={onRoleChange(member.id)}
 							>
 								<option selected={member.role === 'Owner'} disabled={!canEditOwner}>Owner</option>

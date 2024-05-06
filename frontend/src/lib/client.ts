@@ -1,15 +1,9 @@
-import createClient, {
-	type MergedOptions,
-	type Middleware,
-	type MiddlewareRequest
-} from 'openapi-fetch';
+import createClient, { type MiddlewareRequest } from 'openapi-fetch';
 import type { paths } from './api/v1';
-import { organizations, user } from './stores';
 import type {
 	PublicKeyCredentialCreationOptionsJSON,
 	PublicKeyCredentialRequestOptionsJSON
 } from './webauthn';
-import { goto } from '$app/navigation';
 import { toast } from 'svelte-daisy-toast';
 
 export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
@@ -264,39 +258,6 @@ export async function requestResetPassword(
 	});
 }
 
-export async function updateOrganizations(): Promise<string> {
-	return await client
-		.GET('/organizations')
-		.then((res) => {
-			if (res.data?.success) {
-				organizations.set(res.data.organizations);
-				return '';
-			}
-			return res.error?.message || 'Internal server error';
-		})
-		.catch((err) => {
-			return err.message;
-		});
-}
-
-export async function updateCurrentUser(): Promise<string> {
-	return await client
-		.GET('/users/me')
-		.then((res) => {
-			if (res.data?.success) {
-				user.set(res.data.user);
-				return '';
-			} else if (res.data?.success === false) {
-				goto('/login');
-				return '';
-			}
-			return res.error?.message || 'Internal server error';
-		})
-		.catch((err) => {
-			return err.message;
-		});
-}
-
 export type RegisterUserResponse = {
 	success: boolean;
 	errors?: {
@@ -328,16 +289,18 @@ export async function registerUser({ username, email, password }: RegisterUserRe
 	});
 }
 
-const csrfMiddlware = {
+export const csrfMiddlware = {
 	token: '',
 	async onRequest(req: MiddlewareRequest) {
 		const { headers, ...reqOptions } = req;
 
-		await navigator.locks.request('csrf', async () => {
-			if (this.token === '') {
-				this.token = (await getCSRFToken(req.url)) || 'null';
-			}
-		});
+		if (typeof window !== 'undefined') {
+			await navigator.locks.request('csrf', async () => {
+				if (this.token === '') {
+					this.token = (await getCSRFToken(req.url)) || 'null';
+				}
+			});
+		}
 
 		return new Request(req, {
 			...reqOptions,
@@ -348,16 +311,11 @@ const csrfMiddlware = {
 		});
 	},
 	async onResponse(res: Response) {
-		await navigator.locks.request('csrf', async () => {
-			if (res.headers.has('X-CSRF-Token')) {
-				this.token = res.headers.get('X-CSRF-Token') || '';
-			}
-		});
 		return res;
 	}
 };
 
-const client = createClient<paths>({
+export const client = createClient<paths>({
 	baseUrl: '/api/v1'
 });
 

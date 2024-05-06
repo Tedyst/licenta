@@ -1,21 +1,24 @@
 <script lang="ts">
-	import client, { updateOrganizations } from '$lib/client';
-	import { currentOrganization } from '$lib/stores';
+	import type { PageData } from './$types';
+	export let data: PageData;
+
 	import ListMembers from '$lib/utils/ListMembers.svelte';
 	import OrganizationProject from '$lib/utils/OrganizationProject.svelte';
 	import OrganizationSettings from '$lib/utils/OrganizationSettings.svelte';
 	import { toast } from 'svelte-daisy-toast';
+	import { invalidate } from '$app/navigation';
+	import client from '$lib/client';
 
 	let editRoleAction = (role: 'Owner' | 'Admin' | 'Viewer' | 'None', userId: number) => {
-		if (!$currentOrganization) return;
+		if (!data.organization) return;
 		client
 			.POST('/organizations/{id}/edit-user', {
-				params: { path: { id: $currentOrganization?.id } },
+				params: { path: { id: data.organization?.id } },
 				body: { id: userId, role }
 			})
 			.then((res) => {
 				if (res.data?.success) {
-					updateOrganizations();
+					invalidate('app:organizationinfo');
 					toast({
 						closable: true,
 						duration: 5000,
@@ -36,15 +39,15 @@
 	};
 
 	let addUserAction = (email: string) => {
-		if (!$currentOrganization) return;
+		if (!data.organization) return;
 		client
 			.POST('/organizations/{id}/add-user', {
-				params: { path: { id: $currentOrganization?.id } },
+				params: { path: { id: data.organization?.id } },
 				body: { email }
 			})
 			.then((res) => {
 				if (res.data?.success) {
-					updateOrganizations();
+					invalidate('app:organizationinfo');
 					toast({
 						closable: true,
 						duration: 5000,
@@ -65,14 +68,14 @@
 	};
 
 	let deleteUserAction = (userId: number) => {
-		if (!$currentOrganization) return;
+		if (!data.organization) return;
 		client
 			.DELETE('/organizations/{id}/delete-user', {
-				params: { path: { id: $currentOrganization?.id } },
+				params: { path: { id: data.organization?.id } },
 				body: { id: userId }
 			})
 			.then((res) => {
-				updateOrganizations();
+				invalidate('app:organizationinfo');
 				if (res.response.status === 204) {
 					toast({
 						closable: true,
@@ -95,16 +98,16 @@
 </script>
 
 <svelte:head>
-	<title>{$currentOrganization?.name} | Dashboard | Licenta</title>
+	<title>{data.organization?.name} | Dashboard | Licenta</title>
 </svelte:head>
 
-{#if $currentOrganization === null}
+{#if data.organization === null}
 	This organization does not exist or you do not have permission to see it
 {:else}
 	<div class="hero bg-base-200">
 		<div class="hero-content text-center">
 			<div class="max-w-md">
-				<h1 class="text-5xl font-bold">{$currentOrganization.name}</h1>
+				<h1 class="text-5xl font-bold">{data.organization.name}</h1>
 				<p class="py-6">
 					Here are all the projects that belong to this organization. You can create new projects
 					and manage existing ones.
@@ -113,11 +116,11 @@
 		</div>
 	</div>
 
-	{#each $currentOrganization.projects as project}
-		<OrganizationProject organization={$currentOrganization} {project} />
+	{#each data.organization.projects as project}
+		<OrganizationProject organization={data.organization} {project} />
 	{/each}
 
-	<a href="/dashboard/{$currentOrganization.name}/create">
+	<a href="/dashboard/{data.organization.name}/create">
 		<div class="card ml-4 h-30 max-w-full bg-base-100 outline-dotted outline-secondary mt-4">
 			<div class="card-body flex-row pr-4">
 				<div class="flex flex-grow align-middle items-start flex-col self-center">
@@ -130,13 +133,14 @@
 	<div class="divider" />
 
 	<div class="flex-col flex lg:flex-row w-full">
-		<OrganizationSettings organization={$currentOrganization} />
+		<OrganizationSettings organization={data.organization} />
 		<div class="divider divider-horizontal" />
 		<ListMembers
 			{editRoleAction}
 			{addUserAction}
 			{deleteUserAction}
-			members={$currentOrganization.members}
+			members={data.organization.members}
+			currentUser={data.user}
 		/>
 	</div>
 {/if}

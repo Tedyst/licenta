@@ -1,23 +1,26 @@
 <script lang="ts">
-	import { currentOrganization } from '$lib/stores';
+	import type { PageData } from './$types';
+	export let data: PageData;
+
 	import client from '$lib/client';
+	import { goto, invalidate } from '$app/navigation';
 
 	let projectName = '';
 	let error = '';
 
 	function createProject() {
-		if ($currentOrganization === null) {
+		if (data.organization === null) {
 			error = 'Organization not found';
 			return;
 		}
 		client
 			.POST('/projects', {
-				body: { name: projectName.toLowerCase(), organization_id: $currentOrganization.id }
+				body: { name: projectName.toLowerCase(), organization_id: data.organization.id }
 			})
-			.then((res) => {
-				console.log(res);
+			.then(async (res) => {
+				await invalidate('app:organizationinfo');
 				if (res.data?.success) {
-					window.location.href = `/dashboard/${$currentOrganization?.name}/${res.data.project.name}`;
+					await goto(`/dashboard/${data.organization?.name}/${res.data.project.name}`);
 				} else {
 					error = res.error?.message || 'Internal server error';
 				}
@@ -30,7 +33,7 @@
 </script>
 
 <svelte:head>
-	<title>Create Project | {$currentOrganization?.name} | Dashboard | Licenta</title>
+	<title>Create Project | {data.organization?.name} | Dashboard | Licenta</title>
 </svelte:head>
 
 <div class="hero bg-base-200">

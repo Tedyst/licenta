@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { organizations } from '$lib/stores';
+	import type { PageData } from './$types';
+	export let data: PageData;
 </script>
 
-{#if $organizations === null}
+{#if data.organizations === null}
 	<div class="skeleton h-36 m-0 ml-4 mt-2" />
 	<div class="skeleton h-36 m-0 ml-4 mt-2" />
 {:else}
-	{#each $organizations as organization}
+	{#each data.organizations as organization}
 		<a href="/dashboard/{organization.name}">
 			<div class="card ml-4 h-30 max-w-full mt-2 bg-base-100">
 				<div class="card-body flex-row pr-4">

@@ -1,26 +1,25 @@
 <script lang="ts">
-	import client, { updateOrganizations } from '$lib/client';
+	import { goto, invalidate } from '$app/navigation';
+	import client from '$lib/client';
 
 	let organizationName = '';
 	let error = '';
 
-	function createOrganization() {
+	const createOrganization = () => {
 		client
 			.POST('/organizations', { body: { name: organizationName.toLowerCase() } })
-			.then((res) => {
-				console.log(res);
+			.then(async (res) => {
+				await invalidate('app:organizationinfo');
 				if (res.data?.success) {
-					window.location.href = `/dashboard/${res.data.organization.name}`;
+					await goto(`/dashboard/${res.data.organization.name}`);
 				} else {
 					error = res.error?.message || 'Internal server error';
 				}
 			})
 			.catch((err) => {
-				console.log(err);
 				error = err.toString();
-			})
-			.then(() => updateOrganizations());
-	}
+			});
+	};
 </script>
 
 <div class="hero bg-base-200">

@@ -1,16 +1,18 @@
 <script lang="ts">
+	export let project: components['schemas']['Project'] | null;
+
 	import type { components } from '$lib/api/v1';
 	import client from '$lib/client';
-	import { currentProject, currentMysqlDatabases } from '$lib/stores';
 
 	import { toast } from 'svelte-daisy-toast';
 	import BaseEditItem from './BaseEditItem.svelte';
 	import type { Field } from './BaseEditItem.svelte';
+	import { invalidate } from '$app/navigation';
 
 	export let mysqlDatabase: components['schemas']['MysqlDatabase'];
 
 	const editAction = (id: number, data: Record<Field, string>) => {
-		if (!$currentProject) return;
+		if (!project) return;
 
 		client
 			.PATCH('/mysql/{id}', {
@@ -33,10 +35,7 @@
 					});
 					return;
 				}
-				let mysqlDatabasesCopy = [...$currentMysqlDatabases];
-				let index = mysqlDatabasesCopy.findIndex((md) => md.id === mysqlDatabase.id);
-				mysqlDatabasesCopy[index] = response.data?.mysql_database;
-				$currentMysqlDatabases = mysqlDatabasesCopy;
+				invalidate('app:mysql');
 				toast({
 					closable: true,
 					duration: 5000,

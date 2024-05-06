@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { registerUser } from '$lib/client';
 	import { validateEmail, validatePassword, validateUsername } from '$lib/login/login';
 	import Register from '$lib/register/register.svelte';
@@ -31,7 +32,7 @@
 			password: formData.get('password') as string
 		});
 		if (response.success) {
-			window.location.href = '/login';
+			await goto('/login');
 		} else {
 			errors.username = response.errors?.username?.join(', ') || null;
 			errors.email = response.errors?.email?.join(', ') || null;

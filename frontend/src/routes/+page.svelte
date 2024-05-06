@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { theme } from '../lib/stores';
-	import { user } from '$lib/stores';
 
 	import { pa } from '@accuser/svelte-plausible-analytics';
 

@@ -1,13 +1,15 @@
 <script lang="ts">
+	export let project: components['schemas']['Project'] | null;
 	import client from '$lib/client';
-	import { currentProject, currentPostgresDatabases } from '$lib/stores';
 
 	import { toast } from 'svelte-daisy-toast';
 	import BaseCreateDatabase from './BaseCreateDatabase.svelte';
 	import type { Field } from './BaseCreateDatabase.svelte';
+	import { invalidate } from '$app/navigation';
+	import type { components } from '$lib/api/v1';
 
 	let createAction = (data: Record<Field, string>) => {
-		if (!$currentProject) return;
+		if (!project) return;
 
 		client
 			.POST('/postgres', {
@@ -16,7 +18,7 @@
 					host: data.hostname,
 					password: data.password,
 					port: parseInt(data.port),
-					project_id: $currentProject?.id,
+					project_id: project?.id,
 					username: data.username
 				}
 			})
@@ -30,10 +32,7 @@
 					});
 					return;
 				}
-				$currentPostgresDatabases = [
-					...$currentPostgresDatabases,
-					response.data?.postgres_database
-				];
+				invalidate('app:postgres');
 				toast({
 					closable: true,
 					duration: 5000,

@@ -1,13 +1,16 @@
 <script lang="ts">
+	export let project: components['schemas']['Project'];
+
 	import client from '$lib/client';
-	import { currentProject, currentMysqlDatabases } from '$lib/stores';
 
 	import { toast } from 'svelte-daisy-toast';
 	import BaseCreateDatabase from './BaseCreateDatabase.svelte';
 	import type { Field } from './BaseCreateDatabase.svelte';
+	import type { components } from '$lib/api/v1';
+	import { invalidate } from '$app/navigation';
 
 	let createAction = (data: Record<Field, string>) => {
-		if (!$currentProject) return;
+		if (!project) return;
 
 		client
 			.POST('/mysql', {
@@ -16,7 +19,7 @@
 					host: data.hostname,
 					password: data.password,
 					port: parseInt(data.port),
-					project_id: $currentProject?.id,
+					project_id: project?.id,
 					username: data.username
 				}
 			})
@@ -30,7 +33,7 @@
 					});
 					return;
 				}
-				$currentMysqlDatabases = [...$currentMysqlDatabases, response.data?.mysql_database];
+				invalidate('app:mysql');
 				toast({
 					closable: true,
 					duration: 5000,

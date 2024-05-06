@@ -13,7 +13,7 @@ func HandleOptions(origin string) func(http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			}
-			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 			w.Header().Set("X-CSRF-Token", nosurf.Token(r))
