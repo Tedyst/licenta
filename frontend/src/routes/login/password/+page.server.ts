@@ -33,6 +33,6 @@ export const actions = {
 		} else if (response.webauthn) {
 			redirect(302, '/login/webauthn');
 		}
-		return { error: response.message || null };
+		return { error: response.error || null };
 	}
 } satisfies Actions;

@@ -1,56 +1,46 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import ForgotPassword from '$lib/login/forgot-password.svelte';
-	import { username } from '$lib/login/login';
-	import { requestResetPassword } from '$lib/client';
+	import type { ActionData, PageData } from './$types';
+	import { enhance } from '$app/forms';
 
-	let error: string | null = null;
-
-	let promise: Promise<void> | null = null;
-
-	let onSubmit = (e: SubmitEvent) => {
-		if ($username === null) {
-			return;
-		}
-		promise = requestResetPassword($username)
-			.then((response) => {
-				if (response.success) {
-					setTimeout(() => {
-						goto('/login');
-					}, 2000);
-				}
-			})
-			.catch((e) => {
-				console.log(e);
-				error = e.message;
-			});
-	};
+	export let form: ActionData;
+	export let data: PageData;
 </script>
 
-{#if promise == null}
-	<ForgotPassword
-		{error}
-		on:submit={onSubmit}
-		loading={false}
-		sent={false}
-		bind:username={$username}
-	/>
-{:else}
-	{#await promise}
-		<ForgotPassword
-			{error}
-			on:submit={onSubmit}
-			loading={true}
-			sent={false}
-			bind:username={$username}
+<form method="POST" use:enhance>
+	<div class="form-control">
+		{#if form?.message}
+			<div class="label text-success text-xs">
+				{form?.message}
+			</div>
+		{/if}
+		<label class="label" for="username">
+			<span class="label-text">Username</span>
+		</label>
+		<input
+			type="text"
+			placeholder="username"
+			class="input input-bordered {form?.error
+				? 'wiggle input-error'
+				: ''} transition-colors duration-300 ease-in-out"
+			id="username"
+			name="username"
+			value={data?.username}
 		/>
-	{:then}
-		<ForgotPassword
-			{error}
-			on:submit={onSubmit}
-			loading={false}
-			sent={true}
-			bind:username={$username}
-		/>
-	{/await}
-{/if}
+		{#if form?.error}
+			<div class="label text-error text-xs">
+				{form?.error}
+			</div>
+		{/if}
+
+		<div class="label">
+			<a class="label-text-alt link link-hover" href="/login?username={data.username}">
+				Click here to go back to the login page
+			</a>
+		</div>
+	</div>
+	<div class="form-control mt-6">
+		<button class="btn duration-300 ease-in-out btn-primary" type="submit">
+			Request password reset
+		</button>
+	</div>
+</form>

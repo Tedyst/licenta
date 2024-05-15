@@ -117,7 +117,7 @@ type LoginResponse = {
 	success: boolean;
 	totp?: boolean;
 	webauthn?: boolean;
-	message?: string;
+	error?: string;
 };
 
 export async function login(
@@ -244,15 +244,21 @@ export type RequestResetPasswordResponse = {
 };
 
 export async function requestResetPassword(
-	username: string
+	username: string,
+	f: typeof fetch = fetch,
+	baseURL: string = env.PUBLIC_BACKEND_URL
 ): Promise<RequestResetPasswordResponse> {
-	return await csrfFetch('/api/auth/recover', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+	return await csrfFetch(
+		baseURL + '/api/auth/recover',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username })
 		},
-		body: JSON.stringify({ username })
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response.ok) {
 			return response.json() as Promise<RequestResetPasswordResponse>;
 		}

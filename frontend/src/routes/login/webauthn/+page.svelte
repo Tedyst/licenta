@@ -1,6 +1,5 @@
 <script>
 	import LoginWebauthn from '$lib/login/login-webauthn.svelte';
-	import { username } from '$lib/login/login';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { webauthnLoginBegin, webauthnLoginFinish } from '$lib/client';
@@ -9,8 +8,10 @@
 		LoginPublicKeyCredentialToJSON
 	} from '$lib/webauthn';
 
+	const username = '';
+
 	const webauthnLogin = async () => {
-		const loginStartData = await webauthnLoginBegin($username);
+		const loginStartData = await webauthnLoginBegin(username);
 		const attestation = JSONtoPublicKeyCredentialRequestOptions(loginStartData.response);
 		const credential = await navigator.credentials.get({ publicKey: attestation });
 		const sendData = LoginPublicKeyCredentialToJSON(credential);

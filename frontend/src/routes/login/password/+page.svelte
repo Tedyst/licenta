@@ -41,7 +41,9 @@
 		</div>
 	</div>
 	<div class="label mt-3">
-		<a href="/login/forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
+		<a href="/login/forgot-password?username={data.username}" class="label-text-alt link link-hover"
+			>Forgot password?</a
+		>
 	</div>
 	<div class="label mt-0 pt-0">
 		<a href="/login" class="label-text-alt link link-hover"

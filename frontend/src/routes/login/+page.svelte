@@ -1,8 +1,9 @@
 <script lang="ts">
-	import type { ActionData } from './$types';
+	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
 
 	export let form: ActionData;
+	export let data: PageData;
 </script>
 
 <form method="POST" use:enhance>
@@ -26,6 +27,7 @@
 			id="username"
 			name="username"
 			autocomplete="username"
+			value={data?.username}
 			autofocus
 		/>
 	</div>
