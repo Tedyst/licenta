@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import LoginSuccessful from '$lib/login/login-successful.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -10,4 +9,8 @@
 	});
 </script>
 
-<LoginSuccessful />
+<h1 class="text-2xl font-bold">You are now logged in</h1>
+
+<h1 class="text-sm">Redirecting in 2 seconds...</h1>
+
+<h1 class="text-sm">If you are not redirected, click <a href="/">here</a></h1>

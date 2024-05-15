@@ -4,34 +4,30 @@ import type {
 	PublicKeyCredentialCreationOptionsJSON,
 	PublicKeyCredentialRequestOptionsJSON
 } from './webauthn';
-import { toast } from 'svelte-daisy-toast';
+import { env } from '$env/dynamic/public';
 
-export async function csrfFetch(input: RequestInfo | URL, init?: RequestInit | undefined) {
-	const token = await getCSRFToken(input);
-	return await fetch(input, {
+export async function csrfFetch(
+	input: RequestInfo | URL,
+	init?: RequestInit | undefined,
+	f: typeof fetch = fetch
+) {
+	const token = await getCSRFToken(input, f);
+	return await f(input, {
 		...init,
 		headers: {
 			...init?.headers,
 			'X-CSRF-Token': token || ''
 		}
-	}).catch((err) => {
-		toast({
-			closable: true,
-			duration: 5000,
-			message: 'Failed to fetch',
-			title: 'Error',
-			type: 'error'
-		});
-		throw err;
 	});
 }
 
-async function getCSRFToken(input: RequestInfo | URL) {
-	const optionsResponse = await fetch(input, {
+async function getCSRFToken(input: RequestInfo | URL, f: typeof fetch = fetch) {
+	const optionsResponse = await f(input, {
 		method: 'OPTIONS',
 		headers: {
 			'Content-Type': 'application/json'
-		}
+		},
+		credentials: 'include'
 	});
 	return optionsResponse.headers.get('X-CSRF-Token');
 }
@@ -127,15 +123,21 @@ type LoginResponse = {
 export async function login(
 	username: string,
 	password: string,
-	remember: boolean
+	remember: boolean,
+	f: typeof fetch = fetch,
+	baseURL: string = env.PUBLIC_BACKEND_URL
 ): Promise<LoginResponse> {
-	return await csrfFetch('/api/auth/login', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+	return await csrfFetch(
+		baseURL + '/api/auth/login',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username, password, rm: String(remember) })
 		},
-		body: JSON.stringify({ username, password, rm: String(remember) })
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response?.ok) {
 			return response.json() as Promise<LoginResponse>;
 		}
@@ -274,14 +276,22 @@ export type RegisterUserRequest = {
 	password: string;
 };
 
-export async function registerUser({ username, email, password }: RegisterUserRequest) {
-	return await csrfFetch('/api/auth/register', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+export async function register(
+	{ username, email, password }: RegisterUserRequest,
+	f: typeof fetch = fetch,
+	baseURL: string = env.PUBLIC_BACKEND_URL
+) {
+	return await csrfFetch(
+		baseURL + '/api/auth/register',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username, email, password, confirm_password: password })
 		},
-		body: JSON.stringify({ username, email, password, confirm_password: password })
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response?.ok) {
 			return response.json() as Promise<RegisterUserResponse>;
 		}
@@ -289,36 +299,34 @@ export async function registerUser({ username, email, password }: RegisterUserRe
 	});
 }
 
-export const csrfMiddlware = {
-	token: '',
-	async onRequest(req: MiddlewareRequest) {
-		const { headers, ...reqOptions } = req;
+export const clientFromFetch = (fetch: typeof csrfFetch, origin: string) => {
+	const client = createClient<paths>({
+		baseUrl: origin + '/api/v1',
+		fetch
+	});
+	const csrfMiddleware = {
+		async onRequest(req: MiddlewareRequest) {
+			const { headers, ...reqOptions } = req;
 
-		if (typeof window !== 'undefined') {
-			await navigator.locks.request('csrf', async () => {
-				if (this.token === '') {
-					this.token = (await getCSRFToken(req.url)) || 'null';
-				}
+			const token = (await getCSRFToken(req.url, fetch)) || 'null';
+
+			return new Request(req, {
+				...reqOptions,
+				headers: {
+					...headers,
+					'X-CSRF-Token': token
+				},
+				credentials: 'include'
 			});
+		},
+		async onResponse(res: Response) {
+			return res;
 		}
-
-		return new Request(req, {
-			...reqOptions,
-			headers: {
-				...headers,
-				'X-CSRF-Token': this.token
-			}
-		});
-	},
-	async onResponse(res: Response) {
-		return res;
-	}
+	};
+	client.use(csrfMiddleware);
+	return client;
 };
 
-export const client = createClient<paths>({
-	baseUrl: '/api/v1'
-});
-
-client.use(csrfMiddlware);
+export const client = clientFromFetch(fetch, env.PUBLIC_BACKEND_URL);
 
 export default client;

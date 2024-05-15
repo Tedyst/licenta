@@ -1,54 +1,87 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { registerUser } from '$lib/client';
-	import { validateEmail, validatePassword, validateUsername } from '$lib/login/login';
-	import Register from '$lib/register/register.svelte';
+	import type { ActionData } from './$types';
+	import { enhance } from '$app/forms';
 
-	let errors: {
-		username: string | null;
-		email: string | null;
-		password: string | null;
-	} = {
-		username: null,
-		email: null,
-		password: null
-	};
-
-	const onSubmit = async (e: SubmitEvent) => {
-		e.preventDefault();
-		const form = e.target as HTMLFormElement;
-		const formData = new FormData(form);
-		errors.username = validateUsername(formData.get('username') as string);
-		errors.email = validateEmail(formData.get('email') as string);
-		errors.password = validatePassword(formData.get('password') as string);
-
-		if (errors.username || errors.email || errors.password) {
-			return;
-		}
-
-		let response = await registerUser({
-			username: formData.get('username') as string,
-			email: formData.get('email') as string,
-			password: formData.get('password') as string
-		});
-		if (response.success) {
-			await goto('/login');
-		} else {
-			errors.username = response.errors?.username?.join(', ') || null;
-			errors.email = response.errors?.email?.join(', ') || null;
-			errors.password = response.errors?.password?.join(', ') || null;
-		}
-	};
+	export let form: ActionData;
 </script>
 
-<Register
-	{errors}
-	on:submit={onSubmit}
-	on:input={() => {
-		errors = {
-			username: null,
-			email: null,
-			password: null
-		};
-	}}
-/>
+<form method="POST" use:enhance>
+	<div class="form-control mt-2">
+		{#if form?.usernameError}
+			<label class="label" for="username">
+				<span class="label-text text-error">{form?.usernameError}</span>
+			</label>
+		{:else}
+			<label class="label" for="username">
+				<span class="label-text">Username</span>
+			</label>
+		{/if}
+		<!-- svelte-ignore a11y-autofocus -->
+		<input
+			type="text"
+			placeholder="Username"
+			class="input input-bordered {form?.usernameError
+				? 'wiggle input-error'
+				: ''} transition-colors duration-300 ease-in-out"
+			id="username"
+			name="username"
+			autocomplete="username"
+			autofocus
+		/>
+	</div>
+	<div class="form-control mt-2">
+		{#if form?.emailError}
+			<label class="label" for="email">
+				<span class="label-text text-error">{form?.emailError}</span>
+			</label>
+		{:else}
+			<label class="label" for="email">
+				<span class="label-text">Email</span>
+			</label>
+		{/if}
+		<input
+			type="text"
+			placeholder="Email"
+			class="input input-bordered {form?.emailError
+				? 'wiggle input-error'
+				: ''} transition-colors duration-300 ease-in-out"
+			id="email"
+			name="email"
+			autocomplete="email"
+		/>
+	</div>
+	<div class="form-control mt-2">
+		{#if form?.passwordError}
+			<label class="label" for="password">
+				<span class="label-text text-error">{form?.passwordError}</span>
+			</label>
+		{:else}
+			<label class="label" for="password">
+				<span class="label-text">Password</span>
+			</label>
+		{/if}
+		<input
+			type="password"
+			placeholder="Password"
+			class="input input-bordered {form?.passwordError
+				? 'wiggle input-error'
+				: ''} transition-colors duration-300 ease-in-out"
+			id="password"
+			name="password"
+		/>
+	</div>
+	<div class="form-control mt-6">
+		<button
+			class="btn {!form?.usernameError && !form?.emailError && !form?.passwordError && !form?.error
+				? 'btn-primary'
+				: 'btn-error'} transition-colors duration-300 ease-in-out"
+			type="submit"
+		>
+			{#if form?.error}
+				{form.error}
+			{:else}
+				Register
+			{/if}
+		</button>
+	</div>
+</form>

@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
-		"build": "npm run generate && vite build && npm run postbuild",
+		"build": "npm run generate && vite build",
 		"preview": "vite preview",
 		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -13,7 +13,6 @@
 		"format": "prettier --plugin-search-dir . --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
-		"postbuild": "npx svelte-sitemap --domain https://licenta.tedyst.ro",
 		"generate": "npx openapi-typescript ../api/v1/spec.yaml -o ./src/lib/api/v1.d.ts"
 	},
 	"devDependencies": {

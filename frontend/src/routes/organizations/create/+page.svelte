@@ -1,25 +1,9 @@
 <script lang="ts">
-	import { goto, invalidate } from '$app/navigation';
-	import client from '$lib/client';
+	import { applyAction, enhance } from '$app/forms';
+	import { invalidate } from '$app/navigation';
+	import type { ActionData } from './$types';
 
-	let organizationName = '';
-	let error = '';
-
-	const createOrganization = () => {
-		client
-			.POST('/organizations', { body: { name: organizationName.toLowerCase() } })
-			.then(async (res) => {
-				await invalidate('app:organizationinfo');
-				if (res.data?.success) {
-					await goto(`/dashboard/${res.data.organization.name}`);
-				} else {
-					error = res.error?.message || 'Internal server error';
-				}
-			})
-			.catch((err) => {
-				error = err.toString();
-			});
-	};
+	export let form: ActionData;
 </script>
 
 <div class="hero bg-base-200">
@@ -33,9 +17,14 @@
 		</div>
 		<div class="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
 			<form
+				method="POST"
 				class="card-body"
-				on:submit|preventDefault={createOrganization}
-				on:input={() => (error = '')}
+				use:enhance={() => {
+					return async ({ result }) => {
+						await invalidate('app:organizationinfo');
+						await applyAction(result);
+					};
+				}}
 			>
 				<div class="form-control">
 					<label class="label" for="organizationName">
@@ -43,17 +32,16 @@
 					</label>
 					<input
 						type="text"
-						id="organizationName"
-						placeholder="Name"
-						class="lowercase input input-bordered transition-colors duration-300 ease-in-out {error
+						name="organizationName"
+						placeholder="Organization Name"
+						class="input input-bordered transition-colors duration-300 ease-in-out {form?.error
 							? 'wiggle input-error'
-							: ''}"
+							: ''} lowercase placeholder-shown:normal-case"
 						required
-						bind:value={organizationName}
 					/>
-					{#if error}
+					{#if form?.error}
 						<div class="label text-error text-xs">
-							{error}
+							{form?.error}
 						</div>
 					{/if}
 				</div>
