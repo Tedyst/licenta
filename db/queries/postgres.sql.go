@@ -71,6 +71,16 @@ func (q *Queries) CreatePostgresScan(ctx context.Context, arg CreatePostgresScan
 	return &i, err
 }
 
+const deletePostgresDatabase = `-- name: DeletePostgresDatabase :exec
+DELETE FROM postgres_databases
+WHERE id = $1
+`
+
+func (q *Queries) DeletePostgresDatabase(ctx context.Context, id int64) error {
+	_, err := q.db.Exec(ctx, deletePostgresDatabase, id)
+	return err
+}
+
 const getPostgresDatabase = `-- name: GetPostgresDatabase :one
 SELECT
     postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.version, postgres_databases.created_at,

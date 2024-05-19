@@ -1402,6 +1402,44 @@ func (c *MockTransactionQuerierDeleteOrganizationCall) DoAndReturn(f func(contex
 	return c
 }
 
+// DeletePostgresDatabase mocks base method.
+func (m *MockTransactionQuerier) DeletePostgresDatabase(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeletePostgresDatabase", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeletePostgresDatabase indicates an expected call of DeletePostgresDatabase.
+func (mr *MockTransactionQuerierMockRecorder) DeletePostgresDatabase(ctx, id any) *MockTransactionQuerierDeletePostgresDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePostgresDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).DeletePostgresDatabase), ctx, id)
+	return &MockTransactionQuerierDeletePostgresDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierDeletePostgresDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierDeletePostgresDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierDeletePostgresDatabaseCall) Return(arg0 error) *MockTransactionQuerierDeletePostgresDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierDeletePostgresDatabaseCall) Do(f func(context.Context, int64) error) *MockTransactionQuerierDeletePostgresDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierDeletePostgresDatabaseCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierDeletePostgresDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteProject mocks base method.
 func (m *MockTransactionQuerier) DeleteProject(ctx context.Context, id int64) (*queries.Project, error) {
 	m.ctrl.T.Helper()

@@ -216,3 +216,35 @@ func (server *serverHandler) PostPostgres(ctx context.Context, request generated
 		},
 	}, nil
 }
+
+func (server *serverHandler) DeletePostgresId(ctx context.Context, request generated.DeletePostgresIdRequestObject) (generated.DeletePostgresIdResponseObject, error) {
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.Id)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("error getting postgres database: %w", err)
+	}
+
+	if err == pgx.ErrNoRows {
+		return generated.DeletePostgresId404JSONResponse{
+			Success: false,
+			Message: "Database not found",
+		}, nil
+	}
+
+	_, _, response, err := checkUserHasProjectPermission[generated.DeletePostgresId401JSONResponse](server, ctx, int64(database.PostgresDatabase.ProjectID), authorization.Admin)
+	if err != nil {
+		return nil, err
+	}
+
+	if response.Success == false {
+		return response, nil
+	}
+
+	err = server.DatabaseProvider.DeletePostgresDatabase(ctx, int64(database.PostgresDatabase.ID))
+	if err != nil {
+		return nil, err
+	}
+
+	return generated.DeletePostgresId204JSONResponse{
+		Success: true,
+	}, nil
+}

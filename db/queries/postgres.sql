@@ -84,3 +84,7 @@ INSERT INTO postgres_databases(project_id, database_name, host, port, username, 
 RETURNING
     *;
 
+-- name: DeletePostgresDatabase :exec
+DELETE FROM postgres_databases
+WHERE id = $1;
+

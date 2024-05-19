@@ -1145,6 +1145,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete postgres database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - postgres
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /mysql:
     get:
       summary: Get all mysql databases for a project
