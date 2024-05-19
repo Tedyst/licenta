@@ -1,37 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import type { components } from '$lib/api/v1';
-	import client from '$lib/client';
-	import { toast } from 'svelte-daisy-toast';
 	import TrashCan from 'svelte-material-icons/TrashCan.svelte';
 
 	export let organization: components['schemas']['Organization'];
 	export let project: components['schemas']['Project'];
-
-	let dialog: HTMLDialogElement;
-
-	let deleteProject = () => {
-		client.DELETE('/projects/{id}', { params: { path: { id: project.id } } }).then(async (res) => {
-			if (res.response.status === 204) {
-				await goto(`/dashboard/${organization.name}`);
-				toast({
-					closable: true,
-					duration: 5000,
-					message: 'Project deleted successfully',
-					title: 'Success',
-					type: 'success'
-				});
-			} else {
-				toast({
-					closable: true,
-					duration: 5000,
-					message: res.error?.message || 'Could not delete project',
-					title: 'Error',
-					type: 'error'
-				});
-			}
-		});
-	};
 </script>
 
 <a href="/dashboard/{organization.name}/{project.name}">
@@ -48,28 +20,13 @@
 				</div>
 			</div>
 			<div class="divider divider-horizontal" />
-			<button
+			<a
+				href="/dashboard/{organization.name}/{project.name}/delete"
 				type="button"
 				class="mr-5 inline place-content-center text-red-500"
-				on:click|preventDefault={() => dialog?.showModal()}
 			>
 				<TrashCan size={25} />
-			</button>
+			</a>
 		</div>
 	</div>
 </a>
-
-<dialog class="modal" bind:this={dialog}>
-	<div class="modal-box">
-		<h3 class="font-bold text-lg">
-			Are you sure that you want to delete the project <b>{project.name}</b>?
-		</h3>
-		<p class="py-4">Press ESC key or click the button below to close</p>
-		<div class="modal-action">
-			<form method="dialog">
-				<button class="btn">No</button>
-				<button class="btn bg-red-500 text-black" on:click={deleteProject}>Yes</button>
-			</form>
-		</div>
-	</div>
-</dialog>

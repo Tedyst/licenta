@@ -1,35 +1,9 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { applyAction, enhance } from '$app/forms';
+	import { invalidate } from '$app/navigation';
+	import type { PageData, ActionData } from './$types';
 	export let data: PageData;
-
-	import client from '$lib/client';
-	import { goto, invalidate } from '$app/navigation';
-
-	let projectName = '';
-	let error = '';
-
-	function createProject() {
-		if (data.organization === null) {
-			error = 'Organization not found';
-			return;
-		}
-		client
-			.POST('/projects', {
-				body: { name: projectName.toLowerCase(), organization_id: data.organization.id }
-			})
-			.then(async (res) => {
-				await invalidate('app:organizationinfo');
-				if (res.data?.success) {
-					await goto(`/dashboard/${data.organization?.name}/${res.data.project.name}`);
-				} else {
-					error = res.error?.message || 'Internal server error';
-				}
-			})
-			.catch((err) => {
-				console.log(err);
-				error = err.toString();
-			});
-	}
+	export let form: ActionData;
 </script>
 
 <svelte:head>
@@ -47,10 +21,15 @@
 		<div class="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
 			<form
 				class="card-body"
-				on:submit|preventDefault={createProject}
-				on:input={() => (error = '')}
+				method="POST"
+				use:enhance
 			>
 				<div class="form-control">
+					{#if form?.error}
+						<div class="label text-error text-xs">
+							{form.error}
+						</div>
+					{/if}
 					<label class="label" for="projectName">
 						<span class="label-text">Project Name</span>
 					</label>
@@ -58,17 +37,14 @@
 						type="text"
 						id="projectName"
 						placeholder="Name"
-						class="lowercase input input-bordered transition-colors duration-300 ease-in-out {error
+						class="lowercase input input-bordered transition-colors duration-300 ease-in-out {form?.error
 							? 'wiggle input-error'
 							: ''}"
 						required
-						bind:value={projectName}
+						name="projectName"
 					/>
-					{#if error}
-						<div class="label text-error text-xs">
-							{error}
-						</div>
-					{/if}
+					<input type="hidden" name="organizationId" value={data.organization?.id} />
+					<input type="hidden" name="organizationName" value={data.organization?.name} />
 				</div>
 				<div class="form-control mt-6">
 					<button class="btn btn-primary">Create a new Project</button>

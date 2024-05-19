@@ -1,8 +1,8 @@
 import createClient from 'openapi-fetch';
-import type { LayoutLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 import type { paths } from '$lib/api/v1';
 
-export const load: LayoutLoad = async ({ params, parent, fetch, url, depends }) => {
+export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depends }) => {
 	const parentData = await parent();
 
 	const currentProject =

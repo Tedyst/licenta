@@ -4,97 +4,6 @@
 
 	import ListMembers from '$lib/utils/ListMembers.svelte';
 	import OrganizationProject from '$lib/utils/OrganizationProject.svelte';
-	import OrganizationSettings from '$lib/utils/OrganizationSettings.svelte';
-	import { toast } from 'svelte-daisy-toast';
-	import { invalidate } from '$app/navigation';
-	import client from '$lib/client';
-
-	let editRoleAction = (role: 'Owner' | 'Admin' | 'Viewer' | 'None', userId: number) => {
-		if (!data.organization) return;
-		client
-			.POST('/organizations/{id}/edit-user', {
-				params: { path: { id: data.organization?.id } },
-				body: { id: userId, role }
-			})
-			.then((res) => {
-				if (res.data?.success) {
-					invalidate('app:organizationinfo');
-					toast({
-						closable: true,
-						duration: 5000,
-						message: 'User role edited successfully',
-						title: 'Success',
-						type: 'success'
-					});
-				} else {
-					toast({
-						closable: true,
-						duration: 5000,
-						message: res.error?.message || 'Could not edit user role',
-						title: 'Error',
-						type: 'error'
-					});
-				}
-			});
-	};
-
-	let addUserAction = (email: string) => {
-		if (!data.organization) return;
-		client
-			.POST('/organizations/{id}/add-user', {
-				params: { path: { id: data.organization?.id } },
-				body: { email }
-			})
-			.then((res) => {
-				if (res.data?.success) {
-					invalidate('app:organizationinfo');
-					toast({
-						closable: true,
-						duration: 5000,
-						message: 'User added successfully',
-						title: 'Success',
-						type: 'success'
-					});
-				} else {
-					toast({
-						closable: true,
-						duration: 5000,
-						message: res.error?.message || 'Could not add user',
-						title: 'Error',
-						type: 'error'
-					});
-				}
-			});
-	};
-
-	let deleteUserAction = (userId: number) => {
-		if (!data.organization) return;
-		client
-			.DELETE('/organizations/{id}/delete-user', {
-				params: { path: { id: data.organization?.id } },
-				body: { id: userId }
-			})
-			.then((res) => {
-				invalidate('app:organizationinfo');
-				if (res.response.status === 204) {
-					toast({
-						closable: true,
-						duration: 5000,
-						message: 'User deleted successfully',
-						title: 'Success',
-						type: 'success'
-					});
-				} else {
-					toast({
-						closable: true,
-						duration: 5000,
-						message: res.error?.message || 'Could not delete user',
-						title: 'Error',
-						type: 'error'
-					});
-				}
-			});
-	};
 </script>
 
 <svelte:head>
@@ -133,14 +42,15 @@
 	<div class="divider" />
 
 	<div class="flex-col flex lg:flex-row w-full">
-		<OrganizationSettings organization={data.organization} />
+		<div class="grid flex-grow place-content-center h-auto flex-1">
+			<h1 class="text-3xl font-bold">Organization Settings</h1>
+			<div class="form-control mt-6">
+				<a href="/dashboard/{data.organization.name}/delete" class="btn btn-error"
+					>Delete organization</a
+				>
+			</div>
+		</div>
 		<div class="divider divider-horizontal" />
-		<ListMembers
-			{editRoleAction}
-			{addUserAction}
-			{deleteUserAction}
-			members={data.organization.members}
-			currentUser={data.user}
-		/>
+		<ListMembers organization={data.organization} />
 	</div>
 {/if}

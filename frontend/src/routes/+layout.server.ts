@@ -1,11 +1,11 @@
 import createClient from 'openapi-fetch';
-import type { LayoutLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 import type { components, paths } from '$lib/api/v1';
 import { goto } from '$app/navigation';
 export const prerender = false;
 export const ssr = true;
 
-export const load: LayoutLoad = async ({ fetch, url, depends }) => {
+export const load: LayoutServerLoad = async ({ fetch, url, depends }) => {
 	const client = createClient<paths>({
 		baseUrl: url.origin + '/api/v1',
 		fetch: fetch,
@@ -60,6 +60,7 @@ export const load: LayoutLoad = async ({ fetch, url, depends }) => {
 		});
 
 	const promises = await Promise.all([userInfo, organizationInfo]);
+
 	return {
 		user: promises[0].user as components['schemas']['User'],
 		organizations: promises[1].organizations as components['schemas']['Organization'][],

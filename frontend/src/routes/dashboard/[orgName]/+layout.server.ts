@@ -1,8 +1,8 @@
-import type { LayoutLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 
 export const prerender = false;
 
-export const load: LayoutLoad = async ({ params, parent }) => {
+export const load: LayoutServerLoad = async ({ params, parent }) => {
 	const parentData = await parent();
 	return {
 		...parentData,

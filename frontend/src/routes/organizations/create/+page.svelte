@@ -16,16 +16,7 @@
 			</p>
 		</div>
 		<div class="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-			<form
-				method="POST"
-				class="card-body"
-				use:enhance={() => {
-					return async ({ result }) => {
-						await invalidate('app:organizationinfo');
-						await applyAction(result);
-					};
-				}}
-			>
+			<form method="POST" class="card-body" use:enhance>
 				<div class="form-control">
 					<label class="label" for="organizationName">
 						<span class="label-text">Organization Name</span>
