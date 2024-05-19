@@ -2,36 +2,35 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 
-	import MysqlListDatabase from '$lib/dashboard/MysqlListDatabase.svelte';
-	import MysqlCreateDatabase from '$lib/dashboard/MysqlCreateDatabase.svelte';
-	import PostgresCreateDatabase from '$lib/dashboard/PostgresCreateDatabase.svelte';
-	import PostgresListDatabase from '$lib/dashboard/PostgresListDatabase.svelte';
+	import MysqlIcon from '$lib/images/mysql-icon.svg';
+	import PostgresIcon from '$lib/images/postgresql-icon.svg';
 
-	let selectedDatabaseType: 'MySQL' | 'PostgreSQL' | 'none' = 'none';
+	import BaseListItem from '$lib/dashboard/BaseListItem.svelte';
 </script>
 
 project
 
-{#if data.project}
-	{#each data?.mysqlDatabases || [] as mysqlDatabase}
-		<MysqlListDatabase {mysqlDatabase} project={data.project} />
-	{/each}
-	{#each data?.postgresDatabases || [] as postgresDatabase}
-		<PostgresListDatabase {postgresDatabase} project={data.project} />
-	{/each}
+{#each data?.mysqlDatabases || [] as mysqlDatabase}
+	<BaseListItem
+		databaseUrl={`mysql://${mysqlDatabase.username}@****:${mysqlDatabase.host}:${mysqlDatabase.port}/${mysqlDatabase.database_name}`}
+		databaseIcon={MysqlIcon}
+		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/mysql/?id=${mysqlDatabase.id}`}
+		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/mysql/?id=${mysqlDatabase.id}`}
+		databaseType="MySQL"
+	/>
+{/each}
 
-	<div class="card w-full md:w-96 bg-base-100 shadow-xl">
-		<div class="card-body gap-1">
-			<select class="select select-bordered w-full" bind:value={selectedDatabaseType}>
-				<option disabled selected value="none">Select database type</option>
-				<option value="MySQL">MySQL</option>
-				<option value="PostgreSQL">PostgreSQL</option>
-			</select>
-			{#if selectedDatabaseType === 'MySQL'}
-				<MysqlCreateDatabase project={data.project} />
-			{:else if selectedDatabaseType === 'PostgreSQL'}
-				<PostgresCreateDatabase project={data.project} />
-			{/if}
-		</div>
-	</div>
-{/if}
+{#each data?.postgresDatabases || [] as postgresDatabase}
+	<BaseListItem
+		databaseUrl={`postgres://${postgresDatabase.username}@****:${postgresDatabase.host}:${postgresDatabase.port}/${postgresDatabase.database_name}`}
+		databaseIcon={PostgresIcon}
+		databaseType="PostgreSQL"
+		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/postgresql/?id=${postgresDatabase.id}`}
+		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/postgresql/?id=${postgresDatabase.id}`}
+	/>
+{/each}
+
+<a
+	href="/dashboard/{data.organization?.name}/{data.project?.name}/add-scanner"
+	class="btn btn-primary">Add a scanner to the project</a
+>

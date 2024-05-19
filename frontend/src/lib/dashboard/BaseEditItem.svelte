@@ -48,7 +48,7 @@
 				placeholder="Hostname"
 				autocomplete="off"
 				name="hostname"
-				value={defaultValues.hostname}
+				value={defaultValues.hostname || ''}
 			/>
 		</label>
 	{/if}
@@ -61,7 +61,7 @@
 				placeholder="Port"
 				autocomplete="off"
 				name="port"
-				value={defaultValues.port}
+				value={defaultValues.port || ''}
 			/>
 		</label>
 	{/if}
@@ -74,7 +74,7 @@
 				placeholder="Username"
 				autocomplete="off"
 				name="username"
-				value={defaultValues.username}
+				value={defaultValues.username || ''}
 			/>
 		</label>
 	{/if}
@@ -87,7 +87,7 @@
 				placeholder="Password"
 				autocomplete="off"
 				name="password"
-				value={defaultValues.password}
+				value={defaultValues.password || ''}
 			/>
 		</label>
 	{/if}
@@ -100,7 +100,7 @@
 				placeholder="Database Name"
 				autocomplete="off"
 				name="database"
-				value={defaultValues.database}
+				value={defaultValues.database || ''}
 			/>
 		</label>
 	{/if}
