@@ -3,11 +3,12 @@ SELECT
     layer_hash
 FROM
     docker_layers
+    INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
 WHERE
     project_id = $1;
 
 -- name: CreateDockerScannedLayerForProject :one
-INSERT INTO docker_layers(project_id, layer_hash)
+INSERT INTO docker_layers(layer_hash, image_id)
     VALUES ($1, $2)
 RETURNING
     *;
@@ -40,49 +41,44 @@ WHERE project_id = $1
     AND docker_image = $2;
 
 -- name: CreateDockerLayerResultsForProject :copyfrom
-INSERT INTO docker_results(project_id, layer_id, name, line, line_number, MATCH, probability, username, PASSWORD, filename)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
-
--- name: CreateDockerLayerScanForProject :one
-INSERT INTO docker_scans(project_id, docker_image, layers_to_scan)
-    VALUES ($1, $2, $3)
-RETURNING
-    *;
-
--- name: UpdateDockerLayerScanForProject :one
-UPDATE
-    docker_scans
-SET
-    finished = $3,
-    scanned_layers = $4
-WHERE
-    project_id = $1
-    AND docker_image = $2
-RETURNING
-    *;
-
--- name: GetDockerLayerScanForProject :one
-SELECT
-    *
-FROM
-    docker_scans
-WHERE
-    project_id = $1
-    AND docker_image = $2;
+INSERT INTO docker_results(project_id, layer_id, name, line, line_number, MATCH, probability, username, PASSWORD, filename, previous_lines)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
 
 -- name: DeleteDockerImage :exec
 DELETE FROM docker_images
 WHERE id = $1;
 
--- name: GetDockerLayersAndResultsForScan :many
+-- name: GetDockerLayersAndResultsForImage :many
 SELECT
-    sqlc.embed(docker_layers),
-    sqlc.embed(docker_results)
-FROM
-    docker_layers
-    LEFT JOIN docker_results ON docker_results.layer_id = docker_layers.id
+    *
+FROM ((
+        SELECT
+            docker_layers.image_id,
+            docker_layers.layer_hash,
+            docker_layers.scanned_at,
+            docker_results.*
+        FROM
+            docker_layers
+        LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
+    WHERE
+        docker_layers.image_id = $1
+        AND docker_layers.id IS NULL
+    ORDER BY
+        docker_layers.scanned_at DESC
+    LIMIT 25)
+UNION (
+    SELECT
+        docker_layers.image_id,
+        docker_layers.layer_hash,
+        docker_layers.scanned_at,
+        docker_results.*
+    FROM
+        docker_layers
+    LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
 WHERE
-    docker_layers.scan_id = $1;
+    docker_layers.id IS NOT NULL)) AS asd
+ORDER BY
+    scanned_at DESC;
 
 -- name: UpdateDockerImage :one
 UPDATE

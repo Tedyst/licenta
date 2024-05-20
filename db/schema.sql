@@ -123,20 +123,9 @@ CREATE TABLE docker_images(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE docker_scans(
-    id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    docker_image bigint REFERENCES docker_images(id) ON DELETE CASCADE NOT NULL,
-    finished boolean NOT NULL DEFAULT FALSE,
-    scanned_layers integer NOT NULL DEFAULT 0,
-    layers_to_scan integer NOT NULL DEFAULT 0,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
 CREATE TABLE docker_layers(
     id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    scan_id bigint REFERENCES docker_scans(id) ON DELETE CASCADE NOT NULL,
+    image_id bigint REFERENCES docker_images(id) ON DELETE CASCADE NOT NULL,
     layer_hash text NOT NULL UNIQUE,
     scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
@@ -148,6 +137,7 @@ CREATE TABLE docker_results(
     name text NOT NULL,
     line text NOT NULL,
     line_number integer NOT NULL,
+    previous_lines text NOT NULL,
     match text NOT NULL,
     probability float NOT NULL,
     username text,

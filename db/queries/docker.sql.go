@@ -8,6 +8,8 @@ package queries
 import (
 	"context"
 	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createDockerImage = `-- name: CreateDockerImage :one
@@ -97,65 +99,37 @@ func (q *Queries) CreateDockerImageForProject(ctx context.Context, arg CreateDoc
 }
 
 type CreateDockerLayerResultsForProjectParams struct {
-	ProjectID   int64          `json:"project_id"`
-	LayerID     int64          `json:"layer_id"`
-	Name        string         `json:"name"`
-	Line        string         `json:"line"`
-	LineNumber  int32          `json:"line_number"`
-	Match       string         `json:"match"`
-	Probability float64        `json:"probability"`
-	Username    sql.NullString `json:"username"`
-	Password    sql.NullString `json:"password"`
-	Filename    string         `json:"filename"`
-}
-
-const createDockerLayerScanForProject = `-- name: CreateDockerLayerScanForProject :one
-INSERT INTO docker_scans(project_id, docker_image, layers_to_scan)
-    VALUES ($1, $2, $3)
-RETURNING
-    id, project_id, docker_image, finished, scanned_layers, layers_to_scan, created_at
-`
-
-type CreateDockerLayerScanForProjectParams struct {
-	ProjectID    int64 `json:"project_id"`
-	DockerImage  int64 `json:"docker_image"`
-	LayersToScan int32 `json:"layers_to_scan"`
-}
-
-func (q *Queries) CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*DockerScan, error) {
-	row := q.db.QueryRow(ctx, createDockerLayerScanForProject, arg.ProjectID, arg.DockerImage, arg.LayersToScan)
-	var i DockerScan
-	err := row.Scan(
-		&i.ID,
-		&i.ProjectID,
-		&i.DockerImage,
-		&i.Finished,
-		&i.ScannedLayers,
-		&i.LayersToScan,
-		&i.CreatedAt,
-	)
-	return &i, err
+	ProjectID     int64          `json:"project_id"`
+	LayerID       int64          `json:"layer_id"`
+	Name          string         `json:"name"`
+	Line          string         `json:"line"`
+	LineNumber    int32          `json:"line_number"`
+	Match         string         `json:"match"`
+	Probability   float64        `json:"probability"`
+	Username      sql.NullString `json:"username"`
+	Password      sql.NullString `json:"password"`
+	Filename      string         `json:"filename"`
+	PreviousLines string         `json:"previous_lines"`
 }
 
 const createDockerScannedLayerForProject = `-- name: CreateDockerScannedLayerForProject :one
-INSERT INTO docker_layers(project_id, layer_hash)
+INSERT INTO docker_layers(layer_hash, image_id)
     VALUES ($1, $2)
 RETURNING
-    id, project_id, scan_id, layer_hash, scanned_at
+    id, image_id, layer_hash, scanned_at
 `
 
 type CreateDockerScannedLayerForProjectParams struct {
-	ProjectID int64  `json:"project_id"`
 	LayerHash string `json:"layer_hash"`
+	ImageID   int64  `json:"image_id"`
 }
 
 func (q *Queries) CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*DockerLayer, error) {
-	row := q.db.QueryRow(ctx, createDockerScannedLayerForProject, arg.ProjectID, arg.LayerHash)
+	row := q.db.QueryRow(ctx, createDockerScannedLayerForProject, arg.LayerHash, arg.ImageID)
 	var i DockerLayer
 	err := row.Scan(
 		&i.ID,
-		&i.ProjectID,
-		&i.ScanID,
+		&i.ImageID,
 		&i.LayerHash,
 		&i.ScannedAt,
 	)
@@ -257,79 +231,84 @@ func (q *Queries) GetDockerImagesForProject(ctx context.Context, projectID int64
 	return items, nil
 }
 
-const getDockerLayerScanForProject = `-- name: GetDockerLayerScanForProject :one
+const getDockerLayersAndResultsForImage = `-- name: GetDockerLayersAndResultsForImage :many
 SELECT
-    id, project_id, docker_image, finished, scanned_layers, layers_to_scan, created_at
-FROM
-    docker_scans
+    image_id, layer_hash, scanned_at, id, project_id, layer_id, name, line, line_number, previous_lines, match, probability, username, password, filename, created_at
+FROM ((
+        SELECT
+            docker_layers.image_id,
+            docker_layers.layer_hash,
+            docker_layers.scanned_at,
+            docker_results.id, docker_results.project_id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.previous_lines, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
+        FROM
+            docker_layers
+        LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
+    WHERE
+        docker_layers.image_id = $1
+        AND docker_layers.id IS NULL
+    ORDER BY
+        docker_layers.scanned_at DESC
+    LIMIT 25)
+UNION (
+    SELECT
+        docker_layers.image_id,
+        docker_layers.layer_hash,
+        docker_layers.scanned_at,
+        docker_results.id, docker_results.project_id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.previous_lines, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
+    FROM
+        docker_layers
+    LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
 WHERE
-    project_id = $1
-    AND docker_image = $2
+    docker_layers.id IS NOT NULL)) AS asd
+ORDER BY
+    scanned_at DESC
 `
 
-type GetDockerLayerScanForProjectParams struct {
-	ProjectID   int64 `json:"project_id"`
-	DockerImage int64 `json:"docker_image"`
+type GetDockerLayersAndResultsForImageRow struct {
+	ImageID       int64              `json:"image_id"`
+	LayerHash     string             `json:"layer_hash"`
+	ScannedAt     pgtype.Timestamptz `json:"scanned_at"`
+	ID            pgtype.Int8        `json:"id"`
+	ProjectID     sql.NullInt64      `json:"project_id"`
+	LayerID       sql.NullInt64      `json:"layer_id"`
+	Name          sql.NullString     `json:"name"`
+	Line          sql.NullString     `json:"line"`
+	LineNumber    sql.NullInt32      `json:"line_number"`
+	PreviousLines sql.NullString     `json:"previous_lines"`
+	Match         sql.NullString     `json:"match"`
+	Probability   sql.NullFloat64    `json:"probability"`
+	Username      sql.NullString     `json:"username"`
+	Password      sql.NullString     `json:"password"`
+	Filename      sql.NullString     `json:"filename"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
-func (q *Queries) GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*DockerScan, error) {
-	row := q.db.QueryRow(ctx, getDockerLayerScanForProject, arg.ProjectID, arg.DockerImage)
-	var i DockerScan
-	err := row.Scan(
-		&i.ID,
-		&i.ProjectID,
-		&i.DockerImage,
-		&i.Finished,
-		&i.ScannedLayers,
-		&i.LayersToScan,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
-const getDockerLayersAndResultsForScan = `-- name: GetDockerLayersAndResultsForScan :many
-SELECT
-    docker_layers.id, docker_layers.project_id, docker_layers.scan_id, docker_layers.layer_hash, docker_layers.scanned_at,
-    docker_results.id, docker_results.project_id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
-FROM
-    docker_layers
-    LEFT JOIN docker_results ON docker_results.layer_id = docker_layers.id
-WHERE
-    docker_layers.scan_id = $1
-`
-
-type GetDockerLayersAndResultsForScanRow struct {
-	DockerLayer  DockerLayer  `json:"docker_layer"`
-	DockerResult DockerResult `json:"docker_result"`
-}
-
-func (q *Queries) GetDockerLayersAndResultsForScan(ctx context.Context, scanID int64) ([]*GetDockerLayersAndResultsForScanRow, error) {
-	rows, err := q.db.Query(ctx, getDockerLayersAndResultsForScan, scanID)
+func (q *Queries) GetDockerLayersAndResultsForImage(ctx context.Context, imageID int64) ([]*GetDockerLayersAndResultsForImageRow, error) {
+	rows, err := q.db.Query(ctx, getDockerLayersAndResultsForImage, imageID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*GetDockerLayersAndResultsForScanRow
+	var items []*GetDockerLayersAndResultsForImageRow
 	for rows.Next() {
-		var i GetDockerLayersAndResultsForScanRow
+		var i GetDockerLayersAndResultsForImageRow
 		if err := rows.Scan(
-			&i.DockerLayer.ID,
-			&i.DockerLayer.ProjectID,
-			&i.DockerLayer.ScanID,
-			&i.DockerLayer.LayerHash,
-			&i.DockerLayer.ScannedAt,
-			&i.DockerResult.ID,
-			&i.DockerResult.ProjectID,
-			&i.DockerResult.LayerID,
-			&i.DockerResult.Name,
-			&i.DockerResult.Line,
-			&i.DockerResult.LineNumber,
-			&i.DockerResult.Match,
-			&i.DockerResult.Probability,
-			&i.DockerResult.Username,
-			&i.DockerResult.Password,
-			&i.DockerResult.Filename,
-			&i.DockerResult.CreatedAt,
+			&i.ImageID,
+			&i.LayerHash,
+			&i.ScannedAt,
+			&i.ID,
+			&i.ProjectID,
+			&i.LayerID,
+			&i.Name,
+			&i.Line,
+			&i.LineNumber,
+			&i.PreviousLines,
+			&i.Match,
+			&i.Probability,
+			&i.Username,
+			&i.Password,
+			&i.Filename,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -346,6 +325,7 @@ SELECT
     layer_hash
 FROM
     docker_layers
+    INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
 WHERE
     project_id = $1
 `
@@ -424,46 +404,6 @@ func (q *Queries) UpdateDockerImage(ctx context.Context, arg UpdateDockerImagePa
 		&i.ProbabilityIncreaseMultiplier,
 		&i.EntropyThreshold,
 		&i.LogisticGrowthRate,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
-const updateDockerLayerScanForProject = `-- name: UpdateDockerLayerScanForProject :one
-UPDATE
-    docker_scans
-SET
-    finished = $3,
-    scanned_layers = $4
-WHERE
-    project_id = $1
-    AND docker_image = $2
-RETURNING
-    id, project_id, docker_image, finished, scanned_layers, layers_to_scan, created_at
-`
-
-type UpdateDockerLayerScanForProjectParams struct {
-	ProjectID     int64 `json:"project_id"`
-	DockerImage   int64 `json:"docker_image"`
-	Finished      bool  `json:"finished"`
-	ScannedLayers int32 `json:"scanned_layers"`
-}
-
-func (q *Queries) UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*DockerScan, error) {
-	row := q.db.QueryRow(ctx, updateDockerLayerScanForProject,
-		arg.ProjectID,
-		arg.DockerImage,
-		arg.Finished,
-		arg.ScannedLayers,
-	)
-	var i DockerScan
-	err := row.Scan(
-		&i.ID,
-		&i.ProjectID,
-		&i.DockerImage,
-		&i.Finished,
-		&i.ScannedLayers,
-		&i.LayersToScan,
 		&i.CreatedAt,
 	)
 	return &i, err

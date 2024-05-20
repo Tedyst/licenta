@@ -57,14 +57,34 @@ func (server *serverHandler) GetDocker(ctx context.Context, request generated.Ge
 	dockerImagesResponse := make([]generated.DockerImage, len(dockerImages))
 	for i, dockerImage := range dockerImages {
 		dockerImagesResponse[i] = generated.DockerImage{
-			DockerImage:                   dockerImage.DockerImage,
-			EntropyThreshold:              float32(dockerImage.EntropyThreshold.Float64),
-			LogisticGrowthRate:            float32(dockerImage.LogisticGrowthRate.Float64),
-			MinProbability:                float32(dockerImage.MinProbability.Float64),
-			Password:                      dockerImage.Password.String,
-			ProbabilityDecreaseMultiplier: float32(dockerImage.ProbabilityDecreaseMultiplier.Float64),
-			ProbabilityIncreaseMultiplier: float32(dockerImage.ProbabilityIncreaseMultiplier.Float64),
-			Id:                            int(dockerImage.ID),
+			DockerImage: dockerImage.DockerImage,
+			Id:          int(dockerImage.ID),
+		}
+		if dockerImage.Username.Valid {
+			dockerImagesResponse[i].Username = &dockerImage.Username.String
+		}
+		if dockerImage.Password.Valid {
+			dockerImagesResponse[i].Password = &dockerImage.Password.String
+		}
+		if dockerImage.MinProbability.Valid {
+			value := float32(dockerImage.MinProbability.Float64)
+			dockerImagesResponse[i].MinProbability = &value
+		}
+		if dockerImage.ProbabilityDecreaseMultiplier.Valid {
+			value := float32(dockerImage.ProbabilityDecreaseMultiplier.Float64)
+			dockerImagesResponse[i].ProbabilityDecreaseMultiplier = &value
+		}
+		if dockerImage.ProbabilityIncreaseMultiplier.Valid {
+			value := float32(dockerImage.ProbabilityIncreaseMultiplier.Float64)
+			dockerImagesResponse[i].ProbabilityIncreaseMultiplier = &value
+		}
+		if dockerImage.EntropyThreshold.Valid {
+			value := float32(dockerImage.EntropyThreshold.Float64)
+			dockerImagesResponse[i].EntropyThreshold = &value
+		}
+		if dockerImage.LogisticGrowthRate.Valid {
+			value := float32(dockerImage.LogisticGrowthRate.Float64)
+			dockerImagesResponse[i].LogisticGrowthRate = &value
 		}
 	}
 
@@ -94,7 +114,7 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 		return response, nil
 	}
 
-	dbLayers, err := server.DatabaseProvider.GetDockerLayersAndResultsForScan(ctx, dockerImage.ID)
+	dbLayers, err := server.DatabaseProvider.GetDockerLayersAndResultsForImage(ctx, dockerImage.ID)
 	if err != nil {
 		return nil, fmt.Errorf("GetDockerId: error getting docker layer scans: %w", err)
 	}
@@ -103,30 +123,31 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 	layerResults := map[int64][]generated.DockerLayerResult{}
 
 	for _, dbLayer := range dbLayers {
-		if _, ok := layerResults[dbLayer.DockerLayer.ID]; !ok {
-			layerResults[dbLayer.DockerLayer.ID] = []generated.DockerLayerResult{}
+		if _, ok := layerResults[dbLayer.LayerID.Int64]; !ok {
+			layerResults[dbLayer.LayerID.Int64] = []generated.DockerLayerResult{}
 			layers = append(layers, generated.DockerLayer{
-				Id:        int(dbLayer.DockerLayer.ID),
-				ProjectId: int(dbLayer.DockerLayer.ProjectID),
-				LayerHash: dbLayer.DockerLayer.LayerHash,
+				Id:        int(dbLayer.LayerID.Int64),
+				ImageId:   int(dbLayer.ImageID),
+				ScannedAt: dbLayer.ScannedAt.Time.Format(time.RFC3339Nano),
+				LayerHash: dbLayer.LayerHash,
 				Results:   []generated.DockerLayerResult{},
-				ScanId:    int(dbLayer.DockerLayer.ScanID),
 			})
 		}
 
-		layerResults[dbLayer.DockerLayer.ID] = append(layerResults[dbLayer.DockerLayer.ID], generated.DockerLayerResult{
-			CreatedAt:   dbLayer.DockerResult.CreatedAt.Time.Format(time.RFC3339),
-			Filename:    dbLayer.DockerResult.Filename,
-			Id:          int(dbLayer.DockerResult.ID),
-			Layer:       int(dbLayer.DockerResult.LayerID),
-			Line:        dbLayer.DockerResult.Line,
-			LineNumber:  int(dbLayer.DockerResult.LineNumber),
-			Match:       dbLayer.DockerResult.Match,
-			Name:        dbLayer.DockerResult.Name,
-			Password:    dbLayer.DockerResult.Password.String,
-			Probability: float32(dbLayer.DockerResult.Probability),
-			ProjectId:   int(dbLayer.DockerResult.ProjectID),
-			Username:    dbLayer.DockerResult.Username.String,
+		layerResults[dbLayer.LayerID.Int64] = append(layerResults[dbLayer.LayerID.Int64], generated.DockerLayerResult{
+			CreatedAt:     dbLayer.CreatedAt.Time.Format(time.RFC3339),
+			Filename:      dbLayer.Filename.String,
+			Id:            int(dbLayer.ID.Int64),
+			Layer:         int(dbLayer.LayerID.Int64),
+			Line:          dbLayer.Line.String,
+			LineNumber:    int(dbLayer.LineNumber.Int32),
+			Match:         dbLayer.Match.String,
+			Name:          dbLayer.Name.String,
+			Password:      dbLayer.Password.String,
+			Probability:   float32(dbLayer.Probability.Float64),
+			ProjectId:     int(dbLayer.ProjectID.Int64),
+			Username:      dbLayer.Username.String,
+			PreviousLines: dbLayer.PreviousLines.String,
 		})
 	}
 
@@ -134,19 +155,42 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 		layers[i].Results = layerResults[int64(layer.Id)]
 	}
 
+	image := generated.DockerImage{
+		DockerImage: dockerImage.DockerImage,
+		Id:          int(dockerImage.ID),
+	}
+
+	if dockerImage.Username.Valid {
+		image.Username = &dockerImage.Username.String
+	}
+	if dockerImage.Password.Valid {
+		image.Password = &dockerImage.Password.String
+	}
+	if dockerImage.MinProbability.Valid {
+		value := float32(dockerImage.MinProbability.Float64)
+		image.MinProbability = &value
+	}
+	if dockerImage.ProbabilityDecreaseMultiplier.Valid {
+		value := float32(dockerImage.ProbabilityDecreaseMultiplier.Float64)
+		image.ProbabilityDecreaseMultiplier = &value
+	}
+	if dockerImage.ProbabilityIncreaseMultiplier.Valid {
+		value := float32(dockerImage.ProbabilityIncreaseMultiplier.Float64)
+		image.ProbabilityIncreaseMultiplier = &value
+	}
+	if dockerImage.EntropyThreshold.Valid {
+		value := float32(dockerImage.EntropyThreshold.Float64)
+		image.EntropyThreshold = &value
+	}
+	if dockerImage.LogisticGrowthRate.Valid {
+		value := float32(dockerImage.LogisticGrowthRate.Float64)
+		image.LogisticGrowthRate = &value
+	}
+
 	return generated.GetDockerId200JSONResponse{
 		Success: true,
-		Image: generated.DockerImage{
-			DockerImage:                   dockerImage.DockerImage,
-			EntropyThreshold:              float32(dockerImage.EntropyThreshold.Float64),
-			LogisticGrowthRate:            float32(dockerImage.LogisticGrowthRate.Float64),
-			MinProbability:                float32(dockerImage.MinProbability.Float64),
-			Password:                      dockerImage.Password.String,
-			ProbabilityDecreaseMultiplier: float32(dockerImage.ProbabilityDecreaseMultiplier.Float64),
-			ProbabilityIncreaseMultiplier: float32(dockerImage.ProbabilityIncreaseMultiplier.Float64),
-			Id:                            int(dockerImage.ID),
-		},
-		Layers: layers,
+		Image:   image,
+		Layers:  layers,
 	}, nil
 }
 
@@ -207,20 +251,42 @@ func (server *serverHandler) PatchDockerId(ctx context.Context, request generate
 		return nil, fmt.Errorf("PatchDockerId: error updating docker image: %w", err)
 	}
 
+	responseImage := generated.DockerImage{
+		DockerImage: image.DockerImage,
+		Id:          int(image.ID),
+		ProjectId:   int(image.ProjectID),
+	}
+
+	if image.Username.Valid {
+		responseImage.Username = &image.Username.String
+	}
+	if image.Password.Valid {
+		responseImage.Password = &image.Password.String
+	}
+	if image.MinProbability.Valid {
+		value := float32(image.MinProbability.Float64)
+		responseImage.MinProbability = &value
+	}
+	if image.ProbabilityDecreaseMultiplier.Valid {
+		value := float32(image.ProbabilityDecreaseMultiplier.Float64)
+		responseImage.ProbabilityDecreaseMultiplier = &value
+	}
+	if image.ProbabilityIncreaseMultiplier.Valid {
+		value := float32(image.ProbabilityIncreaseMultiplier.Float64)
+		responseImage.ProbabilityIncreaseMultiplier = &value
+	}
+	if image.EntropyThreshold.Valid {
+		value := float32(image.EntropyThreshold.Float64)
+		responseImage.EntropyThreshold = &value
+	}
+	if image.LogisticGrowthRate.Valid {
+		value := float32(image.LogisticGrowthRate.Float64)
+		responseImage.LogisticGrowthRate = &value
+	}
+
 	return generated.PatchDockerId200JSONResponse{
 		Success: true,
-		Image: generated.DockerImage{
-			DockerImage:                   image.DockerImage,
-			EntropyThreshold:              float32(image.EntropyThreshold.Float64),
-			LogisticGrowthRate:            float32(image.LogisticGrowthRate.Float64),
-			Id:                            int(image.ID),
-			MinProbability:                float32(image.MinProbability.Float64),
-			Password:                      image.Password.String,
-			ProbabilityDecreaseMultiplier: float32(image.ProbabilityDecreaseMultiplier.Float64),
-			ProbabilityIncreaseMultiplier: float32(image.ProbabilityIncreaseMultiplier.Float64),
-			ProjectId:                     int(image.ProjectID),
-			Username:                      image.Username.String,
-		},
+		Image:   responseImage,
 	}, nil
 }
 
@@ -233,26 +299,56 @@ func (server *serverHandler) PostDocker(ctx context.Context, request generated.P
 		return response, nil
 	}
 
-	dockerImage, err := server.DatabaseProvider.CreateDockerImage(ctx, queries.CreateDockerImageParams{
+	params := queries.CreateDockerImageParams{
 		DockerImage: request.Body.DockerImage,
-		Password:    sql.NullString{String: request.Body.Password, Valid: true},
 		ProjectID:   int64(request.Body.ProjectId),
-	})
+	}
+	if request.Body.Username != nil {
+		params.Username = sql.NullString{String: *request.Body.Username, Valid: true}
+	}
+	if request.Body.Password != nil {
+		params.Password = sql.NullString{String: *request.Body.Password, Valid: true}
+	}
+
+	dockerImage, err := server.DatabaseProvider.CreateDockerImage(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("PostDocker: error creating docker image: %w", err)
 	}
 
+	responseImage := generated.DockerImage{
+		DockerImage: dockerImage.DockerImage,
+		Id:          int(dockerImage.ID),
+	}
+
+	if dockerImage.Username.Valid {
+		responseImage.Username = &dockerImage.Username.String
+	}
+	if dockerImage.Password.Valid {
+		responseImage.Password = &dockerImage.Password.String
+	}
+	if dockerImage.MinProbability.Valid {
+		value := float32(dockerImage.MinProbability.Float64)
+		responseImage.MinProbability = &value
+	}
+	if dockerImage.ProbabilityDecreaseMultiplier.Valid {
+		value := float32(dockerImage.ProbabilityDecreaseMultiplier.Float64)
+		responseImage.ProbabilityDecreaseMultiplier = &value
+	}
+	if dockerImage.ProbabilityIncreaseMultiplier.Valid {
+		value := float32(dockerImage.ProbabilityIncreaseMultiplier.Float64)
+		responseImage.ProbabilityIncreaseMultiplier = &value
+	}
+	if dockerImage.EntropyThreshold.Valid {
+		value := float32(dockerImage.EntropyThreshold.Float64)
+		responseImage.EntropyThreshold = &value
+	}
+	if dockerImage.LogisticGrowthRate.Valid {
+		value := float32(dockerImage.LogisticGrowthRate.Float64)
+		responseImage.LogisticGrowthRate = &value
+	}
+
 	return generated.PostDocker201JSONResponse{
 		Success: true,
-		Image: generated.DockerImage{
-			DockerImage:                   dockerImage.DockerImage,
-			EntropyThreshold:              float32(dockerImage.EntropyThreshold.Float64),
-			LogisticGrowthRate:            float32(dockerImage.LogisticGrowthRate.Float64),
-			MinProbability:                float32(dockerImage.MinProbability.Float64),
-			Password:                      dockerImage.Password.String,
-			ProbabilityDecreaseMultiplier: float32(dockerImage.ProbabilityDecreaseMultiplier.Float64),
-			ProbabilityIncreaseMultiplier: float32(dockerImage.ProbabilityIncreaseMultiplier.Float64),
-			Id:                            int(dockerImage.ID),
-		},
+		Image:   responseImage,
 	}, nil
 }

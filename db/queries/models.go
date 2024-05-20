@@ -41,34 +41,24 @@ type DockerImage struct {
 
 type DockerLayer struct {
 	ID        int64              `json:"id"`
-	ProjectID int64              `json:"project_id"`
-	ScanID    int64              `json:"scan_id"`
+	ImageID   int64              `json:"image_id"`
 	LayerHash string             `json:"layer_hash"`
 	ScannedAt pgtype.Timestamptz `json:"scanned_at"`
 }
 
 type DockerResult struct {
-	ID          int64              `json:"id"`
-	ProjectID   int64              `json:"project_id"`
-	LayerID     int64              `json:"layer_id"`
-	Name        string             `json:"name"`
-	Line        string             `json:"line"`
-	LineNumber  int32              `json:"line_number"`
-	Match       string             `json:"match"`
-	Probability float64            `json:"probability"`
-	Username    sql.NullString     `json:"username"`
-	Password    sql.NullString     `json:"password"`
-	Filename    string             `json:"filename"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-}
-
-type DockerScan struct {
 	ID            int64              `json:"id"`
 	ProjectID     int64              `json:"project_id"`
-	DockerImage   int64              `json:"docker_image"`
-	Finished      bool               `json:"finished"`
-	ScannedLayers int32              `json:"scanned_layers"`
-	LayersToScan  int32              `json:"layers_to_scan"`
+	LayerID       int64              `json:"layer_id"`
+	Name          string             `json:"name"`
+	Line          string             `json:"line"`
+	LineNumber    int32              `json:"line_number"`
+	PreviousLines string             `json:"previous_lines"`
+	Match         string             `json:"match"`
+	Probability   float64            `json:"probability"`
+	Username      sql.NullString     `json:"username"`
+	Password      sql.NullString     `json:"password"`
+	Filename      string             `json:"filename"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 

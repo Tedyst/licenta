@@ -67,6 +67,16 @@ func NewScanner(opts ...Option) (*FileScanner, error) {
 	return fs, nil
 }
 
+var filterAlphanumericCharacters *regexp.Regexp
+
+func init() {
+	var err error
+	filterAlphanumericCharacters, err = regexp.Compile("[^a-zA-Z0-9\n@$!%*#?&: \t()+-\\_]+")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (fs *FileScanner) createResult(ctx context.Context, secretType secretType, match string, fileName string, lineNumber int, line string, previousLines string) (ExtractResult, bool, error) {
 	result := ExtractResult{
 		Name:          secretType.name,
@@ -131,6 +141,12 @@ func (fs *FileScanner) createResult(ctx context.Context, secretType secretType, 
 			return ExtractResult{}, false, nil
 		}
 	}
+
+	result.Username = filterAlphanumericCharacters.ReplaceAllString(result.Username, " ")
+	result.Password = filterAlphanumericCharacters.ReplaceAllString(result.Password, " ")
+	result.Line = filterAlphanumericCharacters.ReplaceAllString(result.Line, " ")
+	result.Match = filterAlphanumericCharacters.ReplaceAllString(result.Match, " ")
+	result.PreviousLines = filterAlphanumericCharacters.ReplaceAllString(result.PreviousLines, " ")
 
 	return result, true, nil
 }

@@ -81,19 +81,25 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 			}
 			slog.DebugContext(ctx, "Finished scanning git repo", "repo", repo.ID, "url", repo.GitRepository)
 		}
+
+		slog.DebugContext(ctx, "Finished scanning git repositories", "project", project.ID)
 	}
 
 	if runDocker {
+		slog.DebugContext(ctx, "Scheduling docker scan", "project", project.ID)
 		images, err := source.queries.GetDockerImagesForProject(ctx, project.ID)
 		if err != nil && err != pgx.ErrNoRows {
 			return fmt.Errorf("failed to get docker images for project: %w", err)
 		}
 
 		for _, image := range images {
+			slog.DebugContext(ctx, "Scheduling docker scan", "image", image.ID, "name", image.DockerImage)
 			if err := source.ScanDockerRepository(ctx, image); err != nil {
 				return fmt.Errorf("failed to scan docker repository: %w", err)
 			}
 		}
+
+		slog.DebugContext(ctx, "Finished scanning docker images", "project", project.ID)
 	}
 
 	return nil

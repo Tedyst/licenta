@@ -1958,8 +1958,8 @@ export interface components {
     CreateDockerImage: {
       project_id: number;
       docker_image: string;
-      username: string;
-      password: string;
+      username?: string;
+      password?: string;
     };
     PatchDockerImage: {
       docker_image?: string;
@@ -1982,9 +1982,9 @@ export interface components {
     };
     DockerLayer: {
       id: number;
-      project_id: number;
-      scan_id: number;
+      image_id: number;
       layer_hash: string;
+      scanned_at: string;
       results: components["schemas"]["DockerLayerResult"][];
     };
     DockerLayerResult: {

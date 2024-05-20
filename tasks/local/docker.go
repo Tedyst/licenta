@@ -25,7 +25,6 @@ type DockerRunner struct {
 
 type DockerQuerier interface {
 	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
-	UpdateDockerLayerScanForProject(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.DockerScan, error)
 	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.DockerLayer, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, params []queries.CreateDockerLayerResultsForProjectParams) (int64, error)
 }
@@ -49,22 +48,12 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 	resultCallback := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
 		mutex.Lock()
 		defer mutex.Unlock()
-		finished := false
-		if len(scannnedMap) == len(scanner.ScannedLayers()) {
-			finished = true
-		}
-		_, err = r.queries.UpdateDockerLayerScanForProject(ctx, queries.UpdateDockerLayerScanForProjectParams{
-			ProjectID:     image.ProjectID,
-			DockerImage:   image.ID,
-			ScannedLayers: int32(len(scanner.ScannedLayers())),
-			Finished:      finished,
-		})
 		if err != nil {
 			return fmt.Errorf("ScanDockerRepository: cannot update layer scan: %w", err)
 		}
 		scannedLayer, err := r.queries.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
-			ProjectID: image.ProjectID,
 			LayerHash: result.Layer,
+			ImageID:   image.ID,
 		})
 		if err != nil {
 			return fmt.Errorf("ScanDockerRepository: cannot create scanned layer: %w", err)
@@ -73,16 +62,17 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		layerResults := []queries.CreateDockerLayerResultsForProjectParams{}
 		for _, fileResult := range result.Results {
 			layerResults = append(layerResults, queries.CreateDockerLayerResultsForProjectParams{
-				ProjectID:   image.ProjectID,
-				LayerID:     scannedLayer.ID,
-				Name:        fileResult.Name,
-				Line:        fileResult.Line,
-				LineNumber:  int32(fileResult.LineNumber),
-				Match:       fileResult.Match,
-				Probability: fileResult.Probability,
-				Username:    sql.NullString{String: fileResult.Username, Valid: fileResult.Username != ""},
-				Password:    sql.NullString{String: fileResult.Password, Valid: fileResult.Password != ""},
-				Filename:    fileResult.FileName,
+				ProjectID:     image.ProjectID,
+				LayerID:       scannedLayer.ID,
+				Name:          fileResult.Name,
+				Line:          fileResult.Line,
+				LineNumber:    int32(fileResult.LineNumber),
+				Match:         fileResult.Match,
+				Probability:   fileResult.Probability,
+				Username:      sql.NullString{String: fileResult.Username, Valid: fileResult.Username != ""},
+				Password:      sql.NullString{String: fileResult.Password, Valid: fileResult.Password != ""},
+				Filename:      fileResult.FileName,
+				PreviousLines: fileResult.PreviousLines,
 			})
 		}
 

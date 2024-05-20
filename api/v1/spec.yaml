@@ -2604,13 +2604,6 @@ components:
         - id
         - project_id
         - docker_image
-        - username
-        - password
-        - min_probability
-        - probability_increase_multiplier
-        - probability_decrease_multiplier
-        - entropy_threshold
-        - logistic_growth_rate
       type: object
       properties:
         id:
@@ -2637,8 +2630,6 @@ components:
       required:
         - project_id
         - docker_image
-        - username
-        - password
       type: object
       properties:
         project_id:
@@ -2696,19 +2687,19 @@ components:
     DockerLayer:
       required:
         - id
-        - project_id
-        - scan_id
+        - image_id
         - layer_hash
+        - scanned_at
         - results
       type: object
       properties:
         id:
           type: integer
-        project_id:
-          type: integer
-        scan_id:
+        image_id:
           type: integer
         layer_hash:
+          type: string
+        scanned_at:
           type: string
         results:
           type: array
@@ -2722,6 +2713,7 @@ components:
         - name
         - line
         - line_number
+        - previous_lines
         - match
         - probability
         - username
@@ -2742,6 +2734,8 @@ components:
           type: string
         line_number:
           type: integer
+        previous_lines:
+          type: string
         match:
           type: string
         probability:

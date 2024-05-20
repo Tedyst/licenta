@@ -21,12 +21,6 @@ export const actions = {
 		if (image === '' || image === undefined) {
 			return { error: 'Image is required' };
 		}
-		if (username === '' || username === undefined) {
-			return { error: 'User is required' };
-		}
-		if (password === '' || password === undefined) {
-			return { error: 'Password is required' };
-		}
 		if (organizationName === '' || organizationName === undefined) {
 			return { error: 'Organization name is required' };
 		}
@@ -38,9 +32,9 @@ export const actions = {
 			.POST('/docker', {
 				body: {
 					docker_image: image,
-					password: password,
+					password: password === '' ? undefined : password,
 					project_id: +projectId,
-					username: username
+					username: username === '' ? undefined : username
 				}
 			})
 			.then((res) => {
