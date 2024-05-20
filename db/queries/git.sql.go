@@ -165,14 +165,26 @@ SELECT
     git_results.id, git_results.commit, git_results.name, git_results.line, git_results.line_number, git_results.match, git_results.probability, git_results.username, git_results.password, git_results.filename, git_results.created_at
 FROM
     git_commits
-    LEFT JOIN git_results ON git_commits.commit_hash = git_results.commit
+    LEFT JOIN git_results ON git_commits.id = git_results.commit
 WHERE
     git_commits.repository_id = $1
+ORDER BY
+    git_commits.commit_date DESC
 `
 
 type GetGitCommitsWithResultsRow struct {
-	GitCommit GitCommit `json:"git_commit"`
-	GitResult GitResult `json:"git_result"`
+	GitCommit   GitCommit          `json:"git_commit"`
+	ID          pgtype.Int8        `json:"id"`
+	Commit      sql.NullInt64      `json:"commit"`
+	Name        sql.NullString     `json:"name"`
+	Line        sql.NullString     `json:"line"`
+	LineNumber  sql.NullInt32      `json:"line_number"`
+	Match       sql.NullString     `json:"match"`
+	Probability sql.NullFloat64    `json:"probability"`
+	Username    sql.NullString     `json:"username"`
+	Password    sql.NullString     `json:"password"`
+	Filename    sql.NullString     `json:"filename"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) GetGitCommitsWithResults(ctx context.Context, repositoryID int64) ([]*GetGitCommitsWithResultsRow, error) {
@@ -193,17 +205,17 @@ func (q *Queries) GetGitCommitsWithResults(ctx context.Context, repositoryID int
 			&i.GitCommit.CommitDate,
 			&i.GitCommit.Description,
 			&i.GitCommit.CreatedAt,
-			&i.GitResult.ID,
-			&i.GitResult.Commit,
-			&i.GitResult.Name,
-			&i.GitResult.Line,
-			&i.GitResult.LineNumber,
-			&i.GitResult.Match,
-			&i.GitResult.Probability,
-			&i.GitResult.Username,
-			&i.GitResult.Password,
-			&i.GitResult.Filename,
-			&i.GitResult.CreatedAt,
+			&i.ID,
+			&i.Commit,
+			&i.Name,
+			&i.Line,
+			&i.LineNumber,
+			&i.Match,
+			&i.Probability,
+			&i.Username,
+			&i.Password,
+			&i.Filename,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

@@ -62,12 +62,14 @@ WHERE id = $1;
 -- name: GetGitCommitsWithResults :many
 SELECT
     sqlc.embed(git_commits),
-    sqlc.embed(git_results)
+    git_results.*
 FROM
     git_commits
-    LEFT JOIN git_results ON git_commits.commit_hash = git_results.commit
+    LEFT JOIN git_results ON git_commits.id = git_results.commit
 WHERE
-    git_commits.repository_id = $1;
+    git_commits.repository_id = $1
+ORDER BY
+    git_commits.commit_date DESC;
 
 -- name: UpdateGitRepository :one
 UPDATE

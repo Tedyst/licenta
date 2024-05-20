@@ -58,6 +58,11 @@ func (server *serverHandler) GetGit(ctx context.Context, request generated.GetGi
 	for i, gitRepository := range gitRepositories {
 		gitRepositoriesResponse[i] = generated.Git{
 			GitRepository: gitRepository.GitRepository,
+			HasSsh:        gitRepository.PrivateKey.Valid,
+			Id:            int(gitRepository.ID),
+			Password:      gitRepository.Password.String,
+			ProjectId:     int(gitRepository.ProjectID),
+			Username:      gitRepository.Username.String,
 		}
 	}
 
@@ -97,6 +102,7 @@ func (server *serverHandler) GetGitId(ctx context.Context, request generated.Get
 
 	for _, dbCommit := range dbCommits {
 		if _, ok := commitResults[dbCommit.GitCommit.ID]; !ok {
+			t := dbCommit.GitCommit.CommitDate.Time.Format(time.RFC3339Nano)
 			commitResults[dbCommit.GitCommit.ID] = []generated.GitResult{}
 			commits = append(commits, generated.GitCommit{
 				CommitHash:   dbCommit.GitCommit.CommitHash,
@@ -104,21 +110,27 @@ func (server *serverHandler) GetGitId(ctx context.Context, request generated.Get
 				Id:           int(dbCommit.GitCommit.ID),
 				RepositoryId: int(dbCommit.GitCommit.RepositoryID),
 				Results:      []generated.GitResult{},
+				Author:       &dbCommit.GitCommit.Author.String,
+				AuthorEmail:  &dbCommit.GitCommit.AuthorEmail.String,
+				CommitDate:   &t,
+				Description:  &dbCommit.GitCommit.Description.String,
 			})
 		}
 
-		commitResults[dbCommit.GitCommit.ID] = append(commitResults[dbCommit.GitCommit.ID], generated.GitResult{
-			Commit:      int(dbCommit.GitResult.Commit),
-			Filename:    dbCommit.GitResult.Filename,
-			Id:          int(dbCommit.GitResult.ID),
-			Line:        dbCommit.GitResult.Line,
-			LineNumber:  int(dbCommit.GitResult.LineNumber),
-			Match:       dbCommit.GitResult.Match,
-			Name:        dbCommit.GitResult.Name,
-			Password:    dbCommit.GitResult.Password.String,
-			Probability: float32(dbCommit.GitResult.Probability),
-			Username:    dbCommit.GitResult.Username.String,
-		})
+		if dbCommit.ID.Valid {
+			commitResults[dbCommit.GitCommit.ID] = append(commitResults[dbCommit.GitCommit.ID], generated.GitResult{
+				Commit:      int(dbCommit.Commit.Int64),
+				Filename:    dbCommit.Filename.String,
+				Id:          int(dbCommit.ID.Int64),
+				Line:        dbCommit.Line.String,
+				LineNumber:  int(dbCommit.LineNumber.Int32),
+				Match:       dbCommit.Match.String,
+				Name:        dbCommit.Name.String,
+				Password:    dbCommit.Password.String,
+				Probability: float32(dbCommit.Probability.Float64),
+				Username:    dbCommit.Username.String,
+			})
+		}
 	}
 
 	for i, commit := range commits {

@@ -2775,6 +2775,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/GitResult"
+        author:
+          type: string
+        author_email:
+          type: string
+        commit_date:
+          type: string
+        description:
+          type: string
     GitResult:
       required:
         - id
