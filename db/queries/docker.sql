@@ -52,6 +52,7 @@ SELECT
     *
 FROM ((
         SELECT
+            docker_layers.id AS lid,
             docker_layers.image_id,
             docker_layers.layer_hash,
             docker_layers.scanned_at,
@@ -67,6 +68,7 @@ FROM ((
     LIMIT 25)
 UNION (
     SELECT
+        docker_layers.id AS lid,
         docker_layers.image_id,
         docker_layers.layer_hash,
         docker_layers.scanned_at,

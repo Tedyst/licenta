@@ -123,10 +123,10 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 	layerResults := map[int64][]generated.DockerLayerResult{}
 
 	for _, dbLayer := range dbLayers {
-		if _, ok := layerResults[dbLayer.LayerID.Int64]; !ok {
-			layerResults[dbLayer.LayerID.Int64] = []generated.DockerLayerResult{}
+		if _, ok := layerResults[dbLayer.Lid]; !ok {
+			layerResults[dbLayer.Lid] = []generated.DockerLayerResult{}
 			layers = append(layers, generated.DockerLayer{
-				Id:        int(dbLayer.LayerID.Int64),
+				Id:        int(dbLayer.Lid),
 				ImageId:   int(dbLayer.ImageID),
 				ScannedAt: dbLayer.ScannedAt.Time.Format(time.RFC3339Nano),
 				LayerHash: dbLayer.LayerHash,
@@ -134,21 +134,23 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 			})
 		}
 
-		layerResults[dbLayer.LayerID.Int64] = append(layerResults[dbLayer.LayerID.Int64], generated.DockerLayerResult{
-			CreatedAt:     dbLayer.CreatedAt.Time.Format(time.RFC3339),
-			Filename:      dbLayer.Filename.String,
-			Id:            int(dbLayer.ID.Int64),
-			Layer:         int(dbLayer.LayerID.Int64),
-			Line:          dbLayer.Line.String,
-			LineNumber:    int(dbLayer.LineNumber.Int32),
-			Match:         dbLayer.Match.String,
-			Name:          dbLayer.Name.String,
-			Password:      dbLayer.Password.String,
-			Probability:   float32(dbLayer.Probability.Float64),
-			ProjectId:     int(dbLayer.ProjectID.Int64),
-			Username:      dbLayer.Username.String,
-			PreviousLines: dbLayer.PreviousLines.String,
-		})
+		if dbLayer.ID.Valid {
+			layerResults[dbLayer.Lid] = append(layerResults[dbLayer.Lid], generated.DockerLayerResult{
+				CreatedAt:     dbLayer.CreatedAt.Time.Format(time.RFC3339),
+				Filename:      dbLayer.Filename.String,
+				Id:            int(dbLayer.ID.Int64),
+				Layer:         int(dbLayer.Lid),
+				Line:          dbLayer.Line.String,
+				LineNumber:    int(dbLayer.LineNumber.Int32),
+				Match:         dbLayer.Match.String,
+				Name:          dbLayer.Name.String,
+				Password:      dbLayer.Password.String,
+				Probability:   float32(dbLayer.Probability.Float64),
+				ProjectId:     int(dbLayer.ProjectID.Int64),
+				Username:      dbLayer.Username.String,
+				PreviousLines: dbLayer.PreviousLines.String,
+			})
+		}
 	}
 
 	for i, layer := range layers {

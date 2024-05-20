@@ -233,9 +233,10 @@ func (q *Queries) GetDockerImagesForProject(ctx context.Context, projectID int64
 
 const getDockerLayersAndResultsForImage = `-- name: GetDockerLayersAndResultsForImage :many
 SELECT
-    image_id, layer_hash, scanned_at, id, project_id, layer_id, name, line, line_number, previous_lines, match, probability, username, password, filename, created_at
+    lid, image_id, layer_hash, scanned_at, id, project_id, layer_id, name, line, line_number, previous_lines, match, probability, username, password, filename, created_at
 FROM ((
         SELECT
+            docker_layers.id AS lid,
             docker_layers.image_id,
             docker_layers.layer_hash,
             docker_layers.scanned_at,
@@ -251,6 +252,7 @@ FROM ((
     LIMIT 25)
 UNION (
     SELECT
+        docker_layers.id AS lid,
         docker_layers.image_id,
         docker_layers.layer_hash,
         docker_layers.scanned_at,
@@ -265,6 +267,7 @@ ORDER BY
 `
 
 type GetDockerLayersAndResultsForImageRow struct {
+	Lid           int64              `json:"lid"`
 	ImageID       int64              `json:"image_id"`
 	LayerHash     string             `json:"layer_hash"`
 	ScannedAt     pgtype.Timestamptz `json:"scanned_at"`
@@ -293,6 +296,7 @@ func (q *Queries) GetDockerLayersAndResultsForImage(ctx context.Context, imageID
 	for rows.Next() {
 		var i GetDockerLayersAndResultsForImageRow
 		if err := rows.Scan(
+			&i.Lid,
 			&i.ImageID,
 			&i.LayerHash,
 			&i.ScannedAt,
