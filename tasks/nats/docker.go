@@ -24,7 +24,7 @@ func NewDockerScannerTaskSender(conn *nats.Conn) *dockerScannerTaskSender {
 
 const scanDockerRepositoryQueue = "scan-Docker-repository"
 
-func (gs *dockerScannerTaskSender) ScanDockerRepository(ctx context.Context, img *queries.ProjectDockerImage) error {
+func (gs *dockerScannerTaskSender) ScanDockerRepository(ctx context.Context, img *queries.DockerImage) error {
 	return publishMessage(ctx, gs.conn, scanDockerRepositoryQueue, &ScanDockerRepoMessage{
 		ImageId: img.ID,
 	}, 0)
@@ -39,7 +39,7 @@ type dockerScannerTaskRunner struct {
 
 type DockerQuerier interface {
 	local.DockerQuerier
-	GetDockerImage(ctx context.Context, id int64) (*queries.ProjectDockerImage, error)
+	GetDockerImage(ctx context.Context, id int64) (*queries.DockerImage, error)
 }
 
 func NewDockerScannerTaskRunner(conn *nats.Conn, localRunner tasks.DockerTasksRunner, querier DockerQuerier, concurrency int) *dockerScannerTaskRunner {

@@ -15,7 +15,7 @@ import (
 
 type GitQuerier interface {
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, params queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)
-	CreateGitCommitForProject(ctx context.Context, params queries.CreateGitCommitForProjectParams) (*queries.ProjectGitScannedCommit, error)
+	CreateGitCommitForProject(ctx context.Context, params queries.CreateGitCommitForProjectParams) (*queries.GitCommit, error)
 	CreateGitResultForCommit(ctx context.Context, params []queries.CreateGitResultForCommitParams) (int64, error)
 }
 
@@ -33,7 +33,7 @@ func NewGitRunner(queries GitQuerier) *GitRunner {
 	}
 }
 
-func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
+func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error {
 	if repo == nil {
 		return errors.New("repo is nil")
 	}
@@ -76,8 +76,8 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.Project
 
 	options = append(options, git.WithCallbackResult(func(ctx context.Context, scanner *git.GitScan, result *git.GitResult) error {
 		commit, err := r.queries.CreateGitCommitForProject(ctx, queries.CreateGitCommitForProjectParams{
-			ProjectID:  repo.ProjectID,
-			CommitHash: result.CommitHash,
+			RepositoryID: repo.ID,
+			CommitHash:   result.CommitHash,
 		})
 		if err != nil {
 			return err
@@ -86,7 +86,6 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.Project
 		results := []queries.CreateGitResultForCommitParams{}
 		for _, item := range result.Results {
 			results = append(results, queries.CreateGitResultForCommitParams{
-				ProjectID:   repo.ProjectID,
 				Commit:      commit.ID,
 				Name:        item.Name,
 				Line:        item.Line,

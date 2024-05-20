@@ -25,8 +25,8 @@ type DockerRunner struct {
 
 type DockerQuerier interface {
 	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
-	UpdateDockerLayerScanForProject(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.ProjectDockerLayerScan, error)
-	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.ProjectDockerScannedLayer, error)
+	UpdateDockerLayerScanForProject(context.Context, queries.UpdateDockerLayerScanForProjectParams) (*queries.DockerScan, error)
+	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.DockerLayer, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, params []queries.CreateDockerLayerResultsForProjectParams) (int64, error)
 }
 
@@ -38,7 +38,7 @@ func NewDockerRunner(queries DockerQuerier) *DockerRunner {
 	}
 }
 
-func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.ProjectDockerImage) (err error) {
+func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage) (err error) {
 	if image == nil {
 		return errors.New("image is nil")
 	}
@@ -74,7 +74,7 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		for _, fileResult := range result.Results {
 			layerResults = append(layerResults, queries.CreateDockerLayerResultsForProjectParams{
 				ProjectID:   image.ProjectID,
-				Layer:       scannedLayer.ID,
+				LayerID:     scannedLayer.ID,
 				Name:        fileResult.Name,
 				Line:        fileResult.Line,
 				LineNumber:  int32(fileResult.LineNumber),
@@ -111,27 +111,15 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 	}
 
 	fileOptions := []file.Option{}
-	if image.UseDefaultPasswordsCompletelyIgnore {
-		return errors.New("UseDefaultPasswordsCompletelyIgnore is not supported")
-	}
-	if image.UseDefaultUsernamesCompletelyIgnore {
-		return errors.New("UseDefaultUsernamesCompletelyIgnore is not supported")
-	}
-	if image.UseDefaultWordsIncreaseProbability {
-		return errors.New("UseDefaultWordsIncreaseProbability is not supported")
-	}
-	if image.UseDefaultWordsReduceProbability {
-		return errors.New("UseDefaultWordsReduceProbability is not supported")
-	}
 
 	if image.ProbabilityIncreaseMultiplier.Valid {
 		fileOptions = append(fileOptions, file.WithProbabilityIncreaseMultiplier(image.ProbabilityIncreaseMultiplier.Float64))
 	}
-	if image.ProbailityDecreaseMultiplier.Valid {
-		fileOptions = append(fileOptions, file.WithProbabilityDecreaseMultiplier(image.ProbailityDecreaseMultiplier.Float64))
+	if image.ProbabilityDecreaseMultiplier.Valid {
+		fileOptions = append(fileOptions, file.WithProbabilityDecreaseMultiplier(image.ProbabilityDecreaseMultiplier.Float64))
 	}
 	if image.EntropyThreshold.Valid {
-		fileOptions = append(fileOptions, file.WithEntropyThresholdMidpoint(int(image.EntropyThreshold.Int32)))
+		fileOptions = append(fileOptions, file.WithEntropyThresholdMidpoint(int(image.EntropyThreshold.Float64)))
 	}
 	if image.LogisticGrowthRate.Valid {
 		fileOptions = append(fileOptions, file.WithLogisticGrowthRate(image.LogisticGrowthRate.Float64))

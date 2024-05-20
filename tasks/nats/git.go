@@ -24,7 +24,7 @@ func NewGitScannerTaskSender(conn *nats.Conn) *gitScannerTaskSender {
 
 const scanGitRepositoryQueue = "scan-git-repository"
 
-func (gs *gitScannerTaskSender) ScanGitRepository(ctx context.Context, repo *queries.ProjectGitRepository) error {
+func (gs *gitScannerTaskSender) ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error {
 	return publishMessage(ctx, gs.conn, scanGitRepositoryQueue, &ScanGitRepositoryMessage{
 		RepoId: repo.ID,
 	}, 0)
@@ -39,7 +39,7 @@ type gitScannerTaskRunner struct {
 
 type GitQuerier interface {
 	local.GitQuerier
-	GetGitRepository(ctx context.Context, id int64) (*queries.ProjectGitRepository, error)
+	GetGitRepository(ctx context.Context, id int64) (*queries.GitRepository, error)
 }
 
 func NewGitScannerTaskRunner(conn *nats.Conn, localRunner tasks.GitTasksRunner, querier GitQuerier, concurrency int) *gitScannerTaskRunner {

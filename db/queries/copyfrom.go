@@ -30,7 +30,7 @@ func (r *iteratorForCreateDockerLayerResultsForProject) Next() bool {
 func (r iteratorForCreateDockerLayerResultsForProject) Values() ([]interface{}, error) {
 	return []interface{}{
 		r.rows[0].ProjectID,
-		r.rows[0].Layer,
+		r.rows[0].LayerID,
 		r.rows[0].Name,
 		r.rows[0].Line,
 		r.rows[0].LineNumber,
@@ -47,7 +47,7 @@ func (r iteratorForCreateDockerLayerResultsForProject) Err() error {
 }
 
 func (q *Queries) CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"project_docker_layer_results"}, []string{"project_id", "layer", "name", "line", "line_number", "match", "probability", "username", "password", "filename"}, &iteratorForCreateDockerLayerResultsForProject{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"docker_results"}, []string{"project_id", "layer_id", "name", "line", "line_number", "match", "probability", "username", "password", "filename"}, &iteratorForCreateDockerLayerResultsForProject{rows: arg})
 }
 
 // iteratorForCreateGitResultForCommit implements pgx.CopyFromSource.
@@ -70,7 +70,6 @@ func (r *iteratorForCreateGitResultForCommit) Next() bool {
 
 func (r iteratorForCreateGitResultForCommit) Values() ([]interface{}, error) {
 	return []interface{}{
-		r.rows[0].ProjectID,
 		r.rows[0].Commit,
 		r.rows[0].Name,
 		r.rows[0].Line,
@@ -88,5 +87,5 @@ func (r iteratorForCreateGitResultForCommit) Err() error {
 }
 
 func (q *Queries) CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error) {
-	return q.db.CopyFrom(ctx, []string{"project_git_results"}, []string{"project_id", "commit", "name", "line", "line_number", "match", "probability", "username", "password", "filename"}, &iteratorForCreateGitResultForCommit{rows: arg})
+	return q.db.CopyFrom(ctx, []string{"git_results"}, []string{"commit", "name", "line", "line_number", "match", "probability", "username", "password", "filename"}, &iteratorForCreateGitResultForCommit{rows: arg})
 }

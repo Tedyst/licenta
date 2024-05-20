@@ -25,6 +25,84 @@ type DefaultBruteforcePassword struct {
 	Password string `json:"password"`
 }
 
+type DockerImage struct {
+	ID                            int64              `json:"id"`
+	ProjectID                     int64              `json:"project_id"`
+	DockerImage                   string             `json:"docker_image"`
+	Username                      sql.NullString     `json:"username"`
+	Password                      sql.NullString     `json:"password"`
+	MinProbability                sql.NullFloat64    `json:"min_probability"`
+	ProbabilityDecreaseMultiplier sql.NullFloat64    `json:"probability_decrease_multiplier"`
+	ProbabilityIncreaseMultiplier sql.NullFloat64    `json:"probability_increase_multiplier"`
+	EntropyThreshold              sql.NullFloat64    `json:"entropy_threshold"`
+	LogisticGrowthRate            sql.NullFloat64    `json:"logistic_growth_rate"`
+	CreatedAt                     pgtype.Timestamptz `json:"created_at"`
+}
+
+type DockerLayer struct {
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	ScanID    int64              `json:"scan_id"`
+	LayerHash string             `json:"layer_hash"`
+	ScannedAt pgtype.Timestamptz `json:"scanned_at"`
+}
+
+type DockerResult struct {
+	ID          int64              `json:"id"`
+	ProjectID   int64              `json:"project_id"`
+	LayerID     int64              `json:"layer_id"`
+	Name        string             `json:"name"`
+	Line        string             `json:"line"`
+	LineNumber  int32              `json:"line_number"`
+	Match       string             `json:"match"`
+	Probability float64            `json:"probability"`
+	Username    sql.NullString     `json:"username"`
+	Password    sql.NullString     `json:"password"`
+	Filename    string             `json:"filename"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type DockerScan struct {
+	ID            int64              `json:"id"`
+	ProjectID     int64              `json:"project_id"`
+	DockerImage   int64              `json:"docker_image"`
+	Finished      bool               `json:"finished"`
+	ScannedLayers int32              `json:"scanned_layers"`
+	LayersToScan  int32              `json:"layers_to_scan"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+}
+
+type GitCommit struct {
+	ID           int64              `json:"id"`
+	RepositoryID int64              `json:"repository_id"`
+	CommitHash   string             `json:"commit_hash"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type GitRepository struct {
+	ID            int64              `json:"id"`
+	ProjectID     int64              `json:"project_id"`
+	GitRepository string             `json:"git_repository"`
+	Username      sql.NullString     `json:"username"`
+	Password      sql.NullString     `json:"password"`
+	PrivateKey    sql.NullString     `json:"private_key"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+}
+
+type GitResult struct {
+	ID          int64              `json:"id"`
+	Commit      int64              `json:"commit"`
+	Name        string             `json:"name"`
+	Line        string             `json:"line"`
+	LineNumber  int32              `json:"line_number"`
+	Match       string             `json:"match"`
+	Probability float64            `json:"probability"`
+	Username    sql.NullString     `json:"username"`
+	Password    sql.NullString     `json:"password"`
+	Filename    string             `json:"filename"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
 type MysqlDatabase struct {
 	ID           int64              `json:"id"`
 	ProjectID    int64              `json:"project_id"`
@@ -106,88 +184,6 @@ type Project struct {
 	OrganizationID int64              `json:"organization_id"`
 	Remote         bool               `json:"remote"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectDockerImage struct {
-	ID                                  int64              `json:"id"`
-	ProjectID                           int64              `json:"project_id"`
-	DockerImage                         string             `json:"docker_image"`
-	Username                            sql.NullString     `json:"username"`
-	Password                            sql.NullString     `json:"password"`
-	MinProbability                      sql.NullFloat64    `json:"min_probability"`
-	UseDefaultWordsReduceProbability    bool               `json:"use_default_words_reduce_probability"`
-	UseDefaultWordsIncreaseProbability  bool               `json:"use_default_words_increase_probability"`
-	UseDefaultPasswordsCompletelyIgnore bool               `json:"use_default_passwords_completely_ignore"`
-	UseDefaultUsernamesCompletelyIgnore bool               `json:"use_default_usernames_completely_ignore"`
-	ProbailityDecreaseMultiplier        sql.NullFloat64    `json:"probaility_decrease_multiplier"`
-	ProbabilityIncreaseMultiplier       sql.NullFloat64    `json:"probability_increase_multiplier"`
-	EntropyThreshold                    sql.NullInt32      `json:"entropy_threshold"`
-	LogisticGrowthRate                  sql.NullFloat64    `json:"logistic_growth_rate"`
-	CreatedAt                           pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectDockerLayerResult struct {
-	ID          int64              `json:"id"`
-	ProjectID   int64              `json:"project_id"`
-	Layer       int64              `json:"layer"`
-	Name        string             `json:"name"`
-	Line        string             `json:"line"`
-	LineNumber  int32              `json:"line_number"`
-	Match       string             `json:"match"`
-	Probability float64            `json:"probability"`
-	Username    sql.NullString     `json:"username"`
-	Password    sql.NullString     `json:"password"`
-	Filename    string             `json:"filename"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectDockerLayerScan struct {
-	ID            int64              `json:"id"`
-	ProjectID     int64              `json:"project_id"`
-	DockerImage   int64              `json:"docker_image"`
-	Finished      bool               `json:"finished"`
-	ScannedLayers int32              `json:"scanned_layers"`
-	LayersToScan  int32              `json:"layers_to_scan"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectDockerScannedLayer struct {
-	ID        int64              `json:"id"`
-	ProjectID int64              `json:"project_id"`
-	LayerHash string             `json:"layer_hash"`
-	ScannedAt pgtype.Timestamptz `json:"scanned_at"`
-}
-
-type ProjectGitRepository struct {
-	ID            int64              `json:"id"`
-	ProjectID     int64              `json:"project_id"`
-	GitRepository string             `json:"git_repository"`
-	Username      sql.NullString     `json:"username"`
-	Password      sql.NullString     `json:"password"`
-	PrivateKey    sql.NullString     `json:"private_key"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectGitResult struct {
-	ID          int64              `json:"id"`
-	ProjectID   int64              `json:"project_id"`
-	Commit      int64              `json:"commit"`
-	Name        string             `json:"name"`
-	Line        string             `json:"line"`
-	LineNumber  int32              `json:"line_number"`
-	Match       string             `json:"match"`
-	Probability float64            `json:"probability"`
-	Username    sql.NullString     `json:"username"`
-	Password    sql.NullString     `json:"password"`
-	Filename    string             `json:"filename"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-}
-
-type ProjectGitScannedCommit struct {
-	ID         int64              `json:"id"`
-	ProjectID  int64              `json:"project_id"`
-	CommitHash string             `json:"commit_hash"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
 }
 
 type ProjectMember struct {

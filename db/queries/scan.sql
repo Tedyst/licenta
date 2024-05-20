@@ -116,3 +116,21 @@ WHERE
 ORDER BY
     scans.id DESC;
 
+-- name: GetCountOfScanGroupsForProject :one
+SELECT
+    COUNT(*)
+FROM
+    scan_groups
+WHERE
+    project_id = $1;
+
+-- name: GetScanGroupsForProject :many
+SELECT
+    sqlc.embed(scan_groups),
+    sqlc.embed(scans)
+FROM
+    scan_groups
+    INNER JOIN scans ON scan_groups.id = scans.scan_group_id
+WHERE
+    project_id = $1;
+

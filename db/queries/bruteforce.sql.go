@@ -57,16 +57,16 @@ FROM (
     SELECT
         COUNT(*)
     FROM
-        project_docker_layer_results
+        docker_results
     WHERE
-        project_docker_layer_results.project_id = $1
+        docker_results.project_id = $1
     UNION ALL
     SELECT
         COUNT(*)
     FROM
-        project_git_results
+        git_results
     WHERE
-        project_git_results.project_id = $1) AS count
+        git_results.project_id = $1) AS count
 `
 
 func (q *Queries) GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error) {
@@ -116,16 +116,16 @@ const getBruteforcePasswordsSpecificForProject = `-- name: GetBruteforcePassword
 SELECT
     PASSWORD
 FROM
-    project_docker_layer_results
+    docker_results
 WHERE
-    project_docker_layer_results.project_id = $1
+    docker_results.project_id = $1
 UNION ALL
 SELECT
     PASSWORD
 FROM
-    project_git_results
+    git_results
 WHERE
-    project_git_results.project_id = $1
+    git_results.project_id = $1
 `
 
 func (q *Queries) GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error) {
@@ -195,18 +195,18 @@ FROM (
     SELECT
         -1
     FROM
-        project_docker_layer_results
+        docker_results
     WHERE
-        project_docker_layer_results.project_id = $2
-        AND project_docker_layer_results.PASSWORD = $1
+        docker_results.project_id = $2
+        AND docker_results.PASSWORD = $1
     UNION ALL
     SELECT
         -1
     FROM
-        project_git_results
+        git_results
     WHERE
-        project_git_results.project_id = $2
-        AND project_git_results.PASSWORD = $1) AS subq
+        git_results.project_id = $2
+        AND git_results.PASSWORD = $1) AS subq
 LIMIT 1
 `
 

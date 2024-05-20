@@ -74,7 +74,7 @@ CREATE TABLE project_members(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_git_repositories(
+CREATE TABLE git_repositories(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     git_repository text NOT NULL,
@@ -84,17 +84,16 @@ CREATE TABLE project_git_repositories(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_git_scanned_commits(
+CREATE TABLE git_commits(
     id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE,
     commit_hash text NOT NULL UNIQUE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_git_results(
+CREATE TABLE git_results(
     id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    commit bigint REFERENCES project_git_scanned_commits(id) ON DELETE CASCADE NOT NULL,
+    commit bigint REFERENCES git_commits(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
     line text NOT NULL,
     line_number integer NOT NULL,
@@ -106,45 +105,42 @@ CREATE TABLE project_git_results(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_docker_images(
+CREATE TABLE docker_images(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     docker_image text NOT NULL,
     username text,
     password text,
     min_probability float,
-    use_default_words_reduce_probability boolean DEFAULT TRUE NOT NULL,
-    use_default_words_increase_probability boolean DEFAULT TRUE NOT NULL,
-    use_default_passwords_completely_ignore boolean DEFAULT TRUE NOT NULL,
-    use_default_usernames_completely_ignore boolean DEFAULT TRUE NOT NULL,
-    probaility_decrease_multiplier float,
+    probability_decrease_multiplier float,
     probability_increase_multiplier float,
-    entropy_threshold integer,
+    entropy_threshold float,
     logistic_growth_rate float,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_docker_layer_scans(
+CREATE TABLE docker_scans(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    docker_image bigint REFERENCES project_docker_images(id) ON DELETE CASCADE NOT NULL,
+    docker_image bigint REFERENCES docker_images(id) ON DELETE CASCADE NOT NULL,
     finished boolean NOT NULL DEFAULT FALSE,
     scanned_layers integer NOT NULL DEFAULT 0,
     layers_to_scan integer NOT NULL DEFAULT 0,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_docker_scanned_layers(
+CREATE TABLE docker_layers(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    scan_id bigint REFERENCES docker_scans(id) ON DELETE CASCADE NOT NULL,
     layer_hash text NOT NULL UNIQUE,
     scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE project_docker_layer_results(
+CREATE TABLE docker_results(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    layer bigint REFERENCES project_docker_scanned_layers(id) ON DELETE CASCADE NOT NULL,
+    layer_id bigint REFERENCES docker_layers(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
     line text NOT NULL,
     line_number integer NOT NULL,

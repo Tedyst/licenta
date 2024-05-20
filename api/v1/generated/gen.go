@@ -103,6 +103,23 @@ type CreateBruteforcedPassword struct {
 	Username         string `json:"username"`
 }
 
+// CreateDockerImage defines model for CreateDockerImage.
+type CreateDockerImage struct {
+	DockerImage string `json:"docker_image"`
+	Password    string `json:"password"`
+	ProjectId   int    `json:"project_id"`
+	Username    string `json:"username"`
+}
+
+// CreateGit defines model for CreateGit.
+type CreateGit struct {
+	GitRepository string `json:"git_repository"`
+	Password      string `json:"password"`
+	PrivateKey    string `json:"private_key"`
+	ProjectId     int    `json:"project_id"`
+	Username      string `json:"username"`
+}
+
 // CreateMysqlDatabase defines model for CreateMysqlDatabase.
 type CreateMysqlDatabase struct {
 	DatabaseName string `json:"database_name"`
@@ -141,6 +158,56 @@ type CreateScanResult struct {
 	Severity int    `json:"severity"`
 }
 
+// DockerImage defines model for DockerImage.
+type DockerImage struct {
+	DockerImage                   string  `json:"docker_image"`
+	EntropyThreshold              float32 `json:"entropy_threshold"`
+	Id                            int     `json:"id"`
+	LogisticGrowthRate            float32 `json:"logistic_growth_rate"`
+	MinProbability                float32 `json:"min_probability"`
+	Password                      string  `json:"password"`
+	ProbabilityDecreaseMultiplier float32 `json:"probability_decrease_multiplier"`
+	ProbabilityIncreaseMultiplier float32 `json:"probability_increase_multiplier"`
+	ProjectId                     int     `json:"project_id"`
+	Username                      string  `json:"username"`
+}
+
+// DockerLayer defines model for DockerLayer.
+type DockerLayer struct {
+	Id        int                 `json:"id"`
+	LayerHash string              `json:"layer_hash"`
+	ProjectId int                 `json:"project_id"`
+	Results   []DockerLayerResult `json:"results"`
+	ScanId    int                 `json:"scan_id"`
+}
+
+// DockerLayerResult defines model for DockerLayerResult.
+type DockerLayerResult struct {
+	CreatedAt   string  `json:"created_at"`
+	Filename    string  `json:"filename"`
+	Id          int     `json:"id"`
+	Layer       int     `json:"layer"`
+	Line        string  `json:"line"`
+	LineNumber  int     `json:"line_number"`
+	Match       string  `json:"match"`
+	Name        string  `json:"name"`
+	Password    string  `json:"password"`
+	Probability float32 `json:"probability"`
+	ProjectId   int     `json:"project_id"`
+	Username    string  `json:"username"`
+}
+
+// DockerScan defines model for DockerScan.
+type DockerScan struct {
+	CreatedAt     string `json:"created_at"`
+	Finished      bool   `json:"finished"`
+	Id            int    `json:"id"`
+	Image         string `json:"image"`
+	LayersToScan  int    `json:"layers_to_scan"`
+	ProjectId     int    `json:"project_id"`
+	ScannedLayers int    `json:"scanned_layers"`
+}
+
 // EditUserRoleInOrganization defines model for EditUserRoleInOrganization.
 type EditUserRoleInOrganization struct {
 	Id   int    `json:"id"`
@@ -154,6 +221,39 @@ type Error struct {
 
 	// Success The success status
 	Success bool `json:"success"`
+}
+
+// Git defines model for Git.
+type Git struct {
+	GitRepository string `json:"git_repository"`
+	HasSsh        bool   `json:"has_ssh"`
+	Id            int    `json:"id"`
+	Password      string `json:"password"`
+	ProjectId     int    `json:"project_id"`
+	Username      string `json:"username"`
+}
+
+// GitCommit defines model for GitCommit.
+type GitCommit struct {
+	CommitHash   string      `json:"commit_hash"`
+	CreatedAt    string      `json:"created_at"`
+	Id           int         `json:"id"`
+	RepositoryId int         `json:"repository_id"`
+	Results      []GitResult `json:"results"`
+}
+
+// GitResult defines model for GitResult.
+type GitResult struct {
+	Commit      int     `json:"commit"`
+	Filename    string  `json:"filename"`
+	Id          int     `json:"id"`
+	Line        string  `json:"line"`
+	LineNumber  int     `json:"line_number"`
+	Match       string  `json:"match"`
+	Name        string  `json:"name"`
+	Password    string  `json:"password"`
+	Probability float32 `json:"probability"`
+	Username    string  `json:"username"`
 }
 
 // LoginUser defines model for LoginUser.
@@ -259,6 +359,26 @@ type PatchBruteforceScanResult struct {
 	Password string `json:"password"`
 	Total    int    `json:"total"`
 	Tried    int    `json:"tried"`
+}
+
+// PatchDockerImage defines model for PatchDockerImage.
+type PatchDockerImage struct {
+	DockerImage                   *string  `json:"docker_image,omitempty"`
+	EntropyThreshold              *float32 `json:"entropy_threshold,omitempty"`
+	LogisticGrowthRate            *float32 `json:"logistic_growth_rate,omitempty"`
+	MinProbability                *float32 `json:"min_probability,omitempty"`
+	Password                      *string  `json:"password,omitempty"`
+	ProbabilityDecreaseMultiplier *float32 `json:"probability_decrease_multiplier,omitempty"`
+	ProbabilityIncreaseMultiplier *float32 `json:"probability_increase_multiplier,omitempty"`
+	Username                      *string  `json:"username,omitempty"`
+}
+
+// PatchGit defines model for PatchGit.
+type PatchGit struct {
+	GitRepository *string `json:"git_repository,omitempty"`
+	Password      *string `json:"password,omitempty"`
+	PrivateKey    *string `json:"private_key,omitempty"`
+	Username      *string `json:"username,omitempty"`
 }
 
 // PatchMysqlDatabase defines model for PatchMysqlDatabase.
@@ -423,6 +543,18 @@ type User struct {
 	Username string `json:"username"`
 }
 
+// GetDockerParams defines parameters for GetDocker.
+type GetDockerParams struct {
+	// Project The project to filter for
+	Project int `form:"project" json:"project"`
+}
+
+// GetGitParams defines parameters for GetGit.
+type GetGitParams struct {
+	// Project The project to filter for
+	Project int `form:"project" json:"project"`
+}
+
 // GetMysqlParams defines parameters for GetMysql.
 type GetMysqlParams struct {
 	// Project The projects to filter for
@@ -471,6 +603,12 @@ type GetProjectsIdBruteforcedPasswordParams struct {
 	Username string `form:"username" json:"username"`
 }
 
+// GetScanGroupsParams defines parameters for GetScanGroups.
+type GetScanGroupsParams struct {
+	// Project The project to filter for
+	Project int `form:"project" json:"project"`
+}
+
 // GetUsersParams defines parameters for GetUsers.
 type GetUsersParams struct {
 	// Limit The number of items to return
@@ -491,6 +629,18 @@ type PatchBruteforcedPasswordsIdJSONRequestBody = UpdateBruteforcedPassword
 
 // PatchBruteforceresultsIdJSONRequestBody defines body for PatchBruteforceresultsId for application/json ContentType.
 type PatchBruteforceresultsIdJSONRequestBody = PatchBruteforceScanResult
+
+// PostDockerJSONRequestBody defines body for PostDocker for application/json ContentType.
+type PostDockerJSONRequestBody = CreateDockerImage
+
+// PatchDockerIdJSONRequestBody defines body for PatchDockerId for application/json ContentType.
+type PatchDockerIdJSONRequestBody = PatchDockerImage
+
+// PostGitJSONRequestBody defines body for PostGit for application/json ContentType.
+type PostGitJSONRequestBody = CreateGit
+
+// PatchGitIdJSONRequestBody defines body for PatchGitId for application/json ContentType.
+type PatchGitIdJSONRequestBody = PatchGit
 
 // PostMysqlJSONRequestBody defines body for PostMysql for application/json ContentType.
 type PostMysqlJSONRequestBody = CreateMysqlDatabase
@@ -620,6 +770,44 @@ type ClientInterface interface {
 	// GetCvesDbTypeVersion request
 	GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetDocker request
+	GetDocker(ctx context.Context, params *GetDockerParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostDockerWithBody request with any body
+	PostDockerWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostDocker(ctx context.Context, body PostDockerJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteDockerId request
+	DeleteDockerId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetDockerId request
+	GetDockerId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchDockerIdWithBody request with any body
+	PatchDockerIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchDockerId(ctx context.Context, id int64, body PatchDockerIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetGit request
+	GetGit(ctx context.Context, params *GetGitParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostGitWithBody request with any body
+	PostGitWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostGit(ctx context.Context, body PostGitJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteGitId request
+	DeleteGitId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetGitId request
+	GetGitId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchGitIdWithBody request with any body
+	PatchGitIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchGitId(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetMysql request
 	GetMysql(ctx context.Context, params *GetMysqlParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -718,6 +906,9 @@ type ClientInterface interface {
 	// PostProjectsIdRun request
 	PostProjectsIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetScanGroups request
+	GetScanGroups(ctx context.Context, params *GetScanGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetScanId request
 	GetScanId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -804,6 +995,174 @@ func (c *Client) PatchBruteforceresultsId(ctx context.Context, id int64, body Pa
 
 func (c *Client) GetCvesDbTypeVersion(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetCvesDbTypeVersionRequest(c.Server, dbType, version)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetDocker(ctx context.Context, params *GetDockerParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDockerRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostDockerWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDockerRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostDocker(ctx context.Context, body PostDockerJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDockerRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteDockerId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteDockerIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetDockerId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDockerIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchDockerIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchDockerIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchDockerId(ctx context.Context, id int64, body PatchDockerIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchDockerIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetGit(ctx context.Context, params *GetGitParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetGitRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostGitWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostGitRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostGit(ctx context.Context, body PostGitJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostGitRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteGitId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteGitIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetGitId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetGitIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchGitIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchGitIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchGitId(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchGitIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1246,6 +1605,18 @@ func (c *Client) PostProjectsIdRun(ctx context.Context, id int64, reqEditors ...
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetScanGroups(ctx context.Context, params *GetScanGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetScanGroupsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetScanId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetScanIdRequest(c.Server, id)
 	if err != nil {
@@ -1533,6 +1904,406 @@ func NewGetCvesDbTypeVersionRequest(server string, dbType string, version string
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewGetDockerRequest generates requests for GetDocker
+func NewGetDockerRequest(server string, params *GetDockerParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/docker")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "project", runtime.ParamLocationQuery, params.Project); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostDockerRequest calls the generic PostDocker builder with application/json body
+func NewPostDockerRequest(server string, body PostDockerJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostDockerRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostDockerRequestWithBody generates requests for PostDocker with any type of body
+func NewPostDockerRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/docker")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteDockerIdRequest generates requests for DeleteDockerId
+func NewDeleteDockerIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/docker/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetDockerIdRequest generates requests for GetDockerId
+func NewGetDockerIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/docker/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchDockerIdRequest calls the generic PatchDockerId builder with application/json body
+func NewPatchDockerIdRequest(server string, id int64, body PatchDockerIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchDockerIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchDockerIdRequestWithBody generates requests for PatchDockerId with any type of body
+func NewPatchDockerIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/docker/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetGitRequest generates requests for GetGit
+func NewGetGitRequest(server string, params *GetGitParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/git")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "project", runtime.ParamLocationQuery, params.Project); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostGitRequest calls the generic PostGit builder with application/json body
+func NewPostGitRequest(server string, body PostGitJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostGitRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostGitRequestWithBody generates requests for PostGit with any type of body
+func NewPostGitRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/git")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteGitIdRequest generates requests for DeleteGitId
+func NewDeleteGitIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/git/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetGitIdRequest generates requests for GetGitId
+func NewGetGitIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/git/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchGitIdRequest calls the generic PatchGitId builder with application/json body
+func NewPatchGitIdRequest(server string, id int64, body PatchGitIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchGitIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchGitIdRequestWithBody generates requests for PatchGitId with any type of body
+func NewPatchGitIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/git/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2650,6 +3421,51 @@ func NewPostProjectsIdRunRequest(server string, id int64) (*http.Request, error)
 	return req, nil
 }
 
+// NewGetScanGroupsRequest generates requests for GetScanGroups
+func NewGetScanGroupsRequest(server string, params *GetScanGroupsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/scan-groups")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "project", runtime.ParamLocationQuery, params.Project); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetScanIdRequest generates requests for GetScanId
 func NewGetScanIdRequest(server string, id int64) (*http.Request, error) {
 	var err error
@@ -3106,6 +3922,44 @@ type ClientWithResponsesInterface interface {
 	// GetCvesDbTypeVersionWithResponse request
 	GetCvesDbTypeVersionWithResponse(ctx context.Context, dbType string, version string, reqEditors ...RequestEditorFn) (*GetCvesDbTypeVersionResponse, error)
 
+	// GetDockerWithResponse request
+	GetDockerWithResponse(ctx context.Context, params *GetDockerParams, reqEditors ...RequestEditorFn) (*GetDockerResponse, error)
+
+	// PostDockerWithBodyWithResponse request with any body
+	PostDockerWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDockerResponse, error)
+
+	PostDockerWithResponse(ctx context.Context, body PostDockerJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDockerResponse, error)
+
+	// DeleteDockerIdWithResponse request
+	DeleteDockerIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteDockerIdResponse, error)
+
+	// GetDockerIdWithResponse request
+	GetDockerIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetDockerIdResponse, error)
+
+	// PatchDockerIdWithBodyWithResponse request with any body
+	PatchDockerIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchDockerIdResponse, error)
+
+	PatchDockerIdWithResponse(ctx context.Context, id int64, body PatchDockerIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchDockerIdResponse, error)
+
+	// GetGitWithResponse request
+	GetGitWithResponse(ctx context.Context, params *GetGitParams, reqEditors ...RequestEditorFn) (*GetGitResponse, error)
+
+	// PostGitWithBodyWithResponse request with any body
+	PostGitWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostGitResponse, error)
+
+	PostGitWithResponse(ctx context.Context, body PostGitJSONRequestBody, reqEditors ...RequestEditorFn) (*PostGitResponse, error)
+
+	// DeleteGitIdWithResponse request
+	DeleteGitIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteGitIdResponse, error)
+
+	// GetGitIdWithResponse request
+	GetGitIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetGitIdResponse, error)
+
+	// PatchGitIdWithBodyWithResponse request with any body
+	PatchGitIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchGitIdResponse, error)
+
+	PatchGitIdWithResponse(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchGitIdResponse, error)
+
 	// GetMysqlWithResponse request
 	GetMysqlWithResponse(ctx context.Context, params *GetMysqlParams, reqEditors ...RequestEditorFn) (*GetMysqlResponse, error)
 
@@ -3203,6 +4057,9 @@ type ClientWithResponsesInterface interface {
 
 	// PostProjectsIdRunWithResponse request
 	PostProjectsIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectsIdRunResponse, error)
+
+	// GetScanGroupsWithResponse request
+	GetScanGroupsWithResponse(ctx context.Context, params *GetScanGroupsParams, reqEditors ...RequestEditorFn) (*GetScanGroupsResponse, error)
 
 	// GetScanIdWithResponse request
 	GetScanIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetScanIdResponse, error)
@@ -3317,6 +4174,276 @@ func (r GetCvesDbTypeVersionResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetCvesDbTypeVersionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetDockerResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Images  []DockerImage `json:"images"`
+		Success bool          `json:"success"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDockerResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDockerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostDockerResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Image   DockerImage `json:"image"`
+		Success bool        `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostDockerResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostDockerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteDockerIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteDockerIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteDockerIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetDockerIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Image   DockerImage   `json:"image"`
+		Layers  []DockerLayer `json:"layers"`
+		Success bool          `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDockerIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDockerIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchDockerIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Image   DockerImage `json:"image"`
+		Success bool        `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchDockerIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchDockerIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetGitResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		GitRepositories []Git `json:"git_repositories"`
+		Success         bool  `json:"success"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetGitResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetGitResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostGitResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Git     Git  `json:"git"`
+		Success bool `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostGitResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostGitResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteGitIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteGitIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteGitIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetGitIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Commits []GitCommit `json:"commits"`
+		Git     Git         `json:"git"`
+		Success bool        `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetGitIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetGitIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchGitIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Git     Git  `json:"git"`
+		Success bool `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchGitIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchGitIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -4019,6 +5146,32 @@ func (r PostProjectsIdRunResponse) StatusCode() int {
 	return 0
 }
 
+type GetScanGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		ScanGroups []ScanGroup `json:"scan_groups"`
+		Success    bool        `json:"success"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetScanGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetScanGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetScanIdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -4297,6 +5450,128 @@ func (c *ClientWithResponses) GetCvesDbTypeVersionWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseGetCvesDbTypeVersionResponse(rsp)
+}
+
+// GetDockerWithResponse request returning *GetDockerResponse
+func (c *ClientWithResponses) GetDockerWithResponse(ctx context.Context, params *GetDockerParams, reqEditors ...RequestEditorFn) (*GetDockerResponse, error) {
+	rsp, err := c.GetDocker(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDockerResponse(rsp)
+}
+
+// PostDockerWithBodyWithResponse request with arbitrary body returning *PostDockerResponse
+func (c *ClientWithResponses) PostDockerWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDockerResponse, error) {
+	rsp, err := c.PostDockerWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDockerResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostDockerWithResponse(ctx context.Context, body PostDockerJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDockerResponse, error) {
+	rsp, err := c.PostDocker(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDockerResponse(rsp)
+}
+
+// DeleteDockerIdWithResponse request returning *DeleteDockerIdResponse
+func (c *ClientWithResponses) DeleteDockerIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteDockerIdResponse, error) {
+	rsp, err := c.DeleteDockerId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteDockerIdResponse(rsp)
+}
+
+// GetDockerIdWithResponse request returning *GetDockerIdResponse
+func (c *ClientWithResponses) GetDockerIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetDockerIdResponse, error) {
+	rsp, err := c.GetDockerId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDockerIdResponse(rsp)
+}
+
+// PatchDockerIdWithBodyWithResponse request with arbitrary body returning *PatchDockerIdResponse
+func (c *ClientWithResponses) PatchDockerIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchDockerIdResponse, error) {
+	rsp, err := c.PatchDockerIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchDockerIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchDockerIdWithResponse(ctx context.Context, id int64, body PatchDockerIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchDockerIdResponse, error) {
+	rsp, err := c.PatchDockerId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchDockerIdResponse(rsp)
+}
+
+// GetGitWithResponse request returning *GetGitResponse
+func (c *ClientWithResponses) GetGitWithResponse(ctx context.Context, params *GetGitParams, reqEditors ...RequestEditorFn) (*GetGitResponse, error) {
+	rsp, err := c.GetGit(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetGitResponse(rsp)
+}
+
+// PostGitWithBodyWithResponse request with arbitrary body returning *PostGitResponse
+func (c *ClientWithResponses) PostGitWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostGitResponse, error) {
+	rsp, err := c.PostGitWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostGitResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostGitWithResponse(ctx context.Context, body PostGitJSONRequestBody, reqEditors ...RequestEditorFn) (*PostGitResponse, error) {
+	rsp, err := c.PostGit(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostGitResponse(rsp)
+}
+
+// DeleteGitIdWithResponse request returning *DeleteGitIdResponse
+func (c *ClientWithResponses) DeleteGitIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteGitIdResponse, error) {
+	rsp, err := c.DeleteGitId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteGitIdResponse(rsp)
+}
+
+// GetGitIdWithResponse request returning *GetGitIdResponse
+func (c *ClientWithResponses) GetGitIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetGitIdResponse, error) {
+	rsp, err := c.GetGitId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetGitIdResponse(rsp)
+}
+
+// PatchGitIdWithBodyWithResponse request with arbitrary body returning *PatchGitIdResponse
+func (c *ClientWithResponses) PatchGitIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchGitIdResponse, error) {
+	rsp, err := c.PatchGitIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchGitIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchGitIdWithResponse(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchGitIdResponse, error) {
+	rsp, err := c.PatchGitId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchGitIdResponse(rsp)
 }
 
 // GetMysqlWithResponse request returning *GetMysqlResponse
@@ -4613,6 +5888,15 @@ func (c *ClientWithResponses) PostProjectsIdRunWithResponse(ctx context.Context,
 	return ParsePostProjectsIdRunResponse(rsp)
 }
 
+// GetScanGroupsWithResponse request returning *GetScanGroupsResponse
+func (c *ClientWithResponses) GetScanGroupsWithResponse(ctx context.Context, params *GetScanGroupsParams, reqEditors ...RequestEditorFn) (*GetScanGroupsResponse, error) {
+	rsp, err := c.GetScanGroups(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetScanGroupsResponse(rsp)
+}
+
 // GetScanIdWithResponse request returning *GetScanIdResponse
 func (c *ClientWithResponses) GetScanIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetScanIdResponse, error) {
 	rsp, err := c.GetScanId(ctx, id, reqEditors...)
@@ -4849,6 +6133,436 @@ func ParseGetCvesDbTypeVersionResponse(rsp *http.Response) (*GetCvesDbTypeVersio
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetDockerResponse parses an HTTP response from a GetDockerWithResponse call
+func ParseGetDockerResponse(rsp *http.Response) (*GetDockerResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDockerResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Images  []DockerImage `json:"images"`
+			Success bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostDockerResponse parses an HTTP response from a PostDockerWithResponse call
+func ParsePostDockerResponse(rsp *http.Response) (*PostDockerResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostDockerResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Image   DockerImage `json:"image"`
+			Success bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteDockerIdResponse parses an HTTP response from a DeleteDockerIdWithResponse call
+func ParseDeleteDockerIdResponse(rsp *http.Response) (*DeleteDockerIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteDockerIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetDockerIdResponse parses an HTTP response from a GetDockerIdWithResponse call
+func ParseGetDockerIdResponse(rsp *http.Response) (*GetDockerIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDockerIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Image   DockerImage   `json:"image"`
+			Layers  []DockerLayer `json:"layers"`
+			Success bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchDockerIdResponse parses an HTTP response from a PatchDockerIdWithResponse call
+func ParsePatchDockerIdResponse(rsp *http.Response) (*PatchDockerIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchDockerIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Image   DockerImage `json:"image"`
+			Success bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetGitResponse parses an HTTP response from a GetGitWithResponse call
+func ParseGetGitResponse(rsp *http.Response) (*GetGitResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetGitResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			GitRepositories []Git `json:"git_repositories"`
+			Success         bool  `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostGitResponse parses an HTTP response from a PostGitWithResponse call
+func ParsePostGitResponse(rsp *http.Response) (*PostGitResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostGitResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Git     Git  `json:"git"`
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteGitIdResponse parses an HTTP response from a DeleteGitIdWithResponse call
+func ParseDeleteGitIdResponse(rsp *http.Response) (*DeleteGitIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteGitIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetGitIdResponse parses an HTTP response from a GetGitIdWithResponse call
+func ParseGetGitIdResponse(rsp *http.Response) (*GetGitIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetGitIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Commits []GitCommit `json:"commits"`
+			Git     Git         `json:"git"`
+			Success bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchGitIdResponse parses an HTTP response from a PatchGitIdWithResponse call
+func ParsePatchGitIdResponse(rsp *http.Response) (*PatchGitIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchGitIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Git     Git  `json:"git"`
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest Error
@@ -6005,6 +7719,42 @@ func ParsePostProjectsIdRunResponse(rsp *http.Response) (*PostProjectsIdRunRespo
 	return response, nil
 }
 
+// ParseGetScanGroupsResponse parses an HTTP response from a GetScanGroupsWithResponse call
+func ParseGetScanGroupsResponse(rsp *http.Response) (*GetScanGroupsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetScanGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			ScanGroups []ScanGroup `json:"scan_groups"`
+			Success    bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetScanIdResponse parses an HTTP response from a GetScanIdWithResponse call
 func ParseGetScanIdResponse(rsp *http.Response) (*GetScanIdResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -6397,6 +8147,36 @@ type ServerInterface interface {
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string)
+	// Get all docker images for a project
+	// (GET /docker)
+	GetDocker(w http.ResponseWriter, r *http.Request, params GetDockerParams)
+	// Create a new docker container
+	// (POST /docker)
+	PostDocker(w http.ResponseWriter, r *http.Request)
+	// Delete docker image by ID
+	// (DELETE /docker/{id})
+	DeleteDockerId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get docker image by ID
+	// (GET /docker/{id})
+	GetDockerId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update docker image by ID
+	// (PATCH /docker/{id})
+	PatchDockerId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get all git repositories for a project
+	// (GET /git)
+	GetGit(w http.ResponseWriter, r *http.Request, params GetGitParams)
+	// Create a new git repository for a project
+	// (POST /git)
+	PostGit(w http.ResponseWriter, r *http.Request)
+	// Delete git repository by ID
+	// (DELETE /git/{id})
+	DeleteGitId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get git repository by ID
+	// (GET /git/{id})
+	GetGitId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update a git repository by ID
+	// (PATCH /git/{id})
+	PatchGitId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all mysql databases for a project
 	// (GET /mysql)
 	GetMysql(w http.ResponseWriter, r *http.Request, params GetMysqlParams)
@@ -6475,6 +8255,9 @@ type ServerInterface interface {
 	// Run all extractors and scanners for a project
 	// (POST /projects/{id}/run)
 	PostProjectsIdRun(w http.ResponseWriter, r *http.Request, id int64)
+	// Get all scan groups
+	// (GET /scan-groups)
+	GetScanGroups(w http.ResponseWriter, r *http.Request, params GetScanGroupsParams)
 	// Get a scan by ID
 	// (GET /scan/{id})
 	GetScanId(w http.ResponseWriter, r *http.Request, id int64)
@@ -6523,6 +8306,66 @@ func (_ Unimplemented) PatchBruteforceresultsId(w http.ResponseWriter, r *http.R
 // Get all CVEs for a database type and version
 // (GET /cves/{dbType}/{version})
 func (_ Unimplemented) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Request, dbType string, version string) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all docker images for a project
+// (GET /docker)
+func (_ Unimplemented) GetDocker(w http.ResponseWriter, r *http.Request, params GetDockerParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new docker container
+// (POST /docker)
+func (_ Unimplemented) PostDocker(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete docker image by ID
+// (DELETE /docker/{id})
+func (_ Unimplemented) DeleteDockerId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get docker image by ID
+// (GET /docker/{id})
+func (_ Unimplemented) GetDockerId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update docker image by ID
+// (PATCH /docker/{id})
+func (_ Unimplemented) PatchDockerId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all git repositories for a project
+// (GET /git)
+func (_ Unimplemented) GetGit(w http.ResponseWriter, r *http.Request, params GetGitParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new git repository for a project
+// (POST /git)
+func (_ Unimplemented) PostGit(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete git repository by ID
+// (DELETE /git/{id})
+func (_ Unimplemented) DeleteGitId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get git repository by ID
+// (GET /git/{id})
+func (_ Unimplemented) GetGitId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update a git repository by ID
+// (PATCH /git/{id})
+func (_ Unimplemented) PatchGitId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -6682,6 +8525,12 @@ func (_ Unimplemented) PostProjectsIdRun(w http.ResponseWriter, r *http.Request,
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get all scan groups
+// (GET /scan-groups)
+func (_ Unimplemented) GetScanGroups(w http.ResponseWriter, r *http.Request, params GetScanGroupsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get a scan by ID
 // (GET /scan/{id})
 func (_ Unimplemented) GetScanId(w http.ResponseWriter, r *http.Request, id int64) {
@@ -6829,6 +8678,282 @@ func (siw *ServerInterfaceWrapper) GetCvesDbTypeVersion(w http.ResponseWriter, r
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCvesDbTypeVersion(w, r, dbType, version)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetDocker operation middleware
+func (siw *ServerInterfaceWrapper) GetDocker(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetDockerParams
+
+	// ------------- Required query parameter "project" -------------
+
+	if paramValue := r.URL.Query().Get("project"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "project"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "project", r.URL.Query(), &params.Project)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "project", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDocker(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostDocker operation middleware
+func (siw *ServerInterfaceWrapper) PostDocker(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostDocker(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteDockerId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteDockerId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteDockerId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetDockerId operation middleware
+func (siw *ServerInterfaceWrapper) GetDockerId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetDockerId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchDockerId operation middleware
+func (siw *ServerInterfaceWrapper) PatchDockerId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchDockerId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetGit operation middleware
+func (siw *ServerInterfaceWrapper) GetGit(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetGitParams
+
+	// ------------- Required query parameter "project" -------------
+
+	if paramValue := r.URL.Query().Get("project"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "project"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "project", r.URL.Query(), &params.Project)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "project", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetGit(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostGit operation middleware
+func (siw *ServerInterfaceWrapper) PostGit(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostGit(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteGitId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGitId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGitId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetGitId operation middleware
+func (siw *ServerInterfaceWrapper) GetGitId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetGitId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchGitId operation middleware
+func (siw *ServerInterfaceWrapper) PatchGitId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchGitId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -7612,6 +9737,43 @@ func (siw *ServerInterfaceWrapper) PostProjectsIdRun(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetScanGroups operation middleware
+func (siw *ServerInterfaceWrapper) GetScanGroups(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetScanGroupsParams
+
+	// ------------- Required query parameter "project" -------------
+
+	if paramValue := r.URL.Query().Get("project"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "project"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "project", r.URL.Query(), &params.Project)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "project", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetScanGroups(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetScanId operation middleware
 func (siw *ServerInterfaceWrapper) GetScanId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -7988,6 +10150,36 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/cves/{dbType}/{version}", wrapper.GetCvesDbTypeVersion)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/docker", wrapper.GetDocker)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/docker", wrapper.PostDocker)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/docker/{id}", wrapper.DeleteDockerId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/docker/{id}", wrapper.GetDockerId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/docker/{id}", wrapper.PatchDockerId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/git", wrapper.GetGit)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/git", wrapper.PostGit)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/git/{id}", wrapper.DeleteGitId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/git/{id}", wrapper.GetGitId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/git/{id}", wrapper.PatchGitId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/mysql", wrapper.GetMysql)
 	})
 	r.Group(func(r chi.Router) {
@@ -8064,6 +10256,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/projects/{id}/run", wrapper.PostProjectsIdRun)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/scan-groups", wrapper.GetScanGroups)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/scan/{id}", wrapper.GetScanId)
@@ -8225,6 +10420,388 @@ func (response GetCvesDbTypeVersion401JSONResponse) VisitGetCvesDbTypeVersionRes
 type GetCvesDbTypeVersion404JSONResponse Error
 
 func (response GetCvesDbTypeVersion404JSONResponse) VisitGetCvesDbTypeVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetDockerRequestObject struct {
+	Params GetDockerParams
+}
+
+type GetDockerResponseObject interface {
+	VisitGetDockerResponse(w http.ResponseWriter) error
+}
+
+type GetDocker200JSONResponse struct {
+	Images  []DockerImage `json:"images"`
+	Success bool          `json:"success"`
+}
+
+func (response GetDocker200JSONResponse) VisitGetDockerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetDocker401JSONResponse Error
+
+func (response GetDocker401JSONResponse) VisitGetDockerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostDockerRequestObject struct {
+	Body *PostDockerJSONRequestBody
+}
+
+type PostDockerResponseObject interface {
+	VisitPostDockerResponse(w http.ResponseWriter) error
+}
+
+type PostDocker201JSONResponse struct {
+	Image   DockerImage `json:"image"`
+	Success bool        `json:"success"`
+}
+
+func (response PostDocker201JSONResponse) VisitPostDockerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostDocker400JSONResponse Error
+
+func (response PostDocker400JSONResponse) VisitPostDockerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostDocker401JSONResponse Error
+
+func (response PostDocker401JSONResponse) VisitPostDockerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteDockerIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteDockerIdResponseObject interface {
+	VisitDeleteDockerIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteDockerId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteDockerId204JSONResponse) VisitDeleteDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteDockerId401JSONResponse Error
+
+func (response DeleteDockerId401JSONResponse) VisitDeleteDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteDockerId404JSONResponse Error
+
+func (response DeleteDockerId404JSONResponse) VisitDeleteDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetDockerIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetDockerIdResponseObject interface {
+	VisitGetDockerIdResponse(w http.ResponseWriter) error
+}
+
+type GetDockerId200JSONResponse struct {
+	Image   DockerImage   `json:"image"`
+	Layers  []DockerLayer `json:"layers"`
+	Success bool          `json:"success"`
+}
+
+func (response GetDockerId200JSONResponse) VisitGetDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetDockerId401JSONResponse Error
+
+func (response GetDockerId401JSONResponse) VisitGetDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetDockerId404JSONResponse Error
+
+func (response GetDockerId404JSONResponse) VisitGetDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchDockerIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchDockerIdJSONRequestBody
+}
+
+type PatchDockerIdResponseObject interface {
+	VisitPatchDockerIdResponse(w http.ResponseWriter) error
+}
+
+type PatchDockerId200JSONResponse struct {
+	Image   DockerImage `json:"image"`
+	Success bool        `json:"success"`
+}
+
+func (response PatchDockerId200JSONResponse) VisitPatchDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchDockerId400JSONResponse Error
+
+func (response PatchDockerId400JSONResponse) VisitPatchDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchDockerId401JSONResponse Error
+
+func (response PatchDockerId401JSONResponse) VisitPatchDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchDockerId404JSONResponse Error
+
+func (response PatchDockerId404JSONResponse) VisitPatchDockerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGitRequestObject struct {
+	Params GetGitParams
+}
+
+type GetGitResponseObject interface {
+	VisitGetGitResponse(w http.ResponseWriter) error
+}
+
+type GetGit200JSONResponse struct {
+	GitRepositories []Git `json:"git_repositories"`
+	Success         bool  `json:"success"`
+}
+
+func (response GetGit200JSONResponse) VisitGetGitResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGit401JSONResponse Error
+
+func (response GetGit401JSONResponse) VisitGetGitResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostGitRequestObject struct {
+	Body *PostGitJSONRequestBody
+}
+
+type PostGitResponseObject interface {
+	VisitPostGitResponse(w http.ResponseWriter) error
+}
+
+type PostGit201JSONResponse struct {
+	Git     Git  `json:"git"`
+	Success bool `json:"success"`
+}
+
+func (response PostGit201JSONResponse) VisitPostGitResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostGit400JSONResponse Error
+
+func (response PostGit400JSONResponse) VisitPostGitResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostGit401JSONResponse Error
+
+func (response PostGit401JSONResponse) VisitPostGitResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGitIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteGitIdResponseObject interface {
+	VisitDeleteGitIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteGitId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteGitId204JSONResponse) VisitDeleteGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGitId401JSONResponse Error
+
+func (response DeleteGitId401JSONResponse) VisitDeleteGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGitId404JSONResponse Error
+
+func (response DeleteGitId404JSONResponse) VisitDeleteGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGitIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetGitIdResponseObject interface {
+	VisitGetGitIdResponse(w http.ResponseWriter) error
+}
+
+type GetGitId200JSONResponse struct {
+	Commits []GitCommit `json:"commits"`
+	Git     Git         `json:"git"`
+	Success bool        `json:"success"`
+}
+
+func (response GetGitId200JSONResponse) VisitGetGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGitId401JSONResponse Error
+
+func (response GetGitId401JSONResponse) VisitGetGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGitId404JSONResponse Error
+
+func (response GetGitId404JSONResponse) VisitGetGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchGitIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchGitIdJSONRequestBody
+}
+
+type PatchGitIdResponseObject interface {
+	VisitPatchGitIdResponse(w http.ResponseWriter) error
+}
+
+type PatchGitId200JSONResponse struct {
+	Git     Git  `json:"git"`
+	Success bool `json:"success"`
+}
+
+func (response PatchGitId200JSONResponse) VisitPatchGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchGitId400JSONResponse Error
+
+func (response PatchGitId400JSONResponse) VisitPatchGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchGitId401JSONResponse Error
+
+func (response PatchGitId401JSONResponse) VisitPatchGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchGitId404JSONResponse Error
+
+func (response PatchGitId404JSONResponse) VisitPatchGitIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -9253,6 +11830,35 @@ func (response PostProjectsIdRun404JSONResponse) VisitPostProjectsIdRunResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetScanGroupsRequestObject struct {
+	Params GetScanGroupsParams
+}
+
+type GetScanGroupsResponseObject interface {
+	VisitGetScanGroupsResponse(w http.ResponseWriter) error
+}
+
+type GetScanGroups200JSONResponse struct {
+	ScanGroups []ScanGroup `json:"scan_groups"`
+	Success    bool        `json:"success"`
+}
+
+func (response GetScanGroups200JSONResponse) VisitGetScanGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetScanGroups401JSONResponse Error
+
+func (response GetScanGroups401JSONResponse) VisitGetScanGroupsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetScanIdRequestObject struct {
 	Id int64 `json:"id"`
 }
@@ -9601,6 +12207,36 @@ type StrictServerInterface interface {
 	// Get all CVEs for a database type and version
 	// (GET /cves/{dbType}/{version})
 	GetCvesDbTypeVersion(ctx context.Context, request GetCvesDbTypeVersionRequestObject) (GetCvesDbTypeVersionResponseObject, error)
+	// Get all docker images for a project
+	// (GET /docker)
+	GetDocker(ctx context.Context, request GetDockerRequestObject) (GetDockerResponseObject, error)
+	// Create a new docker container
+	// (POST /docker)
+	PostDocker(ctx context.Context, request PostDockerRequestObject) (PostDockerResponseObject, error)
+	// Delete docker image by ID
+	// (DELETE /docker/{id})
+	DeleteDockerId(ctx context.Context, request DeleteDockerIdRequestObject) (DeleteDockerIdResponseObject, error)
+	// Get docker image by ID
+	// (GET /docker/{id})
+	GetDockerId(ctx context.Context, request GetDockerIdRequestObject) (GetDockerIdResponseObject, error)
+	// Update docker image by ID
+	// (PATCH /docker/{id})
+	PatchDockerId(ctx context.Context, request PatchDockerIdRequestObject) (PatchDockerIdResponseObject, error)
+	// Get all git repositories for a project
+	// (GET /git)
+	GetGit(ctx context.Context, request GetGitRequestObject) (GetGitResponseObject, error)
+	// Create a new git repository for a project
+	// (POST /git)
+	PostGit(ctx context.Context, request PostGitRequestObject) (PostGitResponseObject, error)
+	// Delete git repository by ID
+	// (DELETE /git/{id})
+	DeleteGitId(ctx context.Context, request DeleteGitIdRequestObject) (DeleteGitIdResponseObject, error)
+	// Get git repository by ID
+	// (GET /git/{id})
+	GetGitId(ctx context.Context, request GetGitIdRequestObject) (GetGitIdResponseObject, error)
+	// Update a git repository by ID
+	// (PATCH /git/{id})
+	PatchGitId(ctx context.Context, request PatchGitIdRequestObject) (PatchGitIdResponseObject, error)
 	// Get all mysql databases for a project
 	// (GET /mysql)
 	GetMysql(ctx context.Context, request GetMysqlRequestObject) (GetMysqlResponseObject, error)
@@ -9679,6 +12315,9 @@ type StrictServerInterface interface {
 	// Run all extractors and scanners for a project
 	// (POST /projects/{id}/run)
 	PostProjectsIdRun(ctx context.Context, request PostProjectsIdRunRequestObject) (PostProjectsIdRunResponseObject, error)
+	// Get all scan groups
+	// (GET /scan-groups)
+	GetScanGroups(ctx context.Context, request GetScanGroupsRequestObject) (GetScanGroupsResponseObject, error)
 	// Get a scan by ID
 	// (GET /scan/{id})
 	GetScanId(ctx context.Context, request GetScanIdRequestObject) (GetScanIdResponseObject, error)
@@ -9823,6 +12462,290 @@ func (sh *strictHandler) GetCvesDbTypeVersion(w http.ResponseWriter, r *http.Req
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetCvesDbTypeVersionResponseObject); ok {
 		if err := validResponse.VisitGetCvesDbTypeVersionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetDocker operation middleware
+func (sh *strictHandler) GetDocker(w http.ResponseWriter, r *http.Request, params GetDockerParams) {
+	var request GetDockerRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetDocker(ctx, request.(GetDockerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetDocker")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetDockerResponseObject); ok {
+		if err := validResponse.VisitGetDockerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostDocker operation middleware
+func (sh *strictHandler) PostDocker(w http.ResponseWriter, r *http.Request) {
+	var request PostDockerRequestObject
+
+	var body PostDockerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostDocker(ctx, request.(PostDockerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostDocker")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostDockerResponseObject); ok {
+		if err := validResponse.VisitPostDockerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteDockerId operation middleware
+func (sh *strictHandler) DeleteDockerId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteDockerIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteDockerId(ctx, request.(DeleteDockerIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteDockerId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteDockerIdResponseObject); ok {
+		if err := validResponse.VisitDeleteDockerIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetDockerId operation middleware
+func (sh *strictHandler) GetDockerId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetDockerIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetDockerId(ctx, request.(GetDockerIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetDockerId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetDockerIdResponseObject); ok {
+		if err := validResponse.VisitGetDockerIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchDockerId operation middleware
+func (sh *strictHandler) PatchDockerId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchDockerIdRequestObject
+
+	request.Id = id
+
+	var body PatchDockerIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchDockerId(ctx, request.(PatchDockerIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchDockerId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchDockerIdResponseObject); ok {
+		if err := validResponse.VisitPatchDockerIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetGit operation middleware
+func (sh *strictHandler) GetGit(w http.ResponseWriter, r *http.Request, params GetGitParams) {
+	var request GetGitRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGit(ctx, request.(GetGitRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGit")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetGitResponseObject); ok {
+		if err := validResponse.VisitGetGitResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostGit operation middleware
+func (sh *strictHandler) PostGit(w http.ResponseWriter, r *http.Request) {
+	var request PostGitRequestObject
+
+	var body PostGitJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostGit(ctx, request.(PostGitRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostGit")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostGitResponseObject); ok {
+		if err := validResponse.VisitPostGitResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteGitId operation middleware
+func (sh *strictHandler) DeleteGitId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteGitIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteGitId(ctx, request.(DeleteGitIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteGitId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteGitIdResponseObject); ok {
+		if err := validResponse.VisitDeleteGitIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetGitId operation middleware
+func (sh *strictHandler) GetGitId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetGitIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGitId(ctx, request.(GetGitIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGitId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetGitIdResponseObject); ok {
+		if err := validResponse.VisitGetGitIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchGitId operation middleware
+func (sh *strictHandler) PatchGitId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchGitIdRequestObject
+
+	request.Id = id
+
+	var body PatchGitIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchGitId(ctx, request.(PatchGitIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchGitId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchGitIdResponseObject); ok {
+		if err := validResponse.VisitPatchGitIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -10570,6 +13493,32 @@ func (sh *strictHandler) PostProjectsIdRun(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// GetScanGroups operation middleware
+func (sh *strictHandler) GetScanGroups(w http.ResponseWriter, r *http.Request, params GetScanGroupsParams) {
+	var request GetScanGroupsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetScanGroups(ctx, request.(GetScanGroupsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetScanGroups")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetScanGroupsResponseObject); ok {
+		if err := validResponse.VisitGetScanGroupsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetScanId operation middleware
 func (sh *strictHandler) GetScanId(w http.ResponseWriter, r *http.Request, id int64) {
 	var request GetScanIdRequestObject
@@ -10829,79 +13778,93 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"OwAA//8Z3IXwZLIAAA==",
+	"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",
+	"sy/DhdjDjbWvSZcUKaL1FErbD2EpcUuiXobXKXm5wTgPIJnMGE2TVesql+9CNdygOGWQx5eTA7hOiQoT",
+	"0HfBYCAo4+py2qwSxl59WS+Vkf86UgDsTAQU6OMv8L6bUgjdy8dq4rit2rGciNdQL6xKDWc5pOzgLDYa",
+	"uqDZN1+b1S4evn0o7e1EXw7vjtDSlZMculZvm8Dat9/u3hRnHXrYyIqVRPsmDm0mPs+iFlKLTzP1W0pP",
+	"d+nLIYrMjipdNNbMoZni4X6+9dqxVAyx1suJtYoLEYwiXoupCvtYyetW1Lk9utIK4NfWSy9cIzSTN1VT",
+	"1qEiNHf2nbSRQ+uR17X0gyYZsjZFYU9lN6kC6tWapYTgKnVynff4CnTIAWoOVx9j0A+DfjDoBwelkPLs",
+	"4nxbKP5ZNXBQACSN7xGTSkCFnKurMnCsLuEzlGIcj02lGPC7LsU4Ho8rhRnOdRl0OuVIuNOn25sJHHeV",
+	"ioxdKVpnf7nnFjaKIY5W9q9aPX0Zioba4efFWnmvNJORXMLUGS4V+RrFaKWI/aarB/ZxFInv5YfMdDFE",
+	"nSljNxp6js/r9MHW4gUpY4gIENHZDIUAE7WU3Ss5CuaQzFCt1MbuRmVre6beqeyp78SNqQ3yUc3psvtU",
+	"HEHl3DEBmAj6ZuveTKffkkFpOPCmG6d6VSt1BtM1YLsq4a5g2jd9mCOIIcEwWhzqx6UOSm4oS/IkJ5pO",
+	"Z01XqtVupq4qQNNu5WiGxJEKKDrQ9odqeoHErWz4dFnZPW/U10bcJN46GZ/sHhC/UyDXEcAFxBG8j9CB",
+	"7ESuLLPVZE8pU0oqi3ZM4c+qLRrfOBhii1w5pizyTr25EMnpaBTRAEZzysXpT+PxeAQTPFoce493j/8O",
+	"AAD//6t38MKo4wAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

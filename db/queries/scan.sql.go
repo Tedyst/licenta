@@ -136,6 +136,22 @@ func (q *Queries) CreateScanResult(ctx context.Context, arg CreateScanResultPara
 	return &i, err
 }
 
+const getCountOfScanGroupsForProject = `-- name: GetCountOfScanGroupsForProject :one
+SELECT
+    COUNT(*)
+FROM
+    scan_groups
+WHERE
+    project_id = $1
+`
+
+func (q *Queries) GetCountOfScanGroupsForProject(ctx context.Context, projectID int64) (int64, error) {
+	row := q.db.QueryRow(ctx, getCountOfScanGroupsForProject, projectID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getScan = `-- name: GetScan :one
 SELECT
     scans.id, scans.scan_group_id, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at,
@@ -230,6 +246,54 @@ func (q *Queries) GetScanGroup(ctx context.Context, id int64) (*ScanGroup, error
 		&i.CreatedAt,
 	)
 	return &i, err
+}
+
+const getScanGroupsForProject = `-- name: GetScanGroupsForProject :many
+SELECT
+    scan_groups.id, scan_groups.project_id, scan_groups.created_by, scan_groups.created_at,
+    scans.id, scans.scan_group_id, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at
+FROM
+    scan_groups
+    INNER JOIN scans ON scan_groups.id = scans.scan_group_id
+WHERE
+    project_id = $1
+`
+
+type GetScanGroupsForProjectRow struct {
+	ScanGroup ScanGroup `json:"scan_group"`
+	Scan      Scan      `json:"scan"`
+}
+
+func (q *Queries) GetScanGroupsForProject(ctx context.Context, projectID int64) ([]*GetScanGroupsForProjectRow, error) {
+	rows, err := q.db.Query(ctx, getScanGroupsForProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GetScanGroupsForProjectRow
+	for rows.Next() {
+		var i GetScanGroupsForProjectRow
+		if err := rows.Scan(
+			&i.ScanGroup.ID,
+			&i.ScanGroup.ProjectID,
+			&i.ScanGroup.CreatedBy,
+			&i.ScanGroup.CreatedAt,
+			&i.Scan.ID,
+			&i.Scan.ScanGroupID,
+			&i.Scan.Status,
+			&i.Scan.Error,
+			&i.Scan.WorkerID,
+			&i.Scan.CreatedAt,
+			&i.Scan.EndedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getScanResults = `-- name: GetScanResults :many

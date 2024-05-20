@@ -17,12 +17,14 @@ type Querier interface {
 	BindScanToWorker(ctx context.Context, arg BindScanToWorkerParams) (*Scan, error)
 	CountUsers(ctx context.Context) (int64, error)
 	CreateBruteforcedPassword(ctx context.Context, arg CreateBruteforcedPasswordParams) (*BruteforcedPassword, error)
-	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*ProjectDockerImage, error)
+	CreateDockerImage(ctx context.Context, arg CreateDockerImageParams) (*DockerImage, error)
+	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*DockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
-	CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
-	CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*ProjectDockerScannedLayer, error)
-	CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*ProjectGitScannedCommit, error)
-	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*ProjectGitRepository, error)
+	CreateDockerLayerScanForProject(ctx context.Context, arg CreateDockerLayerScanForProjectParams) (*DockerScan, error)
+	CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*DockerLayer, error)
+	CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*GitCommit, error)
+	CreateGitRepository(ctx context.Context, arg CreateGitRepositoryParams) (*GitRepository, error)
+	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*GitRepository, error)
 	CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error)
 	CreateMysqlDatabase(ctx context.Context, arg CreateMysqlDatabaseParams) (*MysqlDatabase, error)
 	CreateMysqlScan(ctx context.Context, arg CreateMysqlScanParams) (*MysqlScan, error)
@@ -42,7 +44,9 @@ type Querier interface {
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
+	DeleteDockerImage(ctx context.Context, id int64) error
 	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
+	DeleteGitRepository(ctx context.Context, id int64) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteMysqlDatabase(ctx context.Context, id int64) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
@@ -59,15 +63,18 @@ type Querier interface {
 	GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error)
 	GetBruteforcedPasswords(ctx context.Context, arg GetBruteforcedPasswordsParams) (*BruteforcedPassword, error)
 	GetCPEByProductAndVersion(ctx context.Context, arg GetCPEByProductAndVersionParams) (*NvdCpe, error)
+	GetCountOfScanGroupsForProject(ctx context.Context, projectID int64) (int64, error)
 	GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
 	GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error)
 	GetCvesByProductAndVersion(ctx context.Context, arg GetCvesByProductAndVersionParams) ([]*GetCvesByProductAndVersionRow, error)
-	GetDockerImage(ctx context.Context, id int64) (*ProjectDockerImage, error)
-	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*ProjectDockerImage, error)
-	GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
+	GetDockerImage(ctx context.Context, id int64) (*DockerImage, error)
+	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*DockerImage, error)
+	GetDockerLayerScanForProject(ctx context.Context, arg GetDockerLayerScanForProjectParams) (*DockerScan, error)
+	GetDockerLayersAndResultsForScan(ctx context.Context, scanID int64) ([]*GetDockerLayersAndResultsForScanRow, error)
 	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
-	GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*ProjectGitRepository, error)
-	GetGitRepository(ctx context.Context, id int64) (*ProjectGitRepository, error)
+	GetGitCommitsWithResults(ctx context.Context, repositoryID int64) ([]*GetGitCommitsWithResultsRow, error)
+	GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*GitRepository, error)
+	GetGitRepository(ctx context.Context, id int64) (*GitRepository, error)
 	GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error)
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, arg GetGitScannedCommitsForProjectBatchParams) ([]string, error)
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
@@ -102,6 +109,7 @@ type Querier interface {
 	GetScan(ctx context.Context, id int64) (*GetScanRow, error)
 	GetScanBruteforceResults(ctx context.Context, scanID int64) ([]*ScanBruteforceResult, error)
 	GetScanGroup(ctx context.Context, id int64) (*ScanGroup, error)
+	GetScanGroupsForProject(ctx context.Context, projectID int64) ([]*GetScanGroupsForProjectRow, error)
 	GetScanResults(ctx context.Context, scanID int64) ([]*ScanResult, error)
 	GetScanResultsByScanIdAndScanSource(ctx context.Context, arg GetScanResultsByScanIdAndScanSourceParams) ([]*ScanResult, error)
 	GetScansForProject(ctx context.Context, projectID int64) ([]*GetScansForProjectRow, error)
@@ -126,7 +134,9 @@ type Querier interface {
 	RemoveOrganizationUser(ctx context.Context, arg RemoveOrganizationUserParams) (*OrganizationMember, error)
 	SetOrganizationPermissionsForUser(ctx context.Context, arg SetOrganizationPermissionsForUserParams) (*OrganizationMember, error)
 	UpdateBruteforcedPassword(ctx context.Context, arg UpdateBruteforcedPasswordParams) (*BruteforcedPassword, error)
-	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*ProjectDockerLayerScan, error)
+	UpdateDockerImage(ctx context.Context, arg UpdateDockerImageParams) (*DockerImage, error)
+	UpdateDockerLayerScanForProject(ctx context.Context, arg UpdateDockerLayerScanForProjectParams) (*DockerScan, error)
+	UpdateGitRepository(ctx context.Context, arg UpdateGitRepositoryParams) (*GitRepository, error)
 	UpdateMysqlDatabase(ctx context.Context, arg UpdateMysqlDatabaseParams) error
 	UpdateMysqlVersion(ctx context.Context, arg UpdateMysqlVersionParams) error
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error

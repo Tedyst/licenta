@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
 )
@@ -161,5 +162,50 @@ func (server *serverHandler) PostScanIdResult(ctx context.Context, request gener
 			Message:   scanresult.Message,
 			Severity:  int(scanresult.Severity),
 		},
+	}, nil
+}
+
+func (server *serverHandler) GetScanGroups(ctx context.Context, request generated.GetScanGroupsRequestObject) (generated.GetScanGroupsResponseObject, error) {
+	_, project, response, err := checkUserHasProjectPermission[generated.GetScanGroups401JSONResponse](server, ctx, int64(request.Params.Project), authorization.Viewer)
+	if err != nil {
+		return nil, err
+	}
+	if response.Success == false {
+		return response, nil
+	}
+
+	scangroups, err := server.DatabaseProvider.GetScanGroupsForProject(ctx, project.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	scans := map[int64][]generated.Scan{}
+	groups := []generated.ScanGroup{}
+
+	for _, scangroup := range scangroups {
+		if _, ok := scans[scangroup.ScanGroup.ID]; !ok {
+			scans[scangroup.ScanGroup.ID] = []generated.Scan{}
+			groups = append(groups, generated.ScanGroup{
+				Id:        int(scangroup.ScanGroup.ID),
+				ProjectId: int(scangroup.ScanGroup.ProjectID),
+			})
+		}
+
+		scans[scangroup.ScanGroup.ID] = append(scans[scangroup.ScanGroup.ID], generated.Scan{
+			CreatedAt: scangroup.Scan.CreatedAt.Time.Format(time.RFC3339Nano),
+			EndedAt:   scangroup.Scan.EndedAt.Time.Format(time.RFC3339Nano),
+			Error:     scangroup.Scan.Error.String,
+			Id:        int(scangroup.Scan.ID),
+			Status:    int(scangroup.Scan.Status),
+		})
+	}
+
+	for i, group := range groups {
+		groups[i].Scans = scans[int64(group.Id)]
+	}
+
+	return generated.GetScanGroups200JSONResponse{
+		Success:    true,
+		ScanGroups: groups,
 	}, nil
 }

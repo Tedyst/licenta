@@ -189,6 +189,438 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /docker:
+    get:
+      summary: Get all docker images for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - docker
+      parameters:
+        - name: project
+          in: query
+          description: The project to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - images
+                properties:
+                  success:
+                    type: boolean
+                  images:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DockerImage'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new docker container
+      security:
+        - sessionAuth: []
+      tags:
+        - docker
+      requestBody:
+        description: The docker image object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDockerImage'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - image
+                properties:
+                  success:
+                    type: boolean
+                  image:
+                    $ref: '#/components/schemas/DockerImage'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /docker/{id}:
+    get:
+      summary: Get docker image by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - docker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the docker image
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - image
+                  - layers
+                properties:
+                  success:
+                    type: boolean
+                  image:
+                    $ref: '#/components/schemas/DockerImage'
+                  layers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DockerLayer'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Docker image not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update docker image by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - docker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the docker image
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The docker image object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchDockerImage'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - image
+                properties:
+                  success:
+                    type: boolean
+                  image:
+                    $ref: '#/components/schemas/DockerImage'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Docker image not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete docker image by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - docker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the docker image
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Docker image not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /git:
+    get:
+      summary: Get all git repositories for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - git
+      parameters:
+        - name: project
+          in: query
+          description: The project to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - git_repositories
+                properties:
+                  success:
+                    type: boolean
+                  git_repositories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Git'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new git repository for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - git
+      requestBody:
+        description: The git object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGit'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - git
+                properties:
+                  success:
+                    type: boolean
+                  git:
+                    $ref: '#/components/schemas/Git'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /git/{id}:
+    get:
+      summary: Get git repository by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - git
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the git repository
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - git
+                  - commits
+                properties:
+                  success:
+                    type: boolean
+                  git:
+                    $ref: '#/components/schemas/Git'
+                  commits:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GitCommit'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Git repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update a git repository by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - git
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the git repository
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The git object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchGit'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - git
+                properties:
+                  success:
+                    type: boolean
+                  git:
+                    $ref: '#/components/schemas/Git'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Git repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete git repository by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - git
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the git repository
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Git repository not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /projects:
     post:
       summary: Create a new project
@@ -275,6 +707,43 @@ paths:
                 $ref: '#/components/schemas/Error'
         "404":
           description: Specific password not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /scan-groups:
+    get:
+      summary: Get all scan groups
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+      parameters:
+        - name: project
+          in: query
+          description: The project to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - scan_groups
+                properties:
+                  success:
+                    type: boolean
+                  scan_groups:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScanGroup'
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -2130,6 +2599,268 @@ components:
           type: integer
         scan_group_id:
           type: integer
+    DockerImage:
+      required:
+        - id
+        - project_id
+        - docker_image
+        - username
+        - password
+        - min_probability
+        - probability_increase_multiplier
+        - probability_decrease_multiplier
+        - entropy_threshold
+        - logistic_growth_rate
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        docker_image:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        min_probability:
+          type: number
+        probability_increase_multiplier:
+          type: number
+        probability_decrease_multiplier:
+          type: number
+        entropy_threshold:
+          type: number
+        logistic_growth_rate:
+          type: number
+    CreateDockerImage:
+      required:
+        - project_id
+        - docker_image
+        - username
+        - password
+      type: object
+      properties:
+        project_id:
+          type: integer
+        docker_image:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    PatchDockerImage:
+      type: object
+      properties:
+        docker_image:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        min_probability:
+          type: number
+        probability_increase_multiplier:
+          type: number
+        probability_decrease_multiplier:
+          type: number
+        entropy_threshold:
+          type: number
+        logistic_growth_rate:
+          type: number
+    DockerScan:
+      required:
+        - id
+        - project_id
+        - image
+        - finished
+        - scanned_layers
+        - layers_to_scan
+        - created_at
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        image:
+          type: string
+        finished:
+          type: boolean
+        scanned_layers:
+          type: integer
+        layers_to_scan:
+          type: integer
+        created_at:
+          type: string
+    DockerLayer:
+      required:
+        - id
+        - project_id
+        - scan_id
+        - layer_hash
+        - results
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        scan_id:
+          type: integer
+        layer_hash:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/DockerLayerResult"
+    DockerLayerResult:
+      required:
+        - id
+        - project_id
+        - layer
+        - name
+        - line
+        - line_number
+        - match
+        - probability
+        - username
+        - password
+        - filename
+        - created_at
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        layer:
+          type: integer
+        name:
+          type: string
+        line:
+          type: string
+        line_number:
+          type: integer
+        match:
+          type: string
+        probability:
+          type: number
+        username:
+          type: string
+        password:
+          type: string
+        filename:
+          type: string
+        created_at:
+          type: string
+    GitCommit:
+      required:
+        - id
+        - repository_id
+        - commit_hash
+        - created_at
+        - results
+      type: object
+      properties:
+        id:
+          type: integer
+        repository_id:
+          type: integer
+        commit_hash:
+          type: string
+        created_at:
+          type: string
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/GitResult"
+    GitResult:
+      required:
+        - id
+        - commit
+        - name
+        - line
+        - line_number
+        - match
+        - probability
+        - username
+        - password
+        - filename
+      type: object
+      properties:
+        id:
+          type: integer
+        commit:
+          type: integer
+        name:
+          type: string
+        line:
+          type: string
+        line_number:
+          type: integer
+        match:
+          type: string
+        probability:
+          type: number
+        username:
+          type: string
+        password:
+          type: string
+        filename:
+          type: string
+    Git:
+      required:
+        - id
+        - project_id
+        - git_repository
+        - username
+        - password
+        - has_ssh
+      type: object
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        git_repository:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        has_ssh:
+          type: boolean
+    PatchGit:
+      type: object
+      properties:
+        git_repository:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        private_key:
+          type: string
+    CreateGit:
+      required:
+        - project_id
+        - git_repository
+        - username
+        - password
+        - private_key
+      type: object
+      properties:
+        project_id:
+          type: integer
+        git_repository:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        private_key:
+          type: string
     PostgresScan:
       required:
         - id
