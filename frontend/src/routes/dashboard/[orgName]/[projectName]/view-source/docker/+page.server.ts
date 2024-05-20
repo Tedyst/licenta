@@ -1,59 +1,36 @@
-import type { Actions } from './$types';
+import type { PageServerLoad } from './$types';
 import { clientFromFetch } from '$lib/client';
 import { redirect } from '@sveltejs/kit';
 
-export const actions = {
-	default: async ({ request, fetch, url }) => {
-		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+export const load: PageServerLoad = async ({ fetch, parent, url }) => {
+	const parentData = await parent();
 
-		const image = data.get('image')?.toString();
-		const username = data.get('username')?.toString();
-		const password = data.get('password')?.toString();
-
-		const projectId = data.get('projectId')?.toString();
-		const organizationName = data.get('organizationName')?.toString();
-		const projectName = data.get('projectName')?.toString();
-
-		if (projectId === '0' || projectId === undefined) {
-			return { error: 'Project is required' };
-		}
-		if (image === '' || image === undefined) {
-			return { error: 'Image is required' };
-		}
-		if (username === '' || username === undefined) {
-			return { error: 'User is required' };
-		}
-		if (password === '' || password === undefined) {
-			return { error: 'Password is required' };
-		}
-		if (organizationName === '' || organizationName === undefined) {
-			return { error: 'Organization name is required' };
-		}
-		if (projectName === '' || projectName === undefined) {
-			return { error: 'Project name is required' };
-		}
-
-		const returned = await client
-			.POST('/docker', {
-				body: {
-					docker_image: image,
-					password: password,
-					project_id: +projectId,
-					username: username
-				}
-			})
-			.then((res) => {
-				if (res.data?.success) {
-					return {};
-				}
-				return { error: res.error?.message || 'An error occurred' };
-			});
-
-		if (returned.error) {
-			return { error: returned.error };
-		}
-
-		redirect(302, '/dashboard/' + organizationName + '/' + projectName);
+	const dockerId = url.searchParams.get('id') || '0';
+	if (!dockerId) {
+		redirect(302, '/dashboard/' + parentData.organization?.name + '/' + parentData.project?.name);
 	}
-} satisfies Actions;
+
+	const client = clientFromFetch(fetch, url.origin);
+
+	const returned = await client
+		.GET('/docker/{id}', { params: { path: { id: +dockerId } } })
+		.then((res) => {
+			if (res.data?.success) {
+				return {
+					image: res.data.image,
+					layers: res.data.layers
+				};
+			}
+			return { error: res.error?.message || 'An error occurred' };
+		});
+
+	if (returned?.error) {
+		return { error: returned.error };
+	}
+
+	return {
+		...parentData,
+		image: returned.image,
+		layers: returned.layers
+	};
+};

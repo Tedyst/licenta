@@ -51,7 +51,7 @@ project
 		databaseType="Docker"
 		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/postgresql/?id=${dockerImage.id}`}
 		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/postgresql/?id=${dockerImage.id}`}
-		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-scanner/docker/?id=${dockerImage.id}`}
+		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-source/docker/?id=${dockerImage.id}`}
 	/>
 {/each}
 
