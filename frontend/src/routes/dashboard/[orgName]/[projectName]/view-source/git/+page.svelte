@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import GitIcon from '$lib/images/git-icon.svg';
+	import BaseListItem from '$lib/dashboard/BaseListItem.svelte';
+
 	export let data: PageData;
 </script>
 
@@ -11,11 +14,18 @@
 				positives, and are harmless.
 			</p>
 		</div>
-		{data.gitRepo?.git_repository}
+		<BaseListItem
+			databaseUrl={`git://${data.gitRepo?.username}@****:${data.gitRepo?.git_repository}`}
+			databaseIcon={GitIcon}
+			databaseType="Git"
+		/>
 
-		{#each data?.commits || [] as commit}
-			<div class={'collapse ' + (commit.results.length ? 'bg-error text-white' : 'bg-base-300')}>
-				<input type="radio" name="my-accordion-1" checked />
+		{#each data?.commits || [] as commit, i}
+			<div
+				class={'collapse collapse-arrow ' +
+					(commit.results.length ? 'bg-error text-white' : 'bg-base-300')}
+			>
+				<input type="radio" name="my-accordion-1" checked={i === 0} />
 				<div class="collapse-title overflow-hidden">
 					<div class="flex justify-between items-center">
 						<div class="text-xl font-medium">{commit.author}</div>

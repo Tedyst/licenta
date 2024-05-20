@@ -40,7 +40,7 @@ project
 		databaseType="Git"
 		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/postgresql/?id=${gitRepository.id}`}
 		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/postgresql/?id=${gitRepository.id}`}
-		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-scanner/git/?id=${gitRepository.id}`}
+		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-source/git/?id=${gitRepository.id}`}
 	/>
 {/each}
 

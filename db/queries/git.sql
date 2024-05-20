@@ -61,15 +61,45 @@ WHERE id = $1;
 
 -- name: GetGitCommitsWithResults :many
 SELECT
-    sqlc.embed(git_commits),
-    git_results.*
-FROM
-    git_commits
+    *
+FROM ((
+        SELECT
+            git_commits.id AS commit_id,
+            git_commits.repository_id,
+            git_commits.commit_hash,
+            git_commits.author,
+            git_commits.author_email,
+            git_commits.commit_date,
+            git_commits.description,
+            git_commits.created_at AS commit_created_at,
+            git_results.*
+        FROM
+            git_commits
+        LEFT JOIN git_results ON git_commits.id = git_results.commit
+    WHERE
+        git_commits.repository_id = $1
+        AND git_results.id IS NULL
+    ORDER BY
+        git_commits.commit_date DESC
+    LIMIT 25)
+UNION (
+    SELECT
+        git_commits.id AS commit_id,
+        git_commits.repository_id,
+        git_commits.commit_hash,
+        git_commits.author,
+        git_commits.author_email,
+        git_commits.commit_date,
+        git_commits.description,
+        git_commits.created_at AS commit_created_at,
+        git_results.*
+    FROM
+        git_commits
     LEFT JOIN git_results ON git_commits.id = git_results.commit
 WHERE
-    git_commits.repository_id = $1
+    git_results.id IS NOT NULL)) AS asd
 ORDER BY
-    git_commits.commit_date DESC;
+    commit_date DESC;
 
 -- name: UpdateGitRepository :one
 UPDATE

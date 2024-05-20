@@ -101,24 +101,24 @@ func (server *serverHandler) GetGitId(ctx context.Context, request generated.Get
 	commitResults := map[int64][]generated.GitResult{}
 
 	for _, dbCommit := range dbCommits {
-		if _, ok := commitResults[dbCommit.GitCommit.ID]; !ok {
-			t := dbCommit.GitCommit.CommitDate.Time.Format(time.RFC3339Nano)
-			commitResults[dbCommit.GitCommit.ID] = []generated.GitResult{}
+		if _, ok := commitResults[dbCommit.CommitID]; !ok {
+			t := dbCommit.CommitDate.Time.Format(time.RFC3339Nano)
+			commitResults[dbCommit.CommitID] = []generated.GitResult{}
 			commits = append(commits, generated.GitCommit{
-				CommitHash:   dbCommit.GitCommit.CommitHash,
-				CreatedAt:    dbCommit.GitCommit.CreatedAt.Time.Format(time.RFC3339Nano),
-				Id:           int(dbCommit.GitCommit.ID),
-				RepositoryId: int(dbCommit.GitCommit.RepositoryID),
+				CommitHash:   dbCommit.CommitHash,
+				CreatedAt:    dbCommit.CreatedAt.Time.Format(time.RFC3339Nano),
+				Id:           int(dbCommit.CommitID),
+				RepositoryId: int(dbCommit.RepositoryID),
 				Results:      []generated.GitResult{},
-				Author:       &dbCommit.GitCommit.Author.String,
-				AuthorEmail:  &dbCommit.GitCommit.AuthorEmail.String,
+				Author:       &dbCommit.Author.String,
+				AuthorEmail:  &dbCommit.AuthorEmail.String,
 				CommitDate:   &t,
-				Description:  &dbCommit.GitCommit.Description.String,
+				Description:  &dbCommit.Description.String,
 			})
 		}
 
 		if dbCommit.ID.Valid {
-			commitResults[dbCommit.GitCommit.ID] = append(commitResults[dbCommit.GitCommit.ID], generated.GitResult{
+			commitResults[dbCommit.CommitID] = append(commitResults[dbCommit.CommitID], generated.GitResult{
 				Commit:      int(dbCommit.Commit.Int64),
 				Filename:    dbCommit.Filename.String,
 				Id:          int(dbCommit.ID.Int64),

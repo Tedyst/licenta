@@ -161,30 +161,67 @@ func (q *Queries) DeleteGitRepositoryForProject(ctx context.Context, arg DeleteG
 
 const getGitCommitsWithResults = `-- name: GetGitCommitsWithResults :many
 SELECT
-    git_commits.id, git_commits.repository_id, git_commits.commit_hash, git_commits.author, git_commits.author_email, git_commits.commit_date, git_commits.description, git_commits.created_at,
-    git_results.id, git_results.commit, git_results.name, git_results.line, git_results.line_number, git_results.match, git_results.probability, git_results.username, git_results.password, git_results.filename, git_results.created_at
-FROM
-    git_commits
+    commit_id, repository_id, commit_hash, author, author_email, commit_date, description, commit_created_at, id, commit, name, line, line_number, match, probability, username, password, filename, created_at
+FROM ((
+        SELECT
+            git_commits.id AS commit_id,
+            git_commits.repository_id,
+            git_commits.commit_hash,
+            git_commits.author,
+            git_commits.author_email,
+            git_commits.commit_date,
+            git_commits.description,
+            git_commits.created_at AS commit_created_at,
+            git_results.id, git_results.commit, git_results.name, git_results.line, git_results.line_number, git_results.match, git_results.probability, git_results.username, git_results.password, git_results.filename, git_results.created_at
+        FROM
+            git_commits
+        LEFT JOIN git_results ON git_commits.id = git_results.commit
+    WHERE
+        git_commits.repository_id = $1
+        AND git_results.id IS NULL
+    ORDER BY
+        git_commits.commit_date DESC
+    LIMIT 25)
+UNION (
+    SELECT
+        git_commits.id AS commit_id,
+        git_commits.repository_id,
+        git_commits.commit_hash,
+        git_commits.author,
+        git_commits.author_email,
+        git_commits.commit_date,
+        git_commits.description,
+        git_commits.created_at AS commit_created_at,
+        git_results.id, git_results.commit, git_results.name, git_results.line, git_results.line_number, git_results.match, git_results.probability, git_results.username, git_results.password, git_results.filename, git_results.created_at
+    FROM
+        git_commits
     LEFT JOIN git_results ON git_commits.id = git_results.commit
 WHERE
-    git_commits.repository_id = $1
+    git_results.id IS NOT NULL)) AS asd
 ORDER BY
-    git_commits.commit_date DESC
+    commit_date DESC
 `
 
 type GetGitCommitsWithResultsRow struct {
-	GitCommit   GitCommit          `json:"git_commit"`
-	ID          pgtype.Int8        `json:"id"`
-	Commit      sql.NullInt64      `json:"commit"`
-	Name        sql.NullString     `json:"name"`
-	Line        sql.NullString     `json:"line"`
-	LineNumber  sql.NullInt32      `json:"line_number"`
-	Match       sql.NullString     `json:"match"`
-	Probability sql.NullFloat64    `json:"probability"`
-	Username    sql.NullString     `json:"username"`
-	Password    sql.NullString     `json:"password"`
-	Filename    sql.NullString     `json:"filename"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	CommitID        int64              `json:"commit_id"`
+	RepositoryID    int64              `json:"repository_id"`
+	CommitHash      string             `json:"commit_hash"`
+	Author          sql.NullString     `json:"author"`
+	AuthorEmail     sql.NullString     `json:"author_email"`
+	CommitDate      pgtype.Timestamptz `json:"commit_date"`
+	Description     sql.NullString     `json:"description"`
+	CommitCreatedAt pgtype.Timestamptz `json:"commit_created_at"`
+	ID              pgtype.Int8        `json:"id"`
+	Commit          sql.NullInt64      `json:"commit"`
+	Name            sql.NullString     `json:"name"`
+	Line            sql.NullString     `json:"line"`
+	LineNumber      sql.NullInt32      `json:"line_number"`
+	Match           sql.NullString     `json:"match"`
+	Probability     sql.NullFloat64    `json:"probability"`
+	Username        sql.NullString     `json:"username"`
+	Password        sql.NullString     `json:"password"`
+	Filename        sql.NullString     `json:"filename"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 }
 
 func (q *Queries) GetGitCommitsWithResults(ctx context.Context, repositoryID int64) ([]*GetGitCommitsWithResultsRow, error) {
@@ -197,14 +234,14 @@ func (q *Queries) GetGitCommitsWithResults(ctx context.Context, repositoryID int
 	for rows.Next() {
 		var i GetGitCommitsWithResultsRow
 		if err := rows.Scan(
-			&i.GitCommit.ID,
-			&i.GitCommit.RepositoryID,
-			&i.GitCommit.CommitHash,
-			&i.GitCommit.Author,
-			&i.GitCommit.AuthorEmail,
-			&i.GitCommit.CommitDate,
-			&i.GitCommit.Description,
-			&i.GitCommit.CreatedAt,
+			&i.CommitID,
+			&i.RepositoryID,
+			&i.CommitHash,
+			&i.Author,
+			&i.AuthorEmail,
+			&i.CommitDate,
+			&i.Description,
+			&i.CommitCreatedAt,
 			&i.ID,
 			&i.Commit,
 			&i.Name,
