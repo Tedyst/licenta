@@ -1947,13 +1947,13 @@ export interface components {
       id: number;
       project_id: number;
       docker_image: string;
-      username: string;
-      password: string;
-      min_probability: number;
-      probability_increase_multiplier: number;
-      probability_decrease_multiplier: number;
-      entropy_threshold: number;
-      logistic_growth_rate: number;
+      username?: string;
+      password?: string;
+      min_probability?: number;
+      probability_increase_multiplier?: number;
+      probability_decrease_multiplier?: number;
+      entropy_threshold?: number;
+      logistic_growth_rate?: number;
     };
     CreateDockerImage: {
       project_id: number;
@@ -1994,6 +1994,7 @@ export interface components {
       name: string;
       line: string;
       line_number: number;
+      previous_lines: string;
       match: string;
       probability: number;
       username: string;
