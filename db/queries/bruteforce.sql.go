@@ -81,23 +81,49 @@ func (q *Queries) GetBruteforcePasswordsForProjectCount(ctx context.Context, pro
 }
 
 const getBruteforcePasswordsPaginated = `-- name: GetBruteforcePasswordsPaginated :many
-SELECT
-    id,
-    PASSWORD
-FROM
-    default_bruteforce_passwords
-WHERE
-    id > $1
-LIMIT $2
+(
+    SELECT
+        default_bruteforce_passwords.id,
+        PASSWORD
+    FROM
+        default_bruteforce_passwords
+    WHERE
+        default_bruteforce_passwords.id > $1
+    LIMIT $2)
+UNION (
+    SELECT
+        -1,
+        docker_results.PASSWORD
+    FROM
+        docker_results
+        INNER JOIN docker_layers ON docker_results.layer_id = docker_layers.id
+        INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
+    WHERE
+        docker_images.project_id = $3
+        AND docker_results.PASSWORD IS NOT NULL
+        AND $1 = - 1)
+UNION (
+    SELECT
+        -1,
+        git_results.PASSWORD
+    FROM
+        git_results
+        INNER JOIN git_commits ON git_results.commit = git_commits.id
+        INNER JOIN git_repositories ON git_commits.repository_id = git_repositories.id
+    WHERE
+        git_repositories.project_id = $3
+        AND git_results.PASSWORD IS NOT NULL
+        AND $1 = - 1)
 `
 
 type GetBruteforcePasswordsPaginatedParams struct {
-	LastID int64 `json:"last_id"`
-	Limit  int32 `json:"limit"`
+	LastID    int64 `json:"last_id"`
+	Limit     int32 `json:"limit"`
+	ProjectID int64 `json:"project_id"`
 }
 
 func (q *Queries) GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error) {
-	rows, err := q.db.Query(ctx, getBruteforcePasswordsPaginated, arg.LastID, arg.Limit)
+	rows, err := q.db.Query(ctx, getBruteforcePasswordsPaginated, arg.LastID, arg.Limit, arg.ProjectID)
 	if err != nil {
 		return nil, err
 	}

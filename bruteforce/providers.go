@@ -56,8 +56,9 @@ func (p *databasePasswordProvider) readBatch() error {
 		lastID = p.currentBatch[len(p.currentBatch)-1].ID
 	}
 	response, err := p.database.GetBruteforcePasswordsPaginated(p.context, queries.GetBruteforcePasswordsPaginatedParams{
-		LastID: lastID,
-		Limit:  MAX_PASSWORDS_PER_BATCH,
+		LastID:    lastID,
+		Limit:     MAX_PASSWORDS_PER_BATCH,
+		ProjectID: p.projectID,
 	})
 	if err != nil {
 		return err

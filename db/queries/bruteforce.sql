@@ -76,14 +76,39 @@ WHERE
     git_results.project_id = $1;
 
 -- name: GetBruteforcePasswordsPaginated :many
-SELECT
-    id,
-    PASSWORD
-FROM
-    default_bruteforce_passwords
-WHERE
-    id > sqlc.arg('last_id')
-LIMIT sqlc.arg('limit');
+(
+    SELECT
+        default_bruteforce_passwords.id,
+        PASSWORD
+    FROM
+        default_bruteforce_passwords
+    WHERE
+        default_bruteforce_passwords.id > sqlc.arg('last_id')
+    LIMIT sqlc.arg('limit'))
+UNION (
+    SELECT
+        -1,
+        docker_results.PASSWORD
+    FROM
+        docker_results
+        INNER JOIN docker_layers ON docker_results.layer_id = docker_layers.id
+        INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
+    WHERE
+        docker_images.project_id = sqlc.arg('project_id')
+        AND docker_results.PASSWORD IS NOT NULL
+        AND sqlc.arg('last_id') = - 1)
+UNION (
+    SELECT
+        -1,
+        git_results.PASSWORD
+    FROM
+        git_results
+        INNER JOIN git_commits ON git_results.commit = git_commits.id
+        INNER JOIN git_repositories ON git_commits.repository_id = git_repositories.id
+    WHERE
+        git_repositories.project_id = sqlc.arg('project_id')
+        AND git_results.PASSWORD IS NOT NULL
+        AND sqlc.arg('last_id') = - 1);
 
 -- name: GetSpecificBruteforcePasswordID :one
 SELECT
