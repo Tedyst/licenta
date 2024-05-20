@@ -149,6 +149,346 @@ export interface paths {
       };
     };
   };
+  "/docker": {
+    /** Get all docker images for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The project to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              images: components["schemas"]["DockerImage"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new docker container */
+    post: {
+      /** @description The docker image object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateDockerImage"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              image: components["schemas"]["DockerImage"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/docker/{id}": {
+    /** Get docker image by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the docker image */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              image: components["schemas"]["DockerImage"];
+              layers: components["schemas"]["DockerLayer"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Docker image not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Delete docker image by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the docker image */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Docker image not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update docker image by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the docker image */
+          id: number;
+        };
+      };
+      /** @description The docker image object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchDockerImage"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              image: components["schemas"]["DockerImage"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Docker image not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/git": {
+    /** Get all git repositories for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The project to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              git_repositories: components["schemas"]["Git"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new git repository for a project */
+    post: {
+      /** @description The git object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateGit"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              git: components["schemas"]["Git"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/git/{id}": {
+    /** Get git repository by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the git repository */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              git: components["schemas"]["Git"];
+              commits: components["schemas"]["GitCommit"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Git repository not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Delete git repository by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the git repository */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Git repository not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update a git repository by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the git repository */
+          id: number;
+        };
+      };
+      /** @description The git object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchGit"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              git: components["schemas"]["Git"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Git repository not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/projects": {
     /** Create a new project */
     post: {
@@ -213,6 +553,34 @@ export interface paths {
         };
         /** @description Specific password not found */
         404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/scan-groups": {
+    /** Get all scan groups */
+    get: {
+      parameters: {
+        query: {
+          /** @description The project to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              scan_groups: components["schemas"]["ScanGroup"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
           content: {
             "application/json": components["schemas"]["Error"];
           };
@@ -847,6 +1215,37 @@ export interface paths {
             "application/json": {
               success: boolean;
               postgres_database: components["schemas"]["PostgresDatabase"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Delete postgres database by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the postgres database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
             };
           };
         };
@@ -1543,6 +1942,104 @@ export interface components {
       ended_at: string;
       maximum_severity: number;
       scan_group_id: number;
+    };
+    DockerImage: {
+      id: number;
+      project_id: number;
+      docker_image: string;
+      username: string;
+      password: string;
+      min_probability: number;
+      probability_increase_multiplier: number;
+      probability_decrease_multiplier: number;
+      entropy_threshold: number;
+      logistic_growth_rate: number;
+    };
+    CreateDockerImage: {
+      project_id: number;
+      docker_image: string;
+      username: string;
+      password: string;
+    };
+    PatchDockerImage: {
+      docker_image?: string;
+      username?: string;
+      password?: string;
+      min_probability?: number;
+      probability_increase_multiplier?: number;
+      probability_decrease_multiplier?: number;
+      entropy_threshold?: number;
+      logistic_growth_rate?: number;
+    };
+    DockerScan: {
+      id: number;
+      project_id: number;
+      image: string;
+      finished: boolean;
+      scanned_layers: number;
+      layers_to_scan: number;
+      created_at: string;
+    };
+    DockerLayer: {
+      id: number;
+      project_id: number;
+      scan_id: number;
+      layer_hash: string;
+      results: components["schemas"]["DockerLayerResult"][];
+    };
+    DockerLayerResult: {
+      id: number;
+      project_id: number;
+      layer: number;
+      name: string;
+      line: string;
+      line_number: number;
+      match: string;
+      probability: number;
+      username: string;
+      password: string;
+      filename: string;
+      created_at: string;
+    };
+    GitCommit: {
+      id: number;
+      repository_id: number;
+      commit_hash: string;
+      created_at: string;
+      results: components["schemas"]["GitResult"][];
+    };
+    GitResult: {
+      id: number;
+      commit: number;
+      name: string;
+      line: string;
+      line_number: number;
+      match: string;
+      probability: number;
+      username: string;
+      password: string;
+      filename: string;
+    };
+    Git: {
+      id: number;
+      project_id: number;
+      git_repository: string;
+      username: string;
+      password: string;
+      has_ssh: boolean;
+    };
+    PatchGit: {
+      git_repository?: string;
+      username?: string;
+      password?: string;
+      private_key?: string;
+    };
+    CreateGit: {
+      project_id: number;
+      git_repository: string;
+      username?: string;
+      password?: string;
+      private_key?: string;
     };
     PostgresScan: {
       id: number;

@@ -3,7 +3,7 @@
 	export let data: PageData;
 </script>
 
-<div class="flex items-center justify-center h-screen">
+<div class="flex items-center justify-center">
 	<div class="card w-108 bg-base-100 shadow-xl bordered">
 		<div class="card-body">
 			<h2 class="card-title">Add a Database</h2>

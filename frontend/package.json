@@ -48,6 +48,7 @@
 	"type": "module",
 	"dependencies": {
 		"@fontsource/roboto": "^5.0.13",
+		"@preline/toggle-password": "^2.1.0",
 		"material-icons": "^1.13.12",
 		"material-symbols": "^0.17.4",
 		"openapi-fetch": "^0.9.5",

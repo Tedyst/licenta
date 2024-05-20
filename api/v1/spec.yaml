@@ -2846,9 +2846,6 @@ components:
       required:
         - project_id
         - git_repository
-        - username
-        - password
-        - private_key
       type: object
       properties:
         project_id:

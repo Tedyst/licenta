@@ -1,5 +1,13 @@
 <script context="module" lang="ts">
-	export type Field = 'hostname' | 'port' | 'username' | 'password' | 'database';
+	export type Field =
+		| 'hostname'
+		| 'port'
+		| 'username'
+		| 'password'
+		| 'database'
+		| 'repository'
+		| 'privateKey'
+		| 'image';
 </script>
 
 <script lang="ts">
@@ -8,17 +16,38 @@
 	import Server from 'svelte-material-icons/Server.svelte';
 	import Podcast from 'svelte-material-icons/Podcast.svelte';
 	import Database from 'svelte-material-icons/Database.svelte';
+	import LinkVariant from 'svelte-material-icons/LinkVariant.svelte';
 
 	export let fields: Field[] = ['hostname', 'port', 'username', 'password', 'database'];
-	export let initialValues: Record<Field, string | undefined> = {
-		hostname: '',
-		port: '',
-		username: '',
-		password: '',
-		database: ''
-	};
+	export let initialValues: Partial<Record<Field, string | undefined>> = {};
 </script>
 
+{#if fields.includes('repository')}
+	<label class="input input-bordered flex items-center gap-2">
+		<LinkVariant />
+		<input
+			type="text"
+			class="grow bg-base-100"
+			placeholder="Repository"
+			autocomplete="off"
+			name="repository"
+			value={initialValues?.repository || ''}
+		/>
+	</label>
+{/if}
+{#if fields.includes('image')}
+	<label class="input input-bordered flex items-center gap-2">
+		<LinkVariant />
+		<input
+			type="text"
+			class="grow bg-base-100"
+			placeholder="Image"
+			autocomplete="off"
+			name="image"
+			value={initialValues?.image || ''}
+		/>
+	</label>
+{/if}
 {#if fields.includes('hostname')}
 	<label class="input input-bordered flex items-center gap-2">
 		<Server />
@@ -28,7 +57,7 @@
 			placeholder="Hostname"
 			autocomplete="off"
 			name="hostname"
-			value={initialValues.hostname || ''}
+			value={initialValues?.hostname || ''}
 		/>
 	</label>
 {/if}
@@ -41,7 +70,7 @@
 			placeholder="Port"
 			autocomplete="off"
 			name="port"
-			value={initialValues.port || ''}
+			value={initialValues?.port || ''}
 		/>
 	</label>
 {/if}
@@ -54,7 +83,7 @@
 			placeholder="Username"
 			autocomplete="off"
 			name="username"
-			value={initialValues.username || ''}
+			value={initialValues?.username || ''}
 		/>
 	</label>
 {/if}
@@ -64,10 +93,10 @@
 		<input
 			type="password"
 			class="grow bg-base-100"
-			placeholder="Password"
+			placeholder="•••••••••••••"
 			autocomplete="off"
 			name="password"
-			value={initialValues.password || 'pass'}
+			value={initialValues?.password || ''}
 		/>
 	</label>
 {/if}
@@ -80,7 +109,19 @@
 			placeholder="Database Name"
 			autocomplete="off"
 			name="database"
-			value={initialValues.database || ''}
+			value={initialValues?.database || ''}
+		/>
+	</label>
+{/if}
+{#if fields.includes('privateKey')}
+	<label class="textarea textarea-bordered flex items-center gap-2">
+		<Key />
+		<textarea
+			class="textarea grow bg-base-100 min-h-10"
+			placeholder="Private Key"
+			autocomplete="off"
+			name="privateKey"
+			value={initialValues?.privateKey || ''}
 		/>
 	</label>
 {/if}

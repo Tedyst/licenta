@@ -25,15 +25,28 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 	const postgresDatabases = client.GET('/postgres', {
 		params: { query: { project: currentProject.id } }
 	});
+	const gitRepositories = client.GET('/git', {
+		params: { query: { project: currentProject.id } }
+	});
+	const dockerImages = client.GET('/docker', {
+		params: { query: { project: currentProject.id } }
+	});
 
-	depends('app:mysql', 'app:postgres');
+	depends('app:mysql', 'app:postgres', 'app:git', 'app:docker');
 
-	const promises = await Promise.all([mysqlDatabases, postgresDatabases]);
+	const promises = await Promise.all([
+		mysqlDatabases,
+		postgresDatabases,
+		gitRepositories,
+		dockerImages
+	]);
 
 	return {
 		...parentData,
 		project: currentProject,
 		mysqlDatabases: promises[0].data?.mysql_databases,
-		postgresDatabases: promises[1].data?.postgres_databases
+		postgresDatabases: promises[1].data?.postgres_databases,
+		gitRepositories: promises[2].data?.git_repositories,
+		dockerImages: promises[3].data?.images
 	};
 };
