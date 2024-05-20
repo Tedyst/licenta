@@ -197,7 +197,8 @@ UNION (
         git_commits
     LEFT JOIN git_results ON git_commits.id = git_results.commit
 WHERE
-    git_results.id IS NOT NULL)) AS asd
+    git_commits.repository_id = $1
+    AND git_results.id IS NOT NULL)) AS asd
 ORDER BY
     commit_date DESC
 `
