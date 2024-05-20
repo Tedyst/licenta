@@ -14,7 +14,7 @@
 		{data.gitRepo?.git_repository}
 
 		{#each data?.commits || [] as commit}
-			<div class={'collapse ' + (commit.results.length ? 'bg-warning' : 'bg-base-300')}>
+			<div class={'collapse ' + (commit.results.length ? 'bg-error text-white' : 'bg-base-300')}>
 				<input type="radio" name="my-accordion-1" checked />
 				<div class="collapse-title overflow-hidden">
 					<div class="flex justify-between items-center">
@@ -24,7 +24,7 @@
 					<div class="text-sm">{commit.description}</div>
 					<div class="text-xs font-very-small">{commit.commit_hash}</div>
 				</div>
-				<div class="collapse-content gap-2 flex flex-col">
+				<div class="collapse-content gap-2 flex flex-col text-black">
 					{#each commit?.results as result}
 						<div class="card bg-slate-200">
 							<div class="card-body">
