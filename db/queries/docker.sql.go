@@ -261,7 +261,8 @@ UNION (
         docker_layers
     LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
 WHERE
-    docker_layers.id IS NOT NULL)) AS asd
+    docker_layers.image_id = $1
+    AND docker_layers.id IS NOT NULL)) AS asd
 ORDER BY
     scanned_at DESC
 `
