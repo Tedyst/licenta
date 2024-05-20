@@ -35,7 +35,7 @@ project
 
 {#each data?.gitRepositories || [] as gitRepository}
 	<BaseListItem
-		databaseUrl={`git://${gitRepository.username}@****:${gitRepository.git_repository}`}
+		databaseUrl={`git://${gitRepository.git_repository}`}
 		databaseIcon={GitIcon}
 		databaseType="Git"
 		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/postgresql/?id=${gitRepository.id}`}

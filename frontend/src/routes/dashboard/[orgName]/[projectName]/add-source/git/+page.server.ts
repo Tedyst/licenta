@@ -22,20 +22,14 @@ export const actions = {
 		if (repository === '' || repository === undefined) {
 			return { error: 'Git repository is required' };
 		}
-		if (username === '' || username === undefined) {
-			return { error: 'Username is required' };
-		}
-		if (password === '' || password === undefined) {
-			return { error: 'Password is required' };
-		}
 
 		const returned = await client
 			.POST('/git', {
 				body: {
 					git_repository: repository,
-					password: password,
-					private_key: privateKey,
-					username: username,
+					password: password === '' ? undefined : password,
+					private_key: privateKey === '' ? undefined : privateKey,
+					username: username === '' ? undefined : username,
 					project_id: +projectId
 				}
 			})
