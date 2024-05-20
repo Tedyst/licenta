@@ -2007,6 +2007,10 @@ export interface components {
       commit_hash: string;
       created_at: string;
       results: components["schemas"]["GitResult"][];
+      author?: string;
+      author_email?: string;
+      commit_date?: string;
+      description?: string;
     };
     GitResult: {
       id: number;
