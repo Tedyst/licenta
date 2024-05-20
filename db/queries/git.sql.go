@@ -293,7 +293,7 @@ FROM
     INNER JOIN git_repositories ON git_repositories.id = git_commits.repository_id
 WHERE
     project_id = $1
-    AND commit_hash = ANY ($2::string[])
+    AND commit_hash = ANY ($2::text[])
 `
 
 type GetGitScannedCommitsForProjectBatchParams struct {

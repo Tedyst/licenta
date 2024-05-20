@@ -199,13 +199,21 @@ func (server *serverHandler) PostGit(ctx context.Context, request generated.Post
 		return response, nil
 	}
 
-	gitRepository, err := server.DatabaseProvider.CreateGitRepository(ctx, queries.CreateGitRepositoryParams{
+	params := queries.CreateGitRepositoryParams{
 		GitRepository: request.Body.GitRepository,
 		ProjectID:     int64(request.Body.ProjectId),
-		Username:      sql.NullString{String: request.Body.Username, Valid: true},
-		Password:      sql.NullString{String: request.Body.Password, Valid: true},
-		PrivateKey:    sql.NullString{String: request.Body.PrivateKey, Valid: true},
-	})
+	}
+	if request.Body.Password != nil {
+		params.Password = sql.NullString{String: *request.Body.Password, Valid: true}
+	}
+	if request.Body.Username != nil {
+		params.Username = sql.NullString{String: *request.Body.Username, Valid: true}
+	}
+	if request.Body.PrivateKey != nil {
+		params.PrivateKey = sql.NullString{String: *request.Body.PrivateKey, Valid: true}
+	}
+
+	gitRepository, err := server.DatabaseProvider.CreateGitRepository(ctx, params)
 	if err != nil {
 		return nil, fmt.Errorf("PostGit: error creating git repository: %w", err)
 	}

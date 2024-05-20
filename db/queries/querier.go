@@ -113,6 +113,7 @@ type Querier interface {
 	GetScanResults(ctx context.Context, scanID int64) ([]*ScanResult, error)
 	GetScanResultsByScanIdAndScanSource(ctx context.Context, arg GetScanResultsByScanIdAndScanSourceParams) ([]*ScanResult, error)
 	GetScansForProject(ctx context.Context, projectID int64) ([]*GetScansForProjectRow, error)
+	GetScansForScanGroup(ctx context.Context, scanGroupID int64) ([]*Scan, error)
 	GetSpecificBruteforcePasswordID(ctx context.Context, arg GetSpecificBruteforcePasswordIDParams) (int64, error)
 	GetTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
 	GetUser(ctx context.Context, id int64) (*User, error)

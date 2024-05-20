@@ -127,16 +127,12 @@ func (server *serverHandler) PostProjectsIdRun(ctx context.Context, request gene
 		}
 	}
 
-	for _, scan := range scans {
-		scan := scan
-		go func() {
-			ctx := context.WithoutCancel(ctx)
-			err := server.TaskRunner.ScheduleSaverRun(ctx, scan, "all")
-			if err != nil {
-				slog.Error("Error scheduling postgres scan", "error", err)
-			}
-		}()
-	}
+	go func() {
+		ctx := context.WithoutCancel(ctx)
+		if err := server.TaskRunner.ScheduleFullRun(ctx, project, scanGroup, "all", "all"); err != nil {
+			slog.ErrorContext(ctx, "error scheduling full run", "error", err, "project", project, "scangroup", scanGroup)
+		}
+	}()
 
 	return generated.PostProjectsIdRun200JSONResponse{
 		Success: true,

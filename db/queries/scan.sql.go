@@ -437,6 +437,43 @@ func (q *Queries) GetScansForProject(ctx context.Context, projectID int64) ([]*G
 	return items, nil
 }
 
+const getScansForScanGroup = `-- name: GetScansForScanGroup :many
+SELECT
+    id, scan_group_id, status, error, worker_id, created_at, ended_at
+FROM
+    scans
+WHERE
+    scan_group_id = $1
+`
+
+func (q *Queries) GetScansForScanGroup(ctx context.Context, scanGroupID int64) ([]*Scan, error) {
+	rows, err := q.db.Query(ctx, getScansForScanGroup, scanGroupID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*Scan
+	for rows.Next() {
+		var i Scan
+		if err := rows.Scan(
+			&i.ID,
+			&i.ScanGroupID,
+			&i.Status,
+			&i.Error,
+			&i.WorkerID,
+			&i.CreatedAt,
+			&i.EndedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateScanBruteforceResult = `-- name: UpdateScanBruteforceResult :exec
 UPDATE
     scan_bruteforce_results

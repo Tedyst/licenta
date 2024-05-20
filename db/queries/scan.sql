@@ -134,3 +134,11 @@ FROM
 WHERE
     project_id = $1;
 
+-- name: GetScansForScanGroup :many
+SELECT
+    *
+FROM
+    scans
+WHERE
+    scan_group_id = $1;
+

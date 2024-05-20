@@ -3,6 +3,7 @@ package local
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"errors"
 
@@ -28,8 +29,9 @@ type GitRunner struct {
 
 func NewGitRunner(queries GitQuerier) *GitRunner {
 	return &GitRunner{
-		queries:            queries,
-		GitScannerProvider: git.New,
+		queries:             queries,
+		GitScannerProvider:  git.New,
+		FileScannerProvider: file.NewScanner,
 	}
 }
 
@@ -46,9 +48,9 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 		}))
 	}
 	if repo.Username.Valid && repo.PrivateKey.Valid {
-		key, err := ssh.NewPublicKeysFromFile(repo.Username.String, repo.PrivateKey.String, "")
+		key, err := ssh.NewPublicKeys(repo.Username.String, []byte(repo.PrivateKey.String), "")
 		if err != nil {
-			return err
+			return fmt.Errorf("error creating ssh key: %w", err)
 		}
 		options = append(options, git.WithCredentials(key))
 	}
@@ -69,18 +71,30 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 		}
 		var result []git.BatchItem
 		for _, item := range newBatch {
-			result = append(result, commitsMap[item])
+			delete(commitsMap, item)
+		}
+		for _, item := range commitsMap {
+			result = append(result, item)
 		}
 		return result, nil
 	}))
 
+	commitCache := map[string]*queries.GitCommit{}
+
 	options = append(options, git.WithCallbackResult(func(ctx context.Context, scanner *git.GitScan, result *git.GitResult) error {
-		commit, err := r.queries.CreateGitCommitForProject(ctx, queries.CreateGitCommitForProjectParams{
-			RepositoryID: repo.ID,
-			CommitHash:   result.CommitHash,
-		})
-		if err != nil {
-			return err
+		var commit *queries.GitCommit
+		if c, ok := commitCache[result.CommitHash]; ok {
+			commit = c
+		} else {
+			var err error
+			commit, err = r.queries.CreateGitCommitForProject(ctx, queries.CreateGitCommitForProjectParams{
+				RepositoryID: repo.ID,
+				CommitHash:   result.CommitHash,
+			})
+			if err != nil {
+				return fmt.Errorf("error creating commit: %w", err)
+			}
+			commitCache[result.CommitHash] = commit
 		}
 
 		results := []queries.CreateGitResultForCommitParams{}
@@ -97,9 +111,9 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 				Filename:    item.FileName,
 			})
 		}
-		_, err = r.queries.CreateGitResultForCommit(ctx, results)
+		_, err := r.queries.CreateGitResultForCommit(ctx, results)
 		if err != nil {
-			return err
+			return fmt.Errorf("error creating result: %w", err)
 		}
 		return nil
 	}))

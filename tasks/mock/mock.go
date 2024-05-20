@@ -193,6 +193,44 @@ func (c *MockTaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context
 	return c
 }
 
+// ScheduleFullRun mocks base method.
+func (m *MockTaskRunner) ScheduleFullRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType, scanType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduleFullRun", ctx, project, scanGroup, sourceType, scanType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScheduleFullRun indicates an expected call of ScheduleFullRun.
+func (mr *MockTaskRunnerMockRecorder) ScheduleFullRun(ctx, project, scanGroup, sourceType, scanType any) *MockTaskRunnerScheduleFullRunCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleFullRun", reflect.TypeOf((*MockTaskRunner)(nil).ScheduleFullRun), ctx, project, scanGroup, sourceType, scanType)
+	return &MockTaskRunnerScheduleFullRunCall{Call: call}
+}
+
+// MockTaskRunnerScheduleFullRunCall wrap *gomock.Call
+type MockTaskRunnerScheduleFullRunCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTaskRunnerScheduleFullRunCall) Return(arg0 error) *MockTaskRunnerScheduleFullRunCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTaskRunnerScheduleFullRunCall) Do(f func(context.Context, *queries.Project, *queries.ScanGroup, string, string) error) *MockTaskRunnerScheduleFullRunCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTaskRunnerScheduleFullRunCall) DoAndReturn(f func(context.Context, *queries.Project, *queries.ScanGroup, string, string) error) *MockTaskRunnerScheduleFullRunCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // ScheduleSaverRun mocks base method.
 func (m *MockTaskRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
 	m.ctrl.T.Helper()
@@ -227,6 +265,44 @@ func (c *MockTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockTaskRunnerScheduleSaverRunCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// ScheduleSourceRun mocks base method.
+func (m *MockTaskRunner) ScheduleSourceRun(ctx context.Context, project *queries.Project, sourceType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduleSourceRun", ctx, project, sourceType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScheduleSourceRun indicates an expected call of ScheduleSourceRun.
+func (mr *MockTaskRunnerMockRecorder) ScheduleSourceRun(ctx, project, sourceType any) *MockTaskRunnerScheduleSourceRunCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSourceRun", reflect.TypeOf((*MockTaskRunner)(nil).ScheduleSourceRun), ctx, project, sourceType)
+	return &MockTaskRunnerScheduleSourceRunCall{Call: call}
+}
+
+// MockTaskRunnerScheduleSourceRunCall wrap *gomock.Call
+type MockTaskRunnerScheduleSourceRunCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTaskRunnerScheduleSourceRunCall) Return(arg0 error) *MockTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTaskRunnerScheduleSourceRunCall) Do(f func(context.Context, *queries.Project, string) error) *MockTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTaskRunnerScheduleSourceRunCall) DoAndReturn(f func(context.Context, *queries.Project, string) error) *MockTaskRunnerScheduleSourceRunCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -684,6 +760,280 @@ func (c *MockScannerTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockScannerTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerTaskRunnerScheduleSaverRunCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockSourceTaskRunner is a mock of SourceTaskRunner interface.
+type MockSourceTaskRunner struct {
+	ctrl     *gomock.Controller
+	recorder *MockSourceTaskRunnerMockRecorder
+}
+
+// MockSourceTaskRunnerMockRecorder is the mock recorder for MockSourceTaskRunner.
+type MockSourceTaskRunnerMockRecorder struct {
+	mock *MockSourceTaskRunner
+}
+
+// NewMockSourceTaskRunner creates a new mock instance.
+func NewMockSourceTaskRunner(ctrl *gomock.Controller) *MockSourceTaskRunner {
+	mock := &MockSourceTaskRunner{ctrl: ctrl}
+	mock.recorder = &MockSourceTaskRunnerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockSourceTaskRunner) EXPECT() *MockSourceTaskRunnerMockRecorder {
+	return m.recorder
+}
+
+// ScheduleSourceRun mocks base method.
+func (m *MockSourceTaskRunner) ScheduleSourceRun(ctx context.Context, project *queries.Project, sourceType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduleSourceRun", ctx, project, sourceType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScheduleSourceRun indicates an expected call of ScheduleSourceRun.
+func (mr *MockSourceTaskRunnerMockRecorder) ScheduleSourceRun(ctx, project, sourceType any) *MockSourceTaskRunnerScheduleSourceRunCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSourceRun", reflect.TypeOf((*MockSourceTaskRunner)(nil).ScheduleSourceRun), ctx, project, sourceType)
+	return &MockSourceTaskRunnerScheduleSourceRunCall{Call: call}
+}
+
+// MockSourceTaskRunnerScheduleSourceRunCall wrap *gomock.Call
+type MockSourceTaskRunnerScheduleSourceRunCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockSourceTaskRunnerScheduleSourceRunCall) Return(arg0 error) *MockSourceTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockSourceTaskRunnerScheduleSourceRunCall) Do(f func(context.Context, *queries.Project, string) error) *MockSourceTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockSourceTaskRunnerScheduleSourceRunCall) DoAndReturn(f func(context.Context, *queries.Project, string) error) *MockSourceTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockScannerSourceTaskRunner is a mock of ScannerSourceTaskRunner interface.
+type MockScannerSourceTaskRunner struct {
+	ctrl     *gomock.Controller
+	recorder *MockScannerSourceTaskRunnerMockRecorder
+}
+
+// MockScannerSourceTaskRunnerMockRecorder is the mock recorder for MockScannerSourceTaskRunner.
+type MockScannerSourceTaskRunnerMockRecorder struct {
+	mock *MockScannerSourceTaskRunner
+}
+
+// NewMockScannerSourceTaskRunner creates a new mock instance.
+func NewMockScannerSourceTaskRunner(ctrl *gomock.Controller) *MockScannerSourceTaskRunner {
+	mock := &MockScannerSourceTaskRunner{ctrl: ctrl}
+	mock.recorder = &MockScannerSourceTaskRunnerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockScannerSourceTaskRunner) EXPECT() *MockScannerSourceTaskRunnerMockRecorder {
+	return m.recorder
+}
+
+// RunSaverForPublic mocks base method.
+func (m *MockScannerSourceTaskRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RunSaverForPublic", ctx, scan, scanType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunSaverForPublic indicates an expected call of RunSaverForPublic.
+func (mr *MockScannerSourceTaskRunnerMockRecorder) RunSaverForPublic(ctx, scan, scanType any) *MockScannerSourceTaskRunnerRunSaverForPublicCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverForPublic", reflect.TypeOf((*MockScannerSourceTaskRunner)(nil).RunSaverForPublic), ctx, scan, scanType)
+	return &MockScannerSourceTaskRunnerRunSaverForPublicCall{Call: call}
+}
+
+// MockScannerSourceTaskRunnerRunSaverForPublicCall wrap *gomock.Call
+type MockScannerSourceTaskRunnerRunSaverForPublicCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockScannerSourceTaskRunnerRunSaverForPublicCall) Return(arg0 error) *MockScannerSourceTaskRunnerRunSaverForPublicCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockScannerSourceTaskRunnerRunSaverForPublicCall) Do(f func(context.Context, *queries.Scan, string) error) *MockScannerSourceTaskRunnerRunSaverForPublicCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockScannerSourceTaskRunnerRunSaverForPublicCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerSourceTaskRunnerRunSaverForPublicCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// RunSaverRemote mocks base method.
+func (m *MockScannerSourceTaskRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RunSaverRemote", ctx, scan, scanType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunSaverRemote indicates an expected call of RunSaverRemote.
+func (mr *MockScannerSourceTaskRunnerMockRecorder) RunSaverRemote(ctx, scan, scanType any) *MockScannerSourceTaskRunnerRunSaverRemoteCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunSaverRemote", reflect.TypeOf((*MockScannerSourceTaskRunner)(nil).RunSaverRemote), ctx, scan, scanType)
+	return &MockScannerSourceTaskRunnerRunSaverRemoteCall{Call: call}
+}
+
+// MockScannerSourceTaskRunnerRunSaverRemoteCall wrap *gomock.Call
+type MockScannerSourceTaskRunnerRunSaverRemoteCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockScannerSourceTaskRunnerRunSaverRemoteCall) Return(arg0 error) *MockScannerSourceTaskRunnerRunSaverRemoteCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockScannerSourceTaskRunnerRunSaverRemoteCall) Do(f func(context.Context, *queries.Scan, string) error) *MockScannerSourceTaskRunnerRunSaverRemoteCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockScannerSourceTaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerSourceTaskRunnerRunSaverRemoteCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// ScheduleFullRun mocks base method.
+func (m *MockScannerSourceTaskRunner) ScheduleFullRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType, scanType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduleFullRun", ctx, project, scanGroup, sourceType, scanType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScheduleFullRun indicates an expected call of ScheduleFullRun.
+func (mr *MockScannerSourceTaskRunnerMockRecorder) ScheduleFullRun(ctx, project, scanGroup, sourceType, scanType any) *MockScannerSourceTaskRunnerScheduleFullRunCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleFullRun", reflect.TypeOf((*MockScannerSourceTaskRunner)(nil).ScheduleFullRun), ctx, project, scanGroup, sourceType, scanType)
+	return &MockScannerSourceTaskRunnerScheduleFullRunCall{Call: call}
+}
+
+// MockScannerSourceTaskRunnerScheduleFullRunCall wrap *gomock.Call
+type MockScannerSourceTaskRunnerScheduleFullRunCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockScannerSourceTaskRunnerScheduleFullRunCall) Return(arg0 error) *MockScannerSourceTaskRunnerScheduleFullRunCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockScannerSourceTaskRunnerScheduleFullRunCall) Do(f func(context.Context, *queries.Project, *queries.ScanGroup, string, string) error) *MockScannerSourceTaskRunnerScheduleFullRunCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockScannerSourceTaskRunnerScheduleFullRunCall) DoAndReturn(f func(context.Context, *queries.Project, *queries.ScanGroup, string, string) error) *MockScannerSourceTaskRunnerScheduleFullRunCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// ScheduleSaverRun mocks base method.
+func (m *MockScannerSourceTaskRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduleSaverRun", ctx, scan, scanType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScheduleSaverRun indicates an expected call of ScheduleSaverRun.
+func (mr *MockScannerSourceTaskRunnerMockRecorder) ScheduleSaverRun(ctx, scan, scanType any) *MockScannerSourceTaskRunnerScheduleSaverRunCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSaverRun", reflect.TypeOf((*MockScannerSourceTaskRunner)(nil).ScheduleSaverRun), ctx, scan, scanType)
+	return &MockScannerSourceTaskRunnerScheduleSaverRunCall{Call: call}
+}
+
+// MockScannerSourceTaskRunnerScheduleSaverRunCall wrap *gomock.Call
+type MockScannerSourceTaskRunnerScheduleSaverRunCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockScannerSourceTaskRunnerScheduleSaverRunCall) Return(arg0 error) *MockScannerSourceTaskRunnerScheduleSaverRunCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockScannerSourceTaskRunnerScheduleSaverRunCall) Do(f func(context.Context, *queries.Scan, string) error) *MockScannerSourceTaskRunnerScheduleSaverRunCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockScannerSourceTaskRunnerScheduleSaverRunCall) DoAndReturn(f func(context.Context, *queries.Scan, string) error) *MockScannerSourceTaskRunnerScheduleSaverRunCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// ScheduleSourceRun mocks base method.
+func (m *MockScannerSourceTaskRunner) ScheduleSourceRun(ctx context.Context, project *queries.Project, sourceType string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduleSourceRun", ctx, project, sourceType)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ScheduleSourceRun indicates an expected call of ScheduleSourceRun.
+func (mr *MockScannerSourceTaskRunnerMockRecorder) ScheduleSourceRun(ctx, project, sourceType any) *MockScannerSourceTaskRunnerScheduleSourceRunCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduleSourceRun", reflect.TypeOf((*MockScannerSourceTaskRunner)(nil).ScheduleSourceRun), ctx, project, sourceType)
+	return &MockScannerSourceTaskRunnerScheduleSourceRunCall{Call: call}
+}
+
+// MockScannerSourceTaskRunnerScheduleSourceRunCall wrap *gomock.Call
+type MockScannerSourceTaskRunnerScheduleSourceRunCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockScannerSourceTaskRunnerScheduleSourceRunCall) Return(arg0 error) *MockScannerSourceTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockScannerSourceTaskRunnerScheduleSourceRunCall) Do(f func(context.Context, *queries.Project, string) error) *MockScannerSourceTaskRunnerScheduleSourceRunCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockScannerSourceTaskRunnerScheduleSourceRunCall) DoAndReturn(f func(context.Context, *queries.Project, string) error) *MockScannerSourceTaskRunnerScheduleSourceRunCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

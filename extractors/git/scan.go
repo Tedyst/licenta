@@ -90,22 +90,20 @@ func (scanner *GitScan) inspectFilePatch(ctx context.Context, commit *object.Com
 		results, err = scanner.inspectTextFile(ctx, filePatch)
 	}
 	if err != nil {
-		return err
+		return fmt.Errorf("inspectFilePatch: cannot inspect file: %w", err)
 	}
 
 	scanner.mutex.Lock()
 	defer scanner.mutex.Unlock()
 
-	if len(results) > 0 {
-		foundResults.Add(ctx, int64(len(results)))
-		err = scanner.options.callbackResult(ctx, scanner, &GitResult{
-			CommitHash: commit.Hash.String(),
-			FileName:   to.Path(),
-			Results:    results,
-		})
-		if err != nil {
-			return err
-		}
+	foundResults.Add(ctx, int64(len(results)))
+	err = scanner.options.callbackResult(ctx, scanner, &GitResult{
+		CommitHash: commit.Hash.String(),
+		FileName:   to.Path(),
+		Results:    results,
+	})
+	if err != nil {
+		return fmt.Errorf("inspectFilePatch: cannot callback result: %w", err)
 	}
 
 	return nil
@@ -131,6 +129,15 @@ func (scanner *GitScan) inspectCommit(ctx context.Context, commit *object.Commit
 	wg := sync.WaitGroup{}
 	errorChannel := make(chan error)
 	waitChannel := make(chan struct{})
+
+	err = scanner.options.callbackResult(ctx, scanner, &GitResult{
+		CommitHash: commit.Hash.String(),
+		FileName:   "",
+		Results:    []file.ExtractResult{},
+	})
+	if err != nil {
+		return fmt.Errorf("inspectFilePatch: cannot create commit: %w", err)
+	}
 
 	for _, filePatch := range patch.FilePatches() {
 		filePatch := filePatch
@@ -196,7 +203,7 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 			return nil
 		})
 		if err != nil {
-			return err
+			return fmt.Errorf("Scan: cannot iterate over parents: %w", err)
 		}
 		if !hasParent {
 			batch = append(batch, BatchItem{
@@ -236,9 +243,14 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 	})
 	if err != nil {
 		scanner.mutex.Unlock()
-		return fmt.Errorf("sad: %w", err)
+		return fmt.Errorf("Scan: cannot iterate over commits: %w", err)
 	}
 
+	batch, err = scanner.options.skipCommitFunc(batch)
+	if err != nil {
+		scanner.mutex.Unlock()
+		return err
+	}
 	for _, obj := range batch {
 		obj := obj
 		wg.Add(1)

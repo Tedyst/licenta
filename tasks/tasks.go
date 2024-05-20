@@ -13,6 +13,8 @@ type TaskRunner interface {
 	GitTasksRunner
 	VulnerabilityTasksRunner
 	ScannerTaskRunner
+	SourceTaskRunner
+	ScannerSourceTaskRunner
 }
 
 type EmailTasksRunner interface {
@@ -35,4 +37,14 @@ type ScannerTaskRunner interface {
 	RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error
 	RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error
 	ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error
+}
+
+type SourceTaskRunner interface {
+	ScheduleSourceRun(ctx context.Context, project *queries.Project, sourceType string) error
+}
+
+type ScannerSourceTaskRunner interface {
+	ScannerTaskRunner
+	SourceTaskRunner
+	ScheduleFullRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType string, scanType string) error
 }

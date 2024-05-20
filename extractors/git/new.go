@@ -51,8 +51,9 @@ func New(repoUrl string, fileScanner FileScanner, options ...Option) (*GitScan, 
 		return nil, err
 	}
 	repository, err := gitgo.Clone(memory.NewStorage(), nil, &gitgo.CloneOptions{
-		URL:  repoUrl,
-		Auth: o.credentials,
+		URL:    repoUrl,
+		Auth:   o.credentials,
+		Mirror: true,
 	})
 	if err != nil {
 		return nil, err

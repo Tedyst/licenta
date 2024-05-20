@@ -4008,6 +4008,45 @@ func (c *MockTransactionQuerierGetScansForProjectCall) DoAndReturn(f func(contex
 	return c
 }
 
+// GetScansForScanGroup mocks base method.
+func (m *MockTransactionQuerier) GetScansForScanGroup(ctx context.Context, scanGroupID int64) ([]*queries.Scan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetScansForScanGroup", ctx, scanGroupID)
+	ret0, _ := ret[0].([]*queries.Scan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetScansForScanGroup indicates an expected call of GetScansForScanGroup.
+func (mr *MockTransactionQuerierMockRecorder) GetScansForScanGroup(ctx, scanGroupID any) *MockTransactionQuerierGetScansForScanGroupCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScansForScanGroup", reflect.TypeOf((*MockTransactionQuerier)(nil).GetScansForScanGroup), ctx, scanGroupID)
+	return &MockTransactionQuerierGetScansForScanGroupCall{Call: call}
+}
+
+// MockTransactionQuerierGetScansForScanGroupCall wrap *gomock.Call
+type MockTransactionQuerierGetScansForScanGroupCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetScansForScanGroupCall) Return(arg0 []*queries.Scan, arg1 error) *MockTransactionQuerierGetScansForScanGroupCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetScansForScanGroupCall) Do(f func(context.Context, int64) ([]*queries.Scan, error)) *MockTransactionQuerierGetScansForScanGroupCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetScansForScanGroupCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Scan, error)) *MockTransactionQuerierGetScansForScanGroupCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetSpecificBruteforcePasswordID mocks base method.
 func (m *MockTransactionQuerier) GetSpecificBruteforcePasswordID(ctx context.Context, arg queries.GetSpecificBruteforcePasswordIDParams) (int64, error) {
 	m.ctrl.T.Helper()

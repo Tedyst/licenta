@@ -48,7 +48,7 @@ FROM
     INNER JOIN git_repositories ON git_repositories.id = git_commits.repository_id
 WHERE
     project_id = $1
-    AND commit_hash = ANY (sqlc.arg(commit_hashes)::string[]);
+    AND commit_hash = ANY (sqlc.arg(commit_hashes)::text[]);
 
 -- name: CreateGitResultForCommit :copyfrom
 INSERT INTO git_results(
