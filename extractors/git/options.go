@@ -72,7 +72,7 @@ func makeOptions(opts ...Option) (*options, error) {
 		ignoreFileNames: defaultIgnoreFileNameIncluding[:],
 		callbackResult: func(ctx context.Context, scanner *GitScan, result *GitResult) error {
 			for _, r := range result.Results {
-				slog.InfoContext(ctx, "Found Git result", "filename", result.FileName, "commit_hash", result.CommitHash, "line", r.Line, "username", r.Username, "password", r.Password, "probability", r.Probability)
+				slog.InfoContext(ctx, "Found Git result", "filename", result.FileName, "commit", result.Commit, "line", r.Line, "username", r.Username, "password", r.Password, "probability", r.Probability)
 			}
 			return nil
 		},

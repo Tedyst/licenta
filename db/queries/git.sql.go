@@ -8,27 +8,44 @@ package queries
 import (
 	"context"
 	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createGitCommitForProject = `-- name: CreateGitCommitForProject :one
-INSERT INTO git_commits(repository_id, commit_hash)
-    VALUES ($1, $2)
+INSERT INTO git_commits(repository_id, commit_hash, author, author_email, description, commit_date)
+    VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING
-    id, repository_id, commit_hash, created_at
+    id, repository_id, commit_hash, author, author_email, commit_date, description, created_at
 `
 
 type CreateGitCommitForProjectParams struct {
-	RepositoryID int64  `json:"repository_id"`
-	CommitHash   string `json:"commit_hash"`
+	RepositoryID int64              `json:"repository_id"`
+	CommitHash   string             `json:"commit_hash"`
+	Author       sql.NullString     `json:"author"`
+	AuthorEmail  sql.NullString     `json:"author_email"`
+	Description  sql.NullString     `json:"description"`
+	CommitDate   pgtype.Timestamptz `json:"commit_date"`
 }
 
 func (q *Queries) CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*GitCommit, error) {
-	row := q.db.QueryRow(ctx, createGitCommitForProject, arg.RepositoryID, arg.CommitHash)
+	row := q.db.QueryRow(ctx, createGitCommitForProject,
+		arg.RepositoryID,
+		arg.CommitHash,
+		arg.Author,
+		arg.AuthorEmail,
+		arg.Description,
+		arg.CommitDate,
+	)
 	var i GitCommit
 	err := row.Scan(
 		&i.ID,
 		&i.RepositoryID,
 		&i.CommitHash,
+		&i.Author,
+		&i.AuthorEmail,
+		&i.CommitDate,
+		&i.Description,
 		&i.CreatedAt,
 	)
 	return &i, err
@@ -144,7 +161,7 @@ func (q *Queries) DeleteGitRepositoryForProject(ctx context.Context, arg DeleteG
 
 const getGitCommitsWithResults = `-- name: GetGitCommitsWithResults :many
 SELECT
-    git_commits.id, git_commits.repository_id, git_commits.commit_hash, git_commits.created_at,
+    git_commits.id, git_commits.repository_id, git_commits.commit_hash, git_commits.author, git_commits.author_email, git_commits.commit_date, git_commits.description, git_commits.created_at,
     git_results.id, git_results.commit, git_results.name, git_results.line, git_results.line_number, git_results.match, git_results.probability, git_results.username, git_results.password, git_results.filename, git_results.created_at
 FROM
     git_commits
@@ -171,6 +188,10 @@ func (q *Queries) GetGitCommitsWithResults(ctx context.Context, repositoryID int
 			&i.GitCommit.ID,
 			&i.GitCommit.RepositoryID,
 			&i.GitCommit.CommitHash,
+			&i.GitCommit.Author,
+			&i.GitCommit.AuthorEmail,
+			&i.GitCommit.CommitDate,
+			&i.GitCommit.Description,
 			&i.GitCommit.CreatedAt,
 			&i.GitResult.ID,
 			&i.GitResult.Commit,

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	gitgo "github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/tedyst/licenta/extractors/file"
 )
@@ -16,9 +17,9 @@ type FileScanner interface {
 }
 
 type GitResult struct {
-	CommitHash string
-	FileName   string
-	Results    []file.ExtractResult
+	Commit   *object.Commit
+	FileName string
+	Results  []file.ExtractResult
 }
 
 type GitScan struct {

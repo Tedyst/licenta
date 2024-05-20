@@ -88,6 +88,10 @@ CREATE TABLE git_commits(
     id bigserial PRIMARY KEY,
     repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE,
     commit_hash text NOT NULL UNIQUE,
+    author text,
+    author_email text,
+    commit_date timestamp with time zone,
+    description text,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

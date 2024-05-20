@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sync"
 
 	"errors"
 
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/file"
 	"github.com/tedyst/licenta/extractors/git"
@@ -79,22 +81,31 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 		return result, nil
 	}))
 
-	commitCache := map[string]*queries.GitCommit{}
+	commitCache := sync.Map{}
 
 	options = append(options, git.WithCallbackResult(func(ctx context.Context, scanner *git.GitScan, result *git.GitResult) error {
 		var commit *queries.GitCommit
-		if c, ok := commitCache[result.CommitHash]; ok {
-			commit = c
+		if c, ok := commitCache.Load(result.Commit.Hash); ok {
+			tc, ok := c.(*queries.GitCommit)
+			if !ok {
+				return fmt.Errorf("error loading commit from cache")
+			}
+			commit = tc
 		} else {
 			var err error
 			commit, err = r.queries.CreateGitCommitForProject(ctx, queries.CreateGitCommitForProjectParams{
 				RepositoryID: repo.ID,
-				CommitHash:   result.CommitHash,
+				CommitHash:   result.Commit.Hash.String(),
+				Author:       sql.NullString{String: result.Commit.Author.Name, Valid: true},
+				AuthorEmail:  sql.NullString{String: result.Commit.Author.Email, Valid: true},
+				Description:  sql.NullString{String: result.Commit.Message, Valid: true},
+				CommitDate:   pgtype.Timestamptz{Time: result.Commit.Author.When, Valid: true},
 			})
+
 			if err != nil {
 				return fmt.Errorf("error creating commit: %w", err)
 			}
-			commitCache[result.CommitHash] = commit
+			commitCache.Store(result.Commit.Hash, commit)
 		}
 
 		results := []queries.CreateGitResultForCommitParams{}

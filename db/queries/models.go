@@ -76,6 +76,10 @@ type GitCommit struct {
 	ID           int64              `json:"id"`
 	RepositoryID int64              `json:"repository_id"`
 	CommitHash   string             `json:"commit_hash"`
+	Author       sql.NullString     `json:"author"`
+	AuthorEmail  sql.NullString     `json:"author_email"`
+	CommitDate   pgtype.Timestamptz `json:"commit_date"`
+	Description  sql.NullString     `json:"description"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
 }
 

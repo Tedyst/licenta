@@ -98,9 +98,9 @@ func (scanner *GitScan) inspectFilePatch(ctx context.Context, commit *object.Com
 
 	foundResults.Add(ctx, int64(len(results)))
 	err = scanner.options.callbackResult(ctx, scanner, &GitResult{
-		CommitHash: commit.Hash.String(),
-		FileName:   to.Path(),
-		Results:    results,
+		Commit:   commit,
+		FileName: to.Path(),
+		Results:  results,
 	})
 	if err != nil {
 		return fmt.Errorf("inspectFilePatch: cannot callback result: %w", err)
@@ -131,9 +131,9 @@ func (scanner *GitScan) inspectCommit(ctx context.Context, commit *object.Commit
 	waitChannel := make(chan struct{})
 
 	err = scanner.options.callbackResult(ctx, scanner, &GitResult{
-		CommitHash: commit.Hash.String(),
-		FileName:   "",
-		Results:    []file.ExtractResult{},
+		Commit:   commit,
+		FileName: "",
+		Results:  []file.ExtractResult{},
 	})
 	if err != nil {
 		return fmt.Errorf("inspectFilePatch: cannot create commit: %w", err)

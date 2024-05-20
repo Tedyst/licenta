@@ -26,8 +26,8 @@ WHERE project_id = $1
     AND git_repository = $2;
 
 -- name: CreateGitCommitForProject :one
-INSERT INTO git_commits(repository_id, commit_hash)
-    VALUES ($1, $2)
+INSERT INTO git_commits(repository_id, commit_hash, author, author_email, description, commit_date)
+    VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING
     *;
 
