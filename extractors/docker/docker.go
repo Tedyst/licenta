@@ -235,7 +235,6 @@ func (scanner *DockerScan) ProcessLayers(ctx context.Context, layers []v1.Layer)
 	wg := sync.WaitGroup{}
 	wg.Add(len(layers))
 	for _, layer := range layers {
-		layer := layer
 		go func() {
 			defer wg.Done()
 			err := scanner.processLayer(ctx, layer)

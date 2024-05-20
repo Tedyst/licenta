@@ -20,6 +20,7 @@ linters:
     - goconst
     - gofumpt
     - scopelint
+    - mnd
   fast: true
 
 issues:

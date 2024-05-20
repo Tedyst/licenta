@@ -140,7 +140,6 @@ func (scanner *GitScan) inspectCommit(ctx context.Context, commit *object.Commit
 	}
 
 	for _, filePatch := range patch.FilePatches() {
-		filePatch := filePatch
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -252,7 +251,6 @@ func (scanner *GitScan) Scan(ctx context.Context) error {
 		return err
 	}
 	for _, obj := range batch {
-		obj := obj
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
