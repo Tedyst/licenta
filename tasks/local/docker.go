@@ -24,7 +24,7 @@ type DockerRunner struct {
 }
 
 type DockerQuerier interface {
-	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
+	GetDockerScannedLayersForImage(ctx context.Context, imageID int64) ([]string, error)
 	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.DockerLayer, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, params []queries.CreateDockerLayerResultsForProjectParams) (int64, error)
 }
@@ -44,6 +44,7 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 
 	scannnedMap := map[string]bool{}
 	mutex := sync.Mutex{}
+	alreadyCreated := map[string]*queries.DockerLayer{}
 
 	resultCallback := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
 		mutex.Lock()
@@ -51,12 +52,19 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		if err != nil {
 			return fmt.Errorf("ScanDockerRepository: cannot update layer scan: %w", err)
 		}
-		scannedLayer, err := r.queries.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
-			LayerHash: result.Layer,
-			ImageID:   image.ID,
-		})
-		if err != nil {
-			return fmt.Errorf("ScanDockerRepository: cannot create scanned layer: %w", err)
+
+		var scannedLayer *queries.DockerLayer
+		if layer, ok := alreadyCreated[result.Layer]; ok {
+			scannedLayer = layer
+		} else {
+			scannedLayer, err = r.queries.CreateDockerScannedLayerForProject(ctx, queries.CreateDockerScannedLayerForProjectParams{
+				LayerHash: result.Layer,
+				ImageID:   image.ID,
+			})
+			if err != nil {
+				return fmt.Errorf("ScanDockerRepository: cannot create scanned layer: %w", err)
+			}
+			alreadyCreated[result.Layer] = scannedLayer
 		}
 
 		layerResults := []queries.CreateDockerLayerResultsForProjectParams{}
@@ -74,6 +82,10 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 				Filename:      fileResult.FileName,
 				PreviousLines: fileResult.PreviousLines,
 			})
+		}
+
+		if len(layerResults) == 0 {
+			return nil
 		}
 
 		count, err := r.queries.CreateDockerLayerResultsForProject(ctx, layerResults)
@@ -120,7 +132,7 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		return fmt.Errorf("ScanDockerRepository: cannot create file scanner: %w", err)
 	}
 
-	scannedLayers, err := r.queries.GetDockerScannedLayersForProject(ctx, image.ProjectID)
+	scannedLayers, err := r.queries.GetDockerScannedLayersForImage(ctx, image.ID)
 	if err != nil {
 		return err
 	}

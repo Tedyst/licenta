@@ -15,7 +15,7 @@
 			</p>
 		</div>
 		<BaseListItem
-			databaseUrl={`git://${data.gitRepo?.username}@****:${data.gitRepo?.git_repository}`}
+			databaseUrl={`${data.gitRepo?.git_repository}`}
 			databaseIcon={GitIcon}
 			databaseType="Git"
 		/>

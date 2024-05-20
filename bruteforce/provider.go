@@ -2,6 +2,7 @@ package bruteforce
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tedyst/licenta/scanner"
 )
@@ -29,7 +30,7 @@ func NewDatabaseBruteforceProvider(queries DatabasePasswordProviderInterface) *d
 func (d *databaseBruteforceProvider) NewBruteforcer(ctx context.Context, sc scanner.Scanner, statusFunc StatusFunc, projectID int64) (Bruteforcer, error) {
 	passProvider, err := NewDatabasePasswordProvider(ctx, d.queries, projectID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create password provider: %w", err)
 	}
 	defer passProvider.Close()
 

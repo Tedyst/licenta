@@ -320,18 +320,17 @@ func (q *Queries) GetDockerLayersAndResultsForImage(ctx context.Context, imageID
 	return items, nil
 }
 
-const getDockerScannedLayersForProject = `-- name: GetDockerScannedLayersForProject :many
+const getDockerScannedLayersForImage = `-- name: GetDockerScannedLayersForImage :many
 SELECT
     layer_hash
 FROM
     docker_layers
-    INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
 WHERE
-    project_id = $1
+    image_id = $1
 `
 
-func (q *Queries) GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error) {
-	rows, err := q.db.Query(ctx, getDockerScannedLayersForProject, projectID)
+func (q *Queries) GetDockerScannedLayersForImage(ctx context.Context, imageID int64) ([]string, error) {
+	rows, err := q.db.Query(ctx, getDockerScannedLayersForImage, imageID)
 	if err != nil {
 		return nil, err
 	}

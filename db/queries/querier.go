@@ -69,7 +69,7 @@ type Querier interface {
 	GetDockerImage(ctx context.Context, id int64) (*DockerImage, error)
 	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*DockerImage, error)
 	GetDockerLayersAndResultsForImage(ctx context.Context, imageID int64) ([]*GetDockerLayersAndResultsForImageRow, error)
-	GetDockerScannedLayersForProject(ctx context.Context, projectID int64) ([]string, error)
+	GetDockerScannedLayersForImage(ctx context.Context, imageID int64) ([]string, error)
 	GetGitCommitsWithResults(ctx context.Context, repositoryID int64) ([]*GetGitCommitsWithResultsRow, error)
 	GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*GitRepository, error)
 	GetGitRepository(ctx context.Context, id int64) (*GitRepository, error)

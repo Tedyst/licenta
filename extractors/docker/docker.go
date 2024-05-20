@@ -157,7 +157,26 @@ func (scanner *DockerScan) processLayer(ctx context.Context, layer v1.Layer) (er
 	}()
 
 	tarReader := tar.NewReader(reader)
-	return scanner.scanTarArchive(ctx, *tarReader, layer)
+	err = scanner.scanTarArchive(ctx, *tarReader, layer)
+	if err != nil {
+		return fmt.Errorf("processLayer: cannot scan tar archive: %w", err)
+	}
+
+	digest, err := layer.Digest()
+	if err != nil {
+		return fmt.Errorf("processLayer: cannot get digest for layer: %w", err)
+	}
+
+	err = scanner.options.callbackResult(scanner, &LayerResult{
+		Layer:    digest.String(),
+		FileName: "",
+		Results:  []file.ExtractResult{},
+	})
+	if err != nil {
+		return fmt.Errorf("processLayer: cannot callback result: %w", err)
+	}
+
+	return nil
 }
 
 func NewScanner(ctx context.Context, fileScanner FileScanner, imageName string, opts ...Option) (*DockerScan, error) {

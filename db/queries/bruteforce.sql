@@ -46,15 +46,19 @@ FROM (
         COUNT(*)
     FROM
         docker_results
+        INNER JOIN docker_layers ON docker_results.layer_id = docker_layers.id
+        INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
     WHERE
-        docker_results.project_id = $1
+        docker_images.project_id = $1
     UNION ALL
     SELECT
         COUNT(*)
     FROM
         git_results
+        INNER JOIN git_commits ON git_results.commit = git_commits.id
+        INNER JOIN git_repositories ON git_commits.repository_id = git_repositories.id
     WHERE
-        git_results.project_id = $1) AS count;
+        git_repositories.project_id = $1) AS count;
 
 -- name: GetBruteforcePasswordsSpecificForProject :many
 SELECT

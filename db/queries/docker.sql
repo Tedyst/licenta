@@ -1,11 +1,10 @@
--- name: GetDockerScannedLayersForProject :many
+-- name: GetDockerScannedLayersForImage :many
 SELECT
     layer_hash
 FROM
     docker_layers
-    INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
 WHERE
-    project_id = $1;
+    image_id = $1;
 
 -- name: CreateDockerScannedLayerForProject :one
 INSERT INTO docker_layers(layer_hash, image_id)

@@ -3,6 +3,7 @@ package bruteforce
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/db/queries"
@@ -176,7 +177,7 @@ func (d *databasePasswordProvider) GetPasswordByHash(username, hash string) (str
 func NewDatabasePasswordProvider(ctx context.Context, database DatabasePasswordProviderInterface, projectID int64) (*databasePasswordProvider, error) {
 	count, err := database.GetBruteforcePasswordsForProjectCount(ctx, projectID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not get count of passwords: %w", err)
 	}
 
 	return &databasePasswordProvider{
