@@ -21,6 +21,7 @@ linters:
     - gofumpt
     - scopelint
     - mnd
+    - intrange
   fast: true
 
 issues:
@@ -29,5 +30,8 @@ issues:
       linters:
         - dupl
     - path: 'worker/(.+)\.go'
+      linters:
+        - dupl
+    - path: 'tasks/nats/(.+)\.go'
       linters:
         - dupl
