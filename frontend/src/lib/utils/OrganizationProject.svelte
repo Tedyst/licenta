@@ -16,10 +16,10 @@
 			<div class="mr-0 inline-grid grid-cols-2 grid-rows-1 grow-0 gap-2">
 				<div class="inline-grid w-max gap-4">
 					<div class="stat-title text-sm">Scans</div>
-					<div class="stat-value text-success text-base">0</div>
+					<div class="stat-value text-success text-base">{project.scans}</div>
 				</div>
 			</div>
-			<div class="divider divider-horizontal" />
+			<div class="divider divider-horizontal ml-0" />
 			<a
 				href="/dashboard/{organization.name}/{project.name}/delete"
 				type="button"

@@ -56,7 +56,7 @@ type Querier interface {
 	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error
 	GetAllOrganizationMembersForOrganizationsThatContainUser(ctx context.Context, userID int64) ([]*GetAllOrganizationMembersForOrganizationsThatContainUserRow, error)
-	GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*Project, error)
+	GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*GetAllOrganizationProjectsForUserRow, error)
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
 	GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBruteforcePasswordsPaginatedParams) ([]*DefaultBruteforcePassword, error)
 	GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error)

@@ -1786,10 +1786,10 @@ func (c *MockTransactionQuerierGetAllOrganizationMembersForOrganizationsThatCont
 }
 
 // GetAllOrganizationProjectsForUser mocks base method.
-func (m *MockTransactionQuerier) GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*queries.Project, error) {
+func (m *MockTransactionQuerier) GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*queries.GetAllOrganizationProjectsForUserRow, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllOrganizationProjectsForUser", ctx, userID)
-	ret0, _ := ret[0].([]*queries.Project)
+	ret0, _ := ret[0].([]*queries.GetAllOrganizationProjectsForUserRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -1807,19 +1807,19 @@ type MockTransactionQuerierGetAllOrganizationProjectsForUserCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetAllOrganizationProjectsForUserCall) Return(arg0 []*queries.Project, arg1 error) *MockTransactionQuerierGetAllOrganizationProjectsForUserCall {
+func (c *MockTransactionQuerierGetAllOrganizationProjectsForUserCall) Return(arg0 []*queries.GetAllOrganizationProjectsForUserRow, arg1 error) *MockTransactionQuerierGetAllOrganizationProjectsForUserCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetAllOrganizationProjectsForUserCall) Do(f func(context.Context, int64) ([]*queries.Project, error)) *MockTransactionQuerierGetAllOrganizationProjectsForUserCall {
+func (c *MockTransactionQuerierGetAllOrganizationProjectsForUserCall) Do(f func(context.Context, int64) ([]*queries.GetAllOrganizationProjectsForUserRow, error)) *MockTransactionQuerierGetAllOrganizationProjectsForUserCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetAllOrganizationProjectsForUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Project, error)) *MockTransactionQuerierGetAllOrganizationProjectsForUserCall {
+func (c *MockTransactionQuerierGetAllOrganizationProjectsForUserCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GetAllOrganizationProjectsForUserRow, error)) *MockTransactionQuerierGetAllOrganizationProjectsForUserCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

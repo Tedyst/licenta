@@ -37,14 +37,7 @@
 					>
 				</label>
 			</div>
-			<div class="flex-none block grow">
-				<ul class="menu menu-horizontal hidden md:inline-block">
-					<li><a href="/organizations">Organizations</a></li>
-				</ul>
-				<ul class="menu menu-horizontal hidden md:inline-block">
-					<li><a href="/projects">Projects</a></li>
-				</ul>
-			</div>
+			<div class="flex-none block grow"></div>
 
 			<label class="swap swap-rotate mr-5">
 				<input

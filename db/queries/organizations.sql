@@ -38,7 +38,15 @@ WHERE
 
 -- name: GetAllOrganizationProjectsForUser :many
 SELECT
-    *
+    *,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+        WHERE
+            scan_groups.project_id = projects.id) AS scans
 FROM
     projects
 WHERE

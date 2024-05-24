@@ -139,7 +139,9 @@ FROM
     scan_groups
     INNER JOIN scans ON scan_groups.id = scans.scan_group_id
 WHERE
-    project_id = $1;
+    project_id = $1
+ORDER BY
+    scans.id DESC;
 
 -- name: GetScansForScanGroup :many
 SELECT

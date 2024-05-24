@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { clientFromFetch } from '$lib/client';
 
-export const load: PageServerLoad = async ({ parent, url }) => {
+export const load: PageServerLoad = async ({ parent, url, depends }) => {
 	const parentData = await parent();
 	const client = clientFromFetch(fetch, url.origin);
 
@@ -22,6 +22,8 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 			}
 			return null;
 		});
+
+	depends('app:currentScan');
 
 	if (!currentScan) {
 		redirect(302, '/dashboard/' + parentData.organization?.name + '/' + parentData.project?.name);

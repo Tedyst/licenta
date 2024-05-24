@@ -123,7 +123,15 @@ func (q *Queries) GetAllOrganizationMembersForOrganizationsThatContainUser(ctx c
 
 const getAllOrganizationProjectsForUser = `-- name: GetAllOrganizationProjectsForUser :many
 SELECT
-    id, name, organization_id, remote, created_at
+    id, name, organization_id, remote, created_at,
+(
+        SELECT
+            COUNT(*)
+        FROM
+            scans
+            INNER JOIN scan_groups ON scans.scan_group_id = scan_groups.id
+        WHERE
+            scan_groups.project_id = projects.id) AS scans
 FROM
     projects
 WHERE
@@ -142,21 +150,31 @@ WHERE
                     user_id = $1))
 `
 
-func (q *Queries) GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*Project, error) {
+type GetAllOrganizationProjectsForUserRow struct {
+	ID             int64              `json:"id"`
+	Name           string             `json:"name"`
+	OrganizationID int64              `json:"organization_id"`
+	Remote         bool               `json:"remote"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	Scans          int64              `json:"scans"`
+}
+
+func (q *Queries) GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*GetAllOrganizationProjectsForUserRow, error) {
 	rows, err := q.db.Query(ctx, getAllOrganizationProjectsForUser, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*Project
+	var items []*GetAllOrganizationProjectsForUserRow
 	for rows.Next() {
-		var i Project
+		var i GetAllOrganizationProjectsForUserRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.OrganizationID,
 			&i.Remote,
 			&i.CreatedAt,
+			&i.Scans,
 		); err != nil {
 			return nil, err
 		}

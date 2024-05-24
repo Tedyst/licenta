@@ -46,6 +46,7 @@ func (server *serverHandler) GetOrganizations(ctx context.Context, request gener
 			Name:           project.Name,
 			OrganizationId: int64(project.OrganizationID),
 			Remote:         project.Remote,
+			Scans:          int(project.Scans),
 		})
 	}
 
