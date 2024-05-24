@@ -13,8 +13,40 @@
 	import ScanItem from '$lib/dashboard/ScanItem.svelte';
 </script>
 
-project
+<div class="hero bg-base-200">
+	<div class="hero-content text-center">
+		<div class="max-w-md">
+			<h1 class="text-5xl font-bold">Projects</h1>
+			<p class="py-6">
+				Projects are the main way to organize your scans. You can add scanned databases and secret
+				sources to a project, and then run scans on them. Scans are grouped by the type of source
+				they were run on. You can view the results of each scan by clicking on the scan.
+			</p>
+		</div>
+	</div>
+</div>
 
+<div class="divider">Project Actions</div>
+<div class="flex flex-col gap-2 lg:justify-center lg:flex-row justify-stretch">
+	<a
+		href="/dashboard/{data.organization?.name}/{data.project?.name}/add-scanner"
+		class="btn btn-primary">Add a Scanned Database to the project</a
+	>
+
+	<a
+		href="/dashboard/{data.organization?.name}/{data.project?.name}/add-source"
+		class="btn btn-primary">Add a Secret Source to the project</a
+	>
+
+	<form method="POST" use:enhance action="?/run" class="grow flex lg:grow-0">
+		<input type="hidden" name="projectId" value={data.project?.id} />
+		<button type="submit" class="btn btn-primary grow lg:grow-0"
+			>Run all sources and scanners</button
+		>
+	</form>
+</div>
+
+<div class="divider">Scanned Databases</div>
 {#each data?.mysqlDatabases || [] as mysqlDatabase}
 	<BaseListItem
 		databaseUrl={`mysql://${mysqlDatabase.username}@****:${mysqlDatabase.host}:${mysqlDatabase.port}/${mysqlDatabase.database_name}`}
@@ -35,13 +67,14 @@ project
 	/>
 {/each}
 
+<div class="divider">Secret Sources</div>
 {#each data?.gitRepositories || [] as gitRepository}
 	<BaseListItem
 		databaseUrl={`${gitRepository.git_repository}`}
 		databaseIcon={GitIcon}
 		databaseType="Git"
-		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/postgresql/?id=${gitRepository.id}`}
-		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/postgresql/?id=${gitRepository.id}`}
+		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-source/git/?id=${gitRepository.id}`}
+		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-source/git/?id=${gitRepository.id}`}
 		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-source/git/?id=${gitRepository.id}`}
 	/>
 {/each}
@@ -51,12 +84,13 @@ project
 		databaseUrl={dockerImage.docker_image}
 		databaseIcon={DockerIcon}
 		databaseType="Docker"
-		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/postgresql/?id=${dockerImage.id}`}
-		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/postgresql/?id=${dockerImage.id}`}
+		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-source/docker/?id=${dockerImage.id}`}
+		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-source/docker/?id=${dockerImage.id}`}
 		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-source/docker/?id=${dockerImage.id}`}
 	/>
 {/each}
 
+<div class="divider">Scans</div>
 {#each data?.scanGroups || [] as scanGroup}
 	<ScanGroupItem {scanGroup}>
 		{#each scanGroup?.scans as scan}
@@ -92,18 +126,3 @@ project
 		{/each}
 	</ScanGroupItem>
 {/each}
-
-<a
-	href="/dashboard/{data.organization?.name}/{data.project?.name}/add-scanner"
-	class="btn btn-primary">Add a scanner to the project</a
->
-
-<a
-	href="/dashboard/{data.organization?.name}/{data.project?.name}/add-source"
-	class="btn btn-primary">Add a source to the project</a
->
-
-<form method="POST" use:enhance action="?/run">
-	<input type="hidden" name="projectId" value={data.project?.id} />
-	<button type="submit" class="btn btn-primary">Run all sources and scanners</button>
-</form>
