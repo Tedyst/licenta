@@ -128,6 +128,15 @@ func (runner *baseSaver) Scan(ctx context.Context) error {
 		return fmt.Errorf("could not update scan status: %w", err)
 	}
 
+	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+		ScanID:     runner.scan.ID,
+		Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+		Message:    "Started scanning",
+		ScanSource: int32(runner.scanner.GetScannerID()),
+	}); err != nil {
+		return fmt.Errorf("could not insert scan result: %w", err)
+	}
+
 	if err := runner.runScanner(ctx); err != nil {
 		return runner.failScan(ctx, err)
 	}
@@ -150,6 +159,15 @@ func (runner *baseSaver) Scan(ctx context.Context) error {
 	}
 
 	runner.logger.DebugContext(ctx, "Finished scan")
+
+	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+		ScanID:     runner.scan.ID,
+		Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+		Message:    "Finished the scan",
+		ScanSource: int32(runner.scanner.GetScannerID()),
+	}); err != nil {
+		return fmt.Errorf("could not insert scan result: %w", err)
+	}
 
 	return nil
 }
@@ -251,6 +269,15 @@ func (runner *baseSaver) ScanForPublicAccessOnly(ctx context.Context) error {
 		return nil
 	}
 
+	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+		ScanID:     runner.scan.ID,
+		Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+		Message:    "Started checking for public access",
+		ScanSource: int32(runner.scanner.GetScannerID()),
+	}); err != nil {
+		return fmt.Errorf("could not insert scan result: %w", err)
+	}
+
 	if err := runner.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
 		ID:     runner.scan.ID,
 		Status: models.SCAN_CHECKING_PUBLIC_ACCESS,
@@ -268,6 +295,15 @@ func (runner *baseSaver) ScanForPublicAccessOnly(ctx context.Context) error {
 		ScanID:     runner.scan.ID,
 		Severity:   int32(scanner.SEVERITY_HIGH),
 		Message:    "Database is accessible from public internet",
+		ScanSource: int32(runner.scanner.GetScannerID()),
+	}); err != nil {
+		return fmt.Errorf("could not insert scan result: %w", err)
+	}
+
+	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+		ScanID:     runner.scan.ID,
+		Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+		Message:    "Finished checking for public access. Proceeding with queuing to a project specific worker",
 		ScanSource: int32(runner.scanner.GetScannerID()),
 	}); err != nil {
 		return fmt.Errorf("could not insert scan result: %w", err)

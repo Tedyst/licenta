@@ -14,6 +14,8 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/docker"
 	"github.com/tedyst/licenta/extractors/file"
+	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/scanner"
 )
 
 type DockerRunner struct {
@@ -27,6 +29,7 @@ type DockerQuerier interface {
 	GetDockerScannedLayersForImage(ctx context.Context, imageID int64) ([]string, error)
 	CreateDockerScannedLayerForProject(ctx context.Context, params queries.CreateDockerScannedLayerForProjectParams) (*queries.DockerLayer, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, params []queries.CreateDockerLayerResultsForProjectParams) (int64, error)
+	CreateScanResult(ctx context.Context, params queries.CreateScanResultParams) (*queries.ScanResult, error)
 }
 
 func NewDockerRunner(queries DockerQuerier) *DockerRunner {
@@ -37,7 +40,7 @@ func NewDockerRunner(queries DockerQuerier) *DockerRunner {
 	}
 }
 
-func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage) (err error) {
+func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage, scan *queries.Scan) (err error) {
 	if image == nil {
 		return errors.New("image is nil")
 	}
@@ -141,12 +144,12 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		scannnedMap[layer] = true
 	}
 
-	scanner, err := r.DockerScannerProvider(ctx, fs, image.DockerImage, options...)
+	scc, err := r.DockerScannerProvider(ctx, fs, image.DockerImage, options...)
 	if err != nil {
 		return err
 	}
 
-	layers, err := scanner.FindLayers(ctx)
+	layers, err := scc.FindLayers(ctx)
 	if err != nil {
 		return err
 	}
@@ -162,7 +165,24 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		}
 	}
 
-	err = scanner.ProcessLayers(ctx, scanLayers)
+	for _, layer := range scanLayers {
+		digest, err := layer.Digest()
+		if err != nil {
+			return err
+		}
+
+		_, err = r.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+			ScanID:     scan.ID,
+			Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+			Message:    "Started scanning the layer " + digest.String(),
+			ScanSource: models.SCAN_DOCKER,
+		})
+		if err != nil {
+			return fmt.Errorf("ScanDockerRepository: cannot create scan result: %w", err)
+		}
+	}
+
+	err = scc.ProcessLayers(ctx, scanLayers)
 	if err != nil {
 		return err
 	}

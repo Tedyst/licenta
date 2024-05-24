@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/scanner"
 
@@ -74,11 +75,11 @@ func (sc *postgresScanner) ShouldNotBePublic() bool {
 }
 
 func (*postgresScanner) GetScannerID() int32 {
-	return 0
+	return models.SCAN_POSTGRES
 }
 
 func GetScannerID() int32 {
-	return 0
+	return models.SCAN_POSTGRES
 }
 
 func (*postgresScanner) GetScannerName() string {

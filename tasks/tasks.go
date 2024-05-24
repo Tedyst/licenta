@@ -22,11 +22,11 @@ type EmailTasksRunner interface {
 }
 
 type DockerTasksRunner interface {
-	ScanDockerRepository(ctx context.Context, image *queries.DockerImage) error
+	ScanDockerRepository(ctx context.Context, image *queries.DockerImage, scan *queries.Scan) error
 }
 
 type GitTasksRunner interface {
-	ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error
+	ScanGitRepository(ctx context.Context, repo *queries.GitRepository, scan *queries.Scan) error
 }
 
 type VulnerabilityTasksRunner interface {

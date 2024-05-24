@@ -4,13 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/email"
 	"github.com/tedyst/licenta/messages"
+	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/scanner"
 	"github.com/tedyst/licenta/tasks"
 )
 
@@ -75,10 +79,51 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 		}
 
 		for _, repo := range repos {
+			scan, err := source.queries.GetGitScanByScanAndRepo(ctx, queries.GetGitScanByScanAndRepoParams{
+				ScanGroupID:  scanGroup.ID,
+				RepositoryID: repo.ID,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to get git scan by scan and repo: %w", err)
+			}
+
+			_, err = source.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.Scan.ID,
+				Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+				Message:    "Started scanning the repository",
+				ScanSource: models.SCAN_GIT,
+			})
+			if err != nil || scan == nil {
+				return fmt.Errorf("failed to create scan result: %w", err)
+			}
+
 			slog.DebugContext(ctx, "Scheduling git scan", "repo", repo.ID, "url", repo.GitRepository)
-			if err := source.ScanGitRepository(ctx, repo); err != nil {
+			if err := source.ScanGitRepository(ctx, repo, &scan.Scan); err != nil {
 				return fmt.Errorf("failed to scan git repository: %w", err)
 			}
+
+			_, err = source.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.Scan.ID,
+				Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+				Message:    "Finished scanning the repository",
+				ScanSource: models.SCAN_GIT,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create scan result: %w", err)
+			}
+
+			err = source.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
+				ID:     int64(scan.Scan.ID),
+				Status: int32(models.SCAN_FINISHED),
+				EndedAt: pgtype.Timestamptz{
+					Time:  time.Now(),
+					Valid: true,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to update scan status: %w", err)
+			}
+
 			slog.DebugContext(ctx, "Finished scanning git repo", "repo", repo.ID, "url", repo.GitRepository)
 		}
 
@@ -93,9 +138,49 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 		}
 
 		for _, image := range images {
+			scan, err := source.queries.GetDockerScanByScanAndRepo(ctx, queries.GetDockerScanByScanAndRepoParams{
+				ScanGroupID: scanGroup.ID,
+				ImageID:     image.ID,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to get git scan by scan and repo: %w", err)
+			}
+
+			_, err = source.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.Scan.ID,
+				Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+				Message:    "Started scanning the image",
+				ScanSource: models.SCAN_DOCKER,
+			})
+			if err != nil || scan == nil {
+				return fmt.Errorf("failed to create scan result: %w", err)
+			}
+
 			slog.DebugContext(ctx, "Scheduling docker scan", "image", image.ID, "name", image.DockerImage)
-			if err := source.ScanDockerRepository(ctx, image); err != nil {
+			if err := source.ScanDockerRepository(ctx, image, &scan.Scan); err != nil {
 				return fmt.Errorf("failed to scan docker repository: %w", err)
+			}
+
+			_, err = source.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.Scan.ID,
+				Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+				Message:    "Finished scanning the image",
+				ScanSource: models.SCAN_DOCKER,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create scan result: %w", err)
+			}
+
+			err = source.queries.UpdateScanStatus(ctx, queries.UpdateScanStatusParams{
+				ID:     int64(scan.Scan.ID),
+				Status: int32(models.SCAN_FINISHED),
+				EndedAt: pgtype.Timestamptz{
+					Time:  time.Now(),
+					Valid: true,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to update scan status: %w", err)
 			}
 		}
 

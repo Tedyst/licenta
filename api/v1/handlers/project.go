@@ -10,6 +10,7 @@ import (
 	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/saver"
 )
 
@@ -113,6 +114,57 @@ func (server *serverHandler) PostProjectsIdRun(ctx context.Context, request gene
 	scans, err := saver.CreateScans(ctx, server.DatabaseProvider, request.Id, scanGroup.ID, "all")
 	if err != nil {
 		return nil, fmt.Errorf("error creating scans: %w", err)
+	}
+
+	gitRepositories, err := server.DatabaseProvider.GetGitRepositoriesForProject(ctx, request.Id)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, fmt.Errorf("error getting git repositories: %w", err)
+	}
+
+	for _, gitRepository := range gitRepositories {
+		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
+			Status:      models.SCAN_NOT_STARTED,
+			ScanGroupID: scanGroup.ID,
+			ScanType:    models.SCAN_GIT,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating scan: %w", err)
+		}
+
+		_, err = server.DatabaseProvider.CreateGitScan(ctx, queries.CreateGitScanParams{
+			ScanID:       scan.ID,
+			RepositoryID: gitRepository.ID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating git scan: %w", err)
+		}
+
+		scans = append(scans, scan)
+	}
+
+	dockerImages, err := server.DatabaseProvider.GetDockerImagesForProject(ctx, request.Id)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, fmt.Errorf("error getting docker images: %w", err)
+	}
+
+	for _, dockerImage := range dockerImages {
+		scan, err := server.DatabaseProvider.CreateScan(ctx, queries.CreateScanParams{
+			Status:      models.SCAN_NOT_STARTED,
+			ScanGroupID: scanGroup.ID,
+			ScanType:    models.SCAN_DOCKER,
+		})
+
+		if err != nil {
+			return nil, fmt.Errorf("error creating scan: %w", err)
+		}
+
+		_, err = server.DatabaseProvider.CreateDockerScan(ctx, queries.CreateDockerScanParams{
+			ScanID:  scan.ID,
+			ImageID: dockerImage.ID,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("error creating docker scan: %w", err)
+		}
 	}
 
 	resultScans := make([]generated.Scan, len(scans))

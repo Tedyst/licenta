@@ -61,7 +61,7 @@ func (gs *dockerScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) 
 				return nil
 			}
 
-			err = gs.localRunner.ScanDockerRepository(ctx, repo)
+			err = gs.localRunner.ScanDockerRepository(ctx, repo, nil)
 			if err != nil {
 				return nil
 			}

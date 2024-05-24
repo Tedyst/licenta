@@ -121,3 +121,28 @@ INSERT INTO git_repositories(project_id, git_repository, username, PASSWORD, pri
 RETURNING
     *;
 
+-- name: CreateGitScan :one
+INSERT INTO git_scans(repository_id, scan_id)
+    VALUES ($1, $2)
+RETURNING
+    *;
+
+-- name: GetGitScanByScan :many
+SELECT
+    *
+FROM
+    git_scans
+WHERE
+    scan_id = $1;
+
+-- name: GetGitScanByScanAndRepo :one
+SELECT
+    sqlc.embed(git_scans),
+    sqlc.embed(scans)
+FROM
+    git_scans
+    INNER JOIN scans ON scans.id = git_scans.scan_id
+WHERE
+    scans.scan_group_id = $1
+    AND repository_id = $2;
+

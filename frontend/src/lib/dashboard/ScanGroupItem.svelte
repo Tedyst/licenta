@@ -10,7 +10,7 @@
 	<div class="card-body flex-col lg:flex-row">
 		<div class="flex flex-col gap-3 grow">
 			<h2 class="overflow-auto break-all">Scan Group {scanGroup.id}</h2>
-			<div class="flex flex- gap-3">
+			<div class="flex flex-col gap-3">
 				<slot />
 			</div>
 		</div>

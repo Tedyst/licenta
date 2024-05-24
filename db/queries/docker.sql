@@ -105,3 +105,20 @@ INSERT INTO docker_images(project_id, docker_image, username, PASSWORD, min_prob
 RETURNING
     *;
 
+-- name: CreateDockerScan :one
+INSERT INTO docker_scans(image_id, scan_id)
+    VALUES ($1, $2)
+RETURNING
+    *;
+
+-- name: GetDockerScanByScanAndRepo :one
+SELECT
+    sqlc.embed(docker_scans),
+    sqlc.embed(scans)
+FROM
+    docker_scans
+    INNER JOIN scans ON scans.id = docker_scans.scan_id
+WHERE
+    scans.scan_group_id = $1
+    AND image_id = $2;
+

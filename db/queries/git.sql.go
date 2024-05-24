@@ -133,6 +133,25 @@ type CreateGitResultForCommitParams struct {
 	Filename    string         `json:"filename"`
 }
 
+const createGitScan = `-- name: CreateGitScan :one
+INSERT INTO git_scans(repository_id, scan_id)
+    VALUES ($1, $2)
+RETURNING
+    id, scan_id, repository_id
+`
+
+type CreateGitScanParams struct {
+	RepositoryID int64 `json:"repository_id"`
+	ScanID       int64 `json:"scan_id"`
+}
+
+func (q *Queries) CreateGitScan(ctx context.Context, arg CreateGitScanParams) (*GitScan, error) {
+	row := q.db.QueryRow(ctx, createGitScan, arg.RepositoryID, arg.ScanID)
+	var i GitScan
+	err := row.Scan(&i.ID, &i.ScanID, &i.RepositoryID)
+	return &i, err
+}
+
 const deleteGitRepository = `-- name: DeleteGitRepository :exec
 DELETE FROM git_repositories
 WHERE id = $1
@@ -322,6 +341,76 @@ func (q *Queries) GetGitRepository(ctx context.Context, id int64) (*GitRepositor
 		&i.Password,
 		&i.PrivateKey,
 		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getGitScanByScan = `-- name: GetGitScanByScan :many
+SELECT
+    id, scan_id, repository_id
+FROM
+    git_scans
+WHERE
+    scan_id = $1
+`
+
+func (q *Queries) GetGitScanByScan(ctx context.Context, scanID int64) ([]*GitScan, error) {
+	rows, err := q.db.Query(ctx, getGitScanByScan, scanID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*GitScan
+	for rows.Next() {
+		var i GitScan
+		if err := rows.Scan(&i.ID, &i.ScanID, &i.RepositoryID); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGitScanByScanAndRepo = `-- name: GetGitScanByScanAndRepo :one
+SELECT
+    git_scans.id, git_scans.scan_id, git_scans.repository_id,
+    scans.id, scans.scan_group_id, scans.scan_type, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at
+FROM
+    git_scans
+    INNER JOIN scans ON scans.id = git_scans.scan_id
+WHERE
+    scans.scan_group_id = $1
+    AND repository_id = $2
+`
+
+type GetGitScanByScanAndRepoParams struct {
+	ScanGroupID  int64 `json:"scan_group_id"`
+	RepositoryID int64 `json:"repository_id"`
+}
+
+type GetGitScanByScanAndRepoRow struct {
+	GitScan GitScan `json:"git_scan"`
+	Scan    Scan    `json:"scan"`
+}
+
+func (q *Queries) GetGitScanByScanAndRepo(ctx context.Context, arg GetGitScanByScanAndRepoParams) (*GetGitScanByScanAndRepoRow, error) {
+	row := q.db.QueryRow(ctx, getGitScanByScanAndRepo, arg.ScanGroupID, arg.RepositoryID)
+	var i GetGitScanByScanAndRepoRow
+	err := row.Scan(
+		&i.GitScan.ID,
+		&i.GitScan.ScanID,
+		&i.GitScan.RepositoryID,
+		&i.Scan.ID,
+		&i.Scan.ScanGroupID,
+		&i.Scan.ScanType,
+		&i.Scan.Status,
+		&i.Scan.Error,
+		&i.Scan.WorkerID,
+		&i.Scan.CreatedAt,
+		&i.Scan.EndedAt,
 	)
 	return &i, err
 }

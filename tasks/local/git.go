@@ -14,12 +14,15 @@ import (
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/extractors/file"
 	"github.com/tedyst/licenta/extractors/git"
+	"github.com/tedyst/licenta/models"
+	"github.com/tedyst/licenta/scanner"
 )
 
 type GitQuerier interface {
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, params queries.GetGitScannedCommitsForProjectBatchParams) ([]string, error)
 	CreateGitCommitForProject(ctx context.Context, params queries.CreateGitCommitForProjectParams) (*queries.GitCommit, error)
 	CreateGitResultForCommit(ctx context.Context, params []queries.CreateGitResultForCommitParams) (int64, error)
+	CreateScanResult(ctx context.Context, arg queries.CreateScanResultParams) (*queries.ScanResult, error)
 }
 
 type GitRunner struct {
@@ -37,7 +40,7 @@ func NewGitRunner(queries GitQuerier) *GitRunner {
 	}
 }
 
-func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error {
+func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository, scan *queries.Scan) error {
 	if repo == nil {
 		return errors.New("repo is nil")
 	}
@@ -77,6 +80,17 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 		}
 		for _, item := range commitsMap {
 			result = append(result, item)
+		}
+		for _, item := range result {
+			_, err = r.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.ID,
+				Severity:   int32(scanner.SEVERITY_INFORMATIONAL),
+				Message:    "Started scanning commit " + item.Commit.Hash.String(),
+				ScanSource: models.SCAN_GIT,
+			})
+			if err != nil {
+				return nil, err
+			}
 		}
 		return result, nil
 	}))

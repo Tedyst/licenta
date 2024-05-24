@@ -7,3 +7,10 @@ const (
 	SCAN_QUEUED
 	SCAN_CHECKING_PUBLIC_ACCESS
 )
+
+const (
+	SCAN_POSTGRES = 1
+	SCAN_MYSQL    = 2
+	SCAN_GIT      = 3
+	SCAN_DOCKER   = 4
+)

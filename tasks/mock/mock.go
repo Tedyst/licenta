@@ -156,17 +156,17 @@ func (c *MockTaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Cont
 }
 
 // ScanGitRepository mocks base method.
-func (m *MockTaskRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error {
+func (m *MockTaskRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository, scan *queries.Scan) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo)
+	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo, scan)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ScanGitRepository indicates an expected call of ScanGitRepository.
-func (mr *MockTaskRunnerMockRecorder) ScanGitRepository(ctx, repo any) *MockTaskRunnerScanGitRepositoryCall {
+func (mr *MockTaskRunnerMockRecorder) ScanGitRepository(ctx, repo, scan any) *MockTaskRunnerScanGitRepositoryCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanGitRepository), ctx, repo)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanGitRepository), ctx, repo, scan)
 	return &MockTaskRunnerScanGitRepositoryCall{Call: call}
 }
 
@@ -182,13 +182,13 @@ func (c *MockTaskRunnerScanGitRepositoryCall) Return(arg0 error) *MockTaskRunner
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.GitRepository) error) *MockTaskRunnerScanGitRepositoryCall {
+func (c *MockTaskRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.GitRepository, *queries.Scan) error) *MockTaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.GitRepository) error) *MockTaskRunnerScanGitRepositoryCall {
+func (c *MockTaskRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.GitRepository, *queries.Scan) error) *MockTaskRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -529,17 +529,17 @@ func (m *MockGitTasksRunner) EXPECT() *MockGitTasksRunnerMockRecorder {
 }
 
 // ScanGitRepository mocks base method.
-func (m *MockGitTasksRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error {
+func (m *MockGitTasksRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepository, scan *queries.Scan) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo)
+	ret := m.ctrl.Call(m, "ScanGitRepository", ctx, repo, scan)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ScanGitRepository indicates an expected call of ScanGitRepository.
-func (mr *MockGitTasksRunnerMockRecorder) ScanGitRepository(ctx, repo any) *MockGitTasksRunnerScanGitRepositoryCall {
+func (mr *MockGitTasksRunnerMockRecorder) ScanGitRepository(ctx, repo, scan any) *MockGitTasksRunnerScanGitRepositoryCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockGitTasksRunner)(nil).ScanGitRepository), ctx, repo)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanGitRepository", reflect.TypeOf((*MockGitTasksRunner)(nil).ScanGitRepository), ctx, repo, scan)
 	return &MockGitTasksRunnerScanGitRepositoryCall{Call: call}
 }
 
@@ -555,13 +555,13 @@ func (c *MockGitTasksRunnerScanGitRepositoryCall) Return(arg0 error) *MockGitTas
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockGitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.GitRepository) error) *MockGitTasksRunnerScanGitRepositoryCall {
+func (c *MockGitTasksRunnerScanGitRepositoryCall) Do(f func(context.Context, *queries.GitRepository, *queries.Scan) error) *MockGitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockGitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.GitRepository) error) *MockGitTasksRunnerScanGitRepositoryCall {
+func (c *MockGitTasksRunnerScanGitRepositoryCall) DoAndReturn(f func(context.Context, *queries.GitRepository, *queries.Scan) error) *MockGitTasksRunnerScanGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

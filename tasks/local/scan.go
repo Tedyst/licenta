@@ -9,6 +9,7 @@ import (
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/messages"
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/saver"
 )
 
@@ -51,6 +52,10 @@ func (r *SaverRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan,
 }
 
 func (r *SaverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, scanType string) error {
+	if scan.ScanType == models.SCAN_DOCKER || scan.ScanType == models.SCAN_GIT {
+		return nil
+	}
+
 	scanGroup, err := r.queries.GetScanGroup(ctx, scan.ScanGroupID)
 	if err != nil {
 		return err

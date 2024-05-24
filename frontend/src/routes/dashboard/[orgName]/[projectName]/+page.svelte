@@ -94,28 +94,28 @@
 {#each data?.scanGroups || [] as scanGroup}
 	<ScanGroupItem {scanGroup}>
 		{#each scanGroup?.scans as scan}
-			{#if scan.scan_type === 0}
+			{#if scan.scan_type === 1}
 				<ScanItem
 					{scan}
 					scanIcon={PostgresIcon}
 					scanName="Postgres"
 					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
 				/>
-			{:else if scan.scan_type === 1}
+			{:else if scan.scan_type === 2}
 				<ScanItem
 					{scan}
 					scanIcon={MysqlIcon}
 					scanName="MySQL"
 					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
 				/>
-			{:else if scan.scan_type === 2}
+			{:else if scan.scan_type === 3}
 				<ScanItem
 					{scan}
 					scanIcon={GitIcon}
 					scanName="Git"
 					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
 				/>
-			{:else if scan.scan_type === 3}
+			{:else if scan.scan_type === 4}
 				<ScanItem
 					{scan}
 					scanIcon={DockerIcon}

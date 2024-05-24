@@ -112,6 +112,25 @@ type CreateDockerLayerResultsForProjectParams struct {
 	PreviousLines string         `json:"previous_lines"`
 }
 
+const createDockerScan = `-- name: CreateDockerScan :one
+INSERT INTO docker_scans(image_id, scan_id)
+    VALUES ($1, $2)
+RETURNING
+    id, scan_id, image_id
+`
+
+type CreateDockerScanParams struct {
+	ImageID int64 `json:"image_id"`
+	ScanID  int64 `json:"scan_id"`
+}
+
+func (q *Queries) CreateDockerScan(ctx context.Context, arg CreateDockerScanParams) (*DockerScan, error) {
+	row := q.db.QueryRow(ctx, createDockerScan, arg.ImageID, arg.ScanID)
+	var i DockerScan
+	err := row.Scan(&i.ID, &i.ScanID, &i.ImageID)
+	return &i, err
+}
+
 const createDockerScannedLayerForProject = `-- name: CreateDockerScannedLayerForProject :one
 INSERT INTO docker_layers(layer_hash, image_id)
     VALUES ($1, $2)
@@ -323,6 +342,47 @@ func (q *Queries) GetDockerLayersAndResultsForImage(ctx context.Context, imageID
 		return nil, err
 	}
 	return items, nil
+}
+
+const getDockerScanByScanAndRepo = `-- name: GetDockerScanByScanAndRepo :one
+SELECT
+    docker_scans.id, docker_scans.scan_id, docker_scans.image_id,
+    scans.id, scans.scan_group_id, scans.scan_type, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at
+FROM
+    docker_scans
+    INNER JOIN scans ON scans.id = docker_scans.scan_id
+WHERE
+    scans.scan_group_id = $1
+    AND image_id = $2
+`
+
+type GetDockerScanByScanAndRepoParams struct {
+	ScanGroupID int64 `json:"scan_group_id"`
+	ImageID     int64 `json:"image_id"`
+}
+
+type GetDockerScanByScanAndRepoRow struct {
+	DockerScan DockerScan `json:"docker_scan"`
+	Scan       Scan       `json:"scan"`
+}
+
+func (q *Queries) GetDockerScanByScanAndRepo(ctx context.Context, arg GetDockerScanByScanAndRepoParams) (*GetDockerScanByScanAndRepoRow, error) {
+	row := q.db.QueryRow(ctx, getDockerScanByScanAndRepo, arg.ScanGroupID, arg.ImageID)
+	var i GetDockerScanByScanAndRepoRow
+	err := row.Scan(
+		&i.DockerScan.ID,
+		&i.DockerScan.ScanID,
+		&i.DockerScan.ImageID,
+		&i.Scan.ID,
+		&i.Scan.ScanGroupID,
+		&i.Scan.ScanType,
+		&i.Scan.Status,
+		&i.Scan.Error,
+		&i.Scan.WorkerID,
+		&i.Scan.CreatedAt,
+		&i.Scan.EndedAt,
+	)
+	return &i, err
 }
 
 const getDockerScannedLayersForImage = `-- name: GetDockerScannedLayersForImage :many

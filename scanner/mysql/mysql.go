@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/nvd"
 	"github.com/tedyst/licenta/scanner"
 )
@@ -31,10 +32,10 @@ func (sc *mysqlScanner) GetScannerName() string {
 	return "MySQL"
 }
 func (sc *mysqlScanner) GetScannerID() int32 {
-	return 1
+	return models.SCAN_MYSQL
 }
 func GetScannerID() int32 {
-	return 1
+	return models.SCAN_MYSQL
 }
 func (sc *mysqlScanner) GetNvdProductType() nvd.Product {
 	return nvd.MYSQL

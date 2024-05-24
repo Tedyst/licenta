@@ -61,7 +61,7 @@ func (gs *gitScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) err
 				return nil
 			}
 
-			err = gs.localRunner.ScanGitRepository(ctx, repo)
+			err = gs.localRunner.ScanGitRepository(ctx, repo, nil)
 			if err != nil {
 				return nil
 			}
