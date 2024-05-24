@@ -49,7 +49,7 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 	mutex := sync.Mutex{}
 	alreadyCreated := map[string]*queries.DockerLayer{}
 
-	resultCallback := func(scanner *docker.DockerScan, result *docker.LayerResult) error {
+	resultCallback := func(scc *docker.DockerScan, result *docker.LayerResult) error {
 		mutex.Lock()
 		defer mutex.Unlock()
 		if err != nil {
@@ -85,6 +85,16 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 				Filename:      fileResult.FileName,
 				PreviousLines: fileResult.PreviousLines,
 			})
+
+			_, err = r.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.ID,
+				Severity:   int32(scanner.SEVERITY_MEDIUM),
+				Message:    "Found " + fileResult.Match + " in " + fileResult.Line,
+				ScanSource: models.SCAN_DOCKER,
+			})
+			if err != nil {
+				return fmt.Errorf("ScanDockerRepository: cannot create scan result: %w", err)
+			}
 		}
 
 		if len(layerResults) == 0 {

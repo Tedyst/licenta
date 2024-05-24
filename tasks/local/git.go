@@ -97,7 +97,7 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 
 	commitCache := sync.Map{}
 
-	options = append(options, git.WithCallbackResult(func(ctx context.Context, scanner *git.GitScan, result *git.GitResult) error {
+	options = append(options, git.WithCallbackResult(func(ctx context.Context, scc *git.GitScan, result *git.GitResult) error {
 		var commit *queries.GitCommit
 		if c, ok := commitCache.Load(result.Commit.Hash); ok {
 			tc, ok := c.(*queries.GitCommit)
@@ -139,6 +139,18 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 		_, err := r.queries.CreateGitResultForCommit(ctx, results)
 		if err != nil {
 			return fmt.Errorf("error creating result: %w", err)
+		}
+
+		for _, result := range result.Results {
+			_, err = r.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
+				ScanID:     scan.ID,
+				Severity:   int32(scanner.SEVERITY_MEDIUM),
+				Message:    "Found " + result.Match + " in " + result.Line,
+				ScanSource: models.SCAN_GIT,
+			})
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}))
