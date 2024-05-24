@@ -31,14 +31,18 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 	const dockerImages = client.GET('/docker', {
 		params: { query: { project: currentProject.id } }
 	});
+	const scanGroups = client.GET('/scan-groups', {
+		params: { query: { project: currentProject.id } }
+	});
 
-	depends('app:mysql', 'app:postgres', 'app:git', 'app:docker');
+	depends('app:mysql', 'app:postgres', 'app:git', 'app:docker', 'app:scan-groups');
 
 	const promises = await Promise.all([
 		mysqlDatabases,
 		postgresDatabases,
 		gitRepositories,
-		dockerImages
+		dockerImages,
+		scanGroups
 	]);
 
 	return {
@@ -47,6 +51,7 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 		mysqlDatabases: promises[0].data?.mysql_databases,
 		postgresDatabases: promises[1].data?.postgres_databases,
 		gitRepositories: promises[2].data?.git_repositories,
-		dockerImages: promises[3].data?.images
+		dockerImages: promises[3].data?.images,
+		scanGroups: promises[4].data?.scan_groups
 	};
 };

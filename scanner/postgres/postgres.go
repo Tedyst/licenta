@@ -73,7 +73,11 @@ func (sc *postgresScanner) ShouldNotBePublic() bool {
 	return true
 }
 
-func (*postgresScanner) GetScannerID() int64 {
+func (*postgresScanner) GetScannerID() int32 {
+	return 0
+}
+
+func GetScannerID() int32 {
 	return 0
 }
 

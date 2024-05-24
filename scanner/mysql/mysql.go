@@ -30,7 +30,10 @@ type mysqlScanner struct {
 func (sc *mysqlScanner) GetScannerName() string {
 	return "MySQL"
 }
-func (sc *mysqlScanner) GetScannerID() int64 {
+func (sc *mysqlScanner) GetScannerID() int32 {
+	return 1
+}
+func GetScannerID() int32 {
 	return 1
 }
 func (sc *mysqlScanner) GetNvdProductType() nvd.Product {

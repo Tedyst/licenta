@@ -10,7 +10,8 @@ import (
 type Severity = int
 
 const (
-	SEVERITY_WARNING Severity = iota
+	SEVERITY_INFORMATIONAL Severity = iota
+	SEVERITY_WARNING
 	SEVERITY_MEDIUM
 	SEVERITY_HIGH
 )
@@ -25,7 +26,7 @@ var (
 
 type Scanner interface {
 	GetScannerName() string
-	GetScannerID() int64
+	GetScannerID() int32
 
 	GetNvdProductType() nvd.Product
 	ShouldNotBePublic() bool

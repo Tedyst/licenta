@@ -2583,6 +2583,7 @@ components:
         - error
         - maximum_severity
         - scan_group_id
+        - scan_type
       type: object
       properties:
         id:
@@ -2598,6 +2599,8 @@ components:
         maximum_severity:
           type: integer
         scan_group_id:
+          type: integer
+        scan_type:
           type: integer
     DockerImage:
       required:

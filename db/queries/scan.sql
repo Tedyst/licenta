@@ -5,8 +5,8 @@ RETURNING
     *;
 
 -- name: CreateScan :one
-INSERT INTO scans(status, worker_id, scan_group_id)
-    VALUES ($1, $2, $3)
+INSERT INTO scans(status, worker_id, scan_group_id, scan_type)
+    VALUES ($1, $2, $3, $4)
 RETURNING
     *;
 
@@ -127,7 +127,14 @@ WHERE
 -- name: GetScanGroupsForProject :many
 SELECT
     sqlc.embed(scan_groups),
-    sqlc.embed(scans)
+    sqlc.embed(scans),
+(
+        SELECT
+            COALESCE(MAX(scan_results.severity), 0)::integer
+        FROM
+            scan_results
+        WHERE
+            scan_id = scans.id) AS maximum_severity
 FROM
     scan_groups
     INNER JOIN scans ON scan_groups.id = scans.scan_group_id

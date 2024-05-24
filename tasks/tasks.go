@@ -40,7 +40,7 @@ type ScannerTaskRunner interface {
 }
 
 type SourceTaskRunner interface {
-	ScheduleSourceRun(ctx context.Context, project *queries.Project, sourceType string) error
+	ScheduleSourceRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType string) error
 }
 
 type ScannerSourceTaskRunner interface {

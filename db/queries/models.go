@@ -62,6 +62,12 @@ type DockerResult struct {
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
+type DockerScan struct {
+	ID      int64 `json:"id"`
+	ScanID  int64 `json:"scan_id"`
+	ImageID int64 `json:"image_id"`
+}
+
 type GitCommit struct {
 	ID           int64              `json:"id"`
 	RepositoryID int64              `json:"repository_id"`
@@ -95,6 +101,12 @@ type GitResult struct {
 	Password    sql.NullString     `json:"password"`
 	Filename    string             `json:"filename"`
 	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+type GitScan struct {
+	ID           int64 `json:"id"`
+	ScanID       int64 `json:"scan_id"`
+	RepositoryID int64 `json:"repository_id"`
 }
 
 type MysqlDatabase struct {
@@ -205,6 +217,7 @@ type ResetPasswordToken struct {
 type Scan struct {
 	ID          int64              `json:"id"`
 	ScanGroupID int64              `json:"scan_group_id"`
+	ScanType    int32              `json:"scan_type"`
 	Status      int32              `json:"status"`
 	Error       sql.NullString     `json:"error"`
 	WorkerID    sql.NullInt64      `json:"worker_id"`

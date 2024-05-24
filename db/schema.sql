@@ -109,6 +109,12 @@ CREATE TABLE git_results(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE git_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE
+);
+
 CREATE TABLE docker_images(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -144,6 +150,12 @@ CREATE TABLE docker_results(
     password text,
     filename text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE docker_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    image_id bigint NOT NULL REFERENCES docker_images(id) ON DELETE CASCADE
 );
 
 CREATE TABLE nvd_cpes(
@@ -211,6 +223,7 @@ CREATE TABLE workers(
 CREATE TABLE scans(
     id bigserial PRIMARY KEY,
     scan_group_id bigint NOT NULL REFERENCES scan_groups(id) ON DELETE CASCADE,
+    scan_type integer NOT NULL,
     status integer NOT NULL,
     error text,
     worker_id bigint REFERENCES workers(id) ON DELETE CASCADE,

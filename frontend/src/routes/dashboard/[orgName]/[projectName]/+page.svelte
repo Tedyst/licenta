@@ -9,6 +9,8 @@
 
 	import BaseListItem from '$lib/dashboard/BaseListItem.svelte';
 	import { enhance } from '$app/forms';
+	import ScanGroupItem from '$lib/dashboard/ScanGroupItem.svelte';
+	import ScanItem from '$lib/dashboard/ScanItem.svelte';
 </script>
 
 project
@@ -53,6 +55,42 @@ project
 		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/postgresql/?id=${dockerImage.id}`}
 		viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/view-source/docker/?id=${dockerImage.id}`}
 	/>
+{/each}
+
+{#each data?.scanGroups || [] as scanGroup}
+	<ScanGroupItem {scanGroup}>
+		{#each scanGroup?.scans as scan}
+			{#if scan.scan_type === 0}
+				<ScanItem
+					{scan}
+					scanIcon={PostgresIcon}
+					scanName="Postgres"
+					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
+				/>
+			{:else if scan.scan_type === 1}
+				<ScanItem
+					{scan}
+					scanIcon={MysqlIcon}
+					scanName="MySQL"
+					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
+				/>
+			{:else if scan.scan_type === 2}
+				<ScanItem
+					{scan}
+					scanIcon={GitIcon}
+					scanName="Git"
+					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
+				/>
+			{:else if scan.scan_type === 3}
+				<ScanItem
+					{scan}
+					scanIcon={DockerIcon}
+					scanName="Docker"
+					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
+				/>
+			{/if}
+		{/each}
+	</ScanGroupItem>
 {/each}
 
 <a

@@ -66,6 +66,8 @@ func (server *serverHandler) GetScanId(ctx context.Context, request generated.Ge
 			Id:              int(scan.Scan.ID),
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
+			ScanGroupId:     int(scan.Scan.ScanGroupID),
+			ScanType:        int(scan.Scan.ScanType),
 		},
 		Results:           scanResults,
 		BruteforceResults: bruteforceResults,
@@ -119,6 +121,8 @@ func (server *serverHandler) PatchScanId(ctx context.Context, request generated.
 			Id:              int(scan.Scan.ID),
 			Status:          int(scan.Scan.Status),
 			MaximumSeverity: int(scan.MaximumSeverity),
+			ScanGroupId:     int(scan.Scan.ScanGroupID),
+			ScanType:        int(scan.Scan.ScanType),
 		},
 	}, nil
 }
@@ -188,15 +192,19 @@ func (server *serverHandler) GetScanGroups(ctx context.Context, request generate
 			groups = append(groups, generated.ScanGroup{
 				Id:        int(scangroup.ScanGroup.ID),
 				ProjectId: int(scangroup.ScanGroup.ProjectID),
+				Scans:     []generated.Scan{},
 			})
 		}
 
 		scans[scangroup.ScanGroup.ID] = append(scans[scangroup.ScanGroup.ID], generated.Scan{
-			CreatedAt: scangroup.Scan.CreatedAt.Time.Format(time.RFC3339Nano),
-			EndedAt:   scangroup.Scan.EndedAt.Time.Format(time.RFC3339Nano),
-			Error:     scangroup.Scan.Error.String,
-			Id:        int(scangroup.Scan.ID),
-			Status:    int(scangroup.Scan.Status),
+			CreatedAt:       scangroup.Scan.CreatedAt.Time.Format(time.RFC3339Nano),
+			EndedAt:         scangroup.Scan.EndedAt.Time.Format(time.RFC3339Nano),
+			Error:           scangroup.Scan.Error.String,
+			Id:              int(scangroup.Scan.ID),
+			Status:          int(scangroup.Scan.Status),
+			ScanGroupId:     int(scangroup.ScanGroup.ID),
+			MaximumSeverity: int(scangroup.MaximumSeverity),
+			ScanType:        int(scangroup.Scan.ScanType),
 		})
 	}
 

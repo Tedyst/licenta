@@ -126,4 +126,5 @@ var CreatePostgresScan = CreateBaseScan(
 			DatabaseID: db.ID,
 		})
 	},
+	postgres.GetScannerID(),
 )

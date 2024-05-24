@@ -1942,6 +1942,7 @@ export interface components {
       ended_at: string;
       maximum_severity: number;
       scan_group_id: number;
+      scan_type: number;
     };
     DockerImage: {
       id: number;

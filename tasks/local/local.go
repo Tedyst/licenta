@@ -36,7 +36,7 @@ func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.Transa
 }
 
 func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType string, scanType string) error {
-	if err := runner.ScheduleSourceRun(ctx, project, sourceType); err != nil {
+	if err := runner.ScheduleSourceRun(ctx, project, scanGroup, sourceType); err != nil {
 		return fmt.Errorf("failed to schedule source run: %w", err)
 	}
 
@@ -54,7 +54,7 @@ func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries
 	return nil
 }
 
-func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queries.Project, sourceType string) error {
+func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType string) error {
 	var runGit bool
 	var runDocker bool
 	switch sourceType {

@@ -13,24 +13,31 @@ import (
 )
 
 const createScan = `-- name: CreateScan :one
-INSERT INTO scans(status, worker_id, scan_group_id)
-    VALUES ($1, $2, $3)
+INSERT INTO scans(status, worker_id, scan_group_id, scan_type)
+    VALUES ($1, $2, $3, $4)
 RETURNING
-    id, scan_group_id, status, error, worker_id, created_at, ended_at
+    id, scan_group_id, scan_type, status, error, worker_id, created_at, ended_at
 `
 
 type CreateScanParams struct {
 	Status      int32         `json:"status"`
 	WorkerID    sql.NullInt64 `json:"worker_id"`
 	ScanGroupID int64         `json:"scan_group_id"`
+	ScanType    int32         `json:"scan_type"`
 }
 
 func (q *Queries) CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, error) {
-	row := q.db.QueryRow(ctx, createScan, arg.Status, arg.WorkerID, arg.ScanGroupID)
+	row := q.db.QueryRow(ctx, createScan,
+		arg.Status,
+		arg.WorkerID,
+		arg.ScanGroupID,
+		arg.ScanType,
+	)
 	var i Scan
 	err := row.Scan(
 		&i.ID,
 		&i.ScanGroupID,
+		&i.ScanType,
 		&i.Status,
 		&i.Error,
 		&i.WorkerID,
@@ -154,7 +161,7 @@ func (q *Queries) GetCountOfScanGroupsForProject(ctx context.Context, projectID 
 
 const getScan = `-- name: GetScan :one
 SELECT
-    scans.id, scans.scan_group_id, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at,
+    scans.id, scans.scan_group_id, scans.scan_type, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at,
 (
         SELECT
             COALESCE(MAX(scan_results.severity), 0)::integer
@@ -179,6 +186,7 @@ func (q *Queries) GetScan(ctx context.Context, id int64) (*GetScanRow, error) {
 	err := row.Scan(
 		&i.Scan.ID,
 		&i.Scan.ScanGroupID,
+		&i.Scan.ScanType,
 		&i.Scan.Status,
 		&i.Scan.Error,
 		&i.Scan.WorkerID,
@@ -251,7 +259,14 @@ func (q *Queries) GetScanGroup(ctx context.Context, id int64) (*ScanGroup, error
 const getScanGroupsForProject = `-- name: GetScanGroupsForProject :many
 SELECT
     scan_groups.id, scan_groups.project_id, scan_groups.created_by, scan_groups.created_at,
-    scans.id, scans.scan_group_id, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at
+    scans.id, scans.scan_group_id, scans.scan_type, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at,
+(
+        SELECT
+            COALESCE(MAX(scan_results.severity), 0)::integer
+        FROM
+            scan_results
+        WHERE
+            scan_id = scans.id) AS maximum_severity
 FROM
     scan_groups
     INNER JOIN scans ON scan_groups.id = scans.scan_group_id
@@ -260,8 +275,9 @@ WHERE
 `
 
 type GetScanGroupsForProjectRow struct {
-	ScanGroup ScanGroup `json:"scan_group"`
-	Scan      Scan      `json:"scan"`
+	ScanGroup       ScanGroup `json:"scan_group"`
+	Scan            Scan      `json:"scan"`
+	MaximumSeverity int32     `json:"maximum_severity"`
 }
 
 func (q *Queries) GetScanGroupsForProject(ctx context.Context, projectID int64) ([]*GetScanGroupsForProjectRow, error) {
@@ -280,11 +296,13 @@ func (q *Queries) GetScanGroupsForProject(ctx context.Context, projectID int64) 
 			&i.ScanGroup.CreatedAt,
 			&i.Scan.ID,
 			&i.Scan.ScanGroupID,
+			&i.Scan.ScanType,
 			&i.Scan.Status,
 			&i.Scan.Error,
 			&i.Scan.WorkerID,
 			&i.Scan.CreatedAt,
 			&i.Scan.EndedAt,
+			&i.MaximumSeverity,
 		); err != nil {
 			return nil, err
 		}
@@ -376,7 +394,7 @@ func (q *Queries) GetScanResultsByScanIdAndScanSource(ctx context.Context, arg G
 
 const getScansForProject = `-- name: GetScansForProject :many
 SELECT
-    scans.id, scans.scan_group_id, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at,
+    scans.id, scans.scan_group_id, scans.scan_type, scans.status, scans.error, scans.worker_id, scans.created_at, scans.ended_at,
 (
         SELECT
             MAX(scan_results.severity)::integer
@@ -419,6 +437,7 @@ func (q *Queries) GetScansForProject(ctx context.Context, projectID int64) ([]*G
 		if err := rows.Scan(
 			&i.Scan.ID,
 			&i.Scan.ScanGroupID,
+			&i.Scan.ScanType,
 			&i.Scan.Status,
 			&i.Scan.Error,
 			&i.Scan.WorkerID,
@@ -439,7 +458,7 @@ func (q *Queries) GetScansForProject(ctx context.Context, projectID int64) ([]*G
 
 const getScansForScanGroup = `-- name: GetScansForScanGroup :many
 SELECT
-    id, scan_group_id, status, error, worker_id, created_at, ended_at
+    id, scan_group_id, scan_type, status, error, worker_id, created_at, ended_at
 FROM
     scans
 WHERE
@@ -458,6 +477,7 @@ func (q *Queries) GetScansForScanGroup(ctx context.Context, scanGroupID int64) (
 		if err := rows.Scan(
 			&i.ID,
 			&i.ScanGroupID,
+			&i.ScanType,
 			&i.Status,
 			&i.Error,
 			&i.WorkerID,

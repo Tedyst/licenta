@@ -128,4 +128,5 @@ var CreateMysqlScan = CreateBaseScan(
 			DatabaseID: db.ID,
 		})
 	},
+	mysql.GetScannerID(),
 )

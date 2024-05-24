@@ -124,6 +124,7 @@ func (server *serverHandler) PostProjectsIdRun(ctx context.Context, request gene
 			Id:          int(scan.ID),
 			ScanGroupId: int(scan.ScanGroupID),
 			Status:      int(scan.Status),
+			ScanType:    int(scan.ScanType),
 		}
 	}
 
