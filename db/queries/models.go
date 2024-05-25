@@ -29,8 +29,8 @@ type DockerImage struct {
 	ID                            int64              `json:"id"`
 	ProjectID                     int64              `json:"project_id"`
 	DockerImage                   string             `json:"docker_image"`
-	Username                      sql.NullString     `json:"username"`
-	Password                      sql.NullString     `json:"password"`
+	Username                      string             `json:"username"`
+	Password                      string             `json:"password"`
 	MinProbability                sql.NullFloat64    `json:"min_probability"`
 	ProbabilityDecreaseMultiplier sql.NullFloat64    `json:"probability_decrease_multiplier"`
 	ProbabilityIncreaseMultiplier sql.NullFloat64    `json:"probability_increase_multiplier"`
@@ -153,9 +153,10 @@ type NvdCveCpe struct {
 }
 
 type Organization struct {
-	ID        int64              `json:"id"`
-	Name      string             `json:"name"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID            int64              `json:"id"`
+	Name          string             `json:"name"`
+	EncryptionKey []byte             `json:"encryption_key"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type OrganizationMember struct {

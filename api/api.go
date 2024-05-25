@@ -38,6 +38,7 @@ type ApiConfig struct {
 	AuthorizationManager authorization.AuthorizationManager
 
 	Database db.TransactionQuerier
+	SaltKey  string
 }
 
 type workerAuth interface {
@@ -111,6 +112,7 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 		UserAuth:             config.UserAuth,
 		DatabaseProvider:     config.Database,
 		AuthorizationManager: config.AuthorizationManager,
+		SaltKey:              config.SaltKey,
 	})
 	return app, nil
 }

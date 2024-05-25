@@ -24,7 +24,7 @@ var taskCreateScan = &cobra.Command{
 		localExchange := localExchange.NewLocalExchange()
 		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(database)
 
-		taskRunner := local.NewLocalRunner(true, nil, database, localExchange, bruteforceProvider)
+		taskRunner := local.NewLocalRunner(true, nil, database, localExchange, bruteforceProvider, viper.GetString("db-encryption-salt"))
 
 		dbid, err := strconv.ParseInt(args[1], 10, 64)
 		if err != nil {

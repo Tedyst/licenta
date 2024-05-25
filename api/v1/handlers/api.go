@@ -19,6 +19,8 @@ type serverHandler struct {
 	workerauth    workerAuth
 	userAuth      userAuth
 	authorization AuthorizationManager
+
+	saltKey string
 }
 
 type workerAuth interface {
@@ -41,6 +43,8 @@ type HandlerConfig struct {
 	WorkerAuth           workerAuth
 	UserAuth             userAuth
 	AuthorizationManager AuthorizationManager
+
+	SaltKey string
 }
 
 func NewServerHandler(config HandlerConfig) *serverHandler {
@@ -51,6 +55,7 @@ func NewServerHandler(config HandlerConfig) *serverHandler {
 		workerauth:       config.WorkerAuth,
 		userAuth:         config.UserAuth,
 		authorization:    config.AuthorizationManager,
+		saltKey:          config.SaltKey,
 	}
 }
 

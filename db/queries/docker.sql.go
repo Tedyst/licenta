@@ -13,71 +13,25 @@ import (
 )
 
 const createDockerImage = `-- name: CreateDockerImage :one
-INSERT INTO docker_images(project_id, docker_image, username, PASSWORD, min_probability, probability_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO docker_images(project_id, docker_image, username, PASSWORD)
+    VALUES ($1, $2, encrypt_data($1, $3, $4), encrypt_data($1, $3, $5))
 RETURNING
     id, project_id, docker_image, username, password, min_probability, probability_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
 `
 
 type CreateDockerImageParams struct {
-	ProjectID                     int64           `json:"project_id"`
-	DockerImage                   string          `json:"docker_image"`
-	Username                      sql.NullString  `json:"username"`
-	Password                      sql.NullString  `json:"password"`
-	MinProbability                sql.NullFloat64 `json:"min_probability"`
-	ProbabilityDecreaseMultiplier sql.NullFloat64 `json:"probability_decrease_multiplier"`
-	ProbabilityIncreaseMultiplier sql.NullFloat64 `json:"probability_increase_multiplier"`
-	EntropyThreshold              sql.NullFloat64 `json:"entropy_threshold"`
-	LogisticGrowthRate            sql.NullFloat64 `json:"logistic_growth_rate"`
+	ProjectID   int64  `json:"project_id"`
+	DockerImage string `json:"docker_image"`
+	SaltKey     string `json:"salt_key"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
 }
 
 func (q *Queries) CreateDockerImage(ctx context.Context, arg CreateDockerImageParams) (*DockerImage, error) {
 	row := q.db.QueryRow(ctx, createDockerImage,
 		arg.ProjectID,
 		arg.DockerImage,
-		arg.Username,
-		arg.Password,
-		arg.MinProbability,
-		arg.ProbabilityDecreaseMultiplier,
-		arg.ProbabilityIncreaseMultiplier,
-		arg.EntropyThreshold,
-		arg.LogisticGrowthRate,
-	)
-	var i DockerImage
-	err := row.Scan(
-		&i.ID,
-		&i.ProjectID,
-		&i.DockerImage,
-		&i.Username,
-		&i.Password,
-		&i.MinProbability,
-		&i.ProbabilityDecreaseMultiplier,
-		&i.ProbabilityIncreaseMultiplier,
-		&i.EntropyThreshold,
-		&i.LogisticGrowthRate,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
-const createDockerImageForProject = `-- name: CreateDockerImageForProject :one
-INSERT INTO docker_images(project_id, docker_image, username, PASSWORD)
-    VALUES ($1, $2, $3, $4)
-RETURNING
-    id, project_id, docker_image, username, password, min_probability, probability_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
-`
-
-type CreateDockerImageForProjectParams struct {
-	ProjectID   int64          `json:"project_id"`
-	DockerImage string         `json:"docker_image"`
-	Username    sql.NullString `json:"username"`
-	Password    sql.NullString `json:"password"`
-}
-
-func (q *Queries) CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*DockerImage, error) {
-	row := q.db.QueryRow(ctx, createDockerImageForProject,
-		arg.ProjectID,
-		arg.DockerImage,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
 	)
@@ -165,80 +119,86 @@ func (q *Queries) DeleteDockerImage(ctx context.Context, id int64) error {
 	return err
 }
 
-const deleteDockerImageForProject = `-- name: DeleteDockerImageForProject :exec
-DELETE FROM docker_images
-WHERE project_id = $1
-    AND docker_image = $2
-`
-
-type DeleteDockerImageForProjectParams struct {
-	ProjectID   int64  `json:"project_id"`
-	DockerImage string `json:"docker_image"`
-}
-
-func (q *Queries) DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error {
-	_, err := q.db.Exec(ctx, deleteDockerImageForProject, arg.ProjectID, arg.DockerImage)
-	return err
-}
-
 const getDockerImage = `-- name: GetDockerImage :one
 SELECT
-    id, project_id, docker_image, username, password, min_probability, probability_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
+    id,
+    project_id,
+    docker_image,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD
 FROM
     docker_images
 WHERE
     id = $1
 `
 
-func (q *Queries) GetDockerImage(ctx context.Context, id int64) (*DockerImage, error) {
-	row := q.db.QueryRow(ctx, getDockerImage, id)
-	var i DockerImage
+type GetDockerImageParams struct {
+	ID      int64  `json:"id"`
+	SaltKey string `json:"salt_key"`
+}
+
+type GetDockerImageRow struct {
+	ID          int64  `json:"id"`
+	ProjectID   int64  `json:"project_id"`
+	DockerImage string `json:"docker_image"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+}
+
+func (q *Queries) GetDockerImage(ctx context.Context, arg GetDockerImageParams) (*GetDockerImageRow, error) {
+	row := q.db.QueryRow(ctx, getDockerImage, arg.ID, arg.SaltKey)
+	var i GetDockerImageRow
 	err := row.Scan(
 		&i.ID,
 		&i.ProjectID,
 		&i.DockerImage,
 		&i.Username,
 		&i.Password,
-		&i.MinProbability,
-		&i.ProbabilityDecreaseMultiplier,
-		&i.ProbabilityIncreaseMultiplier,
-		&i.EntropyThreshold,
-		&i.LogisticGrowthRate,
-		&i.CreatedAt,
 	)
 	return &i, err
 }
 
 const getDockerImagesForProject = `-- name: GetDockerImagesForProject :many
 SELECT
-    id, project_id, docker_image, username, password, min_probability, probability_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate, created_at
+    id,
+    project_id,
+    docker_image,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD
 FROM
     docker_images
 WHERE
     project_id = $1
 `
 
-func (q *Queries) GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*DockerImage, error) {
-	rows, err := q.db.Query(ctx, getDockerImagesForProject, projectID)
+type GetDockerImagesForProjectParams struct {
+	ProjectID int64  `json:"project_id"`
+	SaltKey   string `json:"salt_key"`
+}
+
+type GetDockerImagesForProjectRow struct {
+	ID          int64  `json:"id"`
+	ProjectID   int64  `json:"project_id"`
+	DockerImage string `json:"docker_image"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+}
+
+func (q *Queries) GetDockerImagesForProject(ctx context.Context, arg GetDockerImagesForProjectParams) ([]*GetDockerImagesForProjectRow, error) {
+	rows, err := q.db.Query(ctx, getDockerImagesForProject, arg.ProjectID, arg.SaltKey)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*DockerImage
+	var items []*GetDockerImagesForProjectRow
 	for rows.Next() {
-		var i DockerImage
+		var i GetDockerImagesForProjectRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProjectID,
 			&i.DockerImage,
 			&i.Username,
 			&i.Password,
-			&i.MinProbability,
-			&i.ProbabilityDecreaseMultiplier,
-			&i.ProbabilityIncreaseMultiplier,
-			&i.EntropyThreshold,
-			&i.LogisticGrowthRate,
-			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -419,13 +379,8 @@ UPDATE
     docker_images
 SET
     docker_image = $2,
-    username = $3,
-    PASSWORD = $4,
-    min_probability = $5,
-    probability_decrease_multiplier = $6,
-    probability_increase_multiplier = $7,
-    entropy_threshold = $8,
-    logistic_growth_rate = $9
+    username = encrypt_data($3, $4, $5),
+    PASSWORD = encrypt_data($3, $4, $6)
 WHERE
     id = $1
 RETURNING
@@ -433,28 +388,22 @@ RETURNING
 `
 
 type UpdateDockerImageParams struct {
-	ID                            int64           `json:"id"`
-	DockerImage                   string          `json:"docker_image"`
-	Username                      sql.NullString  `json:"username"`
-	Password                      sql.NullString  `json:"password"`
-	MinProbability                sql.NullFloat64 `json:"min_probability"`
-	ProbabilityDecreaseMultiplier sql.NullFloat64 `json:"probability_decrease_multiplier"`
-	ProbabilityIncreaseMultiplier sql.NullFloat64 `json:"probability_increase_multiplier"`
-	EntropyThreshold              sql.NullFloat64 `json:"entropy_threshold"`
-	LogisticGrowthRate            sql.NullFloat64 `json:"logistic_growth_rate"`
+	ID          int64  `json:"id"`
+	DockerImage string `json:"docker_image"`
+	ProjectID   int64  `json:"project_id"`
+	SaltKey     string `json:"salt_key"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
 }
 
 func (q *Queries) UpdateDockerImage(ctx context.Context, arg UpdateDockerImageParams) (*DockerImage, error) {
 	row := q.db.QueryRow(ctx, updateDockerImage,
 		arg.ID,
 		arg.DockerImage,
+		arg.ProjectID,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
-		arg.MinProbability,
-		arg.ProbabilityDecreaseMultiplier,
-		arg.ProbabilityIncreaseMultiplier,
-		arg.EntropyThreshold,
-		arg.LogisticGrowthRate,
 	)
 	var i DockerImage
 	err := row.Scan(

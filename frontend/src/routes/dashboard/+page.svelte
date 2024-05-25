@@ -37,7 +37,7 @@
 	{/each}
 {/if}
 
-<a href="/organizations/create">
+<a href="/dashboard/create">
 	<div class="card ml-4 h-30 max-w-full bg-base-100 outline-dotted outline-secondary mt-4">
 		<div class="card-body flex-row pr-4">
 			<div class="flex flex-grow align-middle items-start flex-col self-center">

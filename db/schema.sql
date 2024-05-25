@@ -39,6 +39,7 @@ CREATE TABLE totp_secret_tokens(
 CREATE TABLE organizations(
     id bigserial PRIMARY KEY,
     name text NOT NULL UNIQUE,
+    encryption_key bytea NOT NULL DEFAULT gen_random_bytes(64),
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -119,8 +120,8 @@ CREATE TABLE docker_images(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     docker_image text NOT NULL,
-    username text,
-    password text,
+    username text NOT NULL,
+    password text NOT NULL,
     min_probability float,
     probability_decrease_multiplier float,
     probability_increase_multiplier float,
@@ -317,4 +318,34 @@ CREATE TABLE mysql_scans(
     scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     database_id bigint NOT NULL REFERENCES mysql_databases(id) ON DELETE CASCADE
 );
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE OR REPLACE FUNCTION encrypt_data(project_id bigint, salt_key text, data text)
+    RETURNS text
+    AS $$
+    SELECT
+        encode(pgp_sym_encrypt(data,(
+                    SELECT
+                        CONCAT(organizations.encryption_key, salt_key)
+                    FROM organizations
+                    INNER JOIN projects ON projects.organization_id = organizations.id
+                    WHERE
+                        projects.id = project_id)), 'hex')
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION decrypt_data(project_id bigint, salt_key text, data text)
+    RETURNS text
+    AS $$
+    SELECT
+        pgp_sym_decrypt(decode(data, 'hex'),(
+                SELECT
+                    CONCAT(organizations.encryption_key, salt_key)
+                FROM organizations
+                INNER JOIN projects ON projects.organization_id = organizations.id
+                WHERE
+                    projects.id = project_id))
+$$
+LANGUAGE sql;
 

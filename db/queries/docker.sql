@@ -14,7 +14,11 @@ RETURNING
 
 -- name: GetDockerImage :one
 SELECT
-    *
+    id,
+    project_id,
+    docker_image,
+    decrypt_data(project_id, sqlc.arg(salt_key), username) AS username,
+    decrypt_data(project_id, sqlc.arg(salt_key), PASSWORD) AS PASSWORD
 FROM
     docker_images
 WHERE
@@ -22,22 +26,15 @@ WHERE
 
 -- name: GetDockerImagesForProject :many
 SELECT
-    *
+    id,
+    project_id,
+    docker_image,
+    decrypt_data(project_id, sqlc.arg(salt_key), username) AS username,
+    decrypt_data(project_id, sqlc.arg(salt_key), PASSWORD) AS PASSWORD
 FROM
     docker_images
 WHERE
     project_id = $1;
-
--- name: CreateDockerImageForProject :one
-INSERT INTO docker_images(project_id, docker_image, username, PASSWORD)
-    VALUES ($1, $2, $3, $4)
-RETURNING
-    *;
-
--- name: DeleteDockerImageForProject :exec
-DELETE FROM docker_images
-WHERE project_id = $1
-    AND docker_image = $2;
 
 -- name: CreateDockerLayerResultsForProject :copyfrom
 INSERT INTO docker_results(project_id, layer_id, name, line, line_number, MATCH, probability, username, PASSWORD, filename, previous_lines)
@@ -87,21 +84,16 @@ UPDATE
     docker_images
 SET
     docker_image = $2,
-    username = $3,
-    PASSWORD = $4,
-    min_probability = $5,
-    probability_decrease_multiplier = $6,
-    probability_increase_multiplier = $7,
-    entropy_threshold = $8,
-    logistic_growth_rate = $9
+    username = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(username)),
+    PASSWORD = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(PASSWORD))
 WHERE
     id = $1
 RETURNING
     *;
 
 -- name: CreateDockerImage :one
-INSERT INTO docker_images(project_id, docker_image, username, PASSWORD, min_probability, probability_decrease_multiplier, probability_increase_multiplier, entropy_threshold, logistic_growth_rate)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO docker_images(project_id, docker_image, username, PASSWORD)
+    VALUES ($1, $2, encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(username)), encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(PASSWORD)))
 RETURNING
     *;
 

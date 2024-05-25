@@ -19,4 +19,8 @@ func init() {
 	if err := tasksCmd.MarkPersistentFlagRequired("database"); err != nil {
 		panic(err)
 	}
+	tasksCmd.Flags().String("db-encryption-salt", "", "Database salt encryption key")
+	if err := tasksCmd.MarkFlagRequired("db-encryption-salt"); err != nil {
+		panic(err)
+	}
 }

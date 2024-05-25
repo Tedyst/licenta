@@ -29,6 +29,8 @@ type ApiV1Config struct {
 	AuthorizationManager authorization.AuthorizationManager
 
 	DatabaseProvider db.TransactionQuerier
+
+	SaltKey string
 }
 
 type workerAuth interface {
@@ -49,6 +51,7 @@ func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
 		WorkerAuth:           config.WorkerAuth,
 		UserAuth:             config.UserAuth,
 		AuthorizationManager: config.AuthorizationManager,
+		SaltKey:              config.SaltKey,
 	})
 	api := generated.NewStrictHandlerWithOptions(serverHandler, nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {

@@ -18,7 +18,6 @@ type Querier interface {
 	CountUsers(ctx context.Context) (int64, error)
 	CreateBruteforcedPassword(ctx context.Context, arg CreateBruteforcedPasswordParams) (*BruteforcedPassword, error)
 	CreateDockerImage(ctx context.Context, arg CreateDockerImageParams) (*DockerImage, error)
-	CreateDockerImageForProject(ctx context.Context, arg CreateDockerImageForProjectParams) (*DockerImage, error)
 	CreateDockerLayerResultsForProject(ctx context.Context, arg []CreateDockerLayerResultsForProjectParams) (int64, error)
 	CreateDockerScan(ctx context.Context, arg CreateDockerScanParams) (*DockerScan, error)
 	CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*DockerLayer, error)
@@ -46,7 +45,6 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
 	DeleteDockerImage(ctx context.Context, id int64) error
-	DeleteDockerImageForProject(ctx context.Context, arg DeleteDockerImageForProjectParams) error
 	DeleteGitRepository(ctx context.Context, id int64) error
 	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteMysqlDatabase(ctx context.Context, id int64) error
@@ -68,8 +66,8 @@ type Querier interface {
 	GetCveByCveID(ctx context.Context, cveID string) (*NvdCfe, error)
 	GetCveCpeByCveAndCpe(ctx context.Context, arg GetCveCpeByCveAndCpeParams) (*NvdCveCpe, error)
 	GetCvesByProductAndVersion(ctx context.Context, arg GetCvesByProductAndVersionParams) ([]*GetCvesByProductAndVersionRow, error)
-	GetDockerImage(ctx context.Context, id int64) (*DockerImage, error)
-	GetDockerImagesForProject(ctx context.Context, projectID int64) ([]*DockerImage, error)
+	GetDockerImage(ctx context.Context, arg GetDockerImageParams) (*GetDockerImageRow, error)
+	GetDockerImagesForProject(ctx context.Context, arg GetDockerImagesForProjectParams) ([]*GetDockerImagesForProjectRow, error)
 	GetDockerLayersAndResultsForImage(ctx context.Context, imageID int64) ([]*GetDockerLayersAndResultsForImageRow, error)
 	GetDockerScanByScanAndRepo(ctx context.Context, arg GetDockerScanByScanAndRepoParams) (*GetDockerScanByScanAndRepoRow, error)
 	GetDockerScannedLayersForImage(ctx context.Context, imageID int64) ([]string, error)

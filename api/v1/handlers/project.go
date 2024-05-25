@@ -142,7 +142,10 @@ func (server *serverHandler) PostProjectsIdRun(ctx context.Context, request gene
 		scans = append(scans, scan)
 	}
 
-	dockerImages, err := server.DatabaseProvider.GetDockerImagesForProject(ctx, request.Id)
+	dockerImages, err := server.DatabaseProvider.GetDockerImagesForProject(ctx, queries.GetDockerImagesForProjectParams{
+		ProjectID: project.ID,
+		SaltKey:   server.saltKey,
+	})
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("error getting docker images: %w", err)
 	}

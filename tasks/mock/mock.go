@@ -118,17 +118,17 @@ func (c *MockTaskRunnerRunSaverRemoteCall) DoAndReturn(f func(context.Context, *
 }
 
 // ScanDockerRepository mocks base method.
-func (m *MockTaskRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage) error {
+func (m *MockTaskRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage, scan *queries.Scan) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanDockerRepository", ctx, image)
+	ret := m.ctrl.Call(m, "ScanDockerRepository", ctx, image, scan)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ScanDockerRepository indicates an expected call of ScanDockerRepository.
-func (mr *MockTaskRunnerMockRecorder) ScanDockerRepository(ctx, image any) *MockTaskRunnerScanDockerRepositoryCall {
+func (mr *MockTaskRunnerMockRecorder) ScanDockerRepository(ctx, image, scan any) *MockTaskRunnerScanDockerRepositoryCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanDockerRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanDockerRepository), ctx, image)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanDockerRepository", reflect.TypeOf((*MockTaskRunner)(nil).ScanDockerRepository), ctx, image, scan)
 	return &MockTaskRunnerScanDockerRepositoryCall{Call: call}
 }
 
@@ -144,13 +144,13 @@ func (c *MockTaskRunnerScanDockerRepositoryCall) Return(arg0 error) *MockTaskRun
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTaskRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.DockerImage) error) *MockTaskRunnerScanDockerRepositoryCall {
+func (c *MockTaskRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.DockerImage, *queries.Scan) error) *MockTaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.DockerImage) error) *MockTaskRunnerScanDockerRepositoryCall {
+func (c *MockTaskRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.DockerImage, *queries.Scan) error) *MockTaskRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -468,17 +468,17 @@ func (m *MockDockerTasksRunner) EXPECT() *MockDockerTasksRunnerMockRecorder {
 }
 
 // ScanDockerRepository mocks base method.
-func (m *MockDockerTasksRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage) error {
+func (m *MockDockerTasksRunner) ScanDockerRepository(ctx context.Context, image *queries.DockerImage, scan *queries.Scan) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScanDockerRepository", ctx, image)
+	ret := m.ctrl.Call(m, "ScanDockerRepository", ctx, image, scan)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // ScanDockerRepository indicates an expected call of ScanDockerRepository.
-func (mr *MockDockerTasksRunnerMockRecorder) ScanDockerRepository(ctx, image any) *MockDockerTasksRunnerScanDockerRepositoryCall {
+func (mr *MockDockerTasksRunnerMockRecorder) ScanDockerRepository(ctx, image, scan any) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanDockerRepository", reflect.TypeOf((*MockDockerTasksRunner)(nil).ScanDockerRepository), ctx, image)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScanDockerRepository", reflect.TypeOf((*MockDockerTasksRunner)(nil).ScanDockerRepository), ctx, image, scan)
 	return &MockDockerTasksRunnerScanDockerRepositoryCall{Call: call}
 }
 
@@ -494,13 +494,13 @@ func (c *MockDockerTasksRunnerScanDockerRepositoryCall) Return(arg0 error) *Mock
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockDockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.DockerImage) error) *MockDockerTasksRunnerScanDockerRepositoryCall {
+func (c *MockDockerTasksRunnerScanDockerRepositoryCall) Do(f func(context.Context, *queries.DockerImage, *queries.Scan) error) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockDockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.DockerImage) error) *MockDockerTasksRunnerScanDockerRepositoryCall {
+func (c *MockDockerTasksRunnerScanDockerRepositoryCall) DoAndReturn(f func(context.Context, *queries.DockerImage, *queries.Scan) error) *MockDockerTasksRunnerScanDockerRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

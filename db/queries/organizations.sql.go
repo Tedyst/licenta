@@ -31,13 +31,18 @@ const createOrganization = `-- name: CreateOrganization :one
 INSERT INTO organizations(name)
     VALUES ($1)
 RETURNING
-    id, name, created_at
+    id, name, encryption_key, created_at
 `
 
 func (q *Queries) CreateOrganization(ctx context.Context, name string) (*Organization, error) {
 	row := q.db.QueryRow(ctx, createOrganization, name)
 	var i Organization
-	err := row.Scan(&i.ID, &i.Name, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.EncryptionKey,
+		&i.CreatedAt,
+	)
 	return &i, err
 }
 
@@ -188,7 +193,7 @@ func (q *Queries) GetAllOrganizationProjectsForUser(ctx context.Context, userID 
 
 const getOrganization = `-- name: GetOrganization :one
 SELECT
-    id, name, created_at
+    id, name, encryption_key, created_at
 FROM
     organizations
 WHERE
@@ -198,7 +203,12 @@ WHERE
 func (q *Queries) GetOrganization(ctx context.Context, id int64) (*Organization, error) {
 	row := q.db.QueryRow(ctx, getOrganization, id)
 	var i Organization
-	err := row.Scan(&i.ID, &i.Name, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.EncryptionKey,
+		&i.CreatedAt,
+	)
 	return &i, err
 }
 
@@ -257,7 +267,7 @@ func (q *Queries) GetOrganizationProjects(ctx context.Context, organizationID in
 
 const getOrganizationsForUser = `-- name: GetOrganizationsForUser :many
 SELECT
-    id, name, created_at
+    id, name, encryption_key, created_at
 FROM
     organizations
 WHERE
@@ -279,7 +289,12 @@ func (q *Queries) GetOrganizationsForUser(ctx context.Context, userID int64) ([]
 	var items []*Organization
 	for rows.Next() {
 		var i Organization
-		if err := rows.Scan(&i.ID, &i.Name, &i.CreatedAt); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.EncryptionKey,
+			&i.CreatedAt,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

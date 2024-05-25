@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -13,7 +12,10 @@ import (
 )
 
 func (server *serverHandler) DeleteDockerId(ctx context.Context, request generated.DeleteDockerIdRequestObject) (generated.DeleteDockerIdResponseObject, error) {
-	dockerImage, err := server.DatabaseProvider.GetDockerImage(ctx, request.Id)
+	dockerImage, err := server.DatabaseProvider.GetDockerImage(ctx, queries.GetDockerImageParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.DeleteDockerId404JSONResponse{
 			Success: false,
@@ -43,7 +45,10 @@ func (server *serverHandler) DeleteDockerId(ctx context.Context, request generat
 }
 
 func (server *serverHandler) GetDocker(ctx context.Context, request generated.GetDockerRequestObject) (generated.GetDockerResponseObject, error) {
-	dockerImages, err := server.DatabaseProvider.GetDockerImagesForProject(ctx, int64(request.Params.Project))
+	dockerImages, err := server.DatabaseProvider.GetDockerImagesForProject(ctx, queries.GetDockerImagesForProjectParams{
+		ProjectID: int64(request.Params.Project),
+		SaltKey:   server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.GetDocker401JSONResponse{
 			Success: false,
@@ -60,31 +65,11 @@ func (server *serverHandler) GetDocker(ctx context.Context, request generated.Ge
 			DockerImage: dockerImage.DockerImage,
 			Id:          int(dockerImage.ID),
 		}
-		if dockerImage.Username.Valid {
-			dockerImagesResponse[i].Username = &dockerImage.Username.String
+		if dockerImage.Username != "" {
+			dockerImagesResponse[i].Username = &dockerImage.Username
 		}
-		if dockerImage.Password.Valid {
-			dockerImagesResponse[i].Password = &dockerImage.Password.String
-		}
-		if dockerImage.MinProbability.Valid {
-			value := float32(dockerImage.MinProbability.Float64)
-			dockerImagesResponse[i].MinProbability = &value
-		}
-		if dockerImage.ProbabilityDecreaseMultiplier.Valid {
-			value := float32(dockerImage.ProbabilityDecreaseMultiplier.Float64)
-			dockerImagesResponse[i].ProbabilityDecreaseMultiplier = &value
-		}
-		if dockerImage.ProbabilityIncreaseMultiplier.Valid {
-			value := float32(dockerImage.ProbabilityIncreaseMultiplier.Float64)
-			dockerImagesResponse[i].ProbabilityIncreaseMultiplier = &value
-		}
-		if dockerImage.EntropyThreshold.Valid {
-			value := float32(dockerImage.EntropyThreshold.Float64)
-			dockerImagesResponse[i].EntropyThreshold = &value
-		}
-		if dockerImage.LogisticGrowthRate.Valid {
-			value := float32(dockerImage.LogisticGrowthRate.Float64)
-			dockerImagesResponse[i].LogisticGrowthRate = &value
+		if dockerImage.Password != "" {
+			dockerImagesResponse[i].Password = &dockerImage.Password
 		}
 	}
 
@@ -95,7 +80,10 @@ func (server *serverHandler) GetDocker(ctx context.Context, request generated.Ge
 }
 
 func (server *serverHandler) GetDockerId(ctx context.Context, request generated.GetDockerIdRequestObject) (generated.GetDockerIdResponseObject, error) {
-	dockerImage, err := server.DatabaseProvider.GetDockerImage(ctx, request.Id)
+	dockerImage, err := server.DatabaseProvider.GetDockerImage(ctx, queries.GetDockerImageParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.GetDockerId404JSONResponse{
 			Success: false,
@@ -162,31 +150,11 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 		Id:          int(dockerImage.ID),
 	}
 
-	if dockerImage.Username.Valid {
-		image.Username = &dockerImage.Username.String
+	if dockerImage.Username != "" {
+		image.Username = &dockerImage.Username
 	}
-	if dockerImage.Password.Valid {
-		image.Password = &dockerImage.Password.String
-	}
-	if dockerImage.MinProbability.Valid {
-		value := float32(dockerImage.MinProbability.Float64)
-		image.MinProbability = &value
-	}
-	if dockerImage.ProbabilityDecreaseMultiplier.Valid {
-		value := float32(dockerImage.ProbabilityDecreaseMultiplier.Float64)
-		image.ProbabilityDecreaseMultiplier = &value
-	}
-	if dockerImage.ProbabilityIncreaseMultiplier.Valid {
-		value := float32(dockerImage.ProbabilityIncreaseMultiplier.Float64)
-		image.ProbabilityIncreaseMultiplier = &value
-	}
-	if dockerImage.EntropyThreshold.Valid {
-		value := float32(dockerImage.EntropyThreshold.Float64)
-		image.EntropyThreshold = &value
-	}
-	if dockerImage.LogisticGrowthRate.Valid {
-		value := float32(dockerImage.LogisticGrowthRate.Float64)
-		image.LogisticGrowthRate = &value
+	if dockerImage.Password != "" {
+		image.Password = &dockerImage.Password
 	}
 
 	return generated.GetDockerId200JSONResponse{
@@ -197,7 +165,10 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 }
 
 func (server *serverHandler) PatchDockerId(ctx context.Context, request generated.PatchDockerIdRequestObject) (generated.PatchDockerIdResponseObject, error) {
-	dockerImage, err := server.DatabaseProvider.GetDockerImage(ctx, request.Id)
+	dockerImage, err := server.DatabaseProvider.GetDockerImage(ctx, queries.GetDockerImageParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.PatchDockerId404JSONResponse{
 			Success: false,
@@ -219,35 +190,20 @@ func (server *serverHandler) PatchDockerId(ctx context.Context, request generate
 	if request.Body.DockerImage != nil {
 		dockerImage.DockerImage = *request.Body.DockerImage
 	}
-	if request.Body.EntropyThreshold != nil {
-		dockerImage.EntropyThreshold = sql.NullFloat64{Float64: float64(*request.Body.EntropyThreshold), Valid: true}
-	}
-	if request.Body.LogisticGrowthRate != nil {
-		dockerImage.LogisticGrowthRate = sql.NullFloat64{Float64: float64(*request.Body.LogisticGrowthRate), Valid: true}
-	}
-	if request.Body.MinProbability != nil {
-		dockerImage.MinProbability = sql.NullFloat64{Float64: float64(*request.Body.MinProbability), Valid: true}
+	if request.Body.Username != nil {
+		dockerImage.Username = *request.Body.Username
 	}
 	if request.Body.Password != nil {
-		dockerImage.Password = sql.NullString{String: *request.Body.Password, Valid: true}
-	}
-	if request.Body.ProbabilityDecreaseMultiplier != nil {
-		dockerImage.ProbabilityDecreaseMultiplier = sql.NullFloat64{Float64: float64(*request.Body.ProbabilityDecreaseMultiplier), Valid: true}
-	}
-	if request.Body.ProbabilityIncreaseMultiplier != nil {
-		dockerImage.ProbabilityIncreaseMultiplier = sql.NullFloat64{Float64: float64(*request.Body.ProbabilityIncreaseMultiplier), Valid: true}
+		dockerImage.Password = *request.Body.Password
 	}
 
 	image, err := server.DatabaseProvider.UpdateDockerImage(ctx, queries.UpdateDockerImageParams{
-		ID:                            dockerImage.ID,
-		DockerImage:                   dockerImage.DockerImage,
-		Username:                      dockerImage.Username,
-		Password:                      dockerImage.Password,
-		MinProbability:                dockerImage.MinProbability,
-		ProbabilityDecreaseMultiplier: dockerImage.ProbabilityDecreaseMultiplier,
-		ProbabilityIncreaseMultiplier: dockerImage.ProbabilityIncreaseMultiplier,
-		EntropyThreshold:              dockerImage.EntropyThreshold,
-		LogisticGrowthRate:            dockerImage.LogisticGrowthRate,
+		ID:          dockerImage.ID,
+		DockerImage: dockerImage.DockerImage,
+		Username:    dockerImage.Username,
+		Password:    dockerImage.Password,
+		ProjectID:   dockerImage.ProjectID,
+		SaltKey:     server.saltKey,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("PatchDockerId: error updating docker image: %w", err)
@@ -259,11 +215,11 @@ func (server *serverHandler) PatchDockerId(ctx context.Context, request generate
 		ProjectId:   int(image.ProjectID),
 	}
 
-	if image.Username.Valid {
-		responseImage.Username = &image.Username.String
+	if image.Username != "" {
+		responseImage.Username = &image.Username
 	}
-	if image.Password.Valid {
-		responseImage.Password = &image.Password.String
+	if image.Password != "" {
+		responseImage.Password = &image.Password
 	}
 	if image.MinProbability.Valid {
 		value := float32(image.MinProbability.Float64)
@@ -304,12 +260,13 @@ func (server *serverHandler) PostDocker(ctx context.Context, request generated.P
 	params := queries.CreateDockerImageParams{
 		DockerImage: request.Body.DockerImage,
 		ProjectID:   int64(request.Body.ProjectId),
+		SaltKey:     server.saltKey,
 	}
 	if request.Body.Username != nil {
-		params.Username = sql.NullString{String: *request.Body.Username, Valid: true}
+		params.Username = *request.Body.Username
 	}
 	if request.Body.Password != nil {
-		params.Password = sql.NullString{String: *request.Body.Password, Valid: true}
+		params.Password = *request.Body.Password
 	}
 
 	dockerImage, err := server.DatabaseProvider.CreateDockerImage(ctx, params)
@@ -322,11 +279,11 @@ func (server *serverHandler) PostDocker(ctx context.Context, request generated.P
 		Id:          int(dockerImage.ID),
 	}
 
-	if dockerImage.Username.Valid {
-		responseImage.Username = &dockerImage.Username.String
+	if dockerImage.Username != "" {
+		responseImage.Username = &dockerImage.Username
 	}
-	if dockerImage.Password.Valid {
-		responseImage.Password = &dockerImage.Password.String
+	if dockerImage.Password != "" {
+		responseImage.Password = &dockerImage.Password
 	}
 	if dockerImage.MinProbability.Valid {
 		value := float32(dockerImage.MinProbability.Float64)

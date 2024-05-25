@@ -28,7 +28,7 @@ var updateNVDTask = &cobra.Command{
 		localExchange := localExchange.NewLocalExchange()
 		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(transaction)
 
-		taskRunner := local.NewLocalRunner(true, nil, transaction, localExchange, bruteforceProvider)
+		taskRunner := local.NewLocalRunner(true, nil, transaction, localExchange, bruteforceProvider, viper.GetString("db-encryption-salt"))
 
 		err = taskRunner.UpdateNVDVulnerabilitiesForProduct(cmd.Context(), product)
 		transaction.EndTransaction(cmd.Context(), err != nil)

@@ -37,7 +37,7 @@ func (q *Queries) AddOrganizationUser(ctx context.Context, arg AddOrganizationUs
 
 const getOrganizationByName = `-- name: GetOrganizationByName :one
 SELECT
-    id, name, created_at
+    id, name, encryption_key, created_at
 FROM
     organizations
 WHERE
@@ -48,7 +48,12 @@ LIMIT 1
 func (q *Queries) GetOrganizationByName(ctx context.Context, name string) (*Organization, error) {
 	row := q.db.QueryRow(ctx, getOrganizationByName, name)
 	var i Organization
-	err := row.Scan(&i.ID, &i.Name, &i.CreatedAt)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.EncryptionKey,
+		&i.CreatedAt,
+	)
 	return &i, err
 }
 
@@ -140,7 +145,7 @@ func (q *Queries) GetOrganizationUser(ctx context.Context, arg GetOrganizationUs
 
 const getOrganizationsByUser = `-- name: GetOrganizationsByUser :many
 SELECT
-    organizations.id, organizations.name, organizations.created_at,
+    organizations.id, organizations.name, organizations.encryption_key, organizations.created_at,
 (
         SELECT
             COUNT(*)
@@ -201,6 +206,7 @@ func (q *Queries) GetOrganizationsByUser(ctx context.Context, userID int64) ([]*
 		if err := rows.Scan(
 			&i.Organization.ID,
 			&i.Organization.Name,
+			&i.Organization.EncryptionKey,
 			&i.Organization.CreatedAt,
 			&i.Users,
 			&i.Projects,

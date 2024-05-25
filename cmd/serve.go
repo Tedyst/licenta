@@ -59,6 +59,7 @@ var serveCmd = &cobra.Command{
 			db,
 			localExchange,
 			bruteforceProvider,
+			viper.GetString("db-encryption-salt"),
 		)
 
 		userCacheProvider, err := cache.NewLocalCacheProvider[queries.User]()
@@ -93,6 +94,7 @@ var serveCmd = &cobra.Command{
 			UserAuth:             userAuth,
 			Database:             db,
 			AuthorizationManager: authorizationManager,
+			SaltKey:              viper.GetString("db-encryption-salt"),
 		})
 		if err != nil {
 			return err
@@ -126,6 +128,10 @@ func init() {
 	}
 	serveCmd.Flags().String("encrypt-key", "", "Encrypt key used for signing Cookies")
 	if err := serveCmd.MarkFlagRequired("encrypt-key"); err != nil {
+		panic(err)
+	}
+	serveCmd.Flags().String("db-encryption-salt", "", "Database salt encryption key")
+	if err := serveCmd.MarkFlagRequired("db-encryption-salt"); err != nil {
 		panic(err)
 	}
 

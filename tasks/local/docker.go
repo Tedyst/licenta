@@ -23,6 +23,7 @@ type DockerRunner struct {
 
 	FileScannerProvider   func(opts ...file.Option) (*file.FileScanner, error)
 	DockerScannerProvider func(ctx context.Context, fileScanner docker.FileScanner, imageName string, opts ...docker.Option) (*docker.DockerScan, error)
+	saltKey               string
 }
 
 type DockerQuerier interface {
@@ -32,11 +33,12 @@ type DockerQuerier interface {
 	CreateScanResult(ctx context.Context, params queries.CreateScanResultParams) (*queries.ScanResult, error)
 }
 
-func NewDockerRunner(queries DockerQuerier) *DockerRunner {
+func NewDockerRunner(queries DockerQuerier, saltKey string) *DockerRunner {
 	return &DockerRunner{
 		queries:               queries,
 		FileScannerProvider:   file.NewScanner,
 		DockerScannerProvider: docker.NewScanner,
+		saltKey:               saltKey,
 	}
 }
 
@@ -113,10 +115,10 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 
 	options := []docker.Option{}
 	options = append(options, docker.WithCallbackResult(resultCallback))
-	if image.Username.Valid && image.Password.Valid {
+	if image.Username != "" && image.Password != "" {
 		auth := authn.Basic{
-			Username: image.Username.String,
-			Password: image.Password.String,
+			Username: image.Username,
+			Password: image.Password,
 		}
 		options = append(options, docker.WithCredentials(&auth))
 	}

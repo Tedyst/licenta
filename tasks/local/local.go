@@ -28,12 +28,12 @@ type localRunner struct {
 	queries db.TransactionQuerier
 }
 
-func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *localRunner {
+func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider, saltKey string) *localRunner {
 	return &localRunner{
 		NvdRunner:    *NewNVDRunner(queries),
 		GitRunner:    *NewGitRunner(queries),
 		emailRunner:  *NewEmailRunner(emailSender),
-		DockerRunner: *NewDockerRunner(queries),
+		DockerRunner: *NewDockerRunner(queries, saltKey),
 		queries:      queries,
 		SaverRunner:  *NewSaverRunner(queries, exchange, bruteforceProvider),
 	}
@@ -132,7 +132,10 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 
 	if runDocker {
 		slog.DebugContext(ctx, "Scheduling docker scan", "project", project.ID)
-		images, err := source.queries.GetDockerImagesForProject(ctx, project.ID)
+		images, err := source.queries.GetDockerImagesForProject(ctx, queries.GetDockerImagesForProjectParams{
+			ProjectID: project.ID,
+			SaltKey:   source.saltKey,
+		})
 		if err != nil && err != pgx.ErrNoRows {
 			return fmt.Errorf("failed to get docker images for project: %w", err)
 		}
@@ -157,7 +160,13 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 			}
 
 			slog.DebugContext(ctx, "Scheduling docker scan", "image", image.ID, "name", image.DockerImage)
-			if err := source.ScanDockerRepository(ctx, image, &scan.Scan); err != nil {
+			if err := source.ScanDockerRepository(ctx, &queries.DockerImage{
+				ID:          image.ID,
+				ProjectID:   image.ProjectID,
+				DockerImage: image.DockerImage,
+				Username:    image.Username,
+				Password:    image.Password,
+			}, &scan.Scan); err != nil {
 				return fmt.Errorf("failed to scan docker repository: %w", err)
 			}
 
