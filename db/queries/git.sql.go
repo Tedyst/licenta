@@ -53,60 +53,28 @@ func (q *Queries) CreateGitCommitForProject(ctx context.Context, arg CreateGitCo
 
 const createGitRepository = `-- name: CreateGitRepository :one
 INSERT INTO git_repositories(project_id, git_repository, username, PASSWORD, private_key)
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, encrypt_data($1, $3, $4), encrypt_data($1, $3, $5), encrypt_data($1, $3, $6))
 RETURNING
     id, project_id, git_repository, username, password, private_key, created_at
 `
 
 type CreateGitRepositoryParams struct {
-	ProjectID     int64          `json:"project_id"`
-	GitRepository string         `json:"git_repository"`
-	Username      sql.NullString `json:"username"`
-	Password      sql.NullString `json:"password"`
-	PrivateKey    sql.NullString `json:"private_key"`
+	ProjectID     int64  `json:"project_id"`
+	GitRepository string `json:"git_repository"`
+	SaltKey       string `json:"salt_key"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	PrivateKey    string `json:"private_key"`
 }
 
 func (q *Queries) CreateGitRepository(ctx context.Context, arg CreateGitRepositoryParams) (*GitRepository, error) {
 	row := q.db.QueryRow(ctx, createGitRepository,
 		arg.ProjectID,
 		arg.GitRepository,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
 		arg.PrivateKey,
-	)
-	var i GitRepository
-	err := row.Scan(
-		&i.ID,
-		&i.ProjectID,
-		&i.GitRepository,
-		&i.Username,
-		&i.Password,
-		&i.PrivateKey,
-		&i.CreatedAt,
-	)
-	return &i, err
-}
-
-const createGitRepositoryForProject = `-- name: CreateGitRepositoryForProject :one
-INSERT INTO git_repositories(project_id, git_repository, username, PASSWORD)
-    VALUES ($1, $2, $3, $4)
-RETURNING
-    id, project_id, git_repository, username, password, private_key, created_at
-`
-
-type CreateGitRepositoryForProjectParams struct {
-	ProjectID     int64          `json:"project_id"`
-	GitRepository string         `json:"git_repository"`
-	Username      sql.NullString `json:"username"`
-	Password      sql.NullString `json:"password"`
-}
-
-func (q *Queries) CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*GitRepository, error) {
-	row := q.db.QueryRow(ctx, createGitRepositoryForProject,
-		arg.ProjectID,
-		arg.GitRepository,
-		arg.Username,
-		arg.Password,
 	)
 	var i GitRepository
 	err := row.Scan(
@@ -159,22 +127,6 @@ WHERE id = $1
 
 func (q *Queries) DeleteGitRepository(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteGitRepository, id)
-	return err
-}
-
-const deleteGitRepositoryForProject = `-- name: DeleteGitRepositoryForProject :exec
-DELETE FROM git_repositories
-WHERE project_id = $1
-    AND git_repository = $2
-`
-
-type DeleteGitRepositoryForProjectParams struct {
-	ProjectID     int64  `json:"project_id"`
-	GitRepository string `json:"git_repository"`
-}
-
-func (q *Queries) DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error {
-	_, err := q.db.Exec(ctx, deleteGitRepositoryForProject, arg.ProjectID, arg.GitRepository)
 	return err
 }
 
@@ -286,22 +238,41 @@ func (q *Queries) GetGitCommitsWithResults(ctx context.Context, repositoryID int
 
 const getGitRepositoriesForProject = `-- name: GetGitRepositoriesForProject :many
 SELECT
-    id, project_id, git_repository, username, password, private_key, created_at
+    id,
+    project_id,
+    git_repository,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD,
+    decrypt_data(project_id, $2, private_key) AS private_key
 FROM
     git_repositories
 WHERE
     project_id = $1
 `
 
-func (q *Queries) GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*GitRepository, error) {
-	rows, err := q.db.Query(ctx, getGitRepositoriesForProject, projectID)
+type GetGitRepositoriesForProjectParams struct {
+	ProjectID int64  `json:"project_id"`
+	SaltKey   string `json:"salt_key"`
+}
+
+type GetGitRepositoriesForProjectRow struct {
+	ID            int64  `json:"id"`
+	ProjectID     int64  `json:"project_id"`
+	GitRepository string `json:"git_repository"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	PrivateKey    string `json:"private_key"`
+}
+
+func (q *Queries) GetGitRepositoriesForProject(ctx context.Context, arg GetGitRepositoriesForProjectParams) ([]*GetGitRepositoriesForProjectRow, error) {
+	rows, err := q.db.Query(ctx, getGitRepositoriesForProject, arg.ProjectID, arg.SaltKey)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*GitRepository
+	var items []*GetGitRepositoriesForProjectRow
 	for rows.Next() {
-		var i GitRepository
+		var i GetGitRepositoriesForProjectRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProjectID,
@@ -309,7 +280,6 @@ func (q *Queries) GetGitRepositoriesForProject(ctx context.Context, projectID in
 			&i.Username,
 			&i.Password,
 			&i.PrivateKey,
-			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -323,16 +293,35 @@ func (q *Queries) GetGitRepositoriesForProject(ctx context.Context, projectID in
 
 const getGitRepository = `-- name: GetGitRepository :one
 SELECT
-    id, project_id, git_repository, username, password, private_key, created_at
+    id,
+    project_id,
+    git_repository,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD,
+    decrypt_data(project_id, $2, private_key) AS private_key
 FROM
     git_repositories
 WHERE
     id = $1
 `
 
-func (q *Queries) GetGitRepository(ctx context.Context, id int64) (*GitRepository, error) {
-	row := q.db.QueryRow(ctx, getGitRepository, id)
-	var i GitRepository
+type GetGitRepositoryParams struct {
+	ID      int64  `json:"id"`
+	SaltKey string `json:"salt_key"`
+}
+
+type GetGitRepositoryRow struct {
+	ID            int64  `json:"id"`
+	ProjectID     int64  `json:"project_id"`
+	GitRepository string `json:"git_repository"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	PrivateKey    string `json:"private_key"`
+}
+
+func (q *Queries) GetGitRepository(ctx context.Context, arg GetGitRepositoryParams) (*GetGitRepositoryRow, error) {
+	row := q.db.QueryRow(ctx, getGitRepository, arg.ID, arg.SaltKey)
+	var i GetGitRepositoryRow
 	err := row.Scan(
 		&i.ID,
 		&i.ProjectID,
@@ -340,7 +329,6 @@ func (q *Queries) GetGitRepository(ctx context.Context, id int64) (*GitRepositor
 		&i.Username,
 		&i.Password,
 		&i.PrivateKey,
-		&i.CreatedAt,
 	)
 	return &i, err
 }
@@ -486,9 +474,9 @@ UPDATE
     git_repositories
 SET
     git_repository = $2,
-    username = $3,
-    PASSWORD = $4,
-    private_key = $5
+    username = encrypt_data($3, $4, $5),
+    PASSWORD = encrypt_data($3, $4, $6),
+    private_key = encrypt_data($3, $4, $7)
 WHERE
     id = $1
 RETURNING
@@ -496,17 +484,21 @@ RETURNING
 `
 
 type UpdateGitRepositoryParams struct {
-	ID            int64          `json:"id"`
-	GitRepository string         `json:"git_repository"`
-	Username      sql.NullString `json:"username"`
-	Password      sql.NullString `json:"password"`
-	PrivateKey    sql.NullString `json:"private_key"`
+	ID            int64  `json:"id"`
+	GitRepository string `json:"git_repository"`
+	ProjectID     int64  `json:"project_id"`
+	SaltKey       string `json:"salt_key"`
+	Username      string `json:"username"`
+	Password      string `json:"password"`
+	PrivateKey    string `json:"private_key"`
 }
 
 func (q *Queries) UpdateGitRepository(ctx context.Context, arg UpdateGitRepositoryParams) (*GitRepository, error) {
 	row := q.db.QueryRow(ctx, updateGitRepository,
 		arg.ID,
 		arg.GitRepository,
+		arg.ProjectID,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
 		arg.PrivateKey,

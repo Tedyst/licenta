@@ -471,45 +471,6 @@ func (c *MockTransactionQuerierCreateGitRepositoryCall) DoAndReturn(f func(conte
 	return c
 }
 
-// CreateGitRepositoryForProject mocks base method.
-func (m *MockTransactionQuerier) CreateGitRepositoryForProject(ctx context.Context, arg queries.CreateGitRepositoryForProjectParams) (*queries.GitRepository, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateGitRepositoryForProject", ctx, arg)
-	ret0, _ := ret[0].(*queries.GitRepository)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CreateGitRepositoryForProject indicates an expected call of CreateGitRepositoryForProject.
-func (mr *MockTransactionQuerierMockRecorder) CreateGitRepositoryForProject(ctx, arg any) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateGitRepositoryForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateGitRepositoryForProject), ctx, arg)
-	return &MockTransactionQuerierCreateGitRepositoryForProjectCall{Call: call}
-}
-
-// MockTransactionQuerierCreateGitRepositoryForProjectCall wrap *gomock.Call
-type MockTransactionQuerierCreateGitRepositoryForProjectCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierCreateGitRepositoryForProjectCall) Return(arg0 *queries.GitRepository, arg1 error) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
-	c.Call = c.Call.Return(arg0, arg1)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierCreateGitRepositoryForProjectCall) Do(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.GitRepository, error)) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierCreateGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.CreateGitRepositoryForProjectParams) (*queries.GitRepository, error)) *MockTransactionQuerierCreateGitRepositoryForProjectCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
 // CreateGitResultForCommit mocks base method.
 func (m *MockTransactionQuerier) CreateGitResultForCommit(ctx context.Context, arg []queries.CreateGitResultForCommitParams) (int64, error) {
 	m.ctrl.T.Helper()
@@ -1362,44 +1323,6 @@ func (c *MockTransactionQuerierDeleteGitRepositoryCall) Do(f func(context.Contex
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierDeleteGitRepositoryCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierDeleteGitRepositoryCall {
-	c.Call = c.Call.DoAndReturn(f)
-	return c
-}
-
-// DeleteGitRepositoryForProject mocks base method.
-func (m *MockTransactionQuerier) DeleteGitRepositoryForProject(ctx context.Context, arg queries.DeleteGitRepositoryForProjectParams) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteGitRepositoryForProject", ctx, arg)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteGitRepositoryForProject indicates an expected call of DeleteGitRepositoryForProject.
-func (mr *MockTransactionQuerierMockRecorder) DeleteGitRepositoryForProject(ctx, arg any) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
-	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteGitRepositoryForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteGitRepositoryForProject), ctx, arg)
-	return &MockTransactionQuerierDeleteGitRepositoryForProjectCall{Call: call}
-}
-
-// MockTransactionQuerierDeleteGitRepositoryForProjectCall wrap *gomock.Call
-type MockTransactionQuerierDeleteGitRepositoryForProjectCall struct {
-	*gomock.Call
-}
-
-// Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierDeleteGitRepositoryForProjectCall) Return(arg0 error) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
-	c.Call = c.Call.Return(arg0)
-	return c
-}
-
-// Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierDeleteGitRepositoryForProjectCall) Do(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
-	c.Call = c.Call.Do(f)
-	return c
-}
-
-// DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierDeleteGitRepositoryForProjectCall) DoAndReturn(f func(context.Context, queries.DeleteGitRepositoryForProjectParams) error) *MockTransactionQuerierDeleteGitRepositoryForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2411,18 +2334,18 @@ func (c *MockTransactionQuerierGetGitCommitsWithResultsCall) DoAndReturn(f func(
 }
 
 // GetGitRepositoriesForProject mocks base method.
-func (m *MockTransactionQuerier) GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*queries.GitRepository, error) {
+func (m *MockTransactionQuerier) GetGitRepositoriesForProject(ctx context.Context, arg queries.GetGitRepositoriesForProjectParams) ([]*queries.GetGitRepositoriesForProjectRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGitRepositoriesForProject", ctx, projectID)
-	ret0, _ := ret[0].([]*queries.GitRepository)
+	ret := m.ctrl.Call(m, "GetGitRepositoriesForProject", ctx, arg)
+	ret0, _ := ret[0].([]*queries.GetGitRepositoriesForProjectRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetGitRepositoriesForProject indicates an expected call of GetGitRepositoriesForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetGitRepositoriesForProject(ctx, projectID any) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetGitRepositoriesForProject(ctx, arg any) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitRepositoriesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitRepositoriesForProject), ctx, projectID)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitRepositoriesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitRepositoriesForProject), ctx, arg)
 	return &MockTransactionQuerierGetGitRepositoriesForProjectCall{Call: call}
 }
 
@@ -2432,36 +2355,36 @@ type MockTransactionQuerierGetGitRepositoriesForProjectCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) Return(arg0 []*queries.GitRepository, arg1 error) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) Return(arg0 []*queries.GetGitRepositoriesForProjectRow, arg1 error) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) Do(f func(context.Context, int64) ([]*queries.GitRepository, error)) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) Do(f func(context.Context, queries.GetGitRepositoriesForProjectParams) ([]*queries.GetGitRepositoriesForProjectRow, error)) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.GitRepository, error)) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
+func (c *MockTransactionQuerierGetGitRepositoriesForProjectCall) DoAndReturn(f func(context.Context, queries.GetGitRepositoriesForProjectParams) ([]*queries.GetGitRepositoriesForProjectRow, error)) *MockTransactionQuerierGetGitRepositoriesForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // GetGitRepository mocks base method.
-func (m *MockTransactionQuerier) GetGitRepository(ctx context.Context, id int64) (*queries.GitRepository, error) {
+func (m *MockTransactionQuerier) GetGitRepository(ctx context.Context, arg queries.GetGitRepositoryParams) (*queries.GetGitRepositoryRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGitRepository", ctx, id)
-	ret0, _ := ret[0].(*queries.GitRepository)
+	ret := m.ctrl.Call(m, "GetGitRepository", ctx, arg)
+	ret0, _ := ret[0].(*queries.GetGitRepositoryRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetGitRepository indicates an expected call of GetGitRepository.
-func (mr *MockTransactionQuerierMockRecorder) GetGitRepository(ctx, id any) *MockTransactionQuerierGetGitRepositoryCall {
+func (mr *MockTransactionQuerierMockRecorder) GetGitRepository(ctx, arg any) *MockTransactionQuerierGetGitRepositoryCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitRepository", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitRepository), ctx, id)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGitRepository", reflect.TypeOf((*MockTransactionQuerier)(nil).GetGitRepository), ctx, arg)
 	return &MockTransactionQuerierGetGitRepositoryCall{Call: call}
 }
 
@@ -2471,19 +2394,19 @@ type MockTransactionQuerierGetGitRepositoryCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetGitRepositoryCall) Return(arg0 *queries.GitRepository, arg1 error) *MockTransactionQuerierGetGitRepositoryCall {
+func (c *MockTransactionQuerierGetGitRepositoryCall) Return(arg0 *queries.GetGitRepositoryRow, arg1 error) *MockTransactionQuerierGetGitRepositoryCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetGitRepositoryCall) Do(f func(context.Context, int64) (*queries.GitRepository, error)) *MockTransactionQuerierGetGitRepositoryCall {
+func (c *MockTransactionQuerierGetGitRepositoryCall) Do(f func(context.Context, queries.GetGitRepositoryParams) (*queries.GetGitRepositoryRow, error)) *MockTransactionQuerierGetGitRepositoryCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetGitRepositoryCall) DoAndReturn(f func(context.Context, int64) (*queries.GitRepository, error)) *MockTransactionQuerierGetGitRepositoryCall {
+func (c *MockTransactionQuerierGetGitRepositoryCall) DoAndReturn(f func(context.Context, queries.GetGitRepositoryParams) (*queries.GetGitRepositoryRow, error)) *MockTransactionQuerierGetGitRepositoryCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

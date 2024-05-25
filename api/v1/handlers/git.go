@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -13,7 +12,10 @@ import (
 )
 
 func (server *serverHandler) DeleteGitId(ctx context.Context, request generated.DeleteGitIdRequestObject) (generated.DeleteGitIdResponseObject, error) {
-	gitRepository, err := server.DatabaseProvider.GetGitRepository(ctx, request.Id)
+	gitRepository, err := server.DatabaseProvider.GetGitRepository(ctx, queries.GetGitRepositoryParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.DeleteGitId404JSONResponse{
 			Success: false,
@@ -43,7 +45,10 @@ func (server *serverHandler) DeleteGitId(ctx context.Context, request generated.
 }
 
 func (server *serverHandler) GetGit(ctx context.Context, request generated.GetGitRequestObject) (generated.GetGitResponseObject, error) {
-	gitRepositories, err := server.DatabaseProvider.GetGitRepositoriesForProject(ctx, int64(request.Params.Project))
+	gitRepositories, err := server.DatabaseProvider.GetGitRepositoriesForProject(ctx, queries.GetGitRepositoriesForProjectParams{
+		ProjectID: int64(request.Params.Project),
+		SaltKey:   server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.GetGit401JSONResponse{
 			Success: false,
@@ -58,11 +63,11 @@ func (server *serverHandler) GetGit(ctx context.Context, request generated.GetGi
 	for i, gitRepository := range gitRepositories {
 		gitRepositoriesResponse[i] = generated.Git{
 			GitRepository: gitRepository.GitRepository,
-			HasSsh:        gitRepository.PrivateKey.Valid,
+			HasSsh:        gitRepository.PrivateKey != "",
 			Id:            int(gitRepository.ID),
-			Password:      gitRepository.Password.String,
+			Password:      gitRepository.Password,
 			ProjectId:     int(gitRepository.ProjectID),
-			Username:      gitRepository.Username.String,
+			Username:      gitRepository.Username,
 		}
 	}
 
@@ -73,7 +78,10 @@ func (server *serverHandler) GetGit(ctx context.Context, request generated.GetGi
 }
 
 func (server *serverHandler) GetGitId(ctx context.Context, request generated.GetGitIdRequestObject) (generated.GetGitIdResponseObject, error) {
-	gitRepository, err := server.DatabaseProvider.GetGitRepository(ctx, request.Id)
+	gitRepository, err := server.DatabaseProvider.GetGitRepository(ctx, queries.GetGitRepositoryParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.GetGitId404JSONResponse{
 			Success: false,
@@ -145,7 +153,10 @@ func (server *serverHandler) GetGitId(ctx context.Context, request generated.Get
 }
 
 func (server *serverHandler) PatchGitId(ctx context.Context, request generated.PatchGitIdRequestObject) (generated.PatchGitIdResponseObject, error) {
-	gitRepository, err := server.DatabaseProvider.GetGitRepository(ctx, request.Id)
+	gitRepository, err := server.DatabaseProvider.GetGitRepository(ctx, queries.GetGitRepositoryParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.PatchGitId404JSONResponse{
 			Success: false,
@@ -168,13 +179,13 @@ func (server *serverHandler) PatchGitId(ctx context.Context, request generated.P
 		gitRepository.GitRepository = *request.Body.GitRepository
 	}
 	if request.Body.Password != nil {
-		gitRepository.Password = sql.NullString{String: *request.Body.Password, Valid: true}
+		gitRepository.Password = *request.Body.Password
 	}
 	if request.Body.Username != nil {
-		gitRepository.Username = sql.NullString{String: *request.Body.Username, Valid: true}
+		gitRepository.Username = *request.Body.Username
 	}
 	if request.Body.PrivateKey != nil {
-		gitRepository.PrivateKey = sql.NullString{String: *request.Body.PrivateKey, Valid: true}
+		gitRepository.PrivateKey = *request.Body.PrivateKey
 	}
 
 	repo, err := server.DatabaseProvider.UpdateGitRepository(ctx, queries.UpdateGitRepositoryParams{
@@ -183,6 +194,8 @@ func (server *serverHandler) PatchGitId(ctx context.Context, request generated.P
 		Username:      gitRepository.Username,
 		Password:      gitRepository.Password,
 		PrivateKey:    gitRepository.PrivateKey,
+		ProjectID:     gitRepository.ProjectID,
+		SaltKey:       server.saltKey,
 	})
 
 	if err != nil {
@@ -193,11 +206,11 @@ func (server *serverHandler) PatchGitId(ctx context.Context, request generated.P
 		Success: true,
 		Git: generated.Git{
 			GitRepository: repo.GitRepository,
-			HasSsh:        repo.PrivateKey.Valid,
+			HasSsh:        repo.PrivateKey != "",
 			Id:            int(repo.ID),
-			Password:      repo.Password.String,
+			Password:      repo.Password,
 			ProjectId:     int(repo.ProjectID),
-			Username:      repo.Username.String,
+			Username:      repo.Username,
 		},
 	}, nil
 }
@@ -216,13 +229,13 @@ func (server *serverHandler) PostGit(ctx context.Context, request generated.Post
 		ProjectID:     int64(request.Body.ProjectId),
 	}
 	if request.Body.Password != nil {
-		params.Password = sql.NullString{String: *request.Body.Password, Valid: true}
+		params.Password = *request.Body.Password
 	}
 	if request.Body.Username != nil {
-		params.Username = sql.NullString{String: *request.Body.Username, Valid: true}
+		params.Username = *request.Body.Username
 	}
 	if request.Body.PrivateKey != nil {
-		params.PrivateKey = sql.NullString{String: *request.Body.PrivateKey, Valid: true}
+		params.PrivateKey = *request.Body.PrivateKey
 	}
 
 	gitRepository, err := server.DatabaseProvider.CreateGitRepository(ctx, params)
@@ -234,11 +247,11 @@ func (server *serverHandler) PostGit(ctx context.Context, request generated.Post
 		Success: true,
 		Git: generated.Git{
 			GitRepository: gitRepository.GitRepository,
-			HasSsh:        gitRepository.PrivateKey.Valid,
+			HasSsh:        gitRepository.PrivateKey != "",
 			Id:            int(gitRepository.ID),
-			Password:      gitRepository.Password.String,
+			Password:      gitRepository.Password,
 			ProjectId:     int(gitRepository.ProjectID),
-			Username:      gitRepository.Username.String,
+			Username:      gitRepository.Username,
 		},
 	}, nil
 }

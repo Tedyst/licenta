@@ -1,6 +1,11 @@
 -- name: GetGitRepositoriesForProject :many
 SELECT
-    *
+    id,
+    project_id,
+    git_repository,
+    decrypt_data(project_id, sqlc.arg(salt_key), username) AS username,
+    decrypt_data(project_id, sqlc.arg(salt_key), PASSWORD) AS PASSWORD,
+    decrypt_data(project_id, sqlc.arg(salt_key), private_key) AS private_key
 FROM
     git_repositories
 WHERE
@@ -8,22 +13,16 @@ WHERE
 
 -- name: GetGitRepository :one
 SELECT
-    *
+    id,
+    project_id,
+    git_repository,
+    decrypt_data(project_id, sqlc.arg(salt_key), username) AS username,
+    decrypt_data(project_id, sqlc.arg(salt_key), PASSWORD) AS PASSWORD,
+    decrypt_data(project_id, sqlc.arg(salt_key), private_key) AS private_key
 FROM
     git_repositories
 WHERE
     id = $1;
-
--- name: CreateGitRepositoryForProject :one
-INSERT INTO git_repositories(project_id, git_repository, username, PASSWORD)
-    VALUES ($1, $2, $3, $4)
-RETURNING
-    *;
-
--- name: DeleteGitRepositoryForProject :exec
-DELETE FROM git_repositories
-WHERE project_id = $1
-    AND git_repository = $2;
 
 -- name: CreateGitCommitForProject :one
 INSERT INTO git_commits(repository_id, commit_hash, author, author_email, description, commit_date)
@@ -107,9 +106,9 @@ UPDATE
     git_repositories
 SET
     git_repository = $2,
-    username = $3,
-    PASSWORD = $4,
-    private_key = $5
+    username = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(username)),
+    PASSWORD = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(PASSWORD)),
+    private_key = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(private_key))
 WHERE
     id = $1
 RETURNING
@@ -117,7 +116,7 @@ RETURNING
 
 -- name: CreateGitRepository :one
 INSERT INTO git_repositories(project_id, git_repository, username, PASSWORD, private_key)
-    VALUES ($1, $2, $3, $4, $5)
+    VALUES ($1, $2, encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(username)), encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(PASSWORD)), encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(private_key)))
 RETURNING
     *;
 

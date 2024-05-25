@@ -73,7 +73,10 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 
 	if runGit {
 		slog.DebugContext(ctx, "Scheduling git scan", "project", project.ID)
-		repos, err := source.queries.GetGitRepositoriesForProject(ctx, project.ID)
+		repos, err := source.queries.GetGitRepositoriesForProject(ctx, queries.GetGitRepositoriesForProjectParams{
+			ProjectID: project.ID,
+			SaltKey:   source.saltKey,
+		})
 		if err != nil && err != pgx.ErrNoRows {
 			return fmt.Errorf("failed to get git repositories for project: %w", err)
 		}
@@ -98,7 +101,14 @@ func (source *localRunner) ScheduleSourceRun(ctx context.Context, project *queri
 			}
 
 			slog.DebugContext(ctx, "Scheduling git scan", "repo", repo.ID, "url", repo.GitRepository)
-			if err := source.ScanGitRepository(ctx, repo, &scan.Scan); err != nil {
+			if err := source.ScanGitRepository(ctx, &queries.GitRepository{
+				ID:            repo.ID,
+				ProjectID:     repo.ProjectID,
+				GitRepository: repo.GitRepository,
+				Username:      repo.Username,
+				Password:      repo.Password,
+				PrivateKey:    repo.PrivateKey,
+			}, &scan.Scan); err != nil {
 				return fmt.Errorf("failed to scan git repository: %w", err)
 			}
 

@@ -46,14 +46,14 @@ func (r *GitRunner) ScanGitRepository(ctx context.Context, repo *queries.GitRepo
 	}
 
 	options := []git.Option{}
-	if repo.Username.Valid && repo.Password.Valid {
+	if repo.Username != "" && repo.Password != "" {
 		options = append(options, git.WithCredentials(&http.BasicAuth{
-			Username: repo.Username.String,
-			Password: repo.Password.String,
+			Username: repo.Username,
+			Password: repo.Password,
 		}))
 	}
-	if repo.Username.Valid && repo.PrivateKey.Valid {
-		key, err := ssh.NewPublicKeys(repo.Username.String, []byte(repo.PrivateKey.String), "")
+	if repo.Username != "" && repo.PrivateKey != "" {
+		key, err := ssh.NewPublicKeys(repo.Username, []byte(repo.PrivateKey), "")
 		if err != nil {
 			return fmt.Errorf("error creating ssh key: %w", err)
 		}

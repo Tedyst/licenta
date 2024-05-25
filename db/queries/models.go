@@ -83,9 +83,9 @@ type GitRepository struct {
 	ID            int64              `json:"id"`
 	ProjectID     int64              `json:"project_id"`
 	GitRepository string             `json:"git_repository"`
-	Username      sql.NullString     `json:"username"`
-	Password      sql.NullString     `json:"password"`
-	PrivateKey    sql.NullString     `json:"private_key"`
+	Username      string             `json:"username"`
+	Password      string             `json:"password"`
+	PrivateKey    string             `json:"private_key"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 

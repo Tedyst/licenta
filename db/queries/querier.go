@@ -23,7 +23,6 @@ type Querier interface {
 	CreateDockerScannedLayerForProject(ctx context.Context, arg CreateDockerScannedLayerForProjectParams) (*DockerLayer, error)
 	CreateGitCommitForProject(ctx context.Context, arg CreateGitCommitForProjectParams) (*GitCommit, error)
 	CreateGitRepository(ctx context.Context, arg CreateGitRepositoryParams) (*GitRepository, error)
-	CreateGitRepositoryForProject(ctx context.Context, arg CreateGitRepositoryForProjectParams) (*GitRepository, error)
 	CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error)
 	CreateGitScan(ctx context.Context, arg CreateGitScanParams) (*GitScan, error)
 	CreateMysqlDatabase(ctx context.Context, arg CreateMysqlDatabaseParams) (*MysqlDatabase, error)
@@ -46,7 +45,6 @@ type Querier interface {
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
 	DeleteDockerImage(ctx context.Context, id int64) error
 	DeleteGitRepository(ctx context.Context, id int64) error
-	DeleteGitRepositoryForProject(ctx context.Context, arg DeleteGitRepositoryForProjectParams) error
 	DeleteMysqlDatabase(ctx context.Context, id int64) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
 	DeleteOrganization(ctx context.Context, id int64) error
@@ -72,8 +70,8 @@ type Querier interface {
 	GetDockerScanByScanAndRepo(ctx context.Context, arg GetDockerScanByScanAndRepoParams) (*GetDockerScanByScanAndRepoRow, error)
 	GetDockerScannedLayersForImage(ctx context.Context, imageID int64) ([]string, error)
 	GetGitCommitsWithResults(ctx context.Context, repositoryID int64) ([]*GetGitCommitsWithResultsRow, error)
-	GetGitRepositoriesForProject(ctx context.Context, projectID int64) ([]*GitRepository, error)
-	GetGitRepository(ctx context.Context, id int64) (*GitRepository, error)
+	GetGitRepositoriesForProject(ctx context.Context, arg GetGitRepositoriesForProjectParams) ([]*GetGitRepositoriesForProjectRow, error)
+	GetGitRepository(ctx context.Context, arg GetGitRepositoryParams) (*GetGitRepositoryRow, error)
 	GetGitScanByScan(ctx context.Context, scanID int64) ([]*GitScan, error)
 	GetGitScanByScanAndRepo(ctx context.Context, arg GetGitScanByScanAndRepoParams) (*GetGitScanByScanAndRepoRow, error)
 	GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error)

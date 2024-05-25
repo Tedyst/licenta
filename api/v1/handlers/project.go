@@ -116,7 +116,10 @@ func (server *serverHandler) PostProjectsIdRun(ctx context.Context, request gene
 		return nil, fmt.Errorf("error creating scans: %w", err)
 	}
 
-	gitRepositories, err := server.DatabaseProvider.GetGitRepositoriesForProject(ctx, request.Id)
+	gitRepositories, err := server.DatabaseProvider.GetGitRepositoriesForProject(ctx, queries.GetGitRepositoriesForProjectParams{
+		ProjectID: request.Id,
+		SaltKey:   server.saltKey,
+	})
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("error getting git repositories: %w", err)
 	}

@@ -79,9 +79,9 @@ CREATE TABLE git_repositories(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     git_repository text NOT NULL,
-    username text,
-    password text,
-    private_key text,
+    username text NOT NULL,
+    password text NOT NULL,
+    private_key text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
