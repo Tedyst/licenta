@@ -22,7 +22,7 @@ type BaseCreater interface {
 	CreateScan(ctx context.Context, params queries.CreateScanParams) (*queries.Scan, error)
 }
 
-type CreateSaverFunc func(context.Context, BaseQuerier, bruteforce.BruteforceProvider, *queries.Scan, bool) (Saver, error)
+type CreateSaverFunc func(context.Context, BaseQuerier, bruteforce.BruteforceProvider, *queries.Scan, bool, string) (Saver, error)
 type CreaterFunc func(ctx context.Context, baseCreater BaseCreater, projectID int64, scanGroupID int64) ([]*queries.Scan, error)
 
 var ErrSaverNotNeeded = errors.New("saver not needed")
@@ -30,10 +30,10 @@ var ErrSaverNotNeeded = errors.New("saver not needed")
 var savers = map[string]CreateSaverFunc{}
 var creaters = map[string]CreaterFunc{}
 
-func NewSaver(ctx context.Context, q BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, scanType string, projectIsRemote bool) (Saver, error) {
+func NewSaver(ctx context.Context, q BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, scanType string, projectIsRemote bool, saltKey string) (Saver, error) {
 	if scanType == "all" {
 		for _, createSaver := range savers {
-			saver, err := createSaver(ctx, q, bruteforceProvider, scan, projectIsRemote)
+			saver, err := createSaver(ctx, q, bruteforceProvider, scan, projectIsRemote, saltKey)
 			if err != nil && !errors.Is(err, ErrSaverNotNeeded) {
 				_, err2 := q.CreateScanResult(ctx, queries.CreateScanResultParams{
 					ScanID:     scan.ID,
@@ -65,7 +65,7 @@ func NewSaver(ctx context.Context, q BaseQuerier, bruteforceProvider bruteforce.
 	if !ok {
 		return nil, errors.New("invalid scan type")
 	}
-	return createSaver(ctx, q, bruteforceProvider, scan, projectIsRemote)
+	return createSaver(ctx, q, bruteforceProvider, scan, projectIsRemote, saltKey)
 }
 
 func CreateScans(ctx context.Context, baseCreater BaseCreater, projectID int64, scanGroupID int64, scanType string) ([]*queries.Scan, error) {

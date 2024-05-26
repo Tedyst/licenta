@@ -10,6 +10,7 @@ import (
 
 	"errors"
 
+	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
@@ -56,7 +57,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 			}
 			passProvider := bruteforce.NewDatabaseBruteforceProvider(database)
 
-			runner := local.NewSaverRunner(database, localExchange, passProvider)
+			runner := local.NewSaverRunner(database, localExchange, passProvider, viper.GetString("db-encryption-salt"))
 
 			err := runner.RunSaverRemote(ctx, &scan, "all")
 			if err != nil {

@@ -20,7 +20,10 @@ func (server *serverHandler) GetProjectsId(ctx context.Context, request generate
 		return nil, err
 	}
 
-	postgresDatabasesQ, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, request.Id)
+	postgresDatabasesQ, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, queries.GetPostgresDatabasesForProjectParams{
+		ProjectID: request.Id,
+		SaltKey:   server.saltKey,
+	})
 	if err != nil {
 		return nil, err
 	}

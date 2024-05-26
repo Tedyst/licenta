@@ -26,6 +26,7 @@ type localRunner struct {
 	DockerRunner
 
 	queries db.TransactionQuerier
+	saltKey string
 }
 
 func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.TransactionQuerier, exchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider, saltKey string) *localRunner {
@@ -35,7 +36,8 @@ func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.Transa
 		emailRunner:  *NewEmailRunner(emailSender),
 		DockerRunner: *NewDockerRunner(queries, saltKey),
 		queries:      queries,
-		SaverRunner:  *NewSaverRunner(queries, exchange, bruteforceProvider),
+		SaverRunner:  *NewSaverRunner(queries, exchange, bruteforceProvider, saltKey),
+		saltKey:      saltKey,
 	}
 }
 

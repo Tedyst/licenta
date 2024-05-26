@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/tedyst/licenta/bruteforce"
+	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/scanner/mysql"
 )
@@ -27,7 +28,7 @@ func getMysqlConnectString(db *queries.MysqlDatabase) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.Username, db.Password, db.Host, db.Port, db.DatabaseName)
 }
 
-func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool) (Saver, error) {
+func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool, saltKey string) (Saver, error) {
 	queries, ok := baseQuerier.(MysqlQuerier)
 	if !ok {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("queries is not a MysqlQuerier"))
@@ -130,3 +131,6 @@ var CreateMysqlScan = CreateBaseScan(
 	},
 	mysql.GetScannerID(),
 )
+
+var _ MysqlQuerier = (db.TransactionQuerier)(nil)
+var _ CreateMysqlScanQuerier = (db.TransactionQuerier)(nil)

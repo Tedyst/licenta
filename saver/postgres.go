@@ -8,7 +8,9 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/bruteforce"
+	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
 	"github.com/tedyst/licenta/scanner/postgres"
 )
@@ -21,17 +23,17 @@ type PostgresQuerier interface {
 	BaseQuerier
 
 	GetPostgresScanByScanID(ctx context.Context, scanID int64) (*queries.PostgresScan, error)
-	GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error)
+	GetPostgresDatabase(context.Context, queries.GetPostgresDatabaseParams) (*queries.GetPostgresDatabaseRow, error)
 	UpdatePostgresVersion(ctx context.Context, params queries.UpdatePostgresVersionParams) error
 }
 
-func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool) (Saver, error) {
-	queries, ok := baseQuerier.(PostgresQuerier)
+func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool, saltKey string) (Saver, error) {
+	q, ok := baseQuerier.(PostgresQuerier)
 	if !ok {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("queries is not a PostgresQuerier"))
 	}
 
-	postgresScan, err := queries.GetPostgresScanByScanID(ctx, scan.ID)
+	postgresScan, err := q.GetPostgresScanByScanID(ctx, scan.ID)
 	if err == pgx.ErrNoRows {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get postgres scan: %w", err))
 	}
@@ -39,12 +41,25 @@ func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforcePr
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get postgres scan: %w", err))
 	}
 
-	db, err := queries.GetPostgresDatabase(ctx, postgresScan.DatabaseID)
+	db, err := q.GetPostgresDatabase(ctx, queries.GetPostgresDatabaseParams{
+		ID:      postgresScan.DatabaseID,
+		SaltKey: saltKey,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not get database: %w", err)
 	}
 
-	conn, err := pgx.Connect(ctx, getPostgresConnectString(&db.PostgresDatabase))
+	conn, err := pgx.Connect(ctx, getPostgresConnectString(&queries.PostgresDatabase{
+		ID:           db.ID,
+		ProjectID:    db.ProjectID,
+		Host:         db.Host,
+		Port:         db.Port,
+		DatabaseName: db.DatabaseName,
+		Username:     db.Username,
+		Password:     db.Password,
+		Version:      db.Version,
+		CreatedAt:    db.CreatedAt,
+	}))
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to database: %w", err)
 	}
@@ -61,11 +76,21 @@ func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforcePr
 	)
 
 	saver := &postgresSaver{
-		queries:      queries,
-		baseSaver:    *createBaseSaver(queries, bruteforceProvider, logger, scan, sc, projectIsRemote),
+		queries:      q,
+		baseSaver:    *createBaseSaver(q, bruteforceProvider, logger, scan, sc, projectIsRemote),
 		postgresScan: postgresScan,
-		database:     &db.PostgresDatabase,
-		connection:   conn,
+		database: &queries.PostgresDatabase{
+			ID:           db.ID,
+			ProjectID:    db.ProjectID,
+			Host:         db.Host,
+			Port:         db.Port,
+			DatabaseName: db.DatabaseName,
+			Username:     db.Username,
+			Password:     db.Password,
+			Version:      db.Version,
+			CreatedAt:    db.CreatedAt,
+		},
+		connection: conn,
 	}
 	saver.runAfterScan = saver.hookAfterScan
 	return saver, nil
@@ -104,7 +129,7 @@ func init() {
 
 type CreatePostgresScanQuerier interface {
 	BaseCreater
-	GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.PostgresDatabase, error)
+	GetPostgresDatabasesForProject(context.Context, queries.GetPostgresDatabasesForProjectParams) ([]*queries.GetPostgresDatabasesForProjectRow, error)
 	CreatePostgresScan(ctx context.Context, params queries.CreatePostgresScanParams) (*queries.PostgresScan, error)
 }
 
@@ -114,7 +139,31 @@ var CreatePostgresScan = CreateBaseScan(
 		if !ok {
 			return nil, errors.New("querier is not a CreatePostgresScanQuerier")
 		}
-		return mq.GetPostgresDatabasesForProject, nil
+		return func(ctx context.Context, projectID int64) ([]*queries.PostgresDatabase, error) {
+			rows, err := mq.GetPostgresDatabasesForProject(ctx, queries.GetPostgresDatabasesForProjectParams{
+				ProjectID: projectID,
+				SaltKey:   viper.GetString("db-encryption-salt"),
+			})
+			if err != nil {
+				return nil, fmt.Errorf("could not get postgres databases: %w", err)
+			}
+
+			databases := make([]*queries.PostgresDatabase, len(rows))
+			for i, row := range rows {
+				databases[i] = &queries.PostgresDatabase{
+					ID:           row.ID,
+					ProjectID:    row.ProjectID,
+					Host:         row.Host,
+					Port:         row.Port,
+					DatabaseName: row.DatabaseName,
+					Username:     row.Username,
+					Password:     row.Password,
+					Version:      row.Version,
+					CreatedAt:    row.CreatedAt,
+				}
+			}
+			return databases, nil
+		}, nil
 	},
 	func(ctx context.Context, q BaseCreater, scanID int64, db *queries.PostgresDatabase) (any, error) {
 		mq, ok := q.(CreatePostgresScanQuerier)
@@ -128,3 +177,6 @@ var CreatePostgresScan = CreateBaseScan(
 	},
 	postgres.GetScannerID(),
 )
+
+var _ PostgresQuerier = (db.TransactionQuerier)(nil)
+var _ CreatePostgresScanQuerier = (db.TransactionQuerier)(nil)

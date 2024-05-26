@@ -334,7 +334,7 @@ func CreateBaseScan[T any](
 		}
 		databases, err := getDatabases(ctx, projectID)
 		if err != nil {
-			return nil, fmt.Errorf("error getting Mysql databases for project: %w", err)
+			return nil, fmt.Errorf("error getting databases for project: %w", err)
 		}
 		for _, db := range databases {
 			scan, err := q.CreateScan(ctx, queries.CreateScanParams{
@@ -343,12 +343,12 @@ func CreateBaseScan[T any](
 				ScanType:    scanType,
 			})
 			if err != nil {
-				return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+				return nil, fmt.Errorf("error creating scan: %w", err)
 			}
 
 			_, err = createSpecificScan(ctx, q, scan.ID, db)
 			if err != nil {
-				return nil, fmt.Errorf("error creating Mysql scan: %w", err)
+				return nil, fmt.Errorf("error creating scan: %w", err)
 			}
 
 			scans = append(scans, scan)

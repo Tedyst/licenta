@@ -17,6 +17,8 @@ type SaverRunner struct {
 	queries            SaverQuerier
 	messageExchange    messages.Exchange
 	bruteforceProvider bruteforce.BruteforceProvider
+
+	saltKey string
 }
 
 type SaverQuerier interface {
@@ -25,16 +27,17 @@ type SaverQuerier interface {
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.Worker, error)
 }
 
-func NewSaverRunner(queries SaverQuerier, messageExchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider) *SaverRunner {
+func NewSaverRunner(queries SaverQuerier, messageExchange messages.Exchange, bruteforceProvider bruteforce.BruteforceProvider, saltKey string) *SaverRunner {
 	return &SaverRunner{
 		queries:            queries,
 		messageExchange:    messageExchange,
 		bruteforceProvider: bruteforceProvider,
+		saltKey:            saltKey,
 	}
 }
 
 func (r *SaverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
-	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType, false)
+	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType, false, r.saltKey)
 	if err != nil {
 		return err
 	}
@@ -43,7 +46,7 @@ func (r *SaverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, sc
 }
 
 func (r *SaverRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
-	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType, true)
+	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType, true, r.saltKey)
 	if err != nil {
 		return err
 	}

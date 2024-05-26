@@ -15,7 +15,10 @@ import (
 const bruteforcePasswordsPerPage = 10000
 
 func (server *serverHandler) GetPostgresId(ctx context.Context, request generated.GetPostgresIdRequestObject) (generated.GetPostgresIdResponseObject, error) {
-	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.Id)
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, queries.GetPostgresDatabaseParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("error getting postgres database: %w", err)
 	}
@@ -29,21 +32,24 @@ func (server *serverHandler) GetPostgresId(ctx context.Context, request generate
 	return generated.GetPostgresId200JSONResponse{
 		Success: true,
 		PostgresDatabase: generated.PostgresDatabase{
-			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339Nano),
-			Host:         database.PostgresDatabase.Host,
-			DatabaseName: database.PostgresDatabase.DatabaseName,
-			Password:     database.PostgresDatabase.Password,
-			Id:           int(database.PostgresDatabase.ID),
-			Port:         int(database.PostgresDatabase.Port),
-			Username:     database.PostgresDatabase.Username,
-			Version:      database.PostgresDatabase.Version.String,
-			ProjectId:    int(database.PostgresDatabase.ProjectID),
+			CreatedAt:    database.CreatedAt.Time.Format(time.RFC3339Nano),
+			Host:         database.Host,
+			DatabaseName: database.DatabaseName,
+			Password:     database.Password,
+			Id:           int(database.ID),
+			Port:         int(database.Port),
+			Username:     database.Username,
+			Version:      database.Version.String,
+			ProjectId:    int(database.ProjectID),
 		},
 	}, nil
 }
 
 func (server *serverHandler) PatchPostgresId(ctx context.Context, request generated.PatchPostgresIdRequestObject) (generated.PatchPostgresIdResponseObject, error) {
-	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.Id)
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, queries.GetPostgresDatabaseParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("error getting postgres database: %w", err)
 	}
@@ -54,27 +60,27 @@ func (server *serverHandler) PatchPostgresId(ctx context.Context, request genera
 		}, nil
 	}
 
-	host := database.PostgresDatabase.Host
+	host := database.Host
 	if request.Body.Host != nil {
 		host = *request.Body.Host
 	}
-	username := database.PostgresDatabase.Username
+	username := database.Username
 	if request.Body.Username != nil {
 		username = *request.Body.Username
 	}
-	password := database.PostgresDatabase.Password
+	password := database.Password
 	if request.Body.Password != nil {
 		password = *request.Body.Password
 	}
-	databaseName := database.PostgresDatabase.DatabaseName
+	databaseName := database.DatabaseName
 	if request.Body.DatabaseName != nil {
 		databaseName = *request.Body.DatabaseName
 	}
-	port := database.PostgresDatabase.Port
+	port := database.Port
 	if request.Body.Port != nil {
 		port = int32(*request.Body.Port)
 	}
-	version := database.PostgresDatabase.Version
+	version := database.Version
 	if request.Body.Version != nil {
 		version = sql.NullString{String: *request.Body.Version, Valid: true}
 	}
@@ -83,10 +89,12 @@ func (server *serverHandler) PatchPostgresId(ctx context.Context, request genera
 		ID:           int64(request.Id),
 		Host:         host,
 		Username:     username,
-		Password:     password,
+		ProjectID:    database.ProjectID,
+		SaltKey:      server.saltKey,
 		DatabaseName: databaseName,
 		Port:         port,
 		Version:      version,
+		Password:     password,
 	})
 	if err != nil {
 		return nil, err
@@ -95,14 +103,14 @@ func (server *serverHandler) PatchPostgresId(ctx context.Context, request genera
 	return generated.PatchPostgresId200JSONResponse{
 		Success: true,
 		PostgresDatabase: generated.PostgresDatabase{
-			CreatedAt:    database.PostgresDatabase.CreatedAt.Time.Format(time.RFC3339Nano),
+			CreatedAt:    database.CreatedAt.Time.Format(time.RFC3339Nano),
 			Host:         host,
 			DatabaseName: databaseName,
 			Password:     password,
-			Id:           int(database.PostgresDatabase.ID),
+			Id:           int(database.ID),
 			Port:         int(port),
 			Username:     username,
-			ProjectId:    int(database.PostgresDatabase.ProjectID),
+			ProjectId:    int(database.ProjectID),
 			Version:      version.String,
 		},
 	}, nil
@@ -114,7 +122,10 @@ func (server *serverHandler) GetPostgresScans(ctx context.Context, request gener
 		return nil, err
 	}
 
-	info, err := server.DatabaseProvider.GetProjectInfoForPostgresScanByScanID(ctx, request.Params.Scan)
+	info, err := server.DatabaseProvider.GetProjectInfoForPostgresScanByScanID(ctx, queries.GetProjectInfoForPostgresScanByScanIDParams{
+		ScanID:  request.Params.Scan,
+		SaltKey: server.saltKey,
+	})
 	if err == pgx.ErrNoRows {
 		return generated.GetPostgresScans404JSONResponse{
 			Success: false,
@@ -154,7 +165,10 @@ func (server *serverHandler) GetPostgres(ctx context.Context, request generated.
 		return response, nil
 	}
 
-	databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, project.ID)
+	databases, err := server.DatabaseProvider.GetPostgresDatabasesForProject(ctx, queries.GetPostgresDatabasesForProjectParams{
+		ProjectID: project.ID,
+		SaltKey:   server.saltKey,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -197,6 +211,7 @@ func (server *serverHandler) PostPostgres(ctx context.Context, request generated
 		Port:         int32(request.Body.Port),
 		Password:     request.Body.Password,
 		Version:      sql.NullString{Valid: false},
+		SaltKey:      server.saltKey,
 	})
 	if err != nil {
 		return nil, err
@@ -218,7 +233,10 @@ func (server *serverHandler) PostPostgres(ctx context.Context, request generated
 }
 
 func (server *serverHandler) DeletePostgresId(ctx context.Context, request generated.DeletePostgresIdRequestObject) (generated.DeletePostgresIdResponseObject, error) {
-	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, request.Id)
+	database, err := server.DatabaseProvider.GetPostgresDatabase(ctx, queries.GetPostgresDatabaseParams{
+		ID:      request.Id,
+		SaltKey: server.saltKey,
+	})
 	if err != nil && err != pgx.ErrNoRows {
 		return nil, fmt.Errorf("error getting postgres database: %w", err)
 	}
@@ -230,7 +248,7 @@ func (server *serverHandler) DeletePostgresId(ctx context.Context, request gener
 		}, nil
 	}
 
-	_, _, response, err := checkUserHasProjectPermission[generated.DeletePostgresId401JSONResponse](server, ctx, int64(database.PostgresDatabase.ProjectID), authorization.Admin)
+	_, _, response, err := checkUserHasProjectPermission[generated.DeletePostgresId401JSONResponse](server, ctx, int64(database.ProjectID), authorization.Admin)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +257,7 @@ func (server *serverHandler) DeletePostgresId(ctx context.Context, request gener
 		return response, nil
 	}
 
-	err = server.DatabaseProvider.DeletePostgresDatabase(ctx, int64(database.PostgresDatabase.ID))
+	err = server.DatabaseProvider.DeletePostgresDatabase(ctx, int64(database.ID))
 	if err != nil {
 		return nil, err
 	}

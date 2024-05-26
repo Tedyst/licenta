@@ -10,10 +10,11 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/saver"
 )
 
-func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*queries.GetPostgresDatabaseRow, error) {
-	response, err := q.client.GetPostgresIdWithResponse(ctx, id)
+func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, r queries.GetPostgresDatabaseParams) (*queries.GetPostgresDatabaseRow, error) {
+	response, err := q.client.GetPostgresIdWithResponse(ctx, r.ID)
 	if err != nil {
 		return nil, errors.New("cannot get postgres database from server")
 	}
@@ -23,18 +24,16 @@ func (q *remoteQuerier) GetPostgresDatabase(ctx context.Context, id int64) (*que
 	switch response.StatusCode() {
 	case http.StatusOK:
 		return &queries.GetPostgresDatabaseRow{
-			PostgresDatabase: queries.PostgresDatabase{
-				ID:           int64(response.JSON200.PostgresDatabase.Id),
-				ProjectID:    int64(response.JSON200.PostgresDatabase.ProjectId),
-				Host:         response.JSON200.PostgresDatabase.Host,
-				Port:         int32(response.JSON200.PostgresDatabase.Port),
-				DatabaseName: response.JSON200.PostgresDatabase.DatabaseName,
-				Username:     response.JSON200.PostgresDatabase.Username,
-				Password:     response.JSON200.PostgresDatabase.Password,
-				Version: sql.NullString{
-					String: response.JSON200.PostgresDatabase.Version,
-					Valid:  response.JSON200.PostgresDatabase.Version != "",
-				},
+			ID:           int64(response.JSON200.PostgresDatabase.Id),
+			ProjectID:    int64(response.JSON200.PostgresDatabase.ProjectId),
+			Host:         response.JSON200.PostgresDatabase.Host,
+			Port:         int32(response.JSON200.PostgresDatabase.Port),
+			DatabaseName: response.JSON200.PostgresDatabase.DatabaseName,
+			Username:     response.JSON200.PostgresDatabase.Username,
+			Password:     response.JSON200.PostgresDatabase.Password,
+			Version: sql.NullString{
+				String: response.JSON200.PostgresDatabase.Version,
+				Valid:  response.JSON200.PostgresDatabase.Version != "",
 			},
 		}, nil
 	default:
@@ -83,3 +82,5 @@ func (q *remoteQuerier) GetPostgresScanByScanID(ctx context.Context, scanID int6
 		return nil, errors.New("error getting postgres scan")
 	}
 }
+
+var _ saver.PostgresQuerier = &remoteQuerier{}

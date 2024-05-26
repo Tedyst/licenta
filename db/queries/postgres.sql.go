@@ -8,11 +8,13 @@ package queries
 import (
 	"context"
 	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPostgresDatabase = `-- name: CreatePostgresDatabase :one
 INSERT INTO postgres_databases(project_id, database_name, host, port, username, PASSWORD, version)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    VALUES ($1, $2, $3, $4, encrypt_data($1, $6, $7), encrypt_data($1, $6, $8), $5)
 RETURNING
     id, project_id, host, port, database_name, username, password, version, created_at
 `
@@ -22,9 +24,10 @@ type CreatePostgresDatabaseParams struct {
 	DatabaseName string         `json:"database_name"`
 	Host         string         `json:"host"`
 	Port         int32          `json:"port"`
+	Version      sql.NullString `json:"version"`
+	SaltKey      string         `json:"salt_key"`
 	Username     string         `json:"username"`
 	Password     string         `json:"password"`
-	Version      sql.NullString `json:"version"`
 }
 
 func (q *Queries) CreatePostgresDatabase(ctx context.Context, arg CreatePostgresDatabaseParams) (*PostgresDatabase, error) {
@@ -33,9 +36,10 @@ func (q *Queries) CreatePostgresDatabase(ctx context.Context, arg CreatePostgres
 		arg.DatabaseName,
 		arg.Host,
 		arg.Port,
+		arg.Version,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
-		arg.Version,
 	)
 	var i PostgresDatabase
 	err := row.Scan(
@@ -83,7 +87,15 @@ func (q *Queries) DeletePostgresDatabase(ctx context.Context, id int64) error {
 
 const getPostgresDatabase = `-- name: GetPostgresDatabase :one
 SELECT
-    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.version, postgres_databases.created_at,
+    id,
+    project_id,
+    host,
+    port,
+    database_name,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD,
+    version,
+    created_at,
 (
         SELECT
             COUNT(*)
@@ -97,24 +109,37 @@ WHERE
     postgres_databases.id = $1
 `
 
-type GetPostgresDatabaseRow struct {
-	PostgresDatabase PostgresDatabase `json:"postgres_database"`
-	ScanCount        int64            `json:"scan_count"`
+type GetPostgresDatabaseParams struct {
+	ID      int64  `json:"id"`
+	SaltKey string `json:"salt_key"`
 }
 
-func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgresDatabaseRow, error) {
-	row := q.db.QueryRow(ctx, getPostgresDatabase, id)
+type GetPostgresDatabaseRow struct {
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Version      sql.NullString     `json:"version"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ScanCount    int64              `json:"scan_count"`
+}
+
+func (q *Queries) GetPostgresDatabase(ctx context.Context, arg GetPostgresDatabaseParams) (*GetPostgresDatabaseRow, error) {
+	row := q.db.QueryRow(ctx, getPostgresDatabase, arg.ID, arg.SaltKey)
 	var i GetPostgresDatabaseRow
 	err := row.Scan(
-		&i.PostgresDatabase.ID,
-		&i.PostgresDatabase.ProjectID,
-		&i.PostgresDatabase.Host,
-		&i.PostgresDatabase.Port,
-		&i.PostgresDatabase.DatabaseName,
-		&i.PostgresDatabase.Username,
-		&i.PostgresDatabase.Password,
-		&i.PostgresDatabase.Version,
-		&i.PostgresDatabase.CreatedAt,
+		&i.ID,
+		&i.ProjectID,
+		&i.Host,
+		&i.Port,
+		&i.DatabaseName,
+		&i.Username,
+		&i.Password,
+		&i.Version,
+		&i.CreatedAt,
 		&i.ScanCount,
 	)
 	return &i, err
@@ -122,22 +147,47 @@ func (q *Queries) GetPostgresDatabase(ctx context.Context, id int64) (*GetPostgr
 
 const getPostgresDatabasesForProject = `-- name: GetPostgresDatabasesForProject :many
 SELECT
-    id, project_id, host, port, database_name, username, password, version, created_at
+    id,
+    project_id,
+    host,
+    port,
+    database_name,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD,
+    version,
+    created_at
 FROM
     postgres_databases
 WHERE
     project_id = $1
 `
 
-func (q *Queries) GetPostgresDatabasesForProject(ctx context.Context, projectID int64) ([]*PostgresDatabase, error) {
-	rows, err := q.db.Query(ctx, getPostgresDatabasesForProject, projectID)
+type GetPostgresDatabasesForProjectParams struct {
+	ProjectID int64  `json:"project_id"`
+	SaltKey   string `json:"salt_key"`
+}
+
+type GetPostgresDatabasesForProjectRow struct {
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Version      sql.NullString     `json:"version"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetPostgresDatabasesForProject(ctx context.Context, arg GetPostgresDatabasesForProjectParams) ([]*GetPostgresDatabasesForProjectRow, error) {
+	rows, err := q.db.Query(ctx, getPostgresDatabasesForProject, arg.ProjectID, arg.SaltKey)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*PostgresDatabase
+	var items []*GetPostgresDatabasesForProjectRow
 	for rows.Next() {
-		var i PostgresDatabase
+		var i GetPostgresDatabasesForProjectRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProjectID,
@@ -196,7 +246,15 @@ func (q *Queries) GetPostgresScanByScanID(ctx context.Context, scanID int64) (*P
 const getProjectInfoForPostgresScanByScanID = `-- name: GetProjectInfoForPostgresScanByScanID :one
 SELECT
     projects.id, projects.name, projects.organization_id, projects.remote, projects.created_at,
-    postgres_databases.id, postgres_databases.project_id, postgres_databases.host, postgres_databases.port, postgres_databases.database_name, postgres_databases.username, postgres_databases.password, postgres_databases.version, postgres_databases.created_at,
+    postgres_databases.id AS database_id,
+    postgres_databases.project_id AS database_project_id,
+    postgres_databases.host AS database_host,
+    postgres_databases.port AS database_port,
+    postgres_databases.database_name AS database_database_name,
+    decrypt_data(postgres_databases.project_id, $2, postgres_databases.username) AS database_username,
+    decrypt_data(postgres_databases.project_id, $2, postgres_databases.PASSWORD) AS database_PASSWORD,
+    postgres_databases.version AS database_version,
+    postgres_databases.created_at AS database_created_at,
     postgres_scans.id, postgres_scans.scan_id, postgres_scans.database_id
 FROM
     projects
@@ -206,14 +264,27 @@ WHERE
     postgres_scans.scan_id = $1
 `
 
-type GetProjectInfoForPostgresScanByScanIDRow struct {
-	Project          Project          `json:"project"`
-	PostgresDatabase PostgresDatabase `json:"postgres_database"`
-	PostgresScan     PostgresScan     `json:"postgres_scan"`
+type GetProjectInfoForPostgresScanByScanIDParams struct {
+	ScanID  int64  `json:"scan_id"`
+	SaltKey string `json:"salt_key"`
 }
 
-func (q *Queries) GetProjectInfoForPostgresScanByScanID(ctx context.Context, scanID int64) (*GetProjectInfoForPostgresScanByScanIDRow, error) {
-	row := q.db.QueryRow(ctx, getProjectInfoForPostgresScanByScanID, scanID)
+type GetProjectInfoForPostgresScanByScanIDRow struct {
+	Project              Project            `json:"project"`
+	DatabaseID           int64              `json:"database_id"`
+	DatabaseProjectID    int64              `json:"database_project_id"`
+	DatabaseHost         string             `json:"database_host"`
+	DatabasePort         int32              `json:"database_port"`
+	DatabaseDatabaseName string             `json:"database_database_name"`
+	DatabaseUsername     string             `json:"database_username"`
+	DatabasePassword     string             `json:"database_password"`
+	DatabaseVersion      sql.NullString     `json:"database_version"`
+	DatabaseCreatedAt    pgtype.Timestamptz `json:"database_created_at"`
+	PostgresScan         PostgresScan       `json:"postgres_scan"`
+}
+
+func (q *Queries) GetProjectInfoForPostgresScanByScanID(ctx context.Context, arg GetProjectInfoForPostgresScanByScanIDParams) (*GetProjectInfoForPostgresScanByScanIDRow, error) {
+	row := q.db.QueryRow(ctx, getProjectInfoForPostgresScanByScanID, arg.ScanID, arg.SaltKey)
 	var i GetProjectInfoForPostgresScanByScanIDRow
 	err := row.Scan(
 		&i.Project.ID,
@@ -221,15 +292,15 @@ func (q *Queries) GetProjectInfoForPostgresScanByScanID(ctx context.Context, sca
 		&i.Project.OrganizationID,
 		&i.Project.Remote,
 		&i.Project.CreatedAt,
-		&i.PostgresDatabase.ID,
-		&i.PostgresDatabase.ProjectID,
-		&i.PostgresDatabase.Host,
-		&i.PostgresDatabase.Port,
-		&i.PostgresDatabase.DatabaseName,
-		&i.PostgresDatabase.Username,
-		&i.PostgresDatabase.Password,
-		&i.PostgresDatabase.Version,
-		&i.PostgresDatabase.CreatedAt,
+		&i.DatabaseID,
+		&i.DatabaseProjectID,
+		&i.DatabaseHost,
+		&i.DatabasePort,
+		&i.DatabaseDatabaseName,
+		&i.DatabaseUsername,
+		&i.DatabasePassword,
+		&i.DatabaseVersion,
+		&i.DatabaseCreatedAt,
 		&i.PostgresScan.ID,
 		&i.PostgresScan.ScanID,
 		&i.PostgresScan.DatabaseID,
@@ -244,9 +315,9 @@ SET
     database_name = $2,
     host = $3,
     port = $4,
-    username = $5,
-    PASSWORD = $6,
-    version = $7
+    username = encrypt_data($6, $7, $8),
+    PASSWORD = encrypt_data($6, $7, $9),
+    version = $5
 WHERE
     id = $1
 `
@@ -256,9 +327,11 @@ type UpdatePostgresDatabaseParams struct {
 	DatabaseName string         `json:"database_name"`
 	Host         string         `json:"host"`
 	Port         int32          `json:"port"`
+	Version      sql.NullString `json:"version"`
+	ProjectID    int64          `json:"project_id"`
+	SaltKey      string         `json:"salt_key"`
 	Username     string         `json:"username"`
 	Password     string         `json:"password"`
-	Version      sql.NullString `json:"version"`
 }
 
 func (q *Queries) UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error {
@@ -267,9 +340,11 @@ func (q *Queries) UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgres
 		arg.DatabaseName,
 		arg.Host,
 		arg.Port,
+		arg.Version,
+		arg.ProjectID,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
-		arg.Version,
 	)
 	return err
 }

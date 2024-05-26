@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
+	"github.com/tedyst/licenta/saver"
 )
 
 func (q *remoteQuerier) GetMysqlDatabase(ctx context.Context, id int64) (*queries.GetMysqlDatabaseRow, error) {
@@ -83,3 +84,5 @@ func (q *remoteQuerier) GetMysqlScanByScanID(ctx context.Context, scanID int64) 
 		return nil, errors.New("error getting Mysql scan")
 	}
 }
+
+var _ saver.MysqlQuerier = &remoteQuerier{}
