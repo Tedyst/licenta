@@ -37,15 +37,23 @@ SET
     database_name = $2,
     host = $3,
     port = $4,
-    username = $5,
-    PASSWORD = $6,
-    version = $7
+    username = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(username)),
+    PASSWORD = encrypt_data(sqlc.arg(project_id), sqlc.arg(salt_key), sqlc.arg(PASSWORD)),
+    version = $5
 WHERE
     id = $1;
 
 -- name: GetMysqlDatabasesForProject :many
 SELECT
-    *
+    id,
+    project_id,
+    host,
+    port,
+    database_name,
+    decrypt_data(project_id, sqlc.arg(salt_key), username) AS username,
+    decrypt_data(project_id, sqlc.arg(salt_key), PASSWORD) AS PASSWORD,
+    version,
+    created_at
 FROM
     mysql_databases
 WHERE
@@ -53,7 +61,15 @@ WHERE
 
 -- name: GetMysqlDatabase :one
 SELECT
-    sqlc.embed(mysql_databases),
+    id,
+    project_id,
+    host,
+    port,
+    database_name,
+    decrypt_data(project_id, sqlc.arg(salt_key), username) AS username,
+    decrypt_data(project_id, sqlc.arg(salt_key), PASSWORD) AS PASSWORD,
+    version,
+    created_at,
 (
         SELECT
             COUNT(*)
@@ -69,7 +85,15 @@ WHERE
 -- name: GetProjectInfoForMysqlScanByScanID :one
 SELECT
     sqlc.embed(projects),
-    sqlc.embed(mysql_databases),
+    mysql_databases.id AS database_id,
+    mysql_databases.project_id AS database_project_id,
+    mysql_databases.host AS database_host,
+    mysql_databases.port AS database_port,
+    mysql_databases.database_name AS database_database_name,
+    decrypt_data(project_id, sqlc.arg(salt_key), mysql_databases.username) AS database_username,
+    decrypt_data(project_id, sqlc.arg(salt_key), mysql_databases.PASSWORD) AS database_PASSWORD,
+    mysql_databases.version AS database_version,
+    mysql_databases.created_at AS database_created_at,
     sqlc.embed(mysql_scans)
 FROM
     projects
@@ -80,7 +104,7 @@ WHERE
 
 -- name: CreateMysqlDatabase :one
 INSERT INTO mysql_databases(project_id, database_name, host, port, username, PASSWORD, version)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    VALUES ($1, $2, $3, $4, encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(username)), encrypt_data($1, sqlc.arg(salt_key), sqlc.arg(PASSWORD)), $5)
 RETURNING
     *;
 

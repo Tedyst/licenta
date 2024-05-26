@@ -13,8 +13,8 @@ import (
 	"github.com/tedyst/licenta/saver"
 )
 
-func (q *remoteQuerier) GetMysqlDatabase(ctx context.Context, id int64) (*queries.GetMysqlDatabaseRow, error) {
-	response, err := q.client.GetMysqlIdWithResponse(ctx, id)
+func (q *remoteQuerier) GetMysqlDatabase(ctx context.Context, r queries.GetMysqlDatabaseParams) (*queries.GetMysqlDatabaseRow, error) {
+	response, err := q.client.GetMysqlIdWithResponse(ctx, r.ID)
 	if err != nil {
 		return nil, errors.New("cannot get Mysql database from server")
 	}
@@ -24,18 +24,16 @@ func (q *remoteQuerier) GetMysqlDatabase(ctx context.Context, id int64) (*querie
 	switch response.StatusCode() {
 	case http.StatusOK:
 		return &queries.GetMysqlDatabaseRow{
-			MysqlDatabase: queries.MysqlDatabase{
-				ID:           int64(response.JSON200.MysqlDatabase.Id),
-				ProjectID:    int64(response.JSON200.MysqlDatabase.ProjectId),
-				Host:         response.JSON200.MysqlDatabase.Host,
-				Port:         int32(response.JSON200.MysqlDatabase.Port),
-				DatabaseName: response.JSON200.MysqlDatabase.DatabaseName,
-				Username:     response.JSON200.MysqlDatabase.Username,
-				Password:     response.JSON200.MysqlDatabase.Password,
-				Version: sql.NullString{
-					String: response.JSON200.MysqlDatabase.Version,
-					Valid:  response.JSON200.MysqlDatabase.Version != "",
-				},
+			ID:           int64(response.JSON200.MysqlDatabase.Id),
+			ProjectID:    int64(response.JSON200.MysqlDatabase.ProjectId),
+			Host:         response.JSON200.MysqlDatabase.Host,
+			Port:         int32(response.JSON200.MysqlDatabase.Port),
+			DatabaseName: response.JSON200.MysqlDatabase.DatabaseName,
+			Username:     response.JSON200.MysqlDatabase.Username,
+			Password:     response.JSON200.MysqlDatabase.Password,
+			Version: sql.NullString{
+				String: response.JSON200.MysqlDatabase.Version,
+				Valid:  response.JSON200.MysqlDatabase.Version != "",
 			},
 		}, nil
 	default:

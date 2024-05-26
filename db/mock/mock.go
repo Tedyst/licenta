@@ -2607,18 +2607,18 @@ func (c *MockTransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f fu
 }
 
 // GetMysqlDatabase mocks base method.
-func (m *MockTransactionQuerier) GetMysqlDatabase(ctx context.Context, id int64) (*queries.GetMysqlDatabaseRow, error) {
+func (m *MockTransactionQuerier) GetMysqlDatabase(ctx context.Context, arg queries.GetMysqlDatabaseParams) (*queries.GetMysqlDatabaseRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMysqlDatabase", ctx, id)
+	ret := m.ctrl.Call(m, "GetMysqlDatabase", ctx, arg)
 	ret0, _ := ret[0].(*queries.GetMysqlDatabaseRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetMysqlDatabase indicates an expected call of GetMysqlDatabase.
-func (mr *MockTransactionQuerierMockRecorder) GetMysqlDatabase(ctx, id any) *MockTransactionQuerierGetMysqlDatabaseCall {
+func (mr *MockTransactionQuerierMockRecorder) GetMysqlDatabase(ctx, arg any) *MockTransactionQuerierGetMysqlDatabaseCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlDatabase), ctx, id)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlDatabase), ctx, arg)
 	return &MockTransactionQuerierGetMysqlDatabaseCall{Call: call}
 }
 
@@ -2634,30 +2634,30 @@ func (c *MockTransactionQuerierGetMysqlDatabaseCall) Return(arg0 *queries.GetMys
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetMysqlDatabaseCall) Do(f func(context.Context, int64) (*queries.GetMysqlDatabaseRow, error)) *MockTransactionQuerierGetMysqlDatabaseCall {
+func (c *MockTransactionQuerierGetMysqlDatabaseCall) Do(f func(context.Context, queries.GetMysqlDatabaseParams) (*queries.GetMysqlDatabaseRow, error)) *MockTransactionQuerierGetMysqlDatabaseCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetMysqlDatabaseCall) DoAndReturn(f func(context.Context, int64) (*queries.GetMysqlDatabaseRow, error)) *MockTransactionQuerierGetMysqlDatabaseCall {
+func (c *MockTransactionQuerierGetMysqlDatabaseCall) DoAndReturn(f func(context.Context, queries.GetMysqlDatabaseParams) (*queries.GetMysqlDatabaseRow, error)) *MockTransactionQuerierGetMysqlDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
 
 // GetMysqlDatabasesForProject mocks base method.
-func (m *MockTransactionQuerier) GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.MysqlDatabase, error) {
+func (m *MockTransactionQuerier) GetMysqlDatabasesForProject(ctx context.Context, arg queries.GetMysqlDatabasesForProjectParams) ([]*queries.GetMysqlDatabasesForProjectRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMysqlDatabasesForProject", ctx, projectID)
-	ret0, _ := ret[0].([]*queries.MysqlDatabase)
+	ret := m.ctrl.Call(m, "GetMysqlDatabasesForProject", ctx, arg)
+	ret0, _ := ret[0].([]*queries.GetMysqlDatabasesForProjectRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetMysqlDatabasesForProject indicates an expected call of GetMysqlDatabasesForProject.
-func (mr *MockTransactionQuerierMockRecorder) GetMysqlDatabasesForProject(ctx, projectID any) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
+func (mr *MockTransactionQuerierMockRecorder) GetMysqlDatabasesForProject(ctx, arg any) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlDatabasesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlDatabasesForProject), ctx, projectID)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMysqlDatabasesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMysqlDatabasesForProject), ctx, arg)
 	return &MockTransactionQuerierGetMysqlDatabasesForProjectCall{Call: call}
 }
 
@@ -2667,19 +2667,19 @@ type MockTransactionQuerierGetMysqlDatabasesForProjectCall struct {
 }
 
 // Return rewrite *gomock.Call.Return
-func (c *MockTransactionQuerierGetMysqlDatabasesForProjectCall) Return(arg0 []*queries.MysqlDatabase, arg1 error) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
+func (c *MockTransactionQuerierGetMysqlDatabasesForProjectCall) Return(arg0 []*queries.GetMysqlDatabasesForProjectRow, arg1 error) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
 	c.Call = c.Call.Return(arg0, arg1)
 	return c
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetMysqlDatabasesForProjectCall) Do(f func(context.Context, int64) ([]*queries.MysqlDatabase, error)) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
+func (c *MockTransactionQuerierGetMysqlDatabasesForProjectCall) Do(f func(context.Context, queries.GetMysqlDatabasesForProjectParams) ([]*queries.GetMysqlDatabasesForProjectRow, error)) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetMysqlDatabasesForProjectCall) DoAndReturn(f func(context.Context, int64) ([]*queries.MysqlDatabase, error)) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
+func (c *MockTransactionQuerierGetMysqlDatabasesForProjectCall) DoAndReturn(f func(context.Context, queries.GetMysqlDatabasesForProjectParams) ([]*queries.GetMysqlDatabasesForProjectRow, error)) *MockTransactionQuerierGetMysqlDatabasesForProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -3387,18 +3387,18 @@ func (c *MockTransactionQuerierGetProjectByOrganizationAndNameCall) DoAndReturn(
 }
 
 // GetProjectInfoForMysqlScanByScanID mocks base method.
-func (m *MockTransactionQuerier) GetProjectInfoForMysqlScanByScanID(ctx context.Context, scanID int64) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error) {
+func (m *MockTransactionQuerier) GetProjectInfoForMysqlScanByScanID(ctx context.Context, arg queries.GetProjectInfoForMysqlScanByScanIDParams) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProjectInfoForMysqlScanByScanID", ctx, scanID)
+	ret := m.ctrl.Call(m, "GetProjectInfoForMysqlScanByScanID", ctx, arg)
 	ret0, _ := ret[0].(*queries.GetProjectInfoForMysqlScanByScanIDRow)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProjectInfoForMysqlScanByScanID indicates an expected call of GetProjectInfoForMysqlScanByScanID.
-func (mr *MockTransactionQuerierMockRecorder) GetProjectInfoForMysqlScanByScanID(ctx, scanID any) *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall {
+func (mr *MockTransactionQuerierMockRecorder) GetProjectInfoForMysqlScanByScanID(ctx, arg any) *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectInfoForMysqlScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectInfoForMysqlScanByScanID), ctx, scanID)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectInfoForMysqlScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectInfoForMysqlScanByScanID), ctx, arg)
 	return &MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall{Call: call}
 }
 
@@ -3414,13 +3414,13 @@ func (c *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall) Return(ar
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall) Do(f func(context.Context, int64) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall {
+func (c *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall) Do(f func(context.Context, queries.GetProjectInfoForMysqlScanByScanIDParams) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall) DoAndReturn(f func(context.Context, int64) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall {
+func (c *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall) DoAndReturn(f func(context.Context, queries.GetProjectInfoForMysqlScanByScanIDParams) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForMysqlScanByScanIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

@@ -8,11 +8,13 @@ package queries
 import (
 	"context"
 	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createMysqlDatabase = `-- name: CreateMysqlDatabase :one
 INSERT INTO mysql_databases(project_id, database_name, host, port, username, PASSWORD, version)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    VALUES ($1, $2, $3, $4, encrypt_data($1, $6, $7), encrypt_data($1, $6, $8), $5)
 RETURNING
     id, project_id, host, port, database_name, username, password, version, created_at
 `
@@ -22,9 +24,10 @@ type CreateMysqlDatabaseParams struct {
 	DatabaseName string         `json:"database_name"`
 	Host         string         `json:"host"`
 	Port         int32          `json:"port"`
+	Version      sql.NullString `json:"version"`
+	SaltKey      string         `json:"salt_key"`
 	Username     string         `json:"username"`
 	Password     string         `json:"password"`
-	Version      sql.NullString `json:"version"`
 }
 
 func (q *Queries) CreateMysqlDatabase(ctx context.Context, arg CreateMysqlDatabaseParams) (*MysqlDatabase, error) {
@@ -33,9 +36,10 @@ func (q *Queries) CreateMysqlDatabase(ctx context.Context, arg CreateMysqlDataba
 		arg.DatabaseName,
 		arg.Host,
 		arg.Port,
+		arg.Version,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
-		arg.Version,
 	)
 	var i MysqlDatabase
 	err := row.Scan(
@@ -83,7 +87,15 @@ func (q *Queries) DeleteMysqlDatabase(ctx context.Context, id int64) error {
 
 const getMysqlDatabase = `-- name: GetMysqlDatabase :one
 SELECT
-    mysql_databases.id, mysql_databases.project_id, mysql_databases.host, mysql_databases.port, mysql_databases.database_name, mysql_databases.username, mysql_databases.password, mysql_databases.version, mysql_databases.created_at,
+    id,
+    project_id,
+    host,
+    port,
+    database_name,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD,
+    version,
+    created_at,
 (
         SELECT
             COUNT(*)
@@ -97,24 +109,37 @@ WHERE
     mysql_databases.id = $1
 `
 
-type GetMysqlDatabaseRow struct {
-	MysqlDatabase MysqlDatabase `json:"mysql_database"`
-	ScanCount     int64         `json:"scan_count"`
+type GetMysqlDatabaseParams struct {
+	ID      int64  `json:"id"`
+	SaltKey string `json:"salt_key"`
 }
 
-func (q *Queries) GetMysqlDatabase(ctx context.Context, id int64) (*GetMysqlDatabaseRow, error) {
-	row := q.db.QueryRow(ctx, getMysqlDatabase, id)
+type GetMysqlDatabaseRow struct {
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Version      sql.NullString     `json:"version"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ScanCount    int64              `json:"scan_count"`
+}
+
+func (q *Queries) GetMysqlDatabase(ctx context.Context, arg GetMysqlDatabaseParams) (*GetMysqlDatabaseRow, error) {
+	row := q.db.QueryRow(ctx, getMysqlDatabase, arg.ID, arg.SaltKey)
 	var i GetMysqlDatabaseRow
 	err := row.Scan(
-		&i.MysqlDatabase.ID,
-		&i.MysqlDatabase.ProjectID,
-		&i.MysqlDatabase.Host,
-		&i.MysqlDatabase.Port,
-		&i.MysqlDatabase.DatabaseName,
-		&i.MysqlDatabase.Username,
-		&i.MysqlDatabase.Password,
-		&i.MysqlDatabase.Version,
-		&i.MysqlDatabase.CreatedAt,
+		&i.ID,
+		&i.ProjectID,
+		&i.Host,
+		&i.Port,
+		&i.DatabaseName,
+		&i.Username,
+		&i.Password,
+		&i.Version,
+		&i.CreatedAt,
 		&i.ScanCount,
 	)
 	return &i, err
@@ -122,22 +147,47 @@ func (q *Queries) GetMysqlDatabase(ctx context.Context, id int64) (*GetMysqlData
 
 const getMysqlDatabasesForProject = `-- name: GetMysqlDatabasesForProject :many
 SELECT
-    id, project_id, host, port, database_name, username, password, version, created_at
+    id,
+    project_id,
+    host,
+    port,
+    database_name,
+    decrypt_data(project_id, $2, username) AS username,
+    decrypt_data(project_id, $2, PASSWORD) AS PASSWORD,
+    version,
+    created_at
 FROM
     mysql_databases
 WHERE
     project_id = $1
 `
 
-func (q *Queries) GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*MysqlDatabase, error) {
-	rows, err := q.db.Query(ctx, getMysqlDatabasesForProject, projectID)
+type GetMysqlDatabasesForProjectParams struct {
+	ProjectID int64  `json:"project_id"`
+	SaltKey   string `json:"salt_key"`
+}
+
+type GetMysqlDatabasesForProjectRow struct {
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Version      sql.NullString     `json:"version"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) GetMysqlDatabasesForProject(ctx context.Context, arg GetMysqlDatabasesForProjectParams) ([]*GetMysqlDatabasesForProjectRow, error) {
+	rows, err := q.db.Query(ctx, getMysqlDatabasesForProject, arg.ProjectID, arg.SaltKey)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*MysqlDatabase
+	var items []*GetMysqlDatabasesForProjectRow
 	for rows.Next() {
-		var i MysqlDatabase
+		var i GetMysqlDatabasesForProjectRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProjectID,
@@ -196,7 +246,15 @@ func (q *Queries) GetMysqlScanByScanID(ctx context.Context, scanID int64) (*Mysq
 const getProjectInfoForMysqlScanByScanID = `-- name: GetProjectInfoForMysqlScanByScanID :one
 SELECT
     projects.id, projects.name, projects.organization_id, projects.remote, projects.created_at,
-    mysql_databases.id, mysql_databases.project_id, mysql_databases.host, mysql_databases.port, mysql_databases.database_name, mysql_databases.username, mysql_databases.password, mysql_databases.version, mysql_databases.created_at,
+    mysql_databases.id AS database_id,
+    mysql_databases.project_id AS database_project_id,
+    mysql_databases.host AS database_host,
+    mysql_databases.port AS database_port,
+    mysql_databases.database_name AS database_database_name,
+    decrypt_data(project_id, $2, mysql_databases.username) AS database_username,
+    decrypt_data(project_id, $2, mysql_databases.PASSWORD) AS database_PASSWORD,
+    mysql_databases.version AS database_version,
+    mysql_databases.created_at AS database_created_at,
     mysql_scans.id, mysql_scans.scan_id, mysql_scans.database_id
 FROM
     projects
@@ -206,14 +264,27 @@ WHERE
     mysql_scans.scan_id = $1
 `
 
-type GetProjectInfoForMysqlScanByScanIDRow struct {
-	Project       Project       `json:"project"`
-	MysqlDatabase MysqlDatabase `json:"mysql_database"`
-	MysqlScan     MysqlScan     `json:"mysql_scan"`
+type GetProjectInfoForMysqlScanByScanIDParams struct {
+	ScanID  int64  `json:"scan_id"`
+	SaltKey string `json:"salt_key"`
 }
 
-func (q *Queries) GetProjectInfoForMysqlScanByScanID(ctx context.Context, scanID int64) (*GetProjectInfoForMysqlScanByScanIDRow, error) {
-	row := q.db.QueryRow(ctx, getProjectInfoForMysqlScanByScanID, scanID)
+type GetProjectInfoForMysqlScanByScanIDRow struct {
+	Project              Project            `json:"project"`
+	DatabaseID           int64              `json:"database_id"`
+	DatabaseProjectID    int64              `json:"database_project_id"`
+	DatabaseHost         string             `json:"database_host"`
+	DatabasePort         int32              `json:"database_port"`
+	DatabaseDatabaseName string             `json:"database_database_name"`
+	DatabaseUsername     string             `json:"database_username"`
+	DatabasePassword     string             `json:"database_password"`
+	DatabaseVersion      sql.NullString     `json:"database_version"`
+	DatabaseCreatedAt    pgtype.Timestamptz `json:"database_created_at"`
+	MysqlScan            MysqlScan          `json:"mysql_scan"`
+}
+
+func (q *Queries) GetProjectInfoForMysqlScanByScanID(ctx context.Context, arg GetProjectInfoForMysqlScanByScanIDParams) (*GetProjectInfoForMysqlScanByScanIDRow, error) {
+	row := q.db.QueryRow(ctx, getProjectInfoForMysqlScanByScanID, arg.ScanID, arg.SaltKey)
 	var i GetProjectInfoForMysqlScanByScanIDRow
 	err := row.Scan(
 		&i.Project.ID,
@@ -221,15 +292,15 @@ func (q *Queries) GetProjectInfoForMysqlScanByScanID(ctx context.Context, scanID
 		&i.Project.OrganizationID,
 		&i.Project.Remote,
 		&i.Project.CreatedAt,
-		&i.MysqlDatabase.ID,
-		&i.MysqlDatabase.ProjectID,
-		&i.MysqlDatabase.Host,
-		&i.MysqlDatabase.Port,
-		&i.MysqlDatabase.DatabaseName,
-		&i.MysqlDatabase.Username,
-		&i.MysqlDatabase.Password,
-		&i.MysqlDatabase.Version,
-		&i.MysqlDatabase.CreatedAt,
+		&i.DatabaseID,
+		&i.DatabaseProjectID,
+		&i.DatabaseHost,
+		&i.DatabasePort,
+		&i.DatabaseDatabaseName,
+		&i.DatabaseUsername,
+		&i.DatabasePassword,
+		&i.DatabaseVersion,
+		&i.DatabaseCreatedAt,
 		&i.MysqlScan.ID,
 		&i.MysqlScan.ScanID,
 		&i.MysqlScan.DatabaseID,
@@ -244,9 +315,9 @@ SET
     database_name = $2,
     host = $3,
     port = $4,
-    username = $5,
-    PASSWORD = $6,
-    version = $7
+    username = encrypt_data($6, $7, $8),
+    PASSWORD = encrypt_data($6, $7, $9),
+    version = $5
 WHERE
     id = $1
 `
@@ -256,9 +327,11 @@ type UpdateMysqlDatabaseParams struct {
 	DatabaseName string         `json:"database_name"`
 	Host         string         `json:"host"`
 	Port         int32          `json:"port"`
+	Version      sql.NullString `json:"version"`
+	ProjectID    int64          `json:"project_id"`
+	SaltKey      string         `json:"salt_key"`
 	Username     string         `json:"username"`
 	Password     string         `json:"password"`
-	Version      sql.NullString `json:"version"`
 }
 
 func (q *Queries) UpdateMysqlDatabase(ctx context.Context, arg UpdateMysqlDatabaseParams) error {
@@ -267,9 +340,11 @@ func (q *Queries) UpdateMysqlDatabase(ctx context.Context, arg UpdateMysqlDataba
 		arg.DatabaseName,
 		arg.Host,
 		arg.Port,
+		arg.Version,
+		arg.ProjectID,
+		arg.SaltKey,
 		arg.Username,
 		arg.Password,
-		arg.Version,
 	)
 	return err
 }

@@ -31,13 +31,16 @@ var taskCreateScan = &cobra.Command{
 			return err
 		}
 
-		db, err := database.GetMysqlDatabase(cmd.Context(), dbid)
+		db, err := database.GetMysqlDatabase(cmd.Context(), queries.GetMysqlDatabaseParams{
+			ID:      dbid,
+			SaltKey: viper.GetString("db-encryption-salt"),
+		})
 		if err != nil {
 			return err
 		}
 
 		scanGroup, err := database.CreateScanGroup(cmd.Context(), queries.CreateScanGroupParams{
-			ProjectID: db.MysqlDatabase.ProjectID,
+			ProjectID: db.ProjectID,
 		})
 		if err != nil {
 			return err

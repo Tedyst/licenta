@@ -9,6 +9,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v5"
+	"github.com/spf13/viper"
 
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db"
@@ -20,7 +21,7 @@ type MysqlQuerier interface {
 	BaseQuerier
 
 	GetMysqlScanByScanID(ctx context.Context, scanID int64) (*queries.MysqlScan, error)
-	GetMysqlDatabase(ctx context.Context, id int64) (*queries.GetMysqlDatabaseRow, error)
+	GetMysqlDatabase(context.Context, queries.GetMysqlDatabaseParams) (*queries.GetMysqlDatabaseRow, error)
 	UpdateMysqlVersion(ctx context.Context, params queries.UpdateMysqlVersionParams) error
 }
 
@@ -29,12 +30,12 @@ func getMysqlConnectString(db *queries.MysqlDatabase) string {
 }
 
 func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool, saltKey string) (Saver, error) {
-	queries, ok := baseQuerier.(MysqlQuerier)
+	q, ok := baseQuerier.(MysqlQuerier)
 	if !ok {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("queries is not a MysqlQuerier"))
 	}
 
-	mysqlScan, err := queries.GetMysqlScanByScanID(ctx, scan.ID)
+	mysqlScan, err := q.GetMysqlScanByScanID(ctx, scan.ID)
 	if err == pgx.ErrNoRows {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get mysql scan: %w", err))
 	}
@@ -42,12 +43,25 @@ func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("could not get mysql scan: %w", err))
 	}
 
-	db, err := queries.GetMysqlDatabase(ctx, mysqlScan.DatabaseID)
+	db, err := q.GetMysqlDatabase(ctx, queries.GetMysqlDatabaseParams{
+		ID:      mysqlScan.DatabaseID,
+		SaltKey: saltKey,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not get database: %w", err)
 	}
 
-	conn, err := sql.Open("mysql", getMysqlConnectString(&db.MysqlDatabase))
+	conn, err := sql.Open("mysql", getMysqlConnectString(&queries.MysqlDatabase{
+		ID:           db.ID,
+		ProjectID:    db.ProjectID,
+		Host:         db.Host,
+		Port:         db.Port,
+		DatabaseName: db.DatabaseName,
+		Username:     db.Username,
+		Password:     db.Password,
+		Version:      db.Version,
+		CreatedAt:    db.CreatedAt,
+	}))
 	if err != nil {
 		return nil, fmt.Errorf("cannot create database connection: %w", err)
 	}
@@ -64,10 +78,20 @@ func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 	)
 
 	saver := &mysqlSaver{
-		queries:    queries,
-		baseSaver:  *createBaseSaver(queries, bruteforceProvider, logger, scan, sc, projectIsRemote),
-		mysqlScan:  mysqlScan,
-		database:   &db.MysqlDatabase,
+		queries:   q,
+		baseSaver: *createBaseSaver(q, bruteforceProvider, logger, scan, sc, projectIsRemote),
+		mysqlScan: mysqlScan,
+		database: &queries.MysqlDatabase{
+			ID:           db.ID,
+			ProjectID:    db.ProjectID,
+			Host:         db.Host,
+			Port:         db.Port,
+			DatabaseName: db.DatabaseName,
+			Username:     db.Username,
+			Password:     db.Password,
+			Version:      db.Version,
+			CreatedAt:    db.CreatedAt,
+		},
 		connection: conn,
 	}
 	saver.runAfterScan = saver.hookAfterScan
@@ -107,7 +131,7 @@ func init() {
 
 type CreateMysqlScanQuerier interface {
 	BaseCreater
-	GetMysqlDatabasesForProject(ctx context.Context, projectID int64) ([]*queries.MysqlDatabase, error)
+	GetMysqlDatabasesForProject(context.Context, queries.GetMysqlDatabasesForProjectParams) ([]*queries.GetMysqlDatabasesForProjectRow, error)
 	CreateMysqlScan(ctx context.Context, params queries.CreateMysqlScanParams) (*queries.MysqlScan, error)
 }
 
@@ -117,7 +141,31 @@ var CreateMysqlScan = CreateBaseScan(
 		if !ok {
 			return nil, errors.New("querier is not a CreateMysqlScanQuerier")
 		}
-		return mq.GetMysqlDatabasesForProject, nil
+		return func(ctx context.Context, projectID int64) ([]*queries.MysqlDatabase, error) {
+			rows, err := mq.GetMysqlDatabasesForProject(ctx, queries.GetMysqlDatabasesForProjectParams{
+				ProjectID: projectID,
+				SaltKey:   viper.GetString("db-encryption-salt"),
+			})
+			if err != nil {
+				return nil, fmt.Errorf("could not get databases: %w", err)
+			}
+
+			dbs := make([]*queries.MysqlDatabase, 0, len(rows))
+			for _, row := range rows {
+				dbs = append(dbs, &queries.MysqlDatabase{
+					ID:           row.ID,
+					ProjectID:    row.ProjectID,
+					Host:         row.Host,
+					Port:         row.Port,
+					DatabaseName: row.DatabaseName,
+					Username:     row.Username,
+					Password:     row.Password,
+					Version:      row.Version,
+					CreatedAt:    row.CreatedAt,
+				})
+			}
+			return dbs, nil
+		}, nil
 	},
 	func(ctx context.Context, q BaseCreater, scanID int64, db *queries.MysqlDatabase) (any, error) {
 		mq, ok := q.(CreateMysqlScanQuerier)
