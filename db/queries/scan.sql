@@ -145,7 +145,14 @@ ORDER BY
 
 -- name: GetScansForScanGroup :many
 SELECT
-    *
+    *,
+(
+        SELECT
+            COALESCE(MAX(scan_results.severity), 0)::integer
+        FROM
+            scan_results
+        WHERE
+            scan_id = scans.id) AS maximum_severity
 FROM
     scans
 WHERE

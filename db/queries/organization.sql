@@ -9,9 +9,11 @@ LIMIT 1;
 
 -- name: GetOrganizationMembers :many
 SELECT
-    *
+    sqlc.embed(organization_members),
+    sqlc.embed(users)
 FROM
     organization_members
+    INNER JOIN users ON organization_members.user_id = users.id
 WHERE
     organization_id = $1;
 

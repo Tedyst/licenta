@@ -192,14 +192,6 @@ type Project struct {
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
 }
 
-type ProjectMember struct {
-	ID        int64              `json:"id"`
-	ProjectID int64              `json:"project_id"`
-	UserID    int64              `json:"user_id"`
-	Role      int16              `json:"role"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-}
-
 type RememberMeToken struct {
 	ID        int64              `json:"id"`
 	UserID    int64              `json:"user_id"`

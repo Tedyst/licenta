@@ -8,14 +8,6 @@ WHERE
     AND name = $2
 LIMIT 1;
 
--- name: GetProjectMembers :many
-SELECT
-    *
-FROM
-    project_members
-WHERE
-    project_id = $1;
-
 -- name: GetProjectsByOrganization :many
 SELECT
     *
@@ -23,25 +15,6 @@ FROM
     projects
 WHERE
     organization_id = $1;
-
--- name: GetProjectUser :one
-SELECT
-    *
-FROM
-    project_members
-WHERE
-    project_id = $1
-    AND user_id = $2
-LIMIT 1;
-
--- name: GetProjectPermissionForUser :one
-SELECT
-    ROLE
-FROM
-    project_members
-WHERE
-    project_id = $1
-    AND user_id = $2;
 
 -- name: GetProject :one
 SELECT

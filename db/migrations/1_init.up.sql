@@ -66,13 +66,6 @@ CREATE INDEX projects_organization_id_idx ON projects(organization_id);
 
 CREATE INDEX projects_name_orgianization_id_idx ON projects(name, organization_id);
 
-CREATE TABLE project_members(
-    id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-    role smallint NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
 
 CREATE TABLE git_repositories(
     id bigserial PRIMARY KEY,

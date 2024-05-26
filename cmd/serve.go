@@ -48,9 +48,9 @@ var serveCmd = &cobra.Command{
 		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
 
 		emailSender := email.NewSendGridEmailSender(
-			viper.GetString("email.sendgrid"),
-			viper.GetString("email.senderName"),
-			viper.GetString("email.sender"),
+			viper.GetString("email-sendgrid"),
+			viper.GetString("email-senderName"),
+			viper.GetString("email-sender"),
 		)
 
 		taskRunner := local.NewLocalRunner(
@@ -111,10 +111,10 @@ var serveCmd = &cobra.Command{
 }
 
 func init() {
-	serveCmd.Flags().String("email.sendgrid", "", "Sendgrid API Key")
+	serveCmd.Flags().String("email-sendgrid", "", "Sendgrid API Key")
 
-	serveCmd.Flags().String("email.sender", "no-reply@tedyst.ro", "Email sender")
-	serveCmd.Flags().String("email.senderName", "Licenta", "Email sender name")
+	serveCmd.Flags().String("email-sender", "no-reply@tedyst.ro", "Email sender")
+	serveCmd.Flags().String("email-senderName", "Licenta", "Email sender name")
 
 	serveCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
 

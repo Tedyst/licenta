@@ -59,28 +59,51 @@ func (q *Queries) GetOrganizationByName(ctx context.Context, name string) (*Orga
 
 const getOrganizationMembers = `-- name: GetOrganizationMembers :many
 SELECT
-    id, organization_id, user_id, role, created_at
+    organization_members.id, organization_members.organization_id, organization_members.user_id, organization_members.role, organization_members.created_at,
+    users.id, users.username, users.password, users.email, users.recovery_codes, users.totp_secret, users.recover_selector, users.recover_verifier, users.recover_expiry, users.login_attempt_count, users.login_last_attempt, users.locked, users.confirm_selector, users.confirm_verifier, users.confirmed, users.created_at
 FROM
     organization_members
+    INNER JOIN users ON organization_members.user_id = users.id
 WHERE
     organization_id = $1
 `
 
-func (q *Queries) GetOrganizationMembers(ctx context.Context, organizationID int64) ([]*OrganizationMember, error) {
+type GetOrganizationMembersRow struct {
+	OrganizationMember OrganizationMember `json:"organization_member"`
+	User               User               `json:"user"`
+}
+
+func (q *Queries) GetOrganizationMembers(ctx context.Context, organizationID int64) ([]*GetOrganizationMembersRow, error) {
 	rows, err := q.db.Query(ctx, getOrganizationMembers, organizationID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*OrganizationMember
+	var items []*GetOrganizationMembersRow
 	for rows.Next() {
-		var i OrganizationMember
+		var i GetOrganizationMembersRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.OrganizationID,
-			&i.UserID,
-			&i.Role,
-			&i.CreatedAt,
+			&i.OrganizationMember.ID,
+			&i.OrganizationMember.OrganizationID,
+			&i.OrganizationMember.UserID,
+			&i.OrganizationMember.Role,
+			&i.OrganizationMember.CreatedAt,
+			&i.User.ID,
+			&i.User.Username,
+			&i.User.Password,
+			&i.User.Email,
+			&i.User.RecoveryCodes,
+			&i.User.TotpSecret,
+			&i.User.RecoverSelector,
+			&i.User.RecoverVerifier,
+			&i.User.RecoverExpiry,
+			&i.User.LoginAttemptCount,
+			&i.User.LoginLastAttempt,
+			&i.User.Locked,
+			&i.User.ConfirmSelector,
+			&i.User.ConfirmVerifier,
+			&i.User.Confirmed,
+			&i.User.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

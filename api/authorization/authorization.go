@@ -129,25 +129,15 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 		return hasPermission(permission, RBACGroup(cached)), nil
 	}
 
-	p, err := a.querier.GetProjectPermissionForUser(ctx, queries.GetProjectPermissionForUserParams{
-		ProjectID: project.ID,
-		UserID:    user.ID,
+	p, err := a.querier.GetOrganizationPermissionForUser(ctx, queries.GetOrganizationPermissionForUserParams{
+		OrganizationID: project.OrganizationID,
+		UserID:         user.ID,
 	})
 	if err != nil && err != pgx.ErrNoRows {
 		return false, err
 	}
 	if err == pgx.ErrNoRows {
-		p2, err := a.querier.GetOrganizationPermissionForUser(ctx, queries.GetOrganizationPermissionForUserParams{
-			OrganizationID: project.OrganizationID,
-			UserID:         user.ID,
-		})
-		if err != nil && err != pgx.ErrNoRows {
-			return false, err
-		}
-		if err == pgx.ErrNoRows {
-			return false, a.cache.Set(cacheKeyForUserProject(user, project), int16(None))
-		}
-		p = int16(p2)
+		return false, a.cache.Set(cacheKeyForUserProject(user, project), int16(None))
 	}
 
 	return hasPermission(permission, RBACGroup(p)), a.cache.Set(cacheKeyForUserProject(user, project), int16(p))

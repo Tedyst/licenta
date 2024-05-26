@@ -14,7 +14,7 @@ type consoleEmailSender struct {
 }
 
 func NewConsoleEmailSender(senderName, sender string) EmailSender {
-	slog.Info("Using console email sender")
+	slog.Debug("Using console email sender")
 
 	return &consoleEmailSender{
 		senderName: senderName,

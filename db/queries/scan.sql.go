@@ -460,22 +460,41 @@ func (q *Queries) GetScansForProject(ctx context.Context, projectID int64) ([]*G
 
 const getScansForScanGroup = `-- name: GetScansForScanGroup :many
 SELECT
-    id, scan_group_id, scan_type, status, error, worker_id, created_at, ended_at
+    id, scan_group_id, scan_type, status, error, worker_id, created_at, ended_at,
+(
+        SELECT
+            COALESCE(MAX(scan_results.severity), 0)::integer
+        FROM
+            scan_results
+        WHERE
+            scan_id = scans.id) AS maximum_severity
 FROM
     scans
 WHERE
     scan_group_id = $1
 `
 
-func (q *Queries) GetScansForScanGroup(ctx context.Context, scanGroupID int64) ([]*Scan, error) {
+type GetScansForScanGroupRow struct {
+	ID              int64              `json:"id"`
+	ScanGroupID     int64              `json:"scan_group_id"`
+	ScanType        int32              `json:"scan_type"`
+	Status          int32              `json:"status"`
+	Error           sql.NullString     `json:"error"`
+	WorkerID        sql.NullInt64      `json:"worker_id"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	EndedAt         pgtype.Timestamptz `json:"ended_at"`
+	MaximumSeverity int32              `json:"maximum_severity"`
+}
+
+func (q *Queries) GetScansForScanGroup(ctx context.Context, scanGroupID int64) ([]*GetScansForScanGroupRow, error) {
 	rows, err := q.db.Query(ctx, getScansForScanGroup, scanGroupID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []*Scan
+	var items []*GetScansForScanGroupRow
 	for rows.Next() {
-		var i Scan
+		var i GetScansForScanGroupRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ScanGroupID,
@@ -485,6 +504,7 @@ func (q *Queries) GetScansForScanGroup(ctx context.Context, scanGroupID int64) (
 			&i.WorkerID,
 			&i.CreatedAt,
 			&i.EndedAt,
+			&i.MaximumSeverity,
 		); err != nil {
 			return nil, err
 		}

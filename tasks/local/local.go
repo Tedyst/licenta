@@ -2,12 +2,14 @@ package local
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
@@ -16,6 +18,7 @@ import (
 	"github.com/tedyst/licenta/models"
 	"github.com/tedyst/licenta/scanner"
 	"github.com/tedyst/licenta/tasks"
+	"github.com/tedyst/licenta/templates"
 )
 
 type localRunner struct {
@@ -41,7 +44,48 @@ func NewLocalRunner(debug bool, emailSender email.EmailSender, queries db.Transa
 	}
 }
 
-func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType string, scanType string) error {
+func (runner *localRunner) NotifyAdminsIfSeverityHigh(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup) error {
+	scans, err := runner.queries.GetScansForScanGroup(ctx, scanGroup.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get scans for scan group: %w", err)
+	}
+
+	for _, scan := range scans {
+		if scan.MaximumSeverity != int32(scanner.SEVERITY_HIGH) {
+			continue
+		}
+
+		results, err := runner.queries.GetScanResults(ctx, scan.ID)
+		if err != nil {
+			return fmt.Errorf("failed to get scan results for scan: %w", err)
+		}
+
+		text := templates.SendScanFailedEmail(int(scan.ID), int(scanGroup.ID), results)
+
+		members, err := runner.queries.GetOrganizationMembers(ctx, project.OrganizationID)
+		if err != nil {
+			return fmt.Errorf("failed to get project members: %w", err)
+		}
+
+		for _, member := range members {
+			if member.OrganizationMember.Role != int32(authorization.Admin) && member.OrganizationMember.Role != int32(authorization.Owner) {
+				continue
+			}
+
+			if err := runner.SendEmail(ctx, member.User.Email, "Scan failed", text, text); err != nil {
+				return fmt.Errorf("failed to send email: %w", err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries.Project, scanGroup *queries.ScanGroup, sourceType string, scanType string) (err error) {
+	defer func() {
+		err = errors.Join(err, runner.NotifyAdminsIfSeverityHigh(ctx, project, scanGroup))
+	}()
+
 	if err := runner.ScheduleSourceRun(ctx, project, scanGroup, sourceType); err != nil {
 		return fmt.Errorf("failed to schedule source run: %w", err)
 	}
@@ -52,7 +96,16 @@ func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries
 	}
 
 	for _, scan := range scans {
-		if err := runner.ScheduleSaverRun(ctx, scan, scanType); err != nil {
+		if err := runner.ScheduleSaverRun(ctx, &queries.Scan{
+			ID:          scan.ID,
+			ScanGroupID: scanGroup.ID,
+			ScanType:    scan.ScanType,
+			Status:      scan.Status,
+			Error:       scan.Error,
+			WorkerID:    scan.WorkerID,
+			CreatedAt:   scan.CreatedAt,
+			EndedAt:     scan.EndedAt,
+		}, scanType); err != nil {
 			return fmt.Errorf("failed to schedule saver run: %w", err)
 		}
 	}

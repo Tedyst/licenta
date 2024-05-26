@@ -1,0 +1,11 @@
+{% import "github.com/tedyst/licenta/db/queries" %}
+
+{% func SendScanFailedEmail(scanId int, scanGroupID int, results []*queries.ScanResult) %}
+	The scan with ID {%d scanId %} has failed. The scan group ID is {%d scanGroupID %}.
+    Here are the results:
+    <ul>
+    {% for _, result := range results %}
+        <li>{%s result.Message %}</li>
+    {% endfor %}
+    </ul>
+{% endfunc %}
