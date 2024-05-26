@@ -20,6 +20,7 @@
 
 	export let fields: Field[] = ['hostname', 'port', 'username', 'password', 'database'];
 	export let initialValues: Partial<Record<Field, string | undefined>> = {};
+	export let buttonLabel: string = 'Create';
 </script>
 
 {#if fields.includes('repository')}
@@ -126,4 +127,4 @@
 	</label>
 {/if}
 
-<button class="btn btn-primary">Create</button>
+<button class="btn btn-primary">{buttonLabel}</button>

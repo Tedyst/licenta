@@ -25,7 +25,7 @@ type PostgresQuerier interface {
 	UpdatePostgresVersion(ctx context.Context, params queries.UpdatePostgresVersionParams) error
 }
 
-func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan) (Saver, error) {
+func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool) (Saver, error) {
 	queries, ok := baseQuerier.(PostgresQuerier)
 	if !ok {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("queries is not a PostgresQuerier"))
@@ -62,7 +62,7 @@ func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforcePr
 
 	saver := &postgresSaver{
 		queries:      queries,
-		baseSaver:    *createBaseSaver(queries, bruteforceProvider, logger, scan, sc),
+		baseSaver:    *createBaseSaver(queries, bruteforceProvider, logger, scan, sc, projectIsRemote),
 		postgresScan: postgresScan,
 		database:     &db.PostgresDatabase,
 		connection:   conn,

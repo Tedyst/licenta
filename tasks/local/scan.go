@@ -34,7 +34,7 @@ func NewSaverRunner(queries SaverQuerier, messageExchange messages.Exchange, bru
 }
 
 func (r *SaverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, scanType string) error {
-	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType)
+	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType, false)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (r *SaverRunner) RunSaverRemote(ctx context.Context, scan *queries.Scan, sc
 }
 
 func (r *SaverRunner) RunSaverForPublic(ctx context.Context, scan *queries.Scan, scanType string) error {
-	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType)
+	saver, err := saver.NewSaver(ctx, r.queries, r.bruteforceProvider, scan, scanType, true)
 	if err != nil {
 		return err
 	}

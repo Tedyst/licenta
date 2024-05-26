@@ -50,6 +50,7 @@
 							password: data.currentDatabase?.password,
 							database: data.currentDatabase?.database_name
 						}}
+						buttonLabel="Edit"
 					/>
 				</form>
 			</div>

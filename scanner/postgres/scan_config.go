@@ -32,7 +32,7 @@ var scanConfigLines = map[string]struct {
 	"listen_addresses": {
 		value: func(s string) bool { return s != "localhost" },
 		diagnostic: postgresScanResult{
-			severity: scanner.SEVERITY_MEDIUM,
+			severity: scanner.SEVERITY_WARNING,
 			message:  "listen_addresses is not localhost.",
 			detail:   "listen_addresses is not localhost. This may allow other users to connect to your database.",
 		},
@@ -64,11 +64,11 @@ var scanConfigLines = map[string]struct {
 		},
 	},
 	"ignore_invalid_pages": {
-		value: func(s string) bool { return s == "off" },
+		value: func(s string) bool { return s == "on" },
 		diagnostic: postgresScanResult{
 			severity: scanner.SEVERITY_WARNING,
-			message:  "ignore_invalid_pages is off.",
-			detail:   "ignore_invalid_pages is off. This may cause error writing data to disk.",
+			message:  "ignore_invalid_pages is on.",
+			detail:   "ignore_invalid_pages is on. This may cause error writing data to disk.",
 		},
 	},
 	"local_preload_libraries": {

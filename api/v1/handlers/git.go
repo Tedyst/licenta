@@ -227,6 +227,7 @@ func (server *serverHandler) PostGit(ctx context.Context, request generated.Post
 	params := queries.CreateGitRepositoryParams{
 		GitRepository: request.Body.GitRepository,
 		ProjectID:     int64(request.Body.ProjectId),
+		SaltKey:       server.saltKey,
 	}
 	if request.Body.Password != nil {
 		params.Password = *request.Body.Password

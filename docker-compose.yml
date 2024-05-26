@@ -24,15 +24,14 @@ services:
   #     - SWAGGER_JSON=/swagger.json
 
   db:
-    image: postgres:latest
+    build:
+      context: postgres/
     ports:
       - "1001:5432"
     networks:
       - licenta-network
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: licenta
+    env_file:
+      - docker.env
 
   nats:
     image: nats:latest

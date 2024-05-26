@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE users(
     id bigserial PRIMARY KEY,
     username text NOT NULL UNIQUE,
@@ -110,12 +112,6 @@ CREATE TABLE git_results(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE git_scans(
-    id bigserial PRIMARY KEY,
-    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
-    repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE
-);
-
 CREATE TABLE docker_images(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -151,12 +147,6 @@ CREATE TABLE docker_results(
     password text,
     filename text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-CREATE TABLE docker_scans(
-    id bigserial PRIMARY KEY,
-    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
-    image_id bigint NOT NULL REFERENCES docker_images(id) ON DELETE CASCADE
 );
 
 CREATE TABLE nvd_cpes(
@@ -230,6 +220,18 @@ CREATE TABLE scans(
     worker_id bigint REFERENCES workers(id) ON DELETE CASCADE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ended_at timestamp with time zone
+);
+
+CREATE TABLE git_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE docker_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    image_id bigint NOT NULL REFERENCES docker_images(id) ON DELETE CASCADE
 );
 
 CREATE TABLE postgres_scans(
@@ -318,8 +320,6 @@ CREATE TABLE mysql_scans(
     scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     database_id bigint NOT NULL REFERENCES mysql_databases(id) ON DELETE CASCADE
 );
-
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE OR REPLACE FUNCTION encrypt_data(project_id bigint, salt_key text, data text)
     RETURNS text

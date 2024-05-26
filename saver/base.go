@@ -38,6 +38,8 @@ type baseSaver struct {
 	scanner scanner.Scanner
 
 	runAfterScan func(ctx context.Context) error
+
+	projectIsRemote bool
 }
 
 func (saver *baseSaver) insertResults(ctx context.Context, results []scanner.ScanResult) error {
@@ -90,7 +92,7 @@ func (saver *baseSaver) bruteforceUpdateStatus(ctx context.Context) func(status 
 	}
 }
 
-func createBaseSaver(q BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *queries.Scan, sc scanner.Scanner) *baseSaver {
+func createBaseSaver(q BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, logger *slog.Logger, scan *queries.Scan, sc scanner.Scanner, projectIsRemote bool) *baseSaver {
 	return &baseSaver{
 		queries:            q,
 		bruteforceProvider: bruteforceProvider,
@@ -98,6 +100,7 @@ func createBaseSaver(q BaseQuerier, bruteforceProvider bruteforce.BruteforceProv
 		scan:               scan,
 		scanner:            sc,
 		bruteforceResults:  map[scanner.User]int64{},
+		projectIsRemote:    projectIsRemote,
 	}
 }
 
@@ -291,9 +294,14 @@ func (runner *baseSaver) ScanForPublicAccessOnly(ctx context.Context) error {
 
 	runner.logger.DebugContext(ctx, "Pinged database from public access")
 
+	severity := scanner.SEVERITY_WARNING
+	if !runner.projectIsRemote {
+		severity = scanner.SEVERITY_HIGH
+	}
+
 	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
 		ScanID:     runner.scan.ID,
-		Severity:   int32(scanner.SEVERITY_HIGH),
+		Severity:   int32(severity),
 		Message:    "Database is accessible from public internet",
 		ScanSource: int32(runner.scanner.GetScannerID()),
 	}); err != nil {

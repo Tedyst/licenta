@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/x509"
 	"fmt"
 	"log/slog"
 	"os"
@@ -39,6 +40,25 @@ var rootCmd = &cobra.Command{
 		if viper.GetBool("telemetry") {
 			if err := telemetry.InitTelemetry(viper.GetString("telemetry-collector-endpoint")); err != nil {
 				return err
+			}
+		}
+
+		if viper.GetString("ssl-extra-ca") != "" {
+			rootCA, err := x509.SystemCertPool()
+			if err != nil {
+				return err
+			}
+			if rootCA == nil {
+				rootCA = x509.NewCertPool()
+			}
+
+			cert, err := os.ReadFile(viper.GetString("ssl-extra-ca"))
+			if err != nil {
+				return err
+			}
+
+			if ok := rootCA.AppendCertsFromPEM(cert); !ok {
+				return fmt.Errorf("failed to append cert to rootCA")
 			}
 		}
 
@@ -95,6 +115,7 @@ func init() {
 	rootCmd.PersistentFlags().String("output", "cli", "Output format")
 	rootCmd.PersistentFlags().Bool("telemetry", false, "Enable telemetry")
 	rootCmd.PersistentFlags().String("telemetry-collector-endpoint", "", "Telemetry collector endpoint")
+	rootCmd.PersistentFlags().String("ssl-extra-ca", "", "Add extra CA file to the SSL certificate store")
 
 	rootCmd.AddCommand(user.NewUserCmd())
 	rootCmd.AddCommand(extract.NewExtractCmd())

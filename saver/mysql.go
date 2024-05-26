@@ -27,7 +27,7 @@ func getMysqlConnectString(db *queries.MysqlDatabase) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.Username, db.Password, db.Host, db.Port, db.DatabaseName)
 }
 
-func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan) (Saver, error) {
+func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool) (Saver, error) {
 	queries, ok := baseQuerier.(MysqlQuerier)
 	if !ok {
 		return nil, errors.Join(ErrSaverNotNeeded, fmt.Errorf("queries is not a MysqlQuerier"))
@@ -64,7 +64,7 @@ func NewMysqlSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 
 	saver := &mysqlSaver{
 		queries:    queries,
-		baseSaver:  *createBaseSaver(queries, bruteforceProvider, logger, scan, sc),
+		baseSaver:  *createBaseSaver(queries, bruteforceProvider, logger, scan, sc, projectIsRemote),
 		mysqlScan:  mysqlScan,
 		database:   &db.MysqlDatabase,
 		connection: conn,
