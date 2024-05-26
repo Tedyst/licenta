@@ -53,7 +53,6 @@ func (q *Queries) CreateDockerImage(ctx context.Context, arg CreateDockerImagePa
 }
 
 type CreateDockerLayerResultsForProjectParams struct {
-	ProjectID     int64          `json:"project_id"`
 	LayerID       int64          `json:"layer_id"`
 	Name          string         `json:"name"`
 	Line          string         `json:"line"`
@@ -212,14 +211,14 @@ func (q *Queries) GetDockerImagesForProject(ctx context.Context, arg GetDockerIm
 
 const getDockerLayersAndResultsForImage = `-- name: GetDockerLayersAndResultsForImage :many
 SELECT
-    lid, image_id, layer_hash, scanned_at, id, project_id, layer_id, name, line, line_number, previous_lines, match, probability, username, password, filename, created_at
+    lid, image_id, layer_hash, scanned_at, id, layer_id, name, line, line_number, previous_lines, match, probability, username, password, filename, created_at
 FROM ((
         SELECT
             docker_layers.id AS lid,
             docker_layers.image_id,
             docker_layers.layer_hash,
             docker_layers.scanned_at,
-            docker_results.id, docker_results.project_id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.previous_lines, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
+            docker_results.id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.previous_lines, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
         FROM
             docker_layers
         LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
@@ -235,7 +234,7 @@ UNION (
         docker_layers.image_id,
         docker_layers.layer_hash,
         docker_layers.scanned_at,
-        docker_results.id, docker_results.project_id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.previous_lines, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
+        docker_results.id, docker_results.layer_id, docker_results.name, docker_results.line, docker_results.line_number, docker_results.previous_lines, docker_results.match, docker_results.probability, docker_results.username, docker_results.password, docker_results.filename, docker_results.created_at
     FROM
         docker_layers
     LEFT JOIN docker_results ON docker_layers.id = docker_results.layer_id
@@ -252,7 +251,6 @@ type GetDockerLayersAndResultsForImageRow struct {
 	LayerHash     string             `json:"layer_hash"`
 	ScannedAt     pgtype.Timestamptz `json:"scanned_at"`
 	ID            pgtype.Int8        `json:"id"`
-	ProjectID     sql.NullInt64      `json:"project_id"`
 	LayerID       sql.NullInt64      `json:"layer_id"`
 	Name          sql.NullString     `json:"name"`
 	Line          sql.NullString     `json:"line"`
@@ -281,7 +279,6 @@ func (q *Queries) GetDockerLayersAndResultsForImage(ctx context.Context, imageID
 			&i.LayerHash,
 			&i.ScannedAt,
 			&i.ID,
-			&i.ProjectID,
 			&i.LayerID,
 			&i.Name,
 			&i.Line,

@@ -1,8 +1,6 @@
 module github.com/tedyst/licenta
 
-go 1.22
-
-toolchain go1.22.0
+go 1.22.2
 
 require (
 	github.com/deepmap/oapi-codegen/v2 v2.1.0
@@ -33,6 +31,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
 	github.com/sqlc-dev/sqlc v1.26.0
+	github.com/tedyst/authbosswebauthn v0.0.0-20240526084728-30f31d7f2fbf
 	github.com/ttys3/slogx v0.2.2
 	github.com/valyala/quicktemplate v1.7.0
 	github.com/volatiletech/authboss-clientstate v0.0.0-20230313034706-0b930a6c0713

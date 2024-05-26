@@ -9,7 +9,7 @@ import (
 	"regexp"
 
 	"github.com/go-webauthn/webauthn/protocol"
-	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
+	"github.com/tedyst/authbosswebauthn"
 	"github.com/volatiletech/authboss/v3"
 	"github.com/volatiletech/authboss/v3/defaults"
 )

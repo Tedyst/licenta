@@ -48,7 +48,6 @@ type DockerLayer struct {
 
 type DockerResult struct {
 	ID            int64              `json:"id"`
-	ProjectID     int64              `json:"project_id"`
 	LayerID       int64              `json:"layer_id"`
 	Name          string             `json:"name"`
 	Line          string             `json:"line"`

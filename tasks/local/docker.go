@@ -75,7 +75,6 @@ func (r *DockerRunner) ScanDockerRepository(ctx context.Context, image *queries.
 		layerResults := []queries.CreateDockerLayerResultsForProjectParams{}
 		for _, fileResult := range result.Results {
 			layerResults = append(layerResults, queries.CreateDockerLayerResultsForProjectParams{
-				ProjectID:     image.ProjectID,
 				LayerID:       scannedLayer.ID,
 				Name:          fileResult.Name,
 				Line:          fileResult.Line,

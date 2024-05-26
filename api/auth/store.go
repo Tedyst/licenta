@@ -9,7 +9,7 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/jackc/pgx/v5"
-	"github.com/tedyst/licenta/api/auth/authbosswebauthn"
+	"github.com/tedyst/authbosswebauthn"
 	"github.com/tedyst/licenta/cache"
 	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"

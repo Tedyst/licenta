@@ -134,7 +134,6 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 				Name:          dbLayer.Name.String,
 				Password:      dbLayer.Password.String,
 				Probability:   float32(dbLayer.Probability.Float64),
-				ProjectId:     int(dbLayer.ProjectID.Int64),
 				Username:      dbLayer.Username.String,
 				PreviousLines: dbLayer.PreviousLines.String,
 			})

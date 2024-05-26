@@ -37,8 +37,8 @@ WHERE
     project_id = $1;
 
 -- name: CreateDockerLayerResultsForProject :copyfrom
-INSERT INTO docker_results(project_id, layer_id, name, line, line_number, MATCH, probability, username, PASSWORD, filename, previous_lines)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
+INSERT INTO docker_results(layer_id, name, line, line_number, MATCH, probability, username, PASSWORD, filename, previous_lines)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
 
 -- name: DeleteDockerImage :exec
 DELETE FROM docker_images

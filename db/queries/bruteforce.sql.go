@@ -144,11 +144,13 @@ func (q *Queries) GetBruteforcePasswordsPaginated(ctx context.Context, arg GetBr
 
 const getBruteforcePasswordsSpecificForProject = `-- name: GetBruteforcePasswordsSpecificForProject :many
 SELECT
-    PASSWORD
+    docker_results.PASSWORD
 FROM
     docker_results
+    INNER JOIN docker_layers ON docker_results.layer_id = docker_layers.id
+    INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
 WHERE
-    docker_results.project_id = $1
+    docker_images.project_id = $1
 UNION ALL
 SELECT
     PASSWORD
@@ -226,8 +228,10 @@ FROM (
         -1
     FROM
         docker_results
+        INNER JOIN docker_layers ON docker_results.layer_id = docker_layers.id
+        INNER JOIN docker_images ON docker_layers.image_id = docker_images.id
     WHERE
-        docker_results.project_id = $2
+        docker_images.project_id = $2
         AND docker_results.PASSWORD = $1
     UNION ALL
     SELECT

@@ -135,7 +135,6 @@ CREATE TABLE docker_layers(
 
 CREATE TABLE docker_results(
     id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     layer_id bigint REFERENCES docker_layers(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
     line text NOT NULL,
