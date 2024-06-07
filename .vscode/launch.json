@@ -100,6 +100,20 @@
                 "1",
                 "-d"
             ]
+        },
+        {
+            "name": "Run Scan Redis",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "args": [
+                "scan",
+                "redis",
+                "localhost",
+                "6379",
+                ""
+            ]
         }
     ]
 }

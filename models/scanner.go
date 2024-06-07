@@ -13,4 +13,6 @@ const (
 	SCAN_MYSQL    = 2
 	SCAN_GIT      = 3
 	SCAN_DOCKER   = 4
+	SCAN_REDIS    = 5
+	SCAN_MONGODB  = 6
 )
