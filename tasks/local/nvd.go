@@ -74,6 +74,7 @@ func (r *NvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 			if err != nil {
 				return err
 			}
+			slog.DebugContext(ctx, "Created CPE", slog.Int("product", int(product)), slog.String("cpe", result.Cpe.CpeName))
 			forceUpdate = true
 		}
 
@@ -86,6 +87,8 @@ func (r *NvdRunner) importCpesInDB(ctx context.Context, product nvd.Product, dat
 			if err != nil {
 				return err
 			}
+
+			slog.DebugContext(ctx, "Waiting 6 seconds before next request", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe))
 
 			time.Sleep(6 * time.Second)
 			err := r.updateCVEsForSpecificCPE(ctx, database, product, cpe)
@@ -134,6 +137,8 @@ func (r *NvdRunner) importCVEsInDB(ctx context.Context, product nvd.Product, dat
 			if err != nil {
 				return fmt.Errorf("failed to create cve: %w", err)
 			}
+
+			slog.DebugContext(ctx, "Created CVE", slog.Int("product", int(product)), slog.String("cpe", cpe.Cpe), slog.String("cve", result.Cve.ID))
 		}
 
 		_, err = database.GetCveCpeByCveAndCpe(ctx, queries.GetCveCpeByCveAndCpeParams{

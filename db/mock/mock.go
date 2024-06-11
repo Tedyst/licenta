@@ -3969,6 +3969,45 @@ func (c *MockTransactionQuerierGetProjectWithStatsCall) DoAndReturn(f func(conte
 	return c
 }
 
+// GetProjects mocks base method.
+func (m *MockTransactionQuerier) GetProjects(ctx context.Context) ([]*queries.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjects", ctx)
+	ret0, _ := ret[0].([]*queries.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjects indicates an expected call of GetProjects.
+func (mr *MockTransactionQuerierMockRecorder) GetProjects(ctx any) *MockTransactionQuerierGetProjectsCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjects", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjects), ctx)
+	return &MockTransactionQuerierGetProjectsCall{Call: call}
+}
+
+// MockTransactionQuerierGetProjectsCall wrap *gomock.Call
+type MockTransactionQuerierGetProjectsCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetProjectsCall) Return(arg0 []*queries.Project, arg1 error) *MockTransactionQuerierGetProjectsCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetProjectsCall) Do(f func(context.Context) ([]*queries.Project, error)) *MockTransactionQuerierGetProjectsCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetProjectsCall) DoAndReturn(f func(context.Context) ([]*queries.Project, error)) *MockTransactionQuerierGetProjectsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetProjectsByOrganization mocks base method.
 func (m *MockTransactionQuerier) GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*queries.Project, error) {
 	m.ctrl.T.Helper()

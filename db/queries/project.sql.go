@@ -149,6 +149,39 @@ func (q *Queries) GetProjectWithStats(ctx context.Context, id int64) (*GetProjec
 	return &i, err
 }
 
+const getProjects = `-- name: GetProjects :many
+SELECT
+    id, name, organization_id, remote, created_at
+FROM
+    projects
+`
+
+func (q *Queries) GetProjects(ctx context.Context) ([]*Project, error) {
+	rows, err := q.db.Query(ctx, getProjects)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*Project
+	for rows.Next() {
+		var i Project
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.OrganizationID,
+			&i.Remote,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getProjectsByOrganization = `-- name: GetProjectsByOrganization :many
 SELECT
     id, name, organization_id, remote, created_at

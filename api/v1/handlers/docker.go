@@ -124,7 +124,7 @@ func (server *serverHandler) GetDockerId(ctx context.Context, request generated.
 
 		if dbLayer.ID.Valid {
 			layerResults[dbLayer.Lid] = append(layerResults[dbLayer.Lid], generated.DockerLayerResult{
-				CreatedAt:     dbLayer.CreatedAt.Time.Format(time.RFC3339),
+				CreatedAt:     dbLayer.CreatedAt.Time.Format(time.RFC3339Nano),
 				Filename:      dbLayer.Filename.String,
 				Id:            int(dbLayer.ID.Int64),
 				Layer:         int(dbLayer.Lid),

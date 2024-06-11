@@ -27,7 +27,7 @@ type NvdCpeCpe struct {
 }
 
 func (c *NvdCpeCpe) LastModifiedDate() (time.Time, error) {
-	return time.Parse(time.RFC3339Nano, c.LastModified)
+	return time.Parse("2006-01-02T15:04:05", c.LastModified)
 }
 
 type NvdCpeRef struct {

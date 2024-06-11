@@ -16,3 +16,5 @@ const (
 	SCAN_REDIS    = 5
 	SCAN_MONGODB  = 6
 )
+
+const AUTOMATIC_SCAN_USER_ID = -1

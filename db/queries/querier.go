@@ -112,6 +112,7 @@ type Querier interface {
 	GetProjectInfoForPostgresScanByScanID(ctx context.Context, arg GetProjectInfoForPostgresScanByScanIDParams) (*GetProjectInfoForPostgresScanByScanIDRow, error)
 	GetProjectInfoForRedisScanByScanID(ctx context.Context, arg GetProjectInfoForRedisScanByScanIDParams) (*GetProjectInfoForRedisScanByScanIDRow, error)
 	GetProjectWithStats(ctx context.Context, id int64) (*GetProjectWithStatsRow, error)
+	GetProjects(ctx context.Context) ([]*Project, error)
 	GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*Project, error)
 	GetRedisDatabase(ctx context.Context, arg GetRedisDatabaseParams) (*GetRedisDatabaseRow, error)
 	GetRedisDatabasesForProject(ctx context.Context, arg GetRedisDatabasesForProjectParams) ([]*GetRedisDatabasesForProjectRow, error)

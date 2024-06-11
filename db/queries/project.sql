@@ -53,3 +53,9 @@ WHERE id = $1
 RETURNING
     *;
 
+-- name: GetProjects :many
+SELECT
+    *
+FROM
+    projects;
+
