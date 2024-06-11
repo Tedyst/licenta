@@ -27,7 +27,7 @@ type MongoQuerier interface {
 }
 
 func getMongoConnectString(db *queries.MongoDatabase) string {
-	return fmt.Sprintf("mongo://%s:%s@%s:%d/%s", db.Username, db.Password, db.Host, db.Port, db.DatabaseName)
+	return fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", db.Username, db.Password, db.Host, db.Port, db.DatabaseName)
 }
 
 func NewMongoSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvider bruteforce.BruteforceProvider, scan *queries.Scan, projectIsRemote bool, saltKey string) (Saver, error) {

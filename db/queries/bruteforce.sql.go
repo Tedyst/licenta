@@ -156,8 +156,10 @@ SELECT
     PASSWORD
 FROM
     git_results
+    INNER JOIN git_commits ON git_results.commit = git_commits.id
+    INNER JOIN git_repositories ON git_commits.repository_id = git_repositories.id
 WHERE
-    git_results.project_id = $1
+    git_repositories.project_id = $1
 `
 
 func (q *Queries) GetBruteforcePasswordsSpecificForProject(ctx context.Context, projectID int64) ([]sql.NullString, error) {
@@ -238,8 +240,10 @@ FROM (
         -1
     FROM
         git_results
+        INNER JOIN git_commits ON git_results.commit = git_commits.id
+        INNER JOIN git_repositories ON git_commits.repository_id = git_repositories.id
     WHERE
-        git_results.project_id = $2
+        git_repositories.project_id = $2
         AND git_results.PASSWORD = $1) AS subq
 LIMIT 1
 `
