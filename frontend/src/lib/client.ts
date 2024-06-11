@@ -312,18 +312,11 @@ export const clientFromFetch = (fetch: typeof csrfFetch, origin: string) => {
 	});
 	const csrfMiddleware = {
 		async onRequest(req: MiddlewareRequest) {
-			const { headers, ...reqOptions } = req;
-
 			const token = (await getCSRFToken(req.url, fetch)) || 'null';
 
-			return new Request(req, {
-				...reqOptions,
-				headers: {
-					...headers,
-					'X-CSRF-Token': token
-				},
-				credentials: 'include'
-			});
+			req.headers.set('X-CSRF-Token', token);
+
+			return req;
 		},
 		async onResponse(res: Response) {
 			return res;

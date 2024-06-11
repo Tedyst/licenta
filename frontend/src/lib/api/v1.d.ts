@@ -788,6 +788,74 @@ export interface paths {
       };
     };
   };
+  "/mongo-scans": {
+    /** Get all mongo scans */
+    get: {
+      parameters: {
+        query: {
+          /** @description The scan ID to filter for */
+          scan: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              scans: components["schemas"]["MongoScan"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/redis-scans": {
+    /** Get all redis scans */
+    get: {
+      parameters: {
+        query: {
+          /** @description The scan ID to filter for */
+          scan: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              scans: components["schemas"]["RedisScan"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Scan not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/mysql-scans": {
     /** Get all postgres scans */
     get: {
@@ -1284,6 +1352,344 @@ export interface paths {
             "application/json": {
               success: boolean;
               postgres_database: components["schemas"]["PostgresDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/mongo": {
+    /** Get all mongo databases for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The projects to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mongo_databases: components["schemas"]["MongoDatabase"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new mongo database */
+    post: {
+      /** @description The mongo database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateMongoDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mongo_database: components["schemas"]["MongoDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/mongo/{id}": {
+    /** Get mongo database by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the mongo database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mongo_database: components["schemas"]["MongoDatabase"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Delete mongo database by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the postgres database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update mongo database by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the mongo database */
+          id: number;
+        };
+      };
+      /** @description The mongo database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchMongoDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              mongo_database: components["schemas"]["MongoDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/redis": {
+    /** Get all redis databases for a project */
+    get: {
+      parameters: {
+        query: {
+          /** @description The projects to filter for */
+          project: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              redis_databases: components["schemas"]["RedisDatabase"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new redis database */
+    post: {
+      /** @description The redis database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateRedisDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              redis_database: components["schemas"]["RedisDatabase"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/redis/{id}": {
+    /** Get redis database by ID */
+    get: {
+      parameters: {
+        path: {
+          /** @description The ID of the redis database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              redis_database: components["schemas"]["RedisDatabase"];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Delete redis database by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the redis database */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Postgres database not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update redis database by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the redis database */
+          id: number;
+        };
+      };
+      /** @description The redis database object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchRedisDatabase"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              redis_database: components["schemas"]["RedisDatabase"];
             };
           };
         };
@@ -1835,6 +2241,21 @@ export interface components {
       password?: string;
       version?: string;
     };
+    PatchMongoDatabase: {
+      host?: string;
+      port?: number;
+      database_name?: string;
+      username?: string;
+      password?: string;
+      version?: string;
+    };
+    PatchRedisDatabase: {
+      host?: string;
+      port?: number;
+      username?: string;
+      password?: string;
+      version?: string;
+    };
     CreatePostgresDatabase: {
       project_id: number;
       host: string;
@@ -1854,11 +2275,47 @@ export interface components {
       created_at: string;
       version: string;
     };
+    MongoDatabase: {
+      id: number;
+      project_id: number;
+      host: string;
+      port: number;
+      database_name: string;
+      username: string;
+      password: string;
+      created_at: string;
+      version: string;
+    };
+    RedisDatabase: {
+      id: number;
+      project_id: number;
+      host: string;
+      port: number;
+      username: string;
+      password: string;
+      created_at: string;
+      version: string;
+    };
     CreateMysqlDatabase: {
       project_id: number;
       host: string;
       port: number;
       database_name: string;
+      username: string;
+      password: string;
+    };
+    CreateMongoDatabase: {
+      project_id: number;
+      host: string;
+      port: number;
+      database_name: string;
+      username: string;
+      password: string;
+    };
+    CreateRedisDatabase: {
+      project_id: number;
+      host: string;
+      port: number;
       username: string;
       password: string;
     };
@@ -2052,6 +2509,14 @@ export interface components {
       database_id: number;
     };
     MysqlScan: {
+      id: number;
+      database_id: number;
+    };
+    MongoScan: {
+      id: number;
+      database_id: number;
+    };
+    RedisScan: {
       id: number;
       database_id: number;
     };

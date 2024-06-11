@@ -20,6 +20,18 @@
 					class="btn btn-primary btn-block">Add a MySQL database</a
 				>
 			</div>
+			<div class="p-2">
+				<a
+					href="/dashboard/{data.organization?.name}/{data.project?.name}/add-scanner/mongo"
+					class="btn btn-primary btn-block">Add a Mongo database</a
+				>
+			</div>
+			<div class="p-2">
+				<a
+					href="/dashboard/{data.organization?.name}/{data.project?.name}/add-scanner/redis"
+					class="btn btn-primary btn-block">Add a Redis database</a
+				>
+			</div>
 		</div>
 	</div>
 </div>

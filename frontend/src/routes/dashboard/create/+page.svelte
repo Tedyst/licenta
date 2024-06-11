@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { applyAction, enhance } from '$app/forms';
-	import { invalidate } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import type { ActionData } from './$types';
 
 	export let form: ActionData;

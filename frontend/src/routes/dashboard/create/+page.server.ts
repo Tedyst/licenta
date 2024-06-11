@@ -14,12 +14,11 @@ export const actions = {
 		}
 
 		const returned = await client
-			.POST('/organizations', { body: { name: organizationName.trim().toLowerCase() } })
+			.POST('/organizations', { body: { name: ('' + organizationName).trim().toLowerCase() } })
 			.then(async (res) => {
 				if (res.data?.success) {
 					return {
-						url: `/dashboard/${res.data.organization.name}`,
-						error: null
+						url: `/dashboard/${res.data.organization.name}`
 					};
 				}
 				return { error: res.error?.message || 'Internal server error' };
@@ -28,7 +27,7 @@ export const actions = {
 				return { error: err.message || 'Internal server error' };
 			});
 
-		if (returned.error === null) {
+		if (returned.url) {
 			redirect(302, returned.url);
 		}
 

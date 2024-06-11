@@ -25,6 +25,12 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 	const postgresDatabases = client.GET('/postgres', {
 		params: { query: { project: currentProject.id } }
 	});
+	const redisDatabases = client.GET('/redis', {
+		params: { query: { project: currentProject.id } }
+	});
+	const mongoDatabases = client.GET('/mongo', {
+		params: { query: { project: currentProject.id } }
+	});
 	const gitRepositories = client.GET('/git', {
 		params: { query: { project: currentProject.id } }
 	});
@@ -42,7 +48,9 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 		postgresDatabases,
 		gitRepositories,
 		dockerImages,
-		scanGroups
+		scanGroups,
+		mongoDatabases,
+		redisDatabases
 	]);
 
 	return {
@@ -52,6 +60,8 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 		postgresDatabases: promises[1].data?.postgres_databases,
 		gitRepositories: promises[2].data?.git_repositories,
 		dockerImages: promises[3].data?.images,
-		scanGroups: promises[4].data?.scan_groups
+		scanGroups: promises[4].data?.scan_groups,
+		redisDatabases: promises[6].data?.redis_databases,
+		mongoDatabases: promises[5].data?.mongo_databases
 	};
 };

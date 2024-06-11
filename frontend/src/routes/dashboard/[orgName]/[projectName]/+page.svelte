@@ -3,6 +3,8 @@
 	export let data: PageData;
 
 	import MysqlIcon from '$lib/images/mysql-icon.svg';
+	import MongoIcon from '$lib/images/mongo-icon.svg';
+	import RedisIcon from '$lib/images/redis-icon.svg';
 	import PostgresIcon from '$lib/images/postgresql-icon.svg';
 	import GitIcon from '$lib/images/git-icon.svg';
 	import DockerIcon from '$lib/images/docker-icon.svg';
@@ -67,6 +69,26 @@
 	/>
 {/each}
 
+{#each data?.mongoDatabases || [] as mongoDatabase}
+	<BaseListItem
+		databaseUrl={`mongodb://${mongoDatabase.username}@****:${mongoDatabase.host}:${mongoDatabase.port}/${mongoDatabase.database_name}`}
+		databaseIcon={MongoIcon}
+		databaseType="MongoDB"
+		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/mongo/?id=${mongoDatabase.id}`}
+		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/mongo/?id=${mongoDatabase.id}`}
+	/>
+{/each}
+
+{#each data?.redisDatabases || [] as redisDatabase}
+	<BaseListItem
+		databaseUrl={`redis://${redisDatabase.username}@****:${redisDatabase.host}:${redisDatabase.port}/0}`}
+		databaseIcon={RedisIcon}
+		databaseType="Redis"
+		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/redis/?id=${redisDatabase.id}`}
+		editURL={`/dashboard/${data.organization?.name}/${data.project?.name}/edit-scanner/redis/?id=${redisDatabase.id}`}
+	/>
+{/each}
+
 <div class="divider">Secret Sources</div>
 {#each data?.gitRepositories || [] as gitRepository}
 	<BaseListItem
@@ -120,6 +142,20 @@
 					{scan}
 					scanIcon={DockerIcon}
 					scanName="Docker"
+					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
+				/>
+			{:else if scan.scan_type === 5}
+				<ScanItem
+					{scan}
+					scanIcon={RedisIcon}
+					scanName="Redis"
+					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
+				/>
+			{:else if scan.scan_type === 6}
+				<ScanItem
+					{scan}
+					scanIcon={MongoIcon}
+					scanName="MongoDB"
 					viewURL={`/dashboard/${data.organization?.name}/${data.project?.name}/scan/?id=${scan.id}`}
 				/>
 			{/if}
