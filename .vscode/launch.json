@@ -114,6 +114,18 @@
                 "6379",
                 ""
             ]
+        },
+        {
+            "name": "Run Scan MongoDB",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "args": [
+                "scan",
+                "mongodb",
+                "mongodb://root:password@localhost:27017",
+            ]
         }
     ]
 }

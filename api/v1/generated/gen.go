@@ -120,6 +120,16 @@ type CreateGit struct {
 	Username      *string `json:"username,omitempty"`
 }
 
+// CreateMongoDatabase defines model for CreateMongoDatabase.
+type CreateMongoDatabase struct {
+	DatabaseName string `json:"database_name"`
+	Host         string `json:"host"`
+	Password     string `json:"password"`
+	Port         int    `json:"port"`
+	ProjectId    int    `json:"project_id"`
+	Username     string `json:"username"`
+}
+
 // CreateMysqlDatabase defines model for CreateMysqlDatabase.
 type CreateMysqlDatabase struct {
 	DatabaseName string `json:"database_name"`
@@ -150,6 +160,15 @@ type CreatePostgresDatabase struct {
 type CreateProject struct {
 	Name           string `json:"name"`
 	OrganizationId int    `json:"organization_id"`
+}
+
+// CreateRedisDatabase defines model for CreateRedisDatabase.
+type CreateRedisDatabase struct {
+	Host      string `json:"host"`
+	Password  string `json:"password"`
+	Port      int    `json:"port"`
+	ProjectId int    `json:"project_id"`
+	Username  string `json:"username"`
 }
 
 // CreateScanResult defines model for CreateScanResult.
@@ -273,6 +292,25 @@ type LoginUser struct {
 	Username string `json:"username" validate:"printascii,min=3,max=20"`
 }
 
+// MongoDatabase defines model for MongoDatabase.
+type MongoDatabase struct {
+	CreatedAt    string `json:"created_at"`
+	DatabaseName string `json:"database_name"`
+	Host         string `json:"host"`
+	Id           int    `json:"id"`
+	Password     string `json:"password"`
+	Port         int    `json:"port"`
+	ProjectId    int    `json:"project_id"`
+	Username     string `json:"username"`
+	Version      string `json:"version"`
+}
+
+// MongoScan defines model for MongoScan.
+type MongoScan struct {
+	DatabaseId int `json:"database_id"`
+	Id         int `json:"id"`
+}
+
 // MysqlDatabase defines model for MysqlDatabase.
 type MysqlDatabase struct {
 	CreatedAt    string `json:"created_at"`
@@ -386,6 +424,16 @@ type PatchGit struct {
 	Username      *string `json:"username,omitempty"`
 }
 
+// PatchMongoDatabase defines model for PatchMongoDatabase.
+type PatchMongoDatabase struct {
+	DatabaseName *string `json:"database_name,omitempty"`
+	Host         *string `json:"host,omitempty"`
+	Password     *string `json:"password,omitempty"`
+	Port         *int    `json:"port,omitempty"`
+	Username     *string `json:"username,omitempty"`
+	Version      *string `json:"version,omitempty"`
+}
+
 // PatchMysqlDatabase defines model for PatchMysqlDatabase.
 type PatchMysqlDatabase struct {
 	DatabaseName *string `json:"database_name,omitempty"`
@@ -404,6 +452,15 @@ type PatchPostgresDatabase struct {
 	Port         *int    `json:"port,omitempty"`
 	Username     *string `json:"username,omitempty"`
 	Version      *string `json:"version,omitempty"`
+}
+
+// PatchRedisDatabase defines model for PatchRedisDatabase.
+type PatchRedisDatabase struct {
+	Host     *string `json:"host,omitempty"`
+	Password *string `json:"password,omitempty"`
+	Port     *int    `json:"port,omitempty"`
+	Username *string `json:"username,omitempty"`
+	Version  *string `json:"version,omitempty"`
 }
 
 // PatchScan defines model for PatchScan.
@@ -451,6 +508,24 @@ type Project struct {
 
 	// Scans The number of scans that have been run on the project
 	Scans int `json:"scans"`
+}
+
+// RedisDatabase defines model for RedisDatabase.
+type RedisDatabase struct {
+	CreatedAt string `json:"created_at"`
+	Host      string `json:"host"`
+	Id        int    `json:"id"`
+	Password  string `json:"password"`
+	Port      int    `json:"port"`
+	ProjectId int    `json:"project_id"`
+	Username  string `json:"username"`
+	Version   string `json:"version"`
+}
+
+// RedisScan defines model for RedisScan.
+type RedisScan struct {
+	DatabaseId int `json:"database_id"`
+	Id         int `json:"id"`
 }
 
 // RegisterUser defines model for RegisterUser.
@@ -561,6 +636,18 @@ type GetGitParams struct {
 	Project int `form:"project" json:"project"`
 }
 
+// GetMongoParams defines parameters for GetMongo.
+type GetMongoParams struct {
+	// Project The projects to filter for
+	Project int `form:"project" json:"project"`
+}
+
+// GetMongoScansParams defines parameters for GetMongoScans.
+type GetMongoScansParams struct {
+	// Scan The scan ID to filter for
+	Scan int64 `form:"scan" json:"scan"`
+}
+
 // GetMysqlParams defines parameters for GetMysql.
 type GetMysqlParams struct {
 	// Project The projects to filter for
@@ -609,6 +696,18 @@ type GetProjectsIdBruteforcedPasswordParams struct {
 	Username string `form:"username" json:"username"`
 }
 
+// GetRedisParams defines parameters for GetRedis.
+type GetRedisParams struct {
+	// Project The projects to filter for
+	Project int `form:"project" json:"project"`
+}
+
+// GetRedisScansParams defines parameters for GetRedisScans.
+type GetRedisScansParams struct {
+	// Scan The scan ID to filter for
+	Scan int64 `form:"scan" json:"scan"`
+}
+
 // GetScanGroupsParams defines parameters for GetScanGroups.
 type GetScanGroupsParams struct {
 	// Project The project to filter for
@@ -648,6 +747,12 @@ type PostGitJSONRequestBody = CreateGit
 // PatchGitIdJSONRequestBody defines body for PatchGitId for application/json ContentType.
 type PatchGitIdJSONRequestBody = PatchGit
 
+// PostMongoJSONRequestBody defines body for PostMongo for application/json ContentType.
+type PostMongoJSONRequestBody = CreateMongoDatabase
+
+// PatchMongoIdJSONRequestBody defines body for PatchMongoId for application/json ContentType.
+type PatchMongoIdJSONRequestBody = PatchMongoDatabase
+
 // PostMysqlJSONRequestBody defines body for PostMysql for application/json ContentType.
 type PostMysqlJSONRequestBody = CreateMysqlDatabase
 
@@ -677,6 +782,12 @@ type PostProjectsJSONRequestBody = CreateProject
 
 // PostProjectsIdBruteforcedPasswordJSONRequestBody defines body for PostProjectsIdBruteforcedPassword for application/json ContentType.
 type PostProjectsIdBruteforcedPasswordJSONRequestBody = CreateBruteforcedPassword
+
+// PostRedisJSONRequestBody defines body for PostRedis for application/json ContentType.
+type PostRedisJSONRequestBody = CreateRedisDatabase
+
+// PatchRedisIdJSONRequestBody defines body for PatchRedisId for application/json ContentType.
+type PatchRedisIdJSONRequestBody = PatchRedisDatabase
 
 // PatchScanIdJSONRequestBody defines body for PatchScanId for application/json ContentType.
 type PatchScanIdJSONRequestBody = PatchScan
@@ -814,6 +925,28 @@ type ClientInterface interface {
 
 	PatchGitId(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetMongo request
+	GetMongo(ctx context.Context, params *GetMongoParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostMongoWithBody request with any body
+	PostMongoWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostMongo(ctx context.Context, body PostMongoJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMongoScans request
+	GetMongoScans(ctx context.Context, params *GetMongoScansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteMongoId request
+	DeleteMongoId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMongoId request
+	GetMongoId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchMongoIdWithBody request with any body
+	PatchMongoIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchMongoId(ctx context.Context, id int64, body PatchMongoIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetMysql request
 	GetMysql(ctx context.Context, params *GetMysqlParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -911,6 +1044,28 @@ type ClientInterface interface {
 
 	// PostProjectsIdRun request
 	PostProjectsIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRedis request
+	GetRedis(ctx context.Context, params *GetRedisParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostRedisWithBody request with any body
+	PostRedisWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostRedis(ctx context.Context, body PostRedisJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRedisScans request
+	GetRedisScans(ctx context.Context, params *GetRedisScansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteRedisId request
+	DeleteRedisId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRedisId request
+	GetRedisId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchRedisIdWithBody request with any body
+	PatchRedisIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchRedisId(ctx context.Context, id int64, body PatchRedisIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetScanGroups request
 	GetScanGroups(ctx context.Context, params *GetScanGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1169,6 +1324,102 @@ func (c *Client) PatchGitIdWithBody(ctx context.Context, id int64, contentType s
 
 func (c *Client) PatchGitId(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchGitIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMongo(ctx context.Context, params *GetMongoParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMongoRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMongoWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMongoRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMongo(ctx context.Context, body PostMongoJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMongoRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMongoScans(ctx context.Context, params *GetMongoScansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMongoScansRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteMongoId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteMongoIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMongoId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMongoIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchMongoIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchMongoIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchMongoId(ctx context.Context, id int64, body PatchMongoIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchMongoIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1601,6 +1852,102 @@ func (c *Client) PostProjectsIdBruteforcedPassword(ctx context.Context, id int64
 
 func (c *Client) PostProjectsIdRun(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostProjectsIdRunRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRedis(ctx context.Context, params *GetRedisParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRedisRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRedisWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRedisRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostRedis(ctx context.Context, body PostRedisJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostRedisRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRedisScans(ctx context.Context, params *GetRedisScansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRedisScansRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteRedisId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteRedisIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRedisId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRedisIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchRedisIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchRedisIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchRedisId(ctx context.Context, id int64, body PatchRedisIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchRedisIdRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2295,6 +2642,251 @@ func NewPatchGitIdRequestWithBody(server string, id int64, contentType string, b
 	}
 
 	operationPath := fmt.Sprintf("/git/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetMongoRequest generates requests for GetMongo
+func NewGetMongoRequest(server string, params *GetMongoParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mongo")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "project", runtime.ParamLocationQuery, params.Project); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostMongoRequest calls the generic PostMongo builder with application/json body
+func NewPostMongoRequest(server string, body PostMongoJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostMongoRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostMongoRequestWithBody generates requests for PostMongo with any type of body
+func NewPostMongoRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mongo")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetMongoScansRequest generates requests for GetMongoScans
+func NewGetMongoScansRequest(server string, params *GetMongoScansParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mongo-scans")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scan", runtime.ParamLocationQuery, params.Scan); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteMongoIdRequest generates requests for DeleteMongoId
+func NewDeleteMongoIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mongo/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetMongoIdRequest generates requests for GetMongoId
+func NewGetMongoIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mongo/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchMongoIdRequest calls the generic PatchMongoId builder with application/json body
+func NewPatchMongoIdRequest(server string, id int64, body PatchMongoIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchMongoIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchMongoIdRequestWithBody generates requests for PatchMongoId with any type of body
+func NewPatchMongoIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/mongo/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -3427,6 +4019,251 @@ func NewPostProjectsIdRunRequest(server string, id int64) (*http.Request, error)
 	return req, nil
 }
 
+// NewGetRedisRequest generates requests for GetRedis
+func NewGetRedisRequest(server string, params *GetRedisParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/redis")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "project", runtime.ParamLocationQuery, params.Project); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostRedisRequest calls the generic PostRedis builder with application/json body
+func NewPostRedisRequest(server string, body PostRedisJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostRedisRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostRedisRequestWithBody generates requests for PostRedis with any type of body
+func NewPostRedisRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/redis")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetRedisScansRequest generates requests for GetRedisScans
+func NewGetRedisScansRequest(server string, params *GetRedisScansParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/redis-scans")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scan", runtime.ParamLocationQuery, params.Scan); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteRedisIdRequest generates requests for DeleteRedisId
+func NewDeleteRedisIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/redis/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetRedisIdRequest generates requests for GetRedisId
+func NewGetRedisIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/redis/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPatchRedisIdRequest calls the generic PatchRedisId builder with application/json body
+func NewPatchRedisIdRequest(server string, id int64, body PatchRedisIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchRedisIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPatchRedisIdRequestWithBody generates requests for PatchRedisId with any type of body
+func NewPatchRedisIdRequestWithBody(server string, id int64, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/redis/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetScanGroupsRequest generates requests for GetScanGroups
 func NewGetScanGroupsRequest(server string, params *GetScanGroupsParams) (*http.Request, error) {
 	var err error
@@ -3966,6 +4803,28 @@ type ClientWithResponsesInterface interface {
 
 	PatchGitIdWithResponse(ctx context.Context, id int64, body PatchGitIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchGitIdResponse, error)
 
+	// GetMongoWithResponse request
+	GetMongoWithResponse(ctx context.Context, params *GetMongoParams, reqEditors ...RequestEditorFn) (*GetMongoResponse, error)
+
+	// PostMongoWithBodyWithResponse request with any body
+	PostMongoWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMongoResponse, error)
+
+	PostMongoWithResponse(ctx context.Context, body PostMongoJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMongoResponse, error)
+
+	// GetMongoScansWithResponse request
+	GetMongoScansWithResponse(ctx context.Context, params *GetMongoScansParams, reqEditors ...RequestEditorFn) (*GetMongoScansResponse, error)
+
+	// DeleteMongoIdWithResponse request
+	DeleteMongoIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteMongoIdResponse, error)
+
+	// GetMongoIdWithResponse request
+	GetMongoIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetMongoIdResponse, error)
+
+	// PatchMongoIdWithBodyWithResponse request with any body
+	PatchMongoIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchMongoIdResponse, error)
+
+	PatchMongoIdWithResponse(ctx context.Context, id int64, body PatchMongoIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchMongoIdResponse, error)
+
 	// GetMysqlWithResponse request
 	GetMysqlWithResponse(ctx context.Context, params *GetMysqlParams, reqEditors ...RequestEditorFn) (*GetMysqlResponse, error)
 
@@ -4063,6 +4922,28 @@ type ClientWithResponsesInterface interface {
 
 	// PostProjectsIdRunWithResponse request
 	PostProjectsIdRunWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*PostProjectsIdRunResponse, error)
+
+	// GetRedisWithResponse request
+	GetRedisWithResponse(ctx context.Context, params *GetRedisParams, reqEditors ...RequestEditorFn) (*GetRedisResponse, error)
+
+	// PostRedisWithBodyWithResponse request with any body
+	PostRedisWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRedisResponse, error)
+
+	PostRedisWithResponse(ctx context.Context, body PostRedisJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRedisResponse, error)
+
+	// GetRedisScansWithResponse request
+	GetRedisScansWithResponse(ctx context.Context, params *GetRedisScansParams, reqEditors ...RequestEditorFn) (*GetRedisScansResponse, error)
+
+	// DeleteRedisIdWithResponse request
+	DeleteRedisIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteRedisIdResponse, error)
+
+	// GetRedisIdWithResponse request
+	GetRedisIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetRedisIdResponse, error)
+
+	// PatchRedisIdWithBodyWithResponse request with any body
+	PatchRedisIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchRedisIdResponse, error)
+
+	PatchRedisIdWithResponse(ctx context.Context, id int64, body PatchRedisIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchRedisIdResponse, error)
 
 	// GetScanGroupsWithResponse request
 	GetScanGroupsWithResponse(ctx context.Context, params *GetScanGroupsParams, reqEditors ...RequestEditorFn) (*GetScanGroupsResponse, error)
@@ -4450,6 +5331,167 @@ func (r PatchGitIdResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PatchGitIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMongoResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		MongoDatabases []MongoDatabase `json:"mongo_databases"`
+		Success        bool            `json:"success"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMongoResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMongoResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostMongoResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		MongoDatabase MongoDatabase `json:"mongo_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostMongoResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostMongoResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMongoScansResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Scans   []MongoScan `json:"scans"`
+		Success bool        `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMongoScansResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMongoScansResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteMongoIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteMongoIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteMongoIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMongoIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		MongoDatabase MongoDatabase `json:"mongo_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMongoIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMongoIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchMongoIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		MongoDatabase MongoDatabase `json:"mongo_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchMongoIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchMongoIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5152,6 +6194,167 @@ func (r PostProjectsIdRunResponse) StatusCode() int {
 	return 0
 }
 
+type GetRedisResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		RedisDatabases []RedisDatabase `json:"redis_databases"`
+		Success        bool            `json:"success"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRedisResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRedisResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostRedisResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		RedisDatabase RedisDatabase `json:"redis_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostRedisResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostRedisResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetRedisScansResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Scans   []RedisScan `json:"scans"`
+		Success bool        `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRedisScansResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRedisScansResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteRedisIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteRedisIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteRedisIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetRedisIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		RedisDatabase RedisDatabase `json:"redis_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRedisIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRedisIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PatchRedisIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		RedisDatabase RedisDatabase `json:"redis_database"`
+		Success       bool          `json:"success"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchRedisIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchRedisIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetScanGroupsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5580,6 +6783,76 @@ func (c *ClientWithResponses) PatchGitIdWithResponse(ctx context.Context, id int
 	return ParsePatchGitIdResponse(rsp)
 }
 
+// GetMongoWithResponse request returning *GetMongoResponse
+func (c *ClientWithResponses) GetMongoWithResponse(ctx context.Context, params *GetMongoParams, reqEditors ...RequestEditorFn) (*GetMongoResponse, error) {
+	rsp, err := c.GetMongo(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMongoResponse(rsp)
+}
+
+// PostMongoWithBodyWithResponse request with arbitrary body returning *PostMongoResponse
+func (c *ClientWithResponses) PostMongoWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMongoResponse, error) {
+	rsp, err := c.PostMongoWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMongoResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostMongoWithResponse(ctx context.Context, body PostMongoJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMongoResponse, error) {
+	rsp, err := c.PostMongo(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMongoResponse(rsp)
+}
+
+// GetMongoScansWithResponse request returning *GetMongoScansResponse
+func (c *ClientWithResponses) GetMongoScansWithResponse(ctx context.Context, params *GetMongoScansParams, reqEditors ...RequestEditorFn) (*GetMongoScansResponse, error) {
+	rsp, err := c.GetMongoScans(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMongoScansResponse(rsp)
+}
+
+// DeleteMongoIdWithResponse request returning *DeleteMongoIdResponse
+func (c *ClientWithResponses) DeleteMongoIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteMongoIdResponse, error) {
+	rsp, err := c.DeleteMongoId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteMongoIdResponse(rsp)
+}
+
+// GetMongoIdWithResponse request returning *GetMongoIdResponse
+func (c *ClientWithResponses) GetMongoIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetMongoIdResponse, error) {
+	rsp, err := c.GetMongoId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMongoIdResponse(rsp)
+}
+
+// PatchMongoIdWithBodyWithResponse request with arbitrary body returning *PatchMongoIdResponse
+func (c *ClientWithResponses) PatchMongoIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchMongoIdResponse, error) {
+	rsp, err := c.PatchMongoIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchMongoIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchMongoIdWithResponse(ctx context.Context, id int64, body PatchMongoIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchMongoIdResponse, error) {
+	rsp, err := c.PatchMongoId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchMongoIdResponse(rsp)
+}
+
 // GetMysqlWithResponse request returning *GetMysqlResponse
 func (c *ClientWithResponses) GetMysqlWithResponse(ctx context.Context, params *GetMysqlParams, reqEditors ...RequestEditorFn) (*GetMysqlResponse, error) {
 	rsp, err := c.GetMysql(ctx, params, reqEditors...)
@@ -5892,6 +7165,76 @@ func (c *ClientWithResponses) PostProjectsIdRunWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParsePostProjectsIdRunResponse(rsp)
+}
+
+// GetRedisWithResponse request returning *GetRedisResponse
+func (c *ClientWithResponses) GetRedisWithResponse(ctx context.Context, params *GetRedisParams, reqEditors ...RequestEditorFn) (*GetRedisResponse, error) {
+	rsp, err := c.GetRedis(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRedisResponse(rsp)
+}
+
+// PostRedisWithBodyWithResponse request with arbitrary body returning *PostRedisResponse
+func (c *ClientWithResponses) PostRedisWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostRedisResponse, error) {
+	rsp, err := c.PostRedisWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRedisResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostRedisWithResponse(ctx context.Context, body PostRedisJSONRequestBody, reqEditors ...RequestEditorFn) (*PostRedisResponse, error) {
+	rsp, err := c.PostRedis(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostRedisResponse(rsp)
+}
+
+// GetRedisScansWithResponse request returning *GetRedisScansResponse
+func (c *ClientWithResponses) GetRedisScansWithResponse(ctx context.Context, params *GetRedisScansParams, reqEditors ...RequestEditorFn) (*GetRedisScansResponse, error) {
+	rsp, err := c.GetRedisScans(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRedisScansResponse(rsp)
+}
+
+// DeleteRedisIdWithResponse request returning *DeleteRedisIdResponse
+func (c *ClientWithResponses) DeleteRedisIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteRedisIdResponse, error) {
+	rsp, err := c.DeleteRedisId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteRedisIdResponse(rsp)
+}
+
+// GetRedisIdWithResponse request returning *GetRedisIdResponse
+func (c *ClientWithResponses) GetRedisIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetRedisIdResponse, error) {
+	rsp, err := c.GetRedisId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRedisIdResponse(rsp)
+}
+
+// PatchRedisIdWithBodyWithResponse request with arbitrary body returning *PatchRedisIdResponse
+func (c *ClientWithResponses) PatchRedisIdWithBodyWithResponse(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchRedisIdResponse, error) {
+	rsp, err := c.PatchRedisIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchRedisIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchRedisIdWithResponse(ctx context.Context, id int64, body PatchRedisIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchRedisIdResponse, error) {
+	rsp, err := c.PatchRedisId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchRedisIdResponse(rsp)
 }
 
 // GetScanGroupsWithResponse request returning *GetScanGroupsResponse
@@ -6557,6 +7900,263 @@ func ParsePatchGitIdResponse(rsp *http.Response) (*PatchGitIdResponse, error) {
 		var dest struct {
 			Git     Git  `json:"git"`
 			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMongoResponse parses an HTTP response from a GetMongoWithResponse call
+func ParseGetMongoResponse(rsp *http.Response) (*GetMongoResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMongoResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			MongoDatabases []MongoDatabase `json:"mongo_databases"`
+			Success        bool            `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostMongoResponse parses an HTTP response from a PostMongoWithResponse call
+func ParsePostMongoResponse(rsp *http.Response) (*PostMongoResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostMongoResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			MongoDatabase MongoDatabase `json:"mongo_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMongoScansResponse parses an HTTP response from a GetMongoScansWithResponse call
+func ParseGetMongoScansResponse(rsp *http.Response) (*GetMongoScansResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMongoScansResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Scans   []MongoScan `json:"scans"`
+			Success bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteMongoIdResponse parses an HTTP response from a DeleteMongoIdWithResponse call
+func ParseDeleteMongoIdResponse(rsp *http.Response) (*DeleteMongoIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteMongoIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMongoIdResponse parses an HTTP response from a GetMongoIdWithResponse call
+func ParseGetMongoIdResponse(rsp *http.Response) (*GetMongoIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMongoIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			MongoDatabase MongoDatabase `json:"mongo_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchMongoIdResponse parses an HTTP response from a PatchMongoIdWithResponse call
+func ParsePatchMongoIdResponse(rsp *http.Response) (*PatchMongoIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchMongoIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			MongoDatabase MongoDatabase `json:"mongo_database"`
+			Success       bool          `json:"success"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -7725,6 +9325,263 @@ func ParsePostProjectsIdRunResponse(rsp *http.Response) (*PostProjectsIdRunRespo
 	return response, nil
 }
 
+// ParseGetRedisResponse parses an HTTP response from a GetRedisWithResponse call
+func ParseGetRedisResponse(rsp *http.Response) (*GetRedisResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRedisResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			RedisDatabases []RedisDatabase `json:"redis_databases"`
+			Success        bool            `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostRedisResponse parses an HTTP response from a PostRedisWithResponse call
+func ParsePostRedisResponse(rsp *http.Response) (*PostRedisResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostRedisResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			RedisDatabase RedisDatabase `json:"redis_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRedisScansResponse parses an HTTP response from a GetRedisScansWithResponse call
+func ParseGetRedisScansResponse(rsp *http.Response) (*GetRedisScansResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRedisScansResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Scans   []RedisScan `json:"scans"`
+			Success bool        `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteRedisIdResponse parses an HTTP response from a DeleteRedisIdWithResponse call
+func ParseDeleteRedisIdResponse(rsp *http.Response) (*DeleteRedisIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteRedisIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRedisIdResponse parses an HTTP response from a GetRedisIdWithResponse call
+func ParseGetRedisIdResponse(rsp *http.Response) (*GetRedisIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRedisIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			RedisDatabase RedisDatabase `json:"redis_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePatchRedisIdResponse parses an HTTP response from a PatchRedisIdWithResponse call
+func ParsePatchRedisIdResponse(rsp *http.Response) (*PatchRedisIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchRedisIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			RedisDatabase RedisDatabase `json:"redis_database"`
+			Success       bool          `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetScanGroupsResponse parses an HTTP response from a GetScanGroupsWithResponse call
 func ParseGetScanGroupsResponse(rsp *http.Response) (*GetScanGroupsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -8183,6 +10040,24 @@ type ServerInterface interface {
 	// Update a git repository by ID
 	// (PATCH /git/{id})
 	PatchGitId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get all mongo databases for a project
+	// (GET /mongo)
+	GetMongo(w http.ResponseWriter, r *http.Request, params GetMongoParams)
+	// Create a new mongo database
+	// (POST /mongo)
+	PostMongo(w http.ResponseWriter, r *http.Request)
+	// Get all mongo scans
+	// (GET /mongo-scans)
+	GetMongoScans(w http.ResponseWriter, r *http.Request, params GetMongoScansParams)
+	// Delete mongo database by ID
+	// (DELETE /mongo/{id})
+	DeleteMongoId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get mongo database by ID
+	// (GET /mongo/{id})
+	GetMongoId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update mongo database by ID
+	// (PATCH /mongo/{id})
+	PatchMongoId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all mysql databases for a project
 	// (GET /mysql)
 	GetMysql(w http.ResponseWriter, r *http.Request, params GetMysqlParams)
@@ -8261,6 +10136,24 @@ type ServerInterface interface {
 	// Run all extractors and scanners for a project
 	// (POST /projects/{id}/run)
 	PostProjectsIdRun(w http.ResponseWriter, r *http.Request, id int64)
+	// Get all redis databases for a project
+	// (GET /redis)
+	GetRedis(w http.ResponseWriter, r *http.Request, params GetRedisParams)
+	// Create a new redis database
+	// (POST /redis)
+	PostRedis(w http.ResponseWriter, r *http.Request)
+	// Get all redis scans
+	// (GET /redis-scans)
+	GetRedisScans(w http.ResponseWriter, r *http.Request, params GetRedisScansParams)
+	// Delete redis database by ID
+	// (DELETE /redis/{id})
+	DeleteRedisId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get redis database by ID
+	// (GET /redis/{id})
+	GetRedisId(w http.ResponseWriter, r *http.Request, id int64)
+	// Update redis database by ID
+	// (PATCH /redis/{id})
+	PatchRedisId(w http.ResponseWriter, r *http.Request, id int64)
 	// Get all scan groups
 	// (GET /scan-groups)
 	GetScanGroups(w http.ResponseWriter, r *http.Request, params GetScanGroupsParams)
@@ -8372,6 +10265,42 @@ func (_ Unimplemented) GetGitId(w http.ResponseWriter, r *http.Request, id int64
 // Update a git repository by ID
 // (PATCH /git/{id})
 func (_ Unimplemented) PatchGitId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all mongo databases for a project
+// (GET /mongo)
+func (_ Unimplemented) GetMongo(w http.ResponseWriter, r *http.Request, params GetMongoParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new mongo database
+// (POST /mongo)
+func (_ Unimplemented) PostMongo(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all mongo scans
+// (GET /mongo-scans)
+func (_ Unimplemented) GetMongoScans(w http.ResponseWriter, r *http.Request, params GetMongoScansParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete mongo database by ID
+// (DELETE /mongo/{id})
+func (_ Unimplemented) DeleteMongoId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get mongo database by ID
+// (GET /mongo/{id})
+func (_ Unimplemented) GetMongoId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update mongo database by ID
+// (PATCH /mongo/{id})
+func (_ Unimplemented) PatchMongoId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -8528,6 +10457,42 @@ func (_ Unimplemented) PostProjectsIdBruteforcedPassword(w http.ResponseWriter, 
 // Run all extractors and scanners for a project
 // (POST /projects/{id}/run)
 func (_ Unimplemented) PostProjectsIdRun(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all redis databases for a project
+// (GET /redis)
+func (_ Unimplemented) GetRedis(w http.ResponseWriter, r *http.Request, params GetRedisParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new redis database
+// (POST /redis)
+func (_ Unimplemented) PostRedis(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get all redis scans
+// (GET /redis-scans)
+func (_ Unimplemented) GetRedisScans(w http.ResponseWriter, r *http.Request, params GetRedisScansParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete redis database by ID
+// (DELETE /redis/{id})
+func (_ Unimplemented) DeleteRedisId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get redis database by ID
+// (GET /redis/{id})
+func (_ Unimplemented) GetRedisId(w http.ResponseWriter, r *http.Request, id int64) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update redis database by ID
+// (PATCH /redis/{id})
+func (_ Unimplemented) PatchRedisId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -8960,6 +10925,181 @@ func (siw *ServerInterfaceWrapper) PatchGitId(w http.ResponseWriter, r *http.Req
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PatchGitId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetMongo operation middleware
+func (siw *ServerInterfaceWrapper) GetMongo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetMongoParams
+
+	// ------------- Required query parameter "project" -------------
+
+	if paramValue := r.URL.Query().Get("project"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "project"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "project", r.URL.Query(), &params.Project)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "project", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMongo(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostMongo operation middleware
+func (siw *ServerInterfaceWrapper) PostMongo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostMongo(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetMongoScans operation middleware
+func (siw *ServerInterfaceWrapper) GetMongoScans(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetMongoScansParams
+
+	// ------------- Required query parameter "scan" -------------
+
+	if paramValue := r.URL.Query().Get("scan"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "scan"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "scan", r.URL.Query(), &params.Scan)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scan", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMongoScans(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteMongoId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteMongoId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteMongoId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetMongoId operation middleware
+func (siw *ServerInterfaceWrapper) GetMongoId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMongoId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchMongoId operation middleware
+func (siw *ServerInterfaceWrapper) PatchMongoId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchMongoId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -9743,6 +11883,181 @@ func (siw *ServerInterfaceWrapper) PostProjectsIdRun(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetRedis operation middleware
+func (siw *ServerInterfaceWrapper) GetRedis(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetRedisParams
+
+	// ------------- Required query parameter "project" -------------
+
+	if paramValue := r.URL.Query().Get("project"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "project"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "project", r.URL.Query(), &params.Project)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "project", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedis(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostRedis operation middleware
+func (siw *ServerInterfaceWrapper) PostRedis(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRedis(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetRedisScans operation middleware
+func (siw *ServerInterfaceWrapper) GetRedisScans(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetRedisScansParams
+
+	// ------------- Required query parameter "scan" -------------
+
+	if paramValue := r.URL.Query().Get("scan"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "scan"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "scan", r.URL.Query(), &params.Scan)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "scan", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedisScans(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteRedisId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRedisId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRedisId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// GetRedisId operation middleware
+func (siw *ServerInterfaceWrapper) GetRedisId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedisId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PatchRedisId operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedisId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedisId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetScanGroups operation middleware
 func (siw *ServerInterfaceWrapper) GetScanGroups(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -10186,6 +12501,24 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Patch(options.BaseURL+"/git/{id}", wrapper.PatchGitId)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/mongo", wrapper.GetMongo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/mongo", wrapper.PostMongo)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/mongo-scans", wrapper.GetMongoScans)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/mongo/{id}", wrapper.DeleteMongoId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/mongo/{id}", wrapper.GetMongoId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/mongo/{id}", wrapper.PatchMongoId)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/mysql", wrapper.GetMysql)
 	})
 	r.Group(func(r chi.Router) {
@@ -10262,6 +12595,24 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/projects/{id}/run", wrapper.PostProjectsIdRun)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/redis", wrapper.GetRedis)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/redis", wrapper.PostRedis)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/redis-scans", wrapper.GetRedisScans)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/redis/{id}", wrapper.DeleteRedisId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/redis/{id}", wrapper.GetRedisId)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/redis/{id}", wrapper.PatchRedisId)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/scan-groups", wrapper.GetScanGroups)
@@ -10808,6 +13159,234 @@ func (response PatchGitId401JSONResponse) VisitPatchGitIdResponse(w http.Respons
 type PatchGitId404JSONResponse Error
 
 func (response PatchGitId404JSONResponse) VisitPatchGitIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoRequestObject struct {
+	Params GetMongoParams
+}
+
+type GetMongoResponseObject interface {
+	VisitGetMongoResponse(w http.ResponseWriter) error
+}
+
+type GetMongo200JSONResponse struct {
+	MongoDatabases []MongoDatabase `json:"mongo_databases"`
+	Success        bool            `json:"success"`
+}
+
+func (response GetMongo200JSONResponse) VisitGetMongoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongo401JSONResponse Error
+
+func (response GetMongo401JSONResponse) VisitGetMongoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostMongoRequestObject struct {
+	Body *PostMongoJSONRequestBody
+}
+
+type PostMongoResponseObject interface {
+	VisitPostMongoResponse(w http.ResponseWriter) error
+}
+
+type PostMongo201JSONResponse struct {
+	MongoDatabase MongoDatabase `json:"mongo_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response PostMongo201JSONResponse) VisitPostMongoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostMongo400JSONResponse Error
+
+func (response PostMongo400JSONResponse) VisitPostMongoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostMongo401JSONResponse Error
+
+func (response PostMongo401JSONResponse) VisitPostMongoResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoScansRequestObject struct {
+	Params GetMongoScansParams
+}
+
+type GetMongoScansResponseObject interface {
+	VisitGetMongoScansResponse(w http.ResponseWriter) error
+}
+
+type GetMongoScans200JSONResponse struct {
+	Scans   []MongoScan `json:"scans"`
+	Success bool        `json:"success"`
+}
+
+func (response GetMongoScans200JSONResponse) VisitGetMongoScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoScans401JSONResponse Error
+
+func (response GetMongoScans401JSONResponse) VisitGetMongoScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoScans404JSONResponse Error
+
+func (response GetMongoScans404JSONResponse) VisitGetMongoScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMongoIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteMongoIdResponseObject interface {
+	VisitDeleteMongoIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteMongoId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteMongoId204JSONResponse) VisitDeleteMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMongoId401JSONResponse Error
+
+func (response DeleteMongoId401JSONResponse) VisitDeleteMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteMongoId404JSONResponse Error
+
+func (response DeleteMongoId404JSONResponse) VisitDeleteMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetMongoIdResponseObject interface {
+	VisitGetMongoIdResponse(w http.ResponseWriter) error
+}
+
+type GetMongoId200JSONResponse struct {
+	MongoDatabase MongoDatabase `json:"mongo_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response GetMongoId200JSONResponse) VisitGetMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoId401JSONResponse Error
+
+func (response GetMongoId401JSONResponse) VisitGetMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMongoId404JSONResponse Error
+
+func (response GetMongoId404JSONResponse) VisitGetMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMongoIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchMongoIdJSONRequestBody
+}
+
+type PatchMongoIdResponseObject interface {
+	VisitPatchMongoIdResponse(w http.ResponseWriter) error
+}
+
+type PatchMongoId200JSONResponse struct {
+	MongoDatabase MongoDatabase `json:"mongo_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response PatchMongoId200JSONResponse) VisitPatchMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMongoId400JSONResponse Error
+
+func (response PatchMongoId400JSONResponse) VisitPatchMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMongoId401JSONResponse Error
+
+func (response PatchMongoId401JSONResponse) VisitPatchMongoIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchMongoId404JSONResponse Error
+
+func (response PatchMongoId404JSONResponse) VisitPatchMongoIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -11836,6 +14415,234 @@ func (response PostProjectsIdRun404JSONResponse) VisitPostProjectsIdRunResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetRedisRequestObject struct {
+	Params GetRedisParams
+}
+
+type GetRedisResponseObject interface {
+	VisitGetRedisResponse(w http.ResponseWriter) error
+}
+
+type GetRedis200JSONResponse struct {
+	RedisDatabases []RedisDatabase `json:"redis_databases"`
+	Success        bool            `json:"success"`
+}
+
+func (response GetRedis200JSONResponse) VisitGetRedisResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedis401JSONResponse Error
+
+func (response GetRedis401JSONResponse) VisitGetRedisResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostRedisRequestObject struct {
+	Body *PostRedisJSONRequestBody
+}
+
+type PostRedisResponseObject interface {
+	VisitPostRedisResponse(w http.ResponseWriter) error
+}
+
+type PostRedis201JSONResponse struct {
+	RedisDatabase RedisDatabase `json:"redis_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response PostRedis201JSONResponse) VisitPostRedisResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostRedis400JSONResponse Error
+
+func (response PostRedis400JSONResponse) VisitPostRedisResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostRedis401JSONResponse Error
+
+func (response PostRedis401JSONResponse) VisitPostRedisResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedisScansRequestObject struct {
+	Params GetRedisScansParams
+}
+
+type GetRedisScansResponseObject interface {
+	VisitGetRedisScansResponse(w http.ResponseWriter) error
+}
+
+type GetRedisScans200JSONResponse struct {
+	Scans   []RedisScan `json:"scans"`
+	Success bool        `json:"success"`
+}
+
+func (response GetRedisScans200JSONResponse) VisitGetRedisScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedisScans401JSONResponse Error
+
+func (response GetRedisScans401JSONResponse) VisitGetRedisScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedisScans404JSONResponse Error
+
+func (response GetRedisScans404JSONResponse) VisitGetRedisScansResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteRedisIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteRedisIdResponseObject interface {
+	VisitDeleteRedisIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteRedisId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteRedisId204JSONResponse) VisitDeleteRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteRedisId401JSONResponse Error
+
+func (response DeleteRedisId401JSONResponse) VisitDeleteRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteRedisId404JSONResponse Error
+
+func (response DeleteRedisId404JSONResponse) VisitDeleteRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedisIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type GetRedisIdResponseObject interface {
+	VisitGetRedisIdResponse(w http.ResponseWriter) error
+}
+
+type GetRedisId200JSONResponse struct {
+	RedisDatabase RedisDatabase `json:"redis_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response GetRedisId200JSONResponse) VisitGetRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedisId401JSONResponse Error
+
+func (response GetRedisId401JSONResponse) VisitGetRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetRedisId404JSONResponse Error
+
+func (response GetRedisId404JSONResponse) VisitGetRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchRedisIdRequestObject struct {
+	Id   int64 `json:"id"`
+	Body *PatchRedisIdJSONRequestBody
+}
+
+type PatchRedisIdResponseObject interface {
+	VisitPatchRedisIdResponse(w http.ResponseWriter) error
+}
+
+type PatchRedisId200JSONResponse struct {
+	RedisDatabase RedisDatabase `json:"redis_database"`
+	Success       bool          `json:"success"`
+}
+
+func (response PatchRedisId200JSONResponse) VisitPatchRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchRedisId400JSONResponse Error
+
+func (response PatchRedisId400JSONResponse) VisitPatchRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchRedisId401JSONResponse Error
+
+func (response PatchRedisId401JSONResponse) VisitPatchRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchRedisId404JSONResponse Error
+
+func (response PatchRedisId404JSONResponse) VisitPatchRedisIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetScanGroupsRequestObject struct {
 	Params GetScanGroupsParams
 }
@@ -12243,6 +15050,24 @@ type StrictServerInterface interface {
 	// Update a git repository by ID
 	// (PATCH /git/{id})
 	PatchGitId(ctx context.Context, request PatchGitIdRequestObject) (PatchGitIdResponseObject, error)
+	// Get all mongo databases for a project
+	// (GET /mongo)
+	GetMongo(ctx context.Context, request GetMongoRequestObject) (GetMongoResponseObject, error)
+	// Create a new mongo database
+	// (POST /mongo)
+	PostMongo(ctx context.Context, request PostMongoRequestObject) (PostMongoResponseObject, error)
+	// Get all mongo scans
+	// (GET /mongo-scans)
+	GetMongoScans(ctx context.Context, request GetMongoScansRequestObject) (GetMongoScansResponseObject, error)
+	// Delete mongo database by ID
+	// (DELETE /mongo/{id})
+	DeleteMongoId(ctx context.Context, request DeleteMongoIdRequestObject) (DeleteMongoIdResponseObject, error)
+	// Get mongo database by ID
+	// (GET /mongo/{id})
+	GetMongoId(ctx context.Context, request GetMongoIdRequestObject) (GetMongoIdResponseObject, error)
+	// Update mongo database by ID
+	// (PATCH /mongo/{id})
+	PatchMongoId(ctx context.Context, request PatchMongoIdRequestObject) (PatchMongoIdResponseObject, error)
 	// Get all mysql databases for a project
 	// (GET /mysql)
 	GetMysql(ctx context.Context, request GetMysqlRequestObject) (GetMysqlResponseObject, error)
@@ -12321,6 +15146,24 @@ type StrictServerInterface interface {
 	// Run all extractors and scanners for a project
 	// (POST /projects/{id}/run)
 	PostProjectsIdRun(ctx context.Context, request PostProjectsIdRunRequestObject) (PostProjectsIdRunResponseObject, error)
+	// Get all redis databases for a project
+	// (GET /redis)
+	GetRedis(ctx context.Context, request GetRedisRequestObject) (GetRedisResponseObject, error)
+	// Create a new redis database
+	// (POST /redis)
+	PostRedis(ctx context.Context, request PostRedisRequestObject) (PostRedisResponseObject, error)
+	// Get all redis scans
+	// (GET /redis-scans)
+	GetRedisScans(ctx context.Context, request GetRedisScansRequestObject) (GetRedisScansResponseObject, error)
+	// Delete redis database by ID
+	// (DELETE /redis/{id})
+	DeleteRedisId(ctx context.Context, request DeleteRedisIdRequestObject) (DeleteRedisIdResponseObject, error)
+	// Get redis database by ID
+	// (GET /redis/{id})
+	GetRedisId(ctx context.Context, request GetRedisIdRequestObject) (GetRedisIdResponseObject, error)
+	// Update redis database by ID
+	// (PATCH /redis/{id})
+	PatchRedisId(ctx context.Context, request PatchRedisIdRequestObject) (PatchRedisIdResponseObject, error)
 	// Get all scan groups
 	// (GET /scan-groups)
 	GetScanGroups(ctx context.Context, request GetScanGroupsRequestObject) (GetScanGroupsResponseObject, error)
@@ -12752,6 +15595,174 @@ func (sh *strictHandler) PatchGitId(w http.ResponseWriter, r *http.Request, id i
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PatchGitIdResponseObject); ok {
 		if err := validResponse.VisitPatchGitIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMongo operation middleware
+func (sh *strictHandler) GetMongo(w http.ResponseWriter, r *http.Request, params GetMongoParams) {
+	var request GetMongoRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMongo(ctx, request.(GetMongoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMongo")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMongoResponseObject); ok {
+		if err := validResponse.VisitGetMongoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostMongo operation middleware
+func (sh *strictHandler) PostMongo(w http.ResponseWriter, r *http.Request) {
+	var request PostMongoRequestObject
+
+	var body PostMongoJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostMongo(ctx, request.(PostMongoRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostMongo")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostMongoResponseObject); ok {
+		if err := validResponse.VisitPostMongoResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMongoScans operation middleware
+func (sh *strictHandler) GetMongoScans(w http.ResponseWriter, r *http.Request, params GetMongoScansParams) {
+	var request GetMongoScansRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMongoScans(ctx, request.(GetMongoScansRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMongoScans")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMongoScansResponseObject); ok {
+		if err := validResponse.VisitGetMongoScansResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteMongoId operation middleware
+func (sh *strictHandler) DeleteMongoId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteMongoIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteMongoId(ctx, request.(DeleteMongoIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteMongoId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteMongoIdResponseObject); ok {
+		if err := validResponse.VisitDeleteMongoIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMongoId operation middleware
+func (sh *strictHandler) GetMongoId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetMongoIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMongoId(ctx, request.(GetMongoIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMongoId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMongoIdResponseObject); ok {
+		if err := validResponse.VisitGetMongoIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchMongoId operation middleware
+func (sh *strictHandler) PatchMongoId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchMongoIdRequestObject
+
+	request.Id = id
+
+	var body PatchMongoIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchMongoId(ctx, request.(PatchMongoIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchMongoId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchMongoIdResponseObject); ok {
+		if err := validResponse.VisitPatchMongoIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -13499,6 +16510,174 @@ func (sh *strictHandler) PostProjectsIdRun(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// GetRedis operation middleware
+func (sh *strictHandler) GetRedis(w http.ResponseWriter, r *http.Request, params GetRedisParams) {
+	var request GetRedisRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetRedis(ctx, request.(GetRedisRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetRedis")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetRedisResponseObject); ok {
+		if err := validResponse.VisitGetRedisResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostRedis operation middleware
+func (sh *strictHandler) PostRedis(w http.ResponseWriter, r *http.Request) {
+	var request PostRedisRequestObject
+
+	var body PostRedisJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostRedis(ctx, request.(PostRedisRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostRedis")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostRedisResponseObject); ok {
+		if err := validResponse.VisitPostRedisResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetRedisScans operation middleware
+func (sh *strictHandler) GetRedisScans(w http.ResponseWriter, r *http.Request, params GetRedisScansParams) {
+	var request GetRedisScansRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetRedisScans(ctx, request.(GetRedisScansRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetRedisScans")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetRedisScansResponseObject); ok {
+		if err := validResponse.VisitGetRedisScansResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteRedisId operation middleware
+func (sh *strictHandler) DeleteRedisId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteRedisIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteRedisId(ctx, request.(DeleteRedisIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteRedisId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteRedisIdResponseObject); ok {
+		if err := validResponse.VisitDeleteRedisIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetRedisId operation middleware
+func (sh *strictHandler) GetRedisId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request GetRedisIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetRedisId(ctx, request.(GetRedisIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetRedisId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetRedisIdResponseObject); ok {
+		if err := validResponse.VisitGetRedisIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchRedisId operation middleware
+func (sh *strictHandler) PatchRedisId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request PatchRedisIdRequestObject
+
+	request.Id = id
+
+	var body PatchRedisIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchRedisId(ctx, request.(PatchRedisIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchRedisId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchRedisIdResponseObject); ok {
+		if err := validResponse.VisitPatchRedisIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetScanGroups operation middleware
 func (sh *strictHandler) GetScanGroups(w http.ResponseWriter, r *http.Request, params GetScanGroupsParams) {
 	var request GetScanGroupsRequestObject
@@ -13784,93 +16963,101 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"1WnwcPvw7wAAAP//pWIR7owRAQA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

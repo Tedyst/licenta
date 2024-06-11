@@ -25,6 +25,8 @@ type Querier interface {
 	CreateGitRepository(ctx context.Context, arg CreateGitRepositoryParams) (*GitRepository, error)
 	CreateGitResultForCommit(ctx context.Context, arg []CreateGitResultForCommitParams) (int64, error)
 	CreateGitScan(ctx context.Context, arg CreateGitScanParams) (*GitScan, error)
+	CreateMongoDatabase(ctx context.Context, arg CreateMongoDatabaseParams) (*MongoDatabase, error)
+	CreateMongoScan(ctx context.Context, arg CreateMongoScanParams) (*MongoScan, error)
 	CreateMysqlDatabase(ctx context.Context, arg CreateMysqlDatabaseParams) (*MysqlDatabase, error)
 	CreateMysqlScan(ctx context.Context, arg CreateMysqlScanParams) (*MysqlScan, error)
 	CreateNvdCPE(ctx context.Context, arg CreateNvdCPEParams) (*NvdCpe, error)
@@ -34,6 +36,8 @@ type Querier interface {
 	CreatePostgresDatabase(ctx context.Context, arg CreatePostgresDatabaseParams) (*PostgresDatabase, error)
 	CreatePostgresScan(ctx context.Context, arg CreatePostgresScanParams) (*PostgresScan, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (*Project, error)
+	CreateRedisDatabase(ctx context.Context, arg CreateRedisDatabaseParams) (*RedisDatabase, error)
+	CreateRedisScan(ctx context.Context, arg CreateRedisScanParams) (*RedisScan, error)
 	CreateRememberMeToken(ctx context.Context, arg CreateRememberMeTokenParams) (*RememberMeToken, error)
 	CreateResetPasswordToken(ctx context.Context, arg CreateResetPasswordTokenParams) (*ResetPasswordToken, error)
 	CreateScan(ctx context.Context, arg CreateScanParams) (*Scan, error)
@@ -45,11 +49,13 @@ type Querier interface {
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
 	DeleteDockerImage(ctx context.Context, id int64) error
 	DeleteGitRepository(ctx context.Context, id int64) error
+	DeleteMongoDatabase(ctx context.Context, id int64) error
 	DeleteMysqlDatabase(ctx context.Context, id int64) error
 	DeleteNvdCveByName(ctx context.Context, cveID string) error
 	DeleteOrganization(ctx context.Context, id int64) error
 	DeletePostgresDatabase(ctx context.Context, id int64) error
 	DeleteProject(ctx context.Context, id int64) (*Project, error)
+	DeleteRedisDatabase(ctx context.Context, id int64) error
 	DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg DeleteRememberMeTokenByUserAndTokenParams) error
 	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error
@@ -77,6 +83,10 @@ type Querier interface {
 	GetGitScannedCommitsForProject(ctx context.Context, projectID int64) ([]string, error)
 	GetGitScannedCommitsForProjectBatch(ctx context.Context, arg GetGitScannedCommitsForProjectBatchParams) ([]string, error)
 	GetInvalidTOTPSecretForUser(ctx context.Context, userID int64) (*TotpSecretToken, error)
+	GetMongoDatabase(ctx context.Context, arg GetMongoDatabaseParams) (*GetMongoDatabaseRow, error)
+	GetMongoDatabasesForProject(ctx context.Context, arg GetMongoDatabasesForProjectParams) ([]*GetMongoDatabasesForProjectRow, error)
+	GetMongoScan(ctx context.Context, id int64) (*MongoScan, error)
+	GetMongoScanByScanID(ctx context.Context, scanID int64) (*MongoScan, error)
 	GetMysqlDatabase(ctx context.Context, arg GetMysqlDatabaseParams) (*GetMysqlDatabaseRow, error)
 	GetMysqlDatabasesForProject(ctx context.Context, arg GetMysqlDatabasesForProjectParams) ([]*GetMysqlDatabasesForProjectRow, error)
 	GetMysqlScan(ctx context.Context, id int64) (*MysqlScan, error)
@@ -97,10 +107,16 @@ type Querier interface {
 	GetPostgresScanByScanID(ctx context.Context, scanID int64) (*PostgresScan, error)
 	GetProject(ctx context.Context, id int64) (*Project, error)
 	GetProjectByOrganizationAndName(ctx context.Context, arg GetProjectByOrganizationAndNameParams) (*Project, error)
+	GetProjectInfoForMongoScanByScanID(ctx context.Context, arg GetProjectInfoForMongoScanByScanIDParams) (*GetProjectInfoForMongoScanByScanIDRow, error)
 	GetProjectInfoForMysqlScanByScanID(ctx context.Context, arg GetProjectInfoForMysqlScanByScanIDParams) (*GetProjectInfoForMysqlScanByScanIDRow, error)
 	GetProjectInfoForPostgresScanByScanID(ctx context.Context, arg GetProjectInfoForPostgresScanByScanIDParams) (*GetProjectInfoForPostgresScanByScanIDRow, error)
+	GetProjectInfoForRedisScanByScanID(ctx context.Context, arg GetProjectInfoForRedisScanByScanIDParams) (*GetProjectInfoForRedisScanByScanIDRow, error)
 	GetProjectWithStats(ctx context.Context, id int64) (*GetProjectWithStatsRow, error)
 	GetProjectsByOrganization(ctx context.Context, organizationID int64) ([]*Project, error)
+	GetRedisDatabase(ctx context.Context, arg GetRedisDatabaseParams) (*GetRedisDatabaseRow, error)
+	GetRedisDatabasesForProject(ctx context.Context, arg GetRedisDatabasesForProjectParams) ([]*GetRedisDatabasesForProjectRow, error)
+	GetRedisScan(ctx context.Context, id int64) (*RedisScan, error)
+	GetRedisScanByScanID(ctx context.Context, scanID int64) (*RedisScan, error)
 	GetResetPasswordToken(ctx context.Context, id uuid.UUID) (*ResetPasswordToken, error)
 	GetScan(ctx context.Context, id int64) (*GetScanRow, error)
 	GetScanBruteforceResults(ctx context.Context, scanID int64) ([]*ScanBruteforceResult, error)
@@ -133,11 +149,15 @@ type Querier interface {
 	UpdateBruteforcedPassword(ctx context.Context, arg UpdateBruteforcedPasswordParams) (*BruteforcedPassword, error)
 	UpdateDockerImage(ctx context.Context, arg UpdateDockerImageParams) (*DockerImage, error)
 	UpdateGitRepository(ctx context.Context, arg UpdateGitRepositoryParams) (*GitRepository, error)
+	UpdateMongoDatabase(ctx context.Context, arg UpdateMongoDatabaseParams) error
+	UpdateMongoVersion(ctx context.Context, arg UpdateMongoVersionParams) error
 	UpdateMysqlDatabase(ctx context.Context, arg UpdateMysqlDatabaseParams) error
 	UpdateMysqlVersion(ctx context.Context, arg UpdateMysqlVersionParams) error
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
+	UpdateRedisDatabase(ctx context.Context, arg UpdateRedisDatabaseParams) error
+	UpdateRedisVersion(ctx context.Context, arg UpdateRedisVersionParams) error
 	UpdateScanBruteforceResult(ctx context.Context, arg UpdateScanBruteforceResultParams) error
 	UpdateScanStatus(ctx context.Context, arg UpdateScanStatusParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) error

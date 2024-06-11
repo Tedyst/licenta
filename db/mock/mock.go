@@ -549,6 +549,84 @@ func (c *MockTransactionQuerierCreateGitScanCall) DoAndReturn(f func(context.Con
 	return c
 }
 
+// CreateMongoDatabase mocks base method.
+func (m *MockTransactionQuerier) CreateMongoDatabase(ctx context.Context, arg queries.CreateMongoDatabaseParams) (*queries.MongoDatabase, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMongoDatabase", ctx, arg)
+	ret0, _ := ret[0].(*queries.MongoDatabase)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateMongoDatabase indicates an expected call of CreateMongoDatabase.
+func (mr *MockTransactionQuerierMockRecorder) CreateMongoDatabase(ctx, arg any) *MockTransactionQuerierCreateMongoDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMongoDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateMongoDatabase), ctx, arg)
+	return &MockTransactionQuerierCreateMongoDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierCreateMongoDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierCreateMongoDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreateMongoDatabaseCall) Return(arg0 *queries.MongoDatabase, arg1 error) *MockTransactionQuerierCreateMongoDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreateMongoDatabaseCall) Do(f func(context.Context, queries.CreateMongoDatabaseParams) (*queries.MongoDatabase, error)) *MockTransactionQuerierCreateMongoDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreateMongoDatabaseCall) DoAndReturn(f func(context.Context, queries.CreateMongoDatabaseParams) (*queries.MongoDatabase, error)) *MockTransactionQuerierCreateMongoDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateMongoScan mocks base method.
+func (m *MockTransactionQuerier) CreateMongoScan(ctx context.Context, arg queries.CreateMongoScanParams) (*queries.MongoScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateMongoScan", ctx, arg)
+	ret0, _ := ret[0].(*queries.MongoScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateMongoScan indicates an expected call of CreateMongoScan.
+func (mr *MockTransactionQuerierMockRecorder) CreateMongoScan(ctx, arg any) *MockTransactionQuerierCreateMongoScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateMongoScan", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateMongoScan), ctx, arg)
+	return &MockTransactionQuerierCreateMongoScanCall{Call: call}
+}
+
+// MockTransactionQuerierCreateMongoScanCall wrap *gomock.Call
+type MockTransactionQuerierCreateMongoScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreateMongoScanCall) Return(arg0 *queries.MongoScan, arg1 error) *MockTransactionQuerierCreateMongoScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreateMongoScanCall) Do(f func(context.Context, queries.CreateMongoScanParams) (*queries.MongoScan, error)) *MockTransactionQuerierCreateMongoScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreateMongoScanCall) DoAndReturn(f func(context.Context, queries.CreateMongoScanParams) (*queries.MongoScan, error)) *MockTransactionQuerierCreateMongoScanCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // CreateMysqlDatabase mocks base method.
 func (m *MockTransactionQuerier) CreateMysqlDatabase(ctx context.Context, arg queries.CreateMysqlDatabaseParams) (*queries.MysqlDatabase, error) {
 	m.ctrl.T.Helper()
@@ -896,6 +974,84 @@ func (c *MockTransactionQuerierCreateProjectCall) Do(f func(context.Context, que
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierCreateProjectCall) DoAndReturn(f func(context.Context, queries.CreateProjectParams) (*queries.Project, error)) *MockTransactionQuerierCreateProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateRedisDatabase mocks base method.
+func (m *MockTransactionQuerier) CreateRedisDatabase(ctx context.Context, arg queries.CreateRedisDatabaseParams) (*queries.RedisDatabase, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRedisDatabase", ctx, arg)
+	ret0, _ := ret[0].(*queries.RedisDatabase)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateRedisDatabase indicates an expected call of CreateRedisDatabase.
+func (mr *MockTransactionQuerierMockRecorder) CreateRedisDatabase(ctx, arg any) *MockTransactionQuerierCreateRedisDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRedisDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateRedisDatabase), ctx, arg)
+	return &MockTransactionQuerierCreateRedisDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierCreateRedisDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierCreateRedisDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreateRedisDatabaseCall) Return(arg0 *queries.RedisDatabase, arg1 error) *MockTransactionQuerierCreateRedisDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreateRedisDatabaseCall) Do(f func(context.Context, queries.CreateRedisDatabaseParams) (*queries.RedisDatabase, error)) *MockTransactionQuerierCreateRedisDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreateRedisDatabaseCall) DoAndReturn(f func(context.Context, queries.CreateRedisDatabaseParams) (*queries.RedisDatabase, error)) *MockTransactionQuerierCreateRedisDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// CreateRedisScan mocks base method.
+func (m *MockTransactionQuerier) CreateRedisScan(ctx context.Context, arg queries.CreateRedisScanParams) (*queries.RedisScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateRedisScan", ctx, arg)
+	ret0, _ := ret[0].(*queries.RedisScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateRedisScan indicates an expected call of CreateRedisScan.
+func (mr *MockTransactionQuerierMockRecorder) CreateRedisScan(ctx, arg any) *MockTransactionQuerierCreateRedisScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRedisScan", reflect.TypeOf((*MockTransactionQuerier)(nil).CreateRedisScan), ctx, arg)
+	return &MockTransactionQuerierCreateRedisScanCall{Call: call}
+}
+
+// MockTransactionQuerierCreateRedisScanCall wrap *gomock.Call
+type MockTransactionQuerierCreateRedisScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierCreateRedisScanCall) Return(arg0 *queries.RedisScan, arg1 error) *MockTransactionQuerierCreateRedisScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierCreateRedisScanCall) Do(f func(context.Context, queries.CreateRedisScanParams) (*queries.RedisScan, error)) *MockTransactionQuerierCreateRedisScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierCreateRedisScanCall) DoAndReturn(f func(context.Context, queries.CreateRedisScanParams) (*queries.RedisScan, error)) *MockTransactionQuerierCreateRedisScanCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -1327,6 +1483,44 @@ func (c *MockTransactionQuerierDeleteGitRepositoryCall) DoAndReturn(f func(conte
 	return c
 }
 
+// DeleteMongoDatabase mocks base method.
+func (m *MockTransactionQuerier) DeleteMongoDatabase(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteMongoDatabase", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteMongoDatabase indicates an expected call of DeleteMongoDatabase.
+func (mr *MockTransactionQuerierMockRecorder) DeleteMongoDatabase(ctx, id any) *MockTransactionQuerierDeleteMongoDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMongoDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteMongoDatabase), ctx, id)
+	return &MockTransactionQuerierDeleteMongoDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierDeleteMongoDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierDeleteMongoDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierDeleteMongoDatabaseCall) Return(arg0 error) *MockTransactionQuerierDeleteMongoDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierDeleteMongoDatabaseCall) Do(f func(context.Context, int64) error) *MockTransactionQuerierDeleteMongoDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierDeleteMongoDatabaseCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierDeleteMongoDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // DeleteMysqlDatabase mocks base method.
 func (m *MockTransactionQuerier) DeleteMysqlDatabase(ctx context.Context, id int64) error {
 	m.ctrl.T.Helper()
@@ -1514,6 +1708,44 @@ func (c *MockTransactionQuerierDeleteProjectCall) Do(f func(context.Context, int
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierDeleteProjectCall) DoAndReturn(f func(context.Context, int64) (*queries.Project, error)) *MockTransactionQuerierDeleteProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// DeleteRedisDatabase mocks base method.
+func (m *MockTransactionQuerier) DeleteRedisDatabase(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteRedisDatabase", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteRedisDatabase indicates an expected call of DeleteRedisDatabase.
+func (mr *MockTransactionQuerierMockRecorder) DeleteRedisDatabase(ctx, id any) *MockTransactionQuerierDeleteRedisDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRedisDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).DeleteRedisDatabase), ctx, id)
+	return &MockTransactionQuerierDeleteRedisDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierDeleteRedisDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierDeleteRedisDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierDeleteRedisDatabaseCall) Return(arg0 error) *MockTransactionQuerierDeleteRedisDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierDeleteRedisDatabaseCall) Do(f func(context.Context, int64) error) *MockTransactionQuerierDeleteRedisDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierDeleteRedisDatabaseCall) DoAndReturn(f func(context.Context, int64) error) *MockTransactionQuerierDeleteRedisDatabaseCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -2606,6 +2838,162 @@ func (c *MockTransactionQuerierGetInvalidTOTPSecretForUserCall) DoAndReturn(f fu
 	return c
 }
 
+// GetMongoDatabase mocks base method.
+func (m *MockTransactionQuerier) GetMongoDatabase(ctx context.Context, arg queries.GetMongoDatabaseParams) (*queries.GetMongoDatabaseRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMongoDatabase", ctx, arg)
+	ret0, _ := ret[0].(*queries.GetMongoDatabaseRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMongoDatabase indicates an expected call of GetMongoDatabase.
+func (mr *MockTransactionQuerierMockRecorder) GetMongoDatabase(ctx, arg any) *MockTransactionQuerierGetMongoDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMongoDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMongoDatabase), ctx, arg)
+	return &MockTransactionQuerierGetMongoDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierGetMongoDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierGetMongoDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetMongoDatabaseCall) Return(arg0 *queries.GetMongoDatabaseRow, arg1 error) *MockTransactionQuerierGetMongoDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetMongoDatabaseCall) Do(f func(context.Context, queries.GetMongoDatabaseParams) (*queries.GetMongoDatabaseRow, error)) *MockTransactionQuerierGetMongoDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetMongoDatabaseCall) DoAndReturn(f func(context.Context, queries.GetMongoDatabaseParams) (*queries.GetMongoDatabaseRow, error)) *MockTransactionQuerierGetMongoDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMongoDatabasesForProject mocks base method.
+func (m *MockTransactionQuerier) GetMongoDatabasesForProject(ctx context.Context, arg queries.GetMongoDatabasesForProjectParams) ([]*queries.GetMongoDatabasesForProjectRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMongoDatabasesForProject", ctx, arg)
+	ret0, _ := ret[0].([]*queries.GetMongoDatabasesForProjectRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMongoDatabasesForProject indicates an expected call of GetMongoDatabasesForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetMongoDatabasesForProject(ctx, arg any) *MockTransactionQuerierGetMongoDatabasesForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMongoDatabasesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMongoDatabasesForProject), ctx, arg)
+	return &MockTransactionQuerierGetMongoDatabasesForProjectCall{Call: call}
+}
+
+// MockTransactionQuerierGetMongoDatabasesForProjectCall wrap *gomock.Call
+type MockTransactionQuerierGetMongoDatabasesForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetMongoDatabasesForProjectCall) Return(arg0 []*queries.GetMongoDatabasesForProjectRow, arg1 error) *MockTransactionQuerierGetMongoDatabasesForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetMongoDatabasesForProjectCall) Do(f func(context.Context, queries.GetMongoDatabasesForProjectParams) ([]*queries.GetMongoDatabasesForProjectRow, error)) *MockTransactionQuerierGetMongoDatabasesForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetMongoDatabasesForProjectCall) DoAndReturn(f func(context.Context, queries.GetMongoDatabasesForProjectParams) ([]*queries.GetMongoDatabasesForProjectRow, error)) *MockTransactionQuerierGetMongoDatabasesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMongoScan mocks base method.
+func (m *MockTransactionQuerier) GetMongoScan(ctx context.Context, id int64) (*queries.MongoScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMongoScan", ctx, id)
+	ret0, _ := ret[0].(*queries.MongoScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMongoScan indicates an expected call of GetMongoScan.
+func (mr *MockTransactionQuerierMockRecorder) GetMongoScan(ctx, id any) *MockTransactionQuerierGetMongoScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMongoScan", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMongoScan), ctx, id)
+	return &MockTransactionQuerierGetMongoScanCall{Call: call}
+}
+
+// MockTransactionQuerierGetMongoScanCall wrap *gomock.Call
+type MockTransactionQuerierGetMongoScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetMongoScanCall) Return(arg0 *queries.MongoScan, arg1 error) *MockTransactionQuerierGetMongoScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetMongoScanCall) Do(f func(context.Context, int64) (*queries.MongoScan, error)) *MockTransactionQuerierGetMongoScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetMongoScanCall) DoAndReturn(f func(context.Context, int64) (*queries.MongoScan, error)) *MockTransactionQuerierGetMongoScanCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetMongoScanByScanID mocks base method.
+func (m *MockTransactionQuerier) GetMongoScanByScanID(ctx context.Context, scanID int64) (*queries.MongoScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMongoScanByScanID", ctx, scanID)
+	ret0, _ := ret[0].(*queries.MongoScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMongoScanByScanID indicates an expected call of GetMongoScanByScanID.
+func (mr *MockTransactionQuerierMockRecorder) GetMongoScanByScanID(ctx, scanID any) *MockTransactionQuerierGetMongoScanByScanIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMongoScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetMongoScanByScanID), ctx, scanID)
+	return &MockTransactionQuerierGetMongoScanByScanIDCall{Call: call}
+}
+
+// MockTransactionQuerierGetMongoScanByScanIDCall wrap *gomock.Call
+type MockTransactionQuerierGetMongoScanByScanIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetMongoScanByScanIDCall) Return(arg0 *queries.MongoScan, arg1 error) *MockTransactionQuerierGetMongoScanByScanIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetMongoScanByScanIDCall) Do(f func(context.Context, int64) (*queries.MongoScan, error)) *MockTransactionQuerierGetMongoScanByScanIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetMongoScanByScanIDCall) DoAndReturn(f func(context.Context, int64) (*queries.MongoScan, error)) *MockTransactionQuerierGetMongoScanByScanIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetMysqlDatabase mocks base method.
 func (m *MockTransactionQuerier) GetMysqlDatabase(ctx context.Context, arg queries.GetMysqlDatabaseParams) (*queries.GetMysqlDatabaseRow, error) {
 	m.ctrl.T.Helper()
@@ -3386,6 +3774,45 @@ func (c *MockTransactionQuerierGetProjectByOrganizationAndNameCall) DoAndReturn(
 	return c
 }
 
+// GetProjectInfoForMongoScanByScanID mocks base method.
+func (m *MockTransactionQuerier) GetProjectInfoForMongoScanByScanID(ctx context.Context, arg queries.GetProjectInfoForMongoScanByScanIDParams) (*queries.GetProjectInfoForMongoScanByScanIDRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjectInfoForMongoScanByScanID", ctx, arg)
+	ret0, _ := ret[0].(*queries.GetProjectInfoForMongoScanByScanIDRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjectInfoForMongoScanByScanID indicates an expected call of GetProjectInfoForMongoScanByScanID.
+func (mr *MockTransactionQuerierMockRecorder) GetProjectInfoForMongoScanByScanID(ctx, arg any) *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectInfoForMongoScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectInfoForMongoScanByScanID), ctx, arg)
+	return &MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall{Call: call}
+}
+
+// MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall wrap *gomock.Call
+type MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall) Return(arg0 *queries.GetProjectInfoForMongoScanByScanIDRow, arg1 error) *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall) Do(f func(context.Context, queries.GetProjectInfoForMongoScanByScanIDParams) (*queries.GetProjectInfoForMongoScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall) DoAndReturn(f func(context.Context, queries.GetProjectInfoForMongoScanByScanIDParams) (*queries.GetProjectInfoForMongoScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForMongoScanByScanIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetProjectInfoForMysqlScanByScanID mocks base method.
 func (m *MockTransactionQuerier) GetProjectInfoForMysqlScanByScanID(ctx context.Context, arg queries.GetProjectInfoForMysqlScanByScanIDParams) (*queries.GetProjectInfoForMysqlScanByScanIDRow, error) {
 	m.ctrl.T.Helper()
@@ -3464,6 +3891,45 @@ func (c *MockTransactionQuerierGetProjectInfoForPostgresScanByScanIDCall) DoAndR
 	return c
 }
 
+// GetProjectInfoForRedisScanByScanID mocks base method.
+func (m *MockTransactionQuerier) GetProjectInfoForRedisScanByScanID(ctx context.Context, arg queries.GetProjectInfoForRedisScanByScanIDParams) (*queries.GetProjectInfoForRedisScanByScanIDRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjectInfoForRedisScanByScanID", ctx, arg)
+	ret0, _ := ret[0].(*queries.GetProjectInfoForRedisScanByScanIDRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProjectInfoForRedisScanByScanID indicates an expected call of GetProjectInfoForRedisScanByScanID.
+func (mr *MockTransactionQuerierMockRecorder) GetProjectInfoForRedisScanByScanID(ctx, arg any) *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectInfoForRedisScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetProjectInfoForRedisScanByScanID), ctx, arg)
+	return &MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall{Call: call}
+}
+
+// MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall wrap *gomock.Call
+type MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall) Return(arg0 *queries.GetProjectInfoForRedisScanByScanIDRow, arg1 error) *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall) Do(f func(context.Context, queries.GetProjectInfoForRedisScanByScanIDParams) (*queries.GetProjectInfoForRedisScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall) DoAndReturn(f func(context.Context, queries.GetProjectInfoForRedisScanByScanIDParams) (*queries.GetProjectInfoForRedisScanByScanIDRow, error)) *MockTransactionQuerierGetProjectInfoForRedisScanByScanIDCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetProjectWithStats mocks base method.
 func (m *MockTransactionQuerier) GetProjectWithStats(ctx context.Context, id int64) (*queries.GetProjectWithStatsRow, error) {
 	m.ctrl.T.Helper()
@@ -3538,6 +4004,162 @@ func (c *MockTransactionQuerierGetProjectsByOrganizationCall) Do(f func(context.
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierGetProjectsByOrganizationCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Project, error)) *MockTransactionQuerierGetProjectsByOrganizationCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetRedisDatabase mocks base method.
+func (m *MockTransactionQuerier) GetRedisDatabase(ctx context.Context, arg queries.GetRedisDatabaseParams) (*queries.GetRedisDatabaseRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRedisDatabase", ctx, arg)
+	ret0, _ := ret[0].(*queries.GetRedisDatabaseRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRedisDatabase indicates an expected call of GetRedisDatabase.
+func (mr *MockTransactionQuerierMockRecorder) GetRedisDatabase(ctx, arg any) *MockTransactionQuerierGetRedisDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRedisDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).GetRedisDatabase), ctx, arg)
+	return &MockTransactionQuerierGetRedisDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierGetRedisDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierGetRedisDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetRedisDatabaseCall) Return(arg0 *queries.GetRedisDatabaseRow, arg1 error) *MockTransactionQuerierGetRedisDatabaseCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetRedisDatabaseCall) Do(f func(context.Context, queries.GetRedisDatabaseParams) (*queries.GetRedisDatabaseRow, error)) *MockTransactionQuerierGetRedisDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetRedisDatabaseCall) DoAndReturn(f func(context.Context, queries.GetRedisDatabaseParams) (*queries.GetRedisDatabaseRow, error)) *MockTransactionQuerierGetRedisDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetRedisDatabasesForProject mocks base method.
+func (m *MockTransactionQuerier) GetRedisDatabasesForProject(ctx context.Context, arg queries.GetRedisDatabasesForProjectParams) ([]*queries.GetRedisDatabasesForProjectRow, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRedisDatabasesForProject", ctx, arg)
+	ret0, _ := ret[0].([]*queries.GetRedisDatabasesForProjectRow)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRedisDatabasesForProject indicates an expected call of GetRedisDatabasesForProject.
+func (mr *MockTransactionQuerierMockRecorder) GetRedisDatabasesForProject(ctx, arg any) *MockTransactionQuerierGetRedisDatabasesForProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRedisDatabasesForProject", reflect.TypeOf((*MockTransactionQuerier)(nil).GetRedisDatabasesForProject), ctx, arg)
+	return &MockTransactionQuerierGetRedisDatabasesForProjectCall{Call: call}
+}
+
+// MockTransactionQuerierGetRedisDatabasesForProjectCall wrap *gomock.Call
+type MockTransactionQuerierGetRedisDatabasesForProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetRedisDatabasesForProjectCall) Return(arg0 []*queries.GetRedisDatabasesForProjectRow, arg1 error) *MockTransactionQuerierGetRedisDatabasesForProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetRedisDatabasesForProjectCall) Do(f func(context.Context, queries.GetRedisDatabasesForProjectParams) ([]*queries.GetRedisDatabasesForProjectRow, error)) *MockTransactionQuerierGetRedisDatabasesForProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetRedisDatabasesForProjectCall) DoAndReturn(f func(context.Context, queries.GetRedisDatabasesForProjectParams) ([]*queries.GetRedisDatabasesForProjectRow, error)) *MockTransactionQuerierGetRedisDatabasesForProjectCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetRedisScan mocks base method.
+func (m *MockTransactionQuerier) GetRedisScan(ctx context.Context, id int64) (*queries.RedisScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRedisScan", ctx, id)
+	ret0, _ := ret[0].(*queries.RedisScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRedisScan indicates an expected call of GetRedisScan.
+func (mr *MockTransactionQuerierMockRecorder) GetRedisScan(ctx, id any) *MockTransactionQuerierGetRedisScanCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRedisScan", reflect.TypeOf((*MockTransactionQuerier)(nil).GetRedisScan), ctx, id)
+	return &MockTransactionQuerierGetRedisScanCall{Call: call}
+}
+
+// MockTransactionQuerierGetRedisScanCall wrap *gomock.Call
+type MockTransactionQuerierGetRedisScanCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetRedisScanCall) Return(arg0 *queries.RedisScan, arg1 error) *MockTransactionQuerierGetRedisScanCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetRedisScanCall) Do(f func(context.Context, int64) (*queries.RedisScan, error)) *MockTransactionQuerierGetRedisScanCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetRedisScanCall) DoAndReturn(f func(context.Context, int64) (*queries.RedisScan, error)) *MockTransactionQuerierGetRedisScanCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// GetRedisScanByScanID mocks base method.
+func (m *MockTransactionQuerier) GetRedisScanByScanID(ctx context.Context, scanID int64) (*queries.RedisScan, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRedisScanByScanID", ctx, scanID)
+	ret0, _ := ret[0].(*queries.RedisScan)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRedisScanByScanID indicates an expected call of GetRedisScanByScanID.
+func (mr *MockTransactionQuerierMockRecorder) GetRedisScanByScanID(ctx, scanID any) *MockTransactionQuerierGetRedisScanByScanIDCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRedisScanByScanID", reflect.TypeOf((*MockTransactionQuerier)(nil).GetRedisScanByScanID), ctx, scanID)
+	return &MockTransactionQuerierGetRedisScanByScanIDCall{Call: call}
+}
+
+// MockTransactionQuerierGetRedisScanByScanIDCall wrap *gomock.Call
+type MockTransactionQuerierGetRedisScanByScanIDCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetRedisScanByScanIDCall) Return(arg0 *queries.RedisScan, arg1 error) *MockTransactionQuerierGetRedisScanByScanIDCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetRedisScanByScanIDCall) Do(f func(context.Context, int64) (*queries.RedisScan, error)) *MockTransactionQuerierGetRedisScanByScanIDCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetRedisScanByScanIDCall) DoAndReturn(f func(context.Context, int64) (*queries.RedisScan, error)) *MockTransactionQuerierGetRedisScanByScanIDCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
@@ -4826,6 +5448,82 @@ func (c *MockTransactionQuerierUpdateGitRepositoryCall) DoAndReturn(f func(conte
 	return c
 }
 
+// UpdateMongoDatabase mocks base method.
+func (m *MockTransactionQuerier) UpdateMongoDatabase(ctx context.Context, arg queries.UpdateMongoDatabaseParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMongoDatabase", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMongoDatabase indicates an expected call of UpdateMongoDatabase.
+func (mr *MockTransactionQuerierMockRecorder) UpdateMongoDatabase(ctx, arg any) *MockTransactionQuerierUpdateMongoDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMongoDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateMongoDatabase), ctx, arg)
+	return &MockTransactionQuerierUpdateMongoDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierUpdateMongoDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierUpdateMongoDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdateMongoDatabaseCall) Return(arg0 error) *MockTransactionQuerierUpdateMongoDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdateMongoDatabaseCall) Do(f func(context.Context, queries.UpdateMongoDatabaseParams) error) *MockTransactionQuerierUpdateMongoDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdateMongoDatabaseCall) DoAndReturn(f func(context.Context, queries.UpdateMongoDatabaseParams) error) *MockTransactionQuerierUpdateMongoDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateMongoVersion mocks base method.
+func (m *MockTransactionQuerier) UpdateMongoVersion(ctx context.Context, arg queries.UpdateMongoVersionParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMongoVersion", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMongoVersion indicates an expected call of UpdateMongoVersion.
+func (mr *MockTransactionQuerierMockRecorder) UpdateMongoVersion(ctx, arg any) *MockTransactionQuerierUpdateMongoVersionCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMongoVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateMongoVersion), ctx, arg)
+	return &MockTransactionQuerierUpdateMongoVersionCall{Call: call}
+}
+
+// MockTransactionQuerierUpdateMongoVersionCall wrap *gomock.Call
+type MockTransactionQuerierUpdateMongoVersionCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdateMongoVersionCall) Return(arg0 error) *MockTransactionQuerierUpdateMongoVersionCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdateMongoVersionCall) Do(f func(context.Context, queries.UpdateMongoVersionParams) error) *MockTransactionQuerierUpdateMongoVersionCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdateMongoVersionCall) DoAndReturn(f func(context.Context, queries.UpdateMongoVersionParams) error) *MockTransactionQuerierUpdateMongoVersionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // UpdateMysqlDatabase mocks base method.
 func (m *MockTransactionQuerier) UpdateMysqlDatabase(ctx context.Context, arg queries.UpdateMysqlDatabaseParams) error {
 	m.ctrl.T.Helper()
@@ -5012,6 +5710,82 @@ func (c *MockTransactionQuerierUpdatePostgresVersionCall) Do(f func(context.Cont
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierUpdatePostgresVersionCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresVersionParams) error) *MockTransactionQuerierUpdatePostgresVersionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateRedisDatabase mocks base method.
+func (m *MockTransactionQuerier) UpdateRedisDatabase(ctx context.Context, arg queries.UpdateRedisDatabaseParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRedisDatabase", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRedisDatabase indicates an expected call of UpdateRedisDatabase.
+func (mr *MockTransactionQuerierMockRecorder) UpdateRedisDatabase(ctx, arg any) *MockTransactionQuerierUpdateRedisDatabaseCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRedisDatabase", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateRedisDatabase), ctx, arg)
+	return &MockTransactionQuerierUpdateRedisDatabaseCall{Call: call}
+}
+
+// MockTransactionQuerierUpdateRedisDatabaseCall wrap *gomock.Call
+type MockTransactionQuerierUpdateRedisDatabaseCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdateRedisDatabaseCall) Return(arg0 error) *MockTransactionQuerierUpdateRedisDatabaseCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdateRedisDatabaseCall) Do(f func(context.Context, queries.UpdateRedisDatabaseParams) error) *MockTransactionQuerierUpdateRedisDatabaseCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdateRedisDatabaseCall) DoAndReturn(f func(context.Context, queries.UpdateRedisDatabaseParams) error) *MockTransactionQuerierUpdateRedisDatabaseCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateRedisVersion mocks base method.
+func (m *MockTransactionQuerier) UpdateRedisVersion(ctx context.Context, arg queries.UpdateRedisVersionParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateRedisVersion", ctx, arg)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateRedisVersion indicates an expected call of UpdateRedisVersion.
+func (mr *MockTransactionQuerierMockRecorder) UpdateRedisVersion(ctx, arg any) *MockTransactionQuerierUpdateRedisVersionCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateRedisVersion", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateRedisVersion), ctx, arg)
+	return &MockTransactionQuerierUpdateRedisVersionCall{Call: call}
+}
+
+// MockTransactionQuerierUpdateRedisVersionCall wrap *gomock.Call
+type MockTransactionQuerierUpdateRedisVersionCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdateRedisVersionCall) Return(arg0 error) *MockTransactionQuerierUpdateRedisVersionCall {
+	c.Call = c.Call.Return(arg0)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdateRedisVersionCall) Do(f func(context.Context, queries.UpdateRedisVersionParams) error) *MockTransactionQuerierUpdateRedisVersionCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdateRedisVersionCall) DoAndReturn(f func(context.Context, queries.UpdateRedisVersionParams) error) *MockTransactionQuerierUpdateRedisVersionCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

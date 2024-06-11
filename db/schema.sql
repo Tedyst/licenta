@@ -69,7 +69,6 @@ CREATE INDEX projects_organization_id_idx ON projects(organization_id);
 
 CREATE INDEX projects_name_orgianization_id_idx ON projects(name, organization_id);
 
-
 CREATE TABLE git_repositories(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -189,6 +188,29 @@ CREATE TABLE postgres_databases(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE mongo_databases(
+    id bigserial PRIMARY KEY,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    host text NOT NULL,
+    port integer NOT NULL,
+    database_name text NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    version text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE redis_databases(
+    id bigserial PRIMARY KEY,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    host text NOT NULL,
+    port integer NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    version text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 CREATE TABLE scan_groups(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -230,6 +252,18 @@ CREATE TABLE postgres_scans(
     id bigserial PRIMARY KEY,
     scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE
+);
+
+CREATE TABLE mongo_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    database_id bigint NOT NULL REFERENCES mongo_databases(id) ON DELETE CASCADE
+);
+
+CREATE TABLE redis_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    database_id bigint NOT NULL REFERENCES redis_databases(id) ON DELETE CASCADE
 );
 
 CREATE TABLE scan_results(

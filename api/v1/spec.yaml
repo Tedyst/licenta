@@ -1002,6 +1002,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /mongo-scans:
+    get:
+      summary: Get all mongo scans
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+      parameters:
+        - name: scan
+          in: query
+          description: The scan ID to filter for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - scans
+                properties:
+                  success:
+                    type: boolean
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MongoScan'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /redis-scans:
+    get:
+      summary: Get all redis scans
+      security:
+        - sessionAuth: []
+      tags:
+        - scanner
+      parameters:
+        - name: scan
+          in: query
+          description: The scan ID to filter for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - scans
+                properties:
+                  success:
+                    type: boolean
+                  scans:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RedisScan'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Scan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /mysql-scans:
     get:
       summary: Get all postgres scans
@@ -1624,6 +1712,428 @@ paths:
         - name: id
           in: path
           description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /mongo:
+    get:
+      summary: Get all mongo databases for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - mongo
+      parameters:
+        - name: project
+          in: query
+          description: The projects to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mongo_databases
+                properties:
+                  success:
+                    type: boolean
+                  mongo_databases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MongoDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new mongo database
+      security:
+        - sessionAuth: []
+      tags:
+        - mongo
+      requestBody:
+        description: The mongo database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMongoDatabase'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mongo_database
+                properties:
+                  success:
+                    type: boolean
+                  mongo_database:
+                    $ref: '#/components/schemas/MongoDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /mongo/{id}:
+    get:
+      summary: Get mongo database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - mongo
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the mongo database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mongo_database
+                properties:
+                  success:
+                    type: boolean
+                  mongo_database:
+                    $ref: '#/components/schemas/MongoDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update mongo database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - mongo
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the mongo database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The mongo database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchMongoDatabase'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - mongo_database
+                properties:
+                  success:
+                    type: boolean
+                  mongo_database:
+                    $ref: '#/components/schemas/MongoDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete mongo database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - mongo
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the postgres database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /redis:
+    get:
+      summary: Get all redis databases for a project
+      security:
+        - sessionAuth: []
+      tags:
+        - redis
+      parameters:
+        - name: project
+          in: query
+          description: The projects to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - redis_databases
+                properties:
+                  success:
+                    type: boolean
+                  redis_databases:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RedisDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new redis database
+      security:
+        - sessionAuth: []
+      tags:
+        - redis
+      requestBody:
+        description: The redis database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRedisDatabase'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - redis_database
+                properties:
+                  success:
+                    type: boolean
+                  redis_database:
+                    $ref: '#/components/schemas/RedisDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /redis/{id}:
+    get:
+      summary: Get redis database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - redis
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the redis database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - redis_database
+                properties:
+                  success:
+                    type: boolean
+                  redis_database:
+                    $ref: '#/components/schemas/RedisDatabase'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update redis database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - redis
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the redis database
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The redis database object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchRedisDatabase'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - redis_database
+                properties:
+                  success:
+                    type: boolean
+                  redis_database:
+                    $ref: '#/components/schemas/RedisDatabase'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Postgres database not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete redis database by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - redis
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the redis database
           required: true
           schema:
             type: integer
@@ -2306,6 +2816,34 @@ components:
           type: string
         version:
           type: string
+    PatchMongoDatabase:
+      type: object
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        version:
+          type: string
+    PatchRedisDatabase:
+      type: object
+      properties:
+        host:
+          type: string
+        port:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        version:
+          type: string
     CreatePostgresDatabase:
       type: object
       required:
@@ -2359,6 +2897,65 @@ components:
           type: string
         version:
           type: string
+    MongoDatabase:
+      type: object
+      required:
+        - id
+        - project_id
+        - host
+        - port
+        - database_name
+        - username
+        - password
+        - created_at
+        - version
+      properties:
+        id: 
+          type: integer
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        created_at: 
+          type: string
+        version:
+          type: string
+    RedisDatabase:
+      type: object
+      required:
+        - id
+        - project_id
+        - host
+        - port
+        - username
+        - password
+        - created_at
+        - version
+      properties:
+        id: 
+          type: integer
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        username:
+          type: string
+        password:
+          type: string
+        created_at: 
+          type: string
+        version:
+          type: string
     CreateMysqlDatabase:
       type: object
       required:
@@ -2377,6 +2974,47 @@ components:
           type: integer
         database_name:
           type: string
+        username:
+          type: string
+        password:
+          type: string
+    CreateMongoDatabase:
+      type: object
+      required:
+        - project_id
+        - host
+        - port
+        - database_name
+        - username
+        - password
+      properties:
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
+        database_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    CreateRedisDatabase:
+      type: object
+      required:
+        - project_id
+        - host
+        - port
+        - username
+        - password
+      properties:
+        project_id:
+          type: integer
+        host:
+          type: string
+        port:
+          type: integer
         username:
           type: string
         password:
@@ -2874,6 +3512,26 @@ components:
         database_id:
           type: integer
     MysqlScan:
+      required:
+        - id
+        - database_id
+      type: object
+      properties:
+        id:
+          type: integer
+        database_id:
+          type: integer
+    MongoScan:
+      required:
+        - id
+        - database_id
+      type: object
+      properties:
+        id:
+          type: integer
+        database_id:
+          type: integer
+    RedisScan:
       required:
         - id
         - database_id

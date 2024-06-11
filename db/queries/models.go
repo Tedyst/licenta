@@ -108,6 +108,24 @@ type GitScan struct {
 	RepositoryID int64 `json:"repository_id"`
 }
 
+type MongoDatabase struct {
+	ID           int64              `json:"id"`
+	ProjectID    int64              `json:"project_id"`
+	Host         string             `json:"host"`
+	Port         int32              `json:"port"`
+	DatabaseName string             `json:"database_name"`
+	Username     string             `json:"username"`
+	Password     string             `json:"password"`
+	Version      sql.NullString     `json:"version"`
+	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+}
+
+type MongoScan struct {
+	ID         int64 `json:"id"`
+	ScanID     int64 `json:"scan_id"`
+	DatabaseID int64 `json:"database_id"`
+}
+
 type MysqlDatabase struct {
 	ID           int64              `json:"id"`
 	ProjectID    int64              `json:"project_id"`
@@ -190,6 +208,23 @@ type Project struct {
 	OrganizationID int64              `json:"organization_id"`
 	Remote         bool               `json:"remote"`
 	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
+type RedisDatabase struct {
+	ID        int64              `json:"id"`
+	ProjectID int64              `json:"project_id"`
+	Host      string             `json:"host"`
+	Port      int32              `json:"port"`
+	Username  string             `json:"username"`
+	Password  string             `json:"password"`
+	Version   sql.NullString     `json:"version"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+}
+
+type RedisScan struct {
+	ID         int64 `json:"id"`
+	ScanID     int64 `json:"scan_id"`
+	DatabaseID int64 `json:"database_id"`
 }
 
 type RememberMeToken struct {
