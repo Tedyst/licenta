@@ -38,7 +38,7 @@ func (s *scheduler) Run(ctx context.Context) error {
 		return fmt.Errorf("could not update nvd vulnerabilities for product: %w", err)
 	}
 
-	slog.InfoContext(ctx, "Updating NVD vulnerabilities for MONGODB")
+	slog.InfoContext(ctx, "Updating NVD vulnerabilities for MYSQL")
 	err = s.tasksRunner.UpdateNVDVulnerabilitiesForProduct(ctx, nvd.MYSQL)
 	if err != nil {
 		return fmt.Errorf("could not update nvd vulnerabilities for product: %w", err)
@@ -138,12 +138,11 @@ func (s *scheduler) Run(ctx context.Context) error {
 
 		err = s.tasksRunner.ScheduleFullRun(ctx, project, scanGroup, "all", "all")
 		if err != nil {
-			return fmt.Errorf("error scheduling full run: %w", err)
+			slog.ErrorContext(ctx, "Error scheduling full run for project", "project", project.ID, "error", err)
 		}
-
-		slog.InfoContext(ctx, "Scheduled full run for project", "project", project.ID)
-
 	}
+
+	slog.InfoContext(ctx, "Finished running scheduler for all projects")
 
 	return nil
 }
@@ -162,6 +161,7 @@ func (s *scheduler) RunContinuous(ctx context.Context, duration time.Duration) e
 			slog.InfoContext(ctx, "Stopping scheduler")
 			return ctx.Err()
 		case <-ticker.C:
+			slog.InfoContext(ctx, "Running scheduler")
 			err := s.Run(ctx)
 			if err != nil {
 				return err

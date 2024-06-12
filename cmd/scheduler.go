@@ -57,7 +57,7 @@ var schedulerCmd = &cobra.Command{
 		)
 
 		sc := scheduler.NewScheduler(db, taskRunner)
-		err = sc.RunContinuous(cmd.Context(), 1*time.Minute)
+		err = sc.RunContinuous(cmd.Context(), 24*time.Hour)
 		if err != nil {
 			return fmt.Errorf("could not run scheduler: %w", err)
 		}

@@ -214,7 +214,7 @@ CREATE TABLE redis_databases(
 CREATE TABLE scan_groups(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    created_by bigint REFERENCES users(id) ON DELETE CASCADE,
+    created_by bigint,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
