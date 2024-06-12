@@ -67,6 +67,11 @@ var schedulerCmd = &cobra.Command{
 }
 
 func init() {
+	schedulerCmd.Flags().String("email-sendgrid", "", "Sendgrid API Key")
+
+	schedulerCmd.Flags().String("email-sender", "no-reply@tedyst.ro", "Email sender")
+	schedulerCmd.Flags().String("email-senderName", "Licenta", "Email sender name")
+
 	schedulerCmd.Flags().String("database", "", "Database connection string")
 
 	schedulerCmd.Flags().String("hash-key", "", "Hash key used for signing Cookies")
