@@ -23,6 +23,7 @@ COPY tasks /app/tasks
 COPY telemetry /app/telemetry
 COPY templates /app/templates
 COPY worker /app/worker
+COPY scheduler /app/scheduler
 COPY main.go /app/
 
 RUN go build -o /app/licenta .
@@ -30,7 +31,8 @@ RUN go build -o /app/licenta .
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
-COPY --from=builder /app/licenta /usr/local/bin/api
+COPY --from=builder /app/licenta /usr/local/bin/licenta
 EXPOSE 5000
 
-ENTRYPOINT ["/usr/local/bin/api", "servelocal"]
+ENTRYPOINT ["licenta"]
+CMD ["serve"]

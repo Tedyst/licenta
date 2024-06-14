@@ -48,5 +48,10 @@ func init() {
 		panic(err)
 	}
 
-	rootCmd.AddCommand(workerCmd)
+	natsCmd.Flags().String("database", "", "Database connection string")
+	if err := natsCmd.MarkFlagRequired("database"); err != nil {
+		panic(err)
+	}
+
+	rootCmd.AddCommand(natsCmd)
 }

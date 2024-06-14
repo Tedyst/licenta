@@ -25,9 +25,9 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 };
 
 export const actions = {
-	default: async ({ request, fetch, url }) => {
+	default: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+		const client = clientFromFetch(fetch);
 
 		const sourceId = data.get('databaseId')?.toString();
 

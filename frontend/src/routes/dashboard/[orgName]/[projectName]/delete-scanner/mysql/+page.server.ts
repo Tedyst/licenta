@@ -1,6 +1,7 @@
 import type { Actions, PageServerLoad } from './$types';
 import { clientFromFetch } from '$lib/client';
 import { redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ parent, url }) => {
 	const parentData = await parent();
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async ({ parent, url }) => {
 export const actions = {
 	default: async ({ request, fetch, url }) => {
 		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+		const client = clientFromFetch(fetch, env.PUBLIC_BACKEND_URL);
 
 		const databaseId = data.get('databaseId')?.toString();
 

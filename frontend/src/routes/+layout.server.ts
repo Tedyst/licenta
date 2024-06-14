@@ -4,10 +4,11 @@ import type { components, paths } from '$lib/api/v1';
 import { goto } from '$app/navigation';
 export const prerender = false;
 export const ssr = true;
+import { env } from '$env/dynamic/public';
 
-export const load: LayoutServerLoad = async ({ fetch, url, depends }) => {
+export const load: LayoutServerLoad = async ({ fetch, depends }) => {
 	const client = createClient<paths>({
-		baseUrl: url.origin + '/api/v1',
+		baseUrl: env.PUBLIC_BACKEND_URL + '/api/v1',
 		fetch: fetch,
 		credentials: 'include'
 	});

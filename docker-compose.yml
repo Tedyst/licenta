@@ -1,6 +1,13 @@
 version: "3.8"
 
 services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - licenta-network
+
   application:
     build: .
     ports:
@@ -9,13 +16,24 @@ services:
       - licenta-network
     depends_on:
       - db
+      - nats
+      - redis
+    env_file:
+      - docker.env
+
+  nats-worker:
+    build: .
+    command: nats
+    networks:
+      - licenta-network
+    depends_on:
+      - db
+      - nats
     env_file:
       - docker.env
 
   # swagger:
   #   image: swaggerapi/swagger-ui
-  #   ports:
-  #     - "5002:8080"
   #   networks:
   #     - licenta-network
   #   volumes:
@@ -40,6 +58,19 @@ services:
     networks:
       - licenta-network
 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "5002:3000"
+    networks:
+      - licenta-network
+    depends_on:
+      - application
+    environment:
+      - PUBLIC_BACKEND_URL=http://application:5000
+
   nginx:
     build:
       context: .
@@ -50,8 +81,10 @@ services:
       - licenta-network
     depends_on:
       - application
+      - frontend
     environment:
-      - UPSTREAM=application:5000
+      - UPSTREAM_API=application:5000
+      - UPSTREAM_FRONTEND=frontend:4173
 
   otelcollector:
     image: otel/opentelemetry-collector-contrib

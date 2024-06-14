@@ -13,7 +13,7 @@ export const actions = {
 			return { error };
 		}
 
-		const response = await requestResetPassword(username, fetch, url.origin).catch(() => {});
+		const response = await requestResetPassword(username, fetch).catch(() => {});
 
 		if (response === undefined) {
 			return { error: 'Failed to fetch' };

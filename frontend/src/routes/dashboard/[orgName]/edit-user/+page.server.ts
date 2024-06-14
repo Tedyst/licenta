@@ -3,9 +3,9 @@ import { clientFromFetch } from '$lib/client';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-	editRole: async ({ request, fetch, url }) => {
+	editRole: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+		const client = clientFromFetch(fetch);
 
 		const organizationId = data.get('organizationId')?.toString();
 		const userId = data.get('userId')?.toString();
@@ -39,9 +39,9 @@ export const actions = {
 
 		redirect(302, '/dashboard/' + organizationId);
 	},
-	delete: async ({ request, fetch, url }) => {
+	delete: async ({ request, fetch }) => {
 		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+		const client = clientFromFetch(fetch);
 
 		const organizationId = data.get('organizationId')?.toString();
 		const userId = data.get('userId')?.toString();

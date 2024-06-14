@@ -4,7 +4,7 @@ import { clientFromFetch } from '$lib/client';
 
 export const load: PageServerLoad = async ({ parent, url, depends }) => {
 	const parentData = await parent();
-	const client = clientFromFetch(fetch, url.origin);
+	const client = clientFromFetch(fetch);
 
 	const scanId = url.searchParams.get('id') || '0';
 

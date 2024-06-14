@@ -150,6 +150,9 @@ func init() {
 	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
 	serveCmd.Flags().String("database", "", "Database connection string")
+	if err := serveCmd.MarkFlagRequired("database"); err != nil {
+		panic(err)
+	}
 
 	serveCmd.Flags().String("nats", "", "Nats connection string")
 	if err := serveCmd.MarkFlagRequired("nats"); err != nil {

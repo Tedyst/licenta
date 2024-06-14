@@ -305,9 +305,9 @@ export async function register(
 	});
 }
 
-export const clientFromFetch = (fetch: typeof csrfFetch, origin: string) => {
+export const clientFromFetch = (fetch: typeof csrfFetch) => {
 	const client = createClient<paths>({
-		baseUrl: origin + '/api/v1',
+		baseUrl: env.PUBLIC_BACKEND_URL + '/api/v1',
 		fetch
 	});
 	const csrfMiddleware = {

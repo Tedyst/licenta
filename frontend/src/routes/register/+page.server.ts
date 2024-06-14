@@ -4,14 +4,14 @@ import type { Actions } from './$types';
 import { register } from '$lib/client';
 
 export const actions = {
-	default: async ({ request, fetch, url }) => {
+	default: async ({ request, fetch }) => {
 		const data = await request.formData();
 
 		const username = data.get('username')?.toString() || '';
 		const email = data.get('email')?.toString() || '';
 		const password = data.get('password')?.toString() || '';
 
-		const response = await register({ username, email, password }, fetch, url.origin);
+		const response = await register({ username, email, password }, fetch);
 
 		if (response === undefined) {
 			return { error: 'Failed to fetch' };

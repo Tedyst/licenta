@@ -1,6 +1,7 @@
 import createClient from 'openapi-fetch';
 import type { LayoutServerLoad } from './$types';
 import type { paths } from '$lib/api/v1';
+import { env } from '$env/dynamic/public';
 
 export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depends }) => {
 	const parentData = await parent();
@@ -9,7 +10,7 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depen
 		parentData.organization?.projects.filter((v) => v.name == params.projectName).at(0) || null;
 
 	const client = createClient<paths>({
-		baseUrl: url.origin + '/api/v1',
+		baseUrl: env.PUBLIC_BACKEND_URL + '/api/v1',
 		fetch: fetch,
 		credentials: 'include'
 	});

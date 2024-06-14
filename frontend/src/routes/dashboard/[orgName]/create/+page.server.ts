@@ -5,7 +5,7 @@ import { redirect } from '@sveltejs/kit';
 export const actions = {
 	default: async ({ request, fetch, url }) => {
 		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+		const client = clientFromFetch(fetch);
 
 		const organizationId = data.get('organizationId')?.toString();
 		const organizationName = data.get('organizationName')?.toString();

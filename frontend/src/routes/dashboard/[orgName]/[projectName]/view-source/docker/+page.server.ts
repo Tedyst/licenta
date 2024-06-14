@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 		redirect(302, '/dashboard/' + parentData.organization?.name + '/' + parentData.project?.name);
 	}
 
-	const client = clientFromFetch(fetch, url.origin);
+	const client = clientFromFetch(fetch);
 
 	const returned = await client
 		.GET('/docker/{id}', { params: { path: { id: +dockerId } } })

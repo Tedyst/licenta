@@ -16,7 +16,7 @@ export const actions = {
 			return { error };
 		}
 
-		const response = await login(username, password, remember === 'on', fetch, url.origin).catch(
+		const response = await login(username, password, remember === 'on', fetch).catch(
 			() => {}
 		);
 

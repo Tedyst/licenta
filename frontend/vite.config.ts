@@ -1,9 +1,8 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
-import { nodeLoaderPlugin } from '@vavite/node-loader/plugin';
 
 export default defineConfig({
-	plugins: [sveltekit(), nodeLoaderPlugin()],
+	plugins: [sveltekit()],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},
@@ -11,7 +10,9 @@ export default defineConfig({
 		host: true,
 		proxy: {
 			'/api/': {
-				target: 'http://localhost:5000',
+				target: process.env.PUBLIC_BACKEND_URL
+					? process.env.PUBLIC_BACKEND_URL
+					: 'http://localhost:5000',
 				changeOrigin: true,
 				preserveHeaderKeyCase: true
 			}

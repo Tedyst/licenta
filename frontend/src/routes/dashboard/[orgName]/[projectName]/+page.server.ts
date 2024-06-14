@@ -1,12 +1,13 @@
 import type { Actions } from './$types';
 import { clientFromFetch } from '$lib/client';
 import { invalidateAll } from '$app/navigation';
+import { env } from '$env/dynamic/public';
 invalidateAll
 
 export const actions = {
 	run: async ({ request, fetch, url }) => {
 		const data = await request.formData();
-		const client = clientFromFetch(fetch, url.origin);
+		const client = clientFromFetch(fetch, env.PUBLIC_BACKEND_URL);
 
 		const projectId = data.get('projectId')?.toString();
 

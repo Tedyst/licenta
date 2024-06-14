@@ -1,15 +1,3 @@
-FROM node:latest AS sveltebuilder
-
-WORKDIR /app/frontend
-
-COPY frontend/package.json frontend/package-lock.json /app/
-RUN npm ci
-COPY frontend/ /app/frontend
-COPY api/ /app/api
-RUN npm run build
-
-
-
 FROM ubuntu:22.04 as nginxbuilder
 
 RUN apt update \
@@ -37,9 +25,7 @@ brotli_types application/atom+xml application/javascript application/json applic
 
 COPY nginx/nginx.conf /etc/nginx/conf.d/svelte.conf.template
 
-COPY --from=sveltebuilder /app/frontend/build /usr/share/nginx/html
-
 RUN rm /etc/nginx/conf.d/default.conf
 
-CMD envsubst '$UPSTREAM' < /etc/nginx/conf.d/svelte.conf.template > /etc/nginx/conf.d/svelte.conf && \
+CMD cat /etc/nginx/conf.d/svelte.conf.template | envsubst '$UPSTREAM_API' | envsubst '$UPSTREAM_FRONTEND' | tee /etc/nginx/conf.d/svelte.conf && \
     exec nginx -g 'daemon off;'
