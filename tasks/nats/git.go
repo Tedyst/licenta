@@ -36,20 +36,22 @@ type gitScannerTaskRunner struct {
 	localRunner tasks.GitTasksRunner
 	semaphore   *semaphore.Weighted
 	querier     GitQuerier
+	saltKey     string
 }
 
 type GitQuerier interface {
 	local.GitQuerier
-	GetGitRepository(ctx context.Context, id int64) (*queries.GitRepository, error)
+	GetGitRepository(context.Context, queries.GetGitRepositoryParams) (*queries.GetGitRepositoryRow, error)
 	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 }
 
-func NewGitScannerTaskRunner(conn *nats.Conn, localRunner tasks.GitTasksRunner, querier GitQuerier, concurrency int) *gitScannerTaskRunner {
+func NewGitScannerTaskRunner(conn *nats.Conn, localRunner tasks.GitTasksRunner, querier GitQuerier, concurrency int, saltKey string) *gitScannerTaskRunner {
 	return &gitScannerTaskRunner{
 		conn:        conn,
 		localRunner: localRunner,
 		semaphore:   semaphore.NewWeighted(int64(concurrency)),
 		querier:     querier,
+		saltKey:     saltKey,
 	}
 }
 
@@ -58,7 +60,10 @@ func (gs *gitScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) err
 		defer wg.Done()
 
 		err := receiveMessage(ctx, gs.conn, gs.semaphore, scanGitRepositoryQueue, func(ctx context.Context, message *ScanGitRepositoryMessage) error {
-			repo, err := gs.querier.GetGitRepository(ctx, message.RepoId)
+			repo, err := gs.querier.GetGitRepository(ctx, queries.GetGitRepositoryParams{
+				ID:      message.RepoId,
+				SaltKey: gs.saltKey,
+			})
 			if err != nil {
 				return nil
 			}
@@ -68,7 +73,14 @@ func (gs *gitScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) err
 				return nil
 			}
 
-			err = gs.localRunner.ScanGitRepository(ctx, repo, &scan.Scan)
+			err = gs.localRunner.ScanGitRepository(ctx, &queries.GitRepository{
+				ID:            repo.ID,
+				ProjectID:     repo.ProjectID,
+				GitRepository: repo.GitRepository,
+				Username:      repo.Username,
+				Password:      repo.Password,
+				PrivateKey:    repo.PrivateKey,
+			}, &scan.Scan)
 			if err != nil {
 				return nil
 			}

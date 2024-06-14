@@ -13,7 +13,8 @@ import (
 )
 
 type dockerScannerTaskSender struct {
-	conn *nats.Conn
+	conn    *nats.Conn
+	saltKey string
 }
 
 func NewDockerScannerTaskSender(conn *nats.Conn) *dockerScannerTaskSender {
@@ -36,20 +37,22 @@ type dockerScannerTaskRunner struct {
 	localRunner tasks.DockerTasksRunner
 	semaphore   *semaphore.Weighted
 	querier     DockerQuerier
+	saltKey     string
 }
 
 type DockerQuerier interface {
 	local.DockerQuerier
-	GetDockerImage(ctx context.Context, id int64) (*queries.DockerImage, error)
+	GetDockerImage(context.Context, queries.GetDockerImageParams) (*queries.GetDockerImageRow, error)
 	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 }
 
-func NewDockerScannerTaskRunner(conn *nats.Conn, localRunner tasks.DockerTasksRunner, querier DockerQuerier, concurrency int) *dockerScannerTaskRunner {
+func NewDockerScannerTaskRunner(conn *nats.Conn, localRunner tasks.DockerTasksRunner, querier DockerQuerier, concurrency int, saltKey string) *dockerScannerTaskRunner {
 	return &dockerScannerTaskRunner{
 		conn:        conn,
 		localRunner: localRunner,
 		semaphore:   semaphore.NewWeighted(int64(concurrency)),
 		querier:     querier,
+		saltKey:     saltKey,
 	}
 }
 
@@ -58,7 +61,10 @@ func (gs *dockerScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) 
 		defer wg.Done()
 
 		err := receiveMessage(ctx, gs.conn, gs.semaphore, scanDockerRepositoryQueue, func(ctx context.Context, message *ScanDockerRepoMessage) error {
-			repo, err := gs.querier.GetDockerImage(ctx, message.ImageId)
+			repo, err := gs.querier.GetDockerImage(ctx, queries.GetDockerImageParams{
+				ID:      message.ImageId,
+				SaltKey: gs.saltKey,
+			})
 			if err != nil {
 				return nil
 			}
@@ -68,7 +74,13 @@ func (gs *dockerScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) 
 				return nil
 			}
 
-			err = gs.localRunner.ScanDockerRepository(ctx, repo, &scan.Scan)
+			err = gs.localRunner.ScanDockerRepository(ctx, &queries.DockerImage{
+				ID:          repo.ID,
+				ProjectID:   repo.ProjectID,
+				DockerImage: repo.DockerImage,
+				Username:    repo.Username,
+				Password:    repo.Password,
+			}, &scan.Scan)
 			if err != nil {
 				return nil
 			}

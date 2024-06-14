@@ -24,10 +24,10 @@ type AllTasksQuerier interface {
 	local.SaverQuerier
 }
 
-func NewAllTasksRunner(conn *nats.Conn, localRunner tasks.TaskRunner, querier AllTasksQuerier, concurrency int) *allTasksRunner {
+func NewAllTasksRunner(conn *nats.Conn, localRunner tasks.TaskRunner, querier AllTasksQuerier, concurrency int, saltKey string) *allTasksRunner {
 	return &allTasksRunner{
-		dockerScannerTaskRunner: *NewDockerScannerTaskRunner(conn, localRunner, querier, concurrency),
-		gitScannerTaskRunner:    *NewGitScannerTaskRunner(conn, localRunner, querier, concurrency),
+		dockerScannerTaskRunner: *NewDockerScannerTaskRunner(conn, localRunner, querier, concurrency, saltKey),
+		gitScannerTaskRunner:    *NewGitScannerTaskRunner(conn, localRunner, querier, concurrency, saltKey),
 		emailSenderTaskRunner:   *NewEmailSenderTaskRunner(conn, localRunner, concurrency),
 		nvdScannerTaskRunner:    *NewNVDScannerTaskRunner(conn, localRunner, querier, concurrency),
 		natsScannerTaskRunner:   *NewNatsScannerTaskRunner(conn, localRunner, querier, concurrency),
