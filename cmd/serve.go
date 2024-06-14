@@ -6,19 +6,19 @@ import (
 	"log/slog"
 	"net/http"
 
+	n "github.com/nats-io/nats.go"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api"
 	"github.com/tedyst/licenta/api/auth"
 	"github.com/tedyst/licenta/api/auth/workerauth"
 	"github.com/tedyst/licenta/api/authorization"
-	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/cache"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/email"
 	localExchange "github.com/tedyst/licenta/messages/local"
-	"github.com/tedyst/licenta/tasks/local"
+	"github.com/tedyst/licenta/tasks/nats"
 )
 
 var serveCmd = &cobra.Command{
@@ -44,42 +44,40 @@ var serveCmd = &cobra.Command{
 			return fmt.Errorf("encrypt key must be 32 bytes long (64 hex characters)")
 		}
 
+		redisUrl, err := redis.ParseURL(viper.GetString("redis"))
+		if err != nil {
+			return err
+		}
+		redisConn := redis.NewClient(redisUrl)
+		defer redisConn.Close()
+
 		localExchange := localExchange.NewLocalExchange()
-		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
 
-		emailSender := email.NewSendGridEmailSender(
-			viper.GetString("email-sendgrid"),
-			viper.GetString("email-senderName"),
-			viper.GetString("email-sender"),
-		)
+		natsConn, err := n.Connect(viper.GetString("nats"))
+		if err != nil {
+			return err
+		}
+		defer natsConn.Close()
+		natsTaskRunner := nats.NewTaskSender(natsConn)
 
-		taskRunner := local.NewLocalRunner(
-			viper.GetBool("debug"),
-			emailSender,
-			db,
-			localExchange,
-			bruteforceProvider,
-			viper.GetString("db-encryption-salt"),
-		)
-
-		userCacheProvider, err := cache.NewLocalCacheProvider[queries.User]()
+		userCacheProvider, err := cache.NewRedisCacheProvider[queries.User](redisConn, "user-cache:")
 		if err != nil {
 			return err
 		}
 
-		userAuth, err := auth.NewAuthenticationProvider(viper.GetString("baseurl"), db, hashKey, encryptKey, taskRunner, userCacheProvider)
+		userAuth, err := auth.NewAuthenticationProvider(viper.GetString("baseurl"), db, hashKey, encryptKey, natsTaskRunner, userCacheProvider)
 		if err != nil {
 			return fmt.Errorf("failed to initialize user authentication: %w", err)
 		}
 
-		waCacheProvider, err := cache.NewLocalCacheProvider[queries.Worker]()
+		waCacheProvider, err := cache.NewRedisCacheProvider[queries.Worker](redisConn, "worker-cache:")
 		if err != nil {
 			return err
 		}
 
 		workerAuth := workerauth.NewWorkerAuth(waCacheProvider, db)
 
-		authorizationCache, err := cache.NewLocalCacheProvider[int16]()
+		authorizationCache, err := cache.NewRedisCacheProvider[int16](redisConn, "authorization-cache:")
 		if err != nil {
 			return err
 		}
@@ -88,7 +86,7 @@ var serveCmd = &cobra.Command{
 		app, err := api.Initialize(api.ApiConfig{
 			Debug:                viper.GetBool("debug"),
 			Origin:               viper.GetString("baseurl"),
-			TaskRunner:           taskRunner,
+			TaskRunner:           natsTaskRunner,
 			MessageExchange:      localExchange,
 			WorkerAuth:           workerAuth,
 			UserAuth:             userAuth,
@@ -121,6 +119,16 @@ func init() {
 	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
 	serveCmd.Flags().String("database", "", "Database connection string")
+
+	serveCmd.Flags().String("nats", "", "Nats connection string")
+	if err := serveCmd.MarkFlagRequired("nats"); err != nil {
+		panic(err)
+	}
+
+	serveCmd.Flags().String("redis", "", "Redis connection string")
+	if err := serveCmd.MarkFlagRequired("redis"); err != nil {
+		panic(err)
+	}
 
 	serveCmd.Flags().String("hash-key", "", "Hash key used for signing Cookies")
 	if err := serveCmd.MarkFlagRequired("hash-key"); err != nil {

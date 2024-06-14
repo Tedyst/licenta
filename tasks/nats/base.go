@@ -26,6 +26,8 @@ func publishMessage(ctx context.Context, conn *nats.Conn, subject string, messag
 	carrier := propagation.MapCarrier{}
 	otel.GetTextMapPropagator().Inject(ctx, carrier)
 
+	slog.Debug("Publishing message to NATS", "subject", subject, "retries", retries, "message", message, "messageType", fmt.Sprintf("%T", message))
+
 	data, err := proto.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -82,10 +84,14 @@ func receiveMessage[T any, PT protobufPointer[T]](
 			return err
 		}
 
+		slog.Debug("Received message from NATS", "subject", msg.Subject, "data", msg.Data)
+
 		ctx, header, message, err := parseMessage[T, PT](origCtx, msg)
 		if err != nil {
 			return err
 		}
+
+		slog.Debug("Parsed message", "header", header, "message", message, "messageType", fmt.Sprintf("%T", message))
 
 		if err := semaphore.Acquire(ctx, 1); err != nil {
 			return err
@@ -97,6 +103,8 @@ func receiveMessage[T any, PT protobufPointer[T]](
 			defer close(done)
 
 			msg.InProgress()
+
+			slog.Debug("Running message", "message", message, "messageType", fmt.Sprintf("%T", message))
 
 			pt := PT(message)
 			err := run(ctx, pt)

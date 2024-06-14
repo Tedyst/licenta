@@ -24,9 +24,10 @@ func NewDockerScannerTaskSender(conn *nats.Conn) *dockerScannerTaskSender {
 
 const scanDockerRepositoryQueue = "scan-Docker-repository"
 
-func (gs *dockerScannerTaskSender) ScanDockerRepository(ctx context.Context, img *queries.DockerImage) error {
+func (gs *dockerScannerTaskSender) ScanDockerRepository(ctx context.Context, img *queries.DockerImage, scan *queries.Scan) error {
 	return publishMessage(ctx, gs.conn, scanDockerRepositoryQueue, &ScanDockerRepoMessage{
 		ImageId: img.ID,
+		ScanId:  scan.ID,
 	}, 0)
 }
 
@@ -40,6 +41,7 @@ type dockerScannerTaskRunner struct {
 type DockerQuerier interface {
 	local.DockerQuerier
 	GetDockerImage(ctx context.Context, id int64) (*queries.DockerImage, error)
+	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 }
 
 func NewDockerScannerTaskRunner(conn *nats.Conn, localRunner tasks.DockerTasksRunner, querier DockerQuerier, concurrency int) *dockerScannerTaskRunner {
@@ -61,7 +63,12 @@ func (gs *dockerScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) 
 				return nil
 			}
 
-			err = gs.localRunner.ScanDockerRepository(ctx, repo, nil)
+			scan, err := gs.querier.GetScan(ctx, message.ScanId)
+			if err != nil {
+				return nil
+			}
+
+			err = gs.localRunner.ScanDockerRepository(ctx, repo, &scan.Scan)
 			if err != nil {
 				return nil
 			}

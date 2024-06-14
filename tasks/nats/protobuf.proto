@@ -22,10 +22,12 @@ message UpdateNVDVulnerabilitiesForProductMessage {
 
 message ScanGitRepositoryMessage {
     int64 repoId = 1;
+    int64 scanId = 2;
 }
 
 message ScanDockerRepoMessage {
     int64 imageId = 1;
+    int64 scanId = 2;
 }
 
 message SendEmailMessage {
@@ -38,4 +40,17 @@ message SendEmailMessage {
 message MessageHeader {
     map<string, string> metadata = 1;
     int32 retries = 2;
+}
+
+message ScheduleFullRunMessage {
+    int64 projectId = 1;
+    int64 scanGroupId = 2;
+    string sourceType = 3;
+    string scanType = 4;
+}
+
+message ScheduleSourceRunMessage {
+    int64 projectId = 1;
+    int64 scanGroupId = 2;
+    string sourceType = 3;
 }

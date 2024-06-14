@@ -24,9 +24,10 @@ func NewGitScannerTaskSender(conn *nats.Conn) *gitScannerTaskSender {
 
 const scanGitRepositoryQueue = "scan-git-repository"
 
-func (gs *gitScannerTaskSender) ScanGitRepository(ctx context.Context, repo *queries.GitRepository) error {
+func (gs *gitScannerTaskSender) ScanGitRepository(ctx context.Context, repo *queries.GitRepository, scan *queries.Scan) error {
 	return publishMessage(ctx, gs.conn, scanGitRepositoryQueue, &ScanGitRepositoryMessage{
 		RepoId: repo.ID,
+		ScanId: scan.ID,
 	}, 0)
 }
 
@@ -40,6 +41,7 @@ type gitScannerTaskRunner struct {
 type GitQuerier interface {
 	local.GitQuerier
 	GetGitRepository(ctx context.Context, id int64) (*queries.GitRepository, error)
+	GetScan(ctx context.Context, id int64) (*queries.GetScanRow, error)
 }
 
 func NewGitScannerTaskRunner(conn *nats.Conn, localRunner tasks.GitTasksRunner, querier GitQuerier, concurrency int) *gitScannerTaskRunner {
@@ -61,7 +63,12 @@ func (gs *gitScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) err
 				return nil
 			}
 
-			err = gs.localRunner.ScanGitRepository(ctx, repo, nil)
+			scan, err := gs.querier.GetScan(ctx, message.ScanId)
+			if err != nil {
+				return nil
+			}
+
+			err = gs.localRunner.ScanGitRepository(ctx, repo, &scan.Scan)
 			if err != nil {
 				return nil
 			}
