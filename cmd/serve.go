@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 
 	n "github.com/nats-io/nats.go"
 	"github.com/redis/go-redis/v9"
@@ -26,6 +29,16 @@ var serveCmd = &cobra.Command{
 	Short: "Run the server using the prod configuration",
 	Long:  `This command starts the API server and waits for requests. It uses all of the local implementations of the dependencies.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := cmd.Context()
+		ctx, cancel := context.WithCancel(ctx)
+
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		defer func() {
+			signal.Stop(c)
+			cancel()
+		}()
+
 		db := database.InitDatabase(viper.GetString("database"))
 
 		hashKey, err := hex.DecodeString(viper.GetString("hash-key"))
@@ -98,11 +111,29 @@ var serveCmd = &cobra.Command{
 			return err
 		}
 
-		slog.Info("Started web server", "port", viper.GetString("port"), "baseurl", viper.GetString("baseurl"))
-		err = http.ListenAndServe(":"+viper.GetString("port"), app)
-		if err != nil {
+		slog.InfoContext(ctx, "Started web server", "port", viper.GetString("port"), "baseurl", viper.GetString("baseurl"))
+		server := &http.Server{
+			Addr:    ":" + viper.GetString("port"),
+			Handler: app,
+		}
+
+		go func() {
+			if err := server.ListenAndServe(); err != nil {
+				if err != http.ErrServerClosed {
+					slog.Error("Failed to start server", "error", err)
+				} else {
+					c <- os.Interrupt
+				}
+			}
+		}()
+
+		<-c
+
+		if err := server.Shutdown(ctx); err != nil {
 			return err
 		}
+
+		slog.InfoContext(ctx, "Server stopped")
 
 		return nil
 	},
