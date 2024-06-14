@@ -98,7 +98,7 @@ func NewAuthorizationManager(querier db.TransactionQuerier, cache cache.CachePro
 }
 
 func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.Context, organization *queries.Organization, user *queries.User, permission RBACGroup) (bool, error) {
-	cached, ok, err := a.cache.Get(cacheKeyForUserOrganization(user, organization))
+	cached, ok, err := a.cache.Get(ctx, cacheKeyForUserOrganization(user, organization))
 	if err != nil {
 		return false, err
 	}
@@ -114,14 +114,14 @@ func (a *authorizationManagerImpl) UserHasPermissionForOrganization(ctx context.
 		return false, err
 	}
 	if err == pgx.ErrNoRows {
-		return false, a.cache.Set(cacheKeyForUserOrganization(user, organization), int16(None))
+		return false, a.cache.Set(ctx, cacheKeyForUserOrganization(user, organization), int16(None))
 	}
 
-	return hasPermission(permission, RBACGroup(p)), a.cache.Set(cacheKeyForUserOrganization(user, organization), int16(p))
+	return hasPermission(permission, RBACGroup(p)), a.cache.Set(ctx, cacheKeyForUserOrganization(user, organization), int16(p))
 }
 
 func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Context, project *queries.Project, user *queries.User, permission RBACGroup) (bool, error) {
-	cached, ok, err := a.cache.Get(cacheKeyForUserProject(user, project))
+	cached, ok, err := a.cache.Get(ctx, cacheKeyForUserProject(user, project))
 	if err != nil {
 		return false, err
 	}
@@ -137,14 +137,14 @@ func (a *authorizationManagerImpl) UserHasPermissionForProject(ctx context.Conte
 		return false, err
 	}
 	if err == pgx.ErrNoRows {
-		return false, a.cache.Set(cacheKeyForUserProject(user, project), int16(None))
+		return false, a.cache.Set(ctx, cacheKeyForUserProject(user, project), int16(None))
 	}
 
-	return hasPermission(permission, RBACGroup(p)), a.cache.Set(cacheKeyForUserProject(user, project), int16(p))
+	return hasPermission(permission, RBACGroup(p)), a.cache.Set(ctx, cacheKeyForUserProject(user, project), int16(p))
 }
 
 func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Context, project *queries.Project, worker *queries.Worker, permission RBACGroup) (bool, error) {
-	cached, ok, err := a.cache.Get(cacheKeyForWorkerProject(worker, project))
+	cached, ok, err := a.cache.Get(ctx, cacheKeyForWorkerProject(worker, project))
 	if err != nil {
 		return false, err
 	}
@@ -164,9 +164,9 @@ func (a *authorizationManagerImpl) WorkerHasPermissionForProject(ctx context.Con
 }
 
 func (a *authorizationManagerImpl) UserPermissionsChanged(ctx context.Context, user *queries.User) error {
-	return a.cache.Invalidate(cachePatternForUser(user))
+	return a.cache.Invalidate(ctx, cachePatternForUser(user))
 }
 
 func (a *authorizationManagerImpl) WorkerPermissionsChanged(ctx context.Context, worker *queries.Worker) error {
-	return a.cache.Invalidate(cachePatternForWorker(worker))
+	return a.cache.Invalidate(ctx, cachePatternForWorker(worker))
 }

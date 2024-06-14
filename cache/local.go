@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"context"
 	"regexp"
 
 	lru "github.com/hashicorp/golang-lru/v2"
@@ -23,7 +24,7 @@ func NewLocalCacheProvider[T any]() (*localCacheProvider[T], error) {
 	}, nil
 }
 
-func (l *localCacheProvider[T]) Get(key string) (T, bool, error) {
+func (l *localCacheProvider[T]) Get(ctx context.Context, key string) (T, bool, error) {
 	if v, ok := l.cache.Get(key); ok {
 		return v, true, nil
 	}
@@ -32,12 +33,12 @@ func (l *localCacheProvider[T]) Get(key string) (T, bool, error) {
 	return result, false, nil
 }
 
-func (l *localCacheProvider[T]) Set(key string, value T) error {
+func (l *localCacheProvider[T]) Set(ctx context.Context, key string, value T) error {
 	l.cache.Add(key, value)
 	return nil
 }
 
-func (l *localCacheProvider[T]) Invalidate(pattern string) error {
+func (l *localCacheProvider[T]) Invalidate(ctx context.Context, pattern string) error {
 	regexp, err := regexp.Compile(pattern)
 	if err != nil {
 		return err

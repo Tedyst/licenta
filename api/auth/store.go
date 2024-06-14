@@ -31,7 +31,7 @@ func newAuthbossStorer(querier db.TransactionQuerier, cache cache.CacheProvider[
 }
 
 func (a *authbossStorer) Load(ctx context.Context, key string) (authboss.User, error) {
-	cachedUser, ok, err := a.cache.Get(key)
+	cachedUser, ok, err := a.cache.Get(ctx, key)
 	if err == nil && ok {
 		return &authbossUser{
 			user: &cachedUser,
@@ -63,7 +63,7 @@ func (a *authbossStorer) Save(ctx context.Context, user authboss.User) error {
 		return errors.New("invalid user type")
 	}
 
-	err := a.cache.Set(u.user.Username, *u.user)
+	err := a.cache.Set(ctx, u.user.Username, *u.user)
 	if err != nil {
 		return fmt.Errorf("error setting user in cache: %w", err)
 	}
@@ -131,7 +131,7 @@ func (a *authbossStorer) Create(ctx context.Context, user authboss.User) error {
 	})
 	u.user = newUser
 
-	err2 := a.cache.Set(u.user.Username, *u.user)
+	err2 := a.cache.Set(ctx, u.user.Username, *u.user)
 
 	return errors.Join(err, err2)
 }

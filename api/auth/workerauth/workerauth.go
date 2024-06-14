@@ -35,7 +35,7 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 		workerAuthData := wa.getWorkerAuthData(ctx)
 
 		if r.Header.Get(workerAuthHeader) != "" {
-			worker, ok, err := wa.cache.Get(r.Header.Get(workerAuthHeader))
+			worker, ok, err := wa.cache.Get(ctx, r.Header.Get(workerAuthHeader))
 			if err != nil {
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
@@ -47,7 +47,7 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 					return
 				}
 				if err == nil {
-					err = wa.cache.Set(r.Header.Get(workerAuthHeader), *worker)
+					err = wa.cache.Set(ctx, r.Header.Get(workerAuthHeader), *worker)
 					if err != nil {
 						http.Error(w, "Internal server error", http.StatusInternalServerError)
 						return
@@ -61,7 +61,7 @@ func (wa *workerAuth) Handler(next http.Handler) http.Handler {
 
 		if workerAuthData != nil {
 			ctx = context.WithValue(ctx, workerAuthKey{}, workerAuthData)
-			wa.cache.Set(r.Header.Get(workerAuthHeader), *workerAuthData)
+			wa.cache.Set(ctx, r.Header.Get(workerAuthHeader), *workerAuthData)
 		}
 
 		next.ServeHTTP(w, r.WithContext(ctx))
