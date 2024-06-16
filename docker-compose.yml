@@ -44,8 +44,6 @@ services:
   db:
     build:
       context: postgres/
-    ports:
-      - "1001:5432"
     networks:
       - licenta-network
     env_file:
@@ -62,14 +60,13 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    ports:
-      - "5002:3000"
     networks:
       - licenta-network
     depends_on:
       - application
     environment:
       - PUBLIC_BACKEND_URL=http://application:5000
+      - ORIGIN=http://localhost:5003
 
   nginx:
     build:
@@ -84,7 +81,7 @@ services:
       - frontend
     environment:
       - UPSTREAM_API=application:5000
-      - UPSTREAM_FRONTEND=frontend:4173
+      - UPSTREAM_FRONTEND=frontend:3000
 
   otelcollector:
     image: otel/opentelemetry-collector-contrib

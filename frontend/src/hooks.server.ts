@@ -1,39 +1,17 @@
-import { minify } from 'html-minifier';
-import { building } from '$app/environment';
 import type { HandleFetch } from '@sveltejs/kit';
+import { env } from '$env/dynamic/public';
 
-const minification_options = {
-	collapseBooleanAttributes: true,
-	collapseWhitespace: true,
-	conservativeCollapse: true,
-	decodeEntities: true,
-	html5: true,
-	ignoreCustomComments: [/^#/],
-	minifyCSS: true,
-	minifyJS: true,
-	removeAttributeQuotes: true,
-	removeComments: false, // some hydration code needs comments, so leave them in
-	removeOptionalTags: true,
-	removeRedundantAttributes: true,
-	removeScriptTypeAttributes: true,
-	removeStyleLinkTypeAttributes: true,
-	sortAttributes: true,
-	sortClassName: true
-};
+export const handleFetch = (async ({ event, request, fetch }) => {
+	if (!request.url.startsWith(env.PUBLIC_BACKEND_URL)) {
+		request = new Request(env.PUBLIC_BACKEND_URL + request.url, {
+			...request,
+			credentials: 'include'
+		});
+	}
 
-/** @type {import('@sveltejs/kit').Handle} */
-export async function handle({ event, resolve }) {
-	let page = '';
+	const cookies = event.request.headers.get('cookie');
 
-	return resolve(event, {
-		filterSerializedResponseHeaders: (name: string, value: string) => {
-			return true;
-		},
-		transformPageChunk: ({ html, done }) => {
-			page += html;
-			if (done) {
-				return building ? minify(page, minification_options) : page;
-			}
-		}
-	});
-}
+	request.headers.set('cookie', cookies!);
+
+	return fetch(request);
+}) satisfies HandleFetch;

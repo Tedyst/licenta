@@ -12,13 +12,18 @@ export async function csrfFetch(
 	f: typeof fetch = fetch
 ) {
 	const token = await getCSRFToken(input, f);
-	return await f(input, {
+	const r = await f(input, {
 		...init,
 		headers: {
 			...init?.headers,
 			'X-CSRF-Token': token || ''
-		}
+		},
+		credentials: 'include'
+	}).catch((e) => {
+		console.error(e);
+		throw e;
 	});
+	return r;
 }
 
 async function getCSRFToken(input: RequestInfo | URL, f: typeof fetch = fetch) {
@@ -28,6 +33,9 @@ async function getCSRFToken(input: RequestInfo | URL, f: typeof fetch = fetch) {
 			'Content-Type': 'application/json'
 		},
 		credentials: 'include'
+	}).catch((e) => {
+		console.error(e);
+		throw e;
 	});
 	return optionsResponse.headers.get('X-CSRF-Token');
 }
@@ -141,7 +149,8 @@ export async function login(
 		if (response?.ok) {
 			return response.json() as Promise<LoginResponse>;
 		}
-		throw new Error('Failed to fetch');
+		console.log(response);
+		throw new Error('Invalid credentials');
 	});
 }
 
@@ -202,15 +211,19 @@ export async function registerTOTPFinish(code: string): Promise<RegisterTOTPFini
 	});
 }
 
-export async function logout(): Promise<void> {
-	return await csrfFetch('/api/auth/logout', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	}).then((response) => {
+export async function logout(f: typeof fetch = fetch) {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/logout',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		},
+		f
+	).then((response) => {
 		if (response.ok) {
-			return;
+			return { ok: true };
 		}
 		throw new Error('Failed to fetch');
 	});
@@ -326,6 +339,6 @@ export const clientFromFetch = (fetch: typeof csrfFetch) => {
 	return client;
 };
 
-export const client = clientFromFetch(fetch, env.PUBLIC_BACKEND_URL);
+export const client = clientFromFetch(fetch);
 
 export default client;

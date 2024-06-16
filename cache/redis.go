@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -20,7 +21,15 @@ func NewRedisCacheProvider[T any](client *redis.Client, prefix string) (*redisCa
 
 func (r *redisCacheProvider[T]) Get(ctx context.Context, key string) (T, bool, error) {
 	var result T
-	err := r.client.Get(ctx, r.prefix+key).Scan(result)
+	var resultText string
+	err := r.client.Get(ctx, r.prefix+key).Scan(resultText)
+	if err == redis.Nil {
+		return result, false, nil
+	} else if err != nil {
+		return result, false, err
+	}
+
+	err = json.Unmarshal([]byte(resultText), &result)
 	if err != nil {
 		return result, false, err
 	}
@@ -29,7 +38,11 @@ func (r *redisCacheProvider[T]) Get(ctx context.Context, key string) (T, bool, e
 }
 
 func (r *redisCacheProvider[T]) Set(ctx context.Context, key string, value T) error {
-	return r.client.Set(ctx, key, value, 0).Err()
+	valueBytes, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return r.client.Set(ctx, key, valueBytes, 0).Err()
 }
 
 func (r *redisCacheProvider[T]) Invalidate(ctx context.Context, pattern string) error {

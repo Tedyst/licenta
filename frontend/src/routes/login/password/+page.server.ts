@@ -4,7 +4,7 @@ import type { Actions } from './$types';
 import { login } from '$lib/client';
 
 export const actions = {
-	default: async ({ request, fetch, url }) => {
+	default: async ({ request, fetch }) => {
 		const data = await request.formData();
 
 		const username = data.get('username')?.toString() || '';
@@ -16,9 +16,7 @@ export const actions = {
 			return { error };
 		}
 
-		const response = await login(username, password, remember === 'on', fetch).catch(
-			() => {}
-		);
+		const response = await login(username, password, remember === 'on', fetch).catch(() => {});
 
 		if (response === undefined) {
 			return { error: 'Failed to fetch' };
