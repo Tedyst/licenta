@@ -56,6 +56,8 @@ func NewGitScannerTaskRunner(conn *nats.Conn, localRunner tasks.GitTasksRunner, 
 }
 
 func (gs *gitScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) error {
+	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

@@ -85,6 +85,8 @@ func NewNatsScannerTaskRunner(conn *nats.Conn, localRunner tasks.TaskRunner, que
 }
 
 func (ns *natsScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) error {
+	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -107,6 +109,7 @@ func (ns *natsScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) er
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
@@ -129,6 +132,7 @@ func (ns *natsScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) er
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
@@ -151,6 +155,7 @@ func (ns *natsScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) er
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
@@ -178,6 +183,7 @@ func (ns *natsScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) er
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 

@@ -58,5 +58,7 @@ func (r *allTasksRunner) RunAll(ctx context.Context) error {
 		return err
 	}
 
+	wg.Wait()
+
 	return nil
 }

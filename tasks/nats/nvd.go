@@ -48,6 +48,8 @@ func NewNVDScannerTaskRunner(conn *nats.Conn, localRunner tasks.VulnerabilityTas
 }
 
 func (nr *nvdScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) error {
+	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

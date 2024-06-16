@@ -46,6 +46,8 @@ func NewEmailSenderTaskRunner(conn *nats.Conn, localRunner tasks.EmailTasksRunne
 }
 
 func (es *emailSenderTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) error {
+	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 

@@ -57,6 +57,8 @@ func NewDockerScannerTaskRunner(conn *nats.Conn, localRunner tasks.DockerTasksRu
 }
 
 func (gs *dockerScannerTaskRunner) Run(ctx context.Context, wg *sync.WaitGroup) error {
+	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
