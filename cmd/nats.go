@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"log/slog"
+
 	n "github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,6 +40,7 @@ var natsCmd = &cobra.Command{
 
 		taskRunner := nats.NewAllTasksRunner(natsConn, localRunner, db, 10, viper.GetString("db-encryption-salt"))
 
+		slog.Info("NATS worker started")
 		return taskRunner.RunAll(cmd.Context())
 	},
 }
@@ -50,6 +53,11 @@ func init() {
 
 	natsCmd.Flags().String("database", "", "Database connection string")
 	if err := natsCmd.MarkFlagRequired("database"); err != nil {
+		panic(err)
+	}
+
+	natsCmd.Flags().String("db-encryption-salt", "", "Database salt encryption key")
+	if err := natsCmd.MarkFlagRequired("db-encryption-salt"); err != nil {
 		panic(err)
 	}
 

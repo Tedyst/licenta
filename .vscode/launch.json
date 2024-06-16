@@ -139,6 +139,17 @@
             ]
         },
         {
+            "name": "Run NATS Worker",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "args": [
+                "nats",
+                "-d"
+            ]
+        },
+        {
             "command": "npx vavite-loader vite dev --port 3000",
             "name": "Launch SvelteKit server",
             "request": "launch",

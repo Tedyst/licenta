@@ -51,7 +51,7 @@ func parseMessage[T any, PT protobufPointer[T]](ctx context.Context, msg *nats.M
 	l := int32(msg.Data[0])<<24 | int32(msg.Data[1])<<16 | int32(msg.Data[2])<<8 | int32(msg.Data[3])
 
 	var header MessageHeader
-	if err := proto.Unmarshal(msg.Data[1:1+l], &header); err != nil {
+	if err := proto.Unmarshal(msg.Data[4:4+l], &header); err != nil {
 		return ctx, nil, nil, fmt.Errorf("failed to unmarshal MessageHeader: %w", err)
 	}
 
@@ -59,89 +59,98 @@ func parseMessage[T any, PT protobufPointer[T]](ctx context.Context, msg *nats.M
 
 	message := new(T)
 	pt := PT(message)
-	if err := proto.Unmarshal(msg.Data[1+l:], pt); err != nil {
+	if err := proto.Unmarshal(msg.Data[4+l:], pt); err != nil {
 		return ctx, nil, nil, fmt.Errorf("failed to unmarshal message: %w", err)
 	}
 
 	return ctx, &header, message, nil
 }
 
+func processMessage[T any, PT protobufPointer[T]](
+	ctx context.Context,
+	conn *nats.Conn,
+	semaphore *semaphore.Weighted,
+	msg *nats.Msg,
+	queue string,
+	run func(context.Context, PT) error,
+) error {
+	ctx, header, message, err := parseMessage[T, PT](ctx, msg)
+	if err != nil {
+		return err
+	}
+
+	slog.Debug("Parsed message", "header", header, "message", message, "messageType", fmt.Sprintf("%T", message))
+
+	if err := semaphore.Acquire(ctx, 1); err != nil {
+		return err
+	}
+
+	done := make(chan struct{})
+	go func() {
+		defer semaphore.Release(1)
+		defer close(done)
+
+		msg.InProgress()
+
+		slog.Debug("Running message", "message", message, "messageType", fmt.Sprintf("%T", message))
+
+		pt := PT(message)
+		err := run(ctx, pt)
+		if err != nil {
+			slog.Error("failed to run saver remote", "error", err)
+			if header.Retries < maxRetries {
+				msg, ok := interface{}(message).(protoreflect.ProtoMessage)
+				if !ok {
+					slog.Error("message is not a proto message")
+					return
+				}
+				err := publishMessage(ctx, conn, queue, msg, header.Retries+1)
+				if err != nil {
+					slog.Error("failed to republish message", "error", err)
+				}
+			} else {
+				slog.Info("message exceeded max retries", "retries", header.Retries)
+			}
+		}
+	}()
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			msg.Nak()
+		case <-done:
+			msg.Ack()
+			return
+		case <-time.Tick(5 * time.Second):
+			msg.InProgress()
+		}
+	}()
+
+	return nil
+}
+
 func receiveMessage[T any, PT protobufPointer[T]](
-	origCtx context.Context,
+	ctx context.Context,
 	conn *nats.Conn,
 	semaphore *semaphore.Weighted,
 	queue string,
 	run func(context.Context, PT) error,
 ) error {
-	subscription, err := conn.QueueSubscribeSync(runServerRemoteQueue, queue)
+	subscription, err := conn.QueueSubscribe(queue, "worker", func(msg *nats.Msg) {
+		slog.Debug("Received message from NATS", "subject", msg.Subject, "data", msg.Data)
+
+		err := processMessage[T, PT](ctx, conn, semaphore, msg, queue, run)
+		if err != nil {
+			slog.Error("failed to process message", "error", err)
+		}
+	})
+
 	if err != nil {
 		return err
 	}
 
-	for {
-		msg, err := subscription.NextMsgWithContext(origCtx)
-		if err != nil {
-			return err
-		}
-
-		slog.Debug("Received message from NATS", "subject", msg.Subject, "data", msg.Data)
-
-		ctx, header, message, err := parseMessage[T, PT](origCtx, msg)
-		if err != nil {
-			return err
-		}
-
-		slog.Debug("Parsed message", "header", header, "message", message, "messageType", fmt.Sprintf("%T", message))
-
-		if err := semaphore.Acquire(ctx, 1); err != nil {
-			return err
-		}
-
-		done := make(chan struct{})
-		go func() {
-			defer semaphore.Release(1)
-			defer close(done)
-
-			msg.InProgress()
-
-			slog.Debug("Running message", "message", message, "messageType", fmt.Sprintf("%T", message))
-
-			pt := PT(message)
-			err := run(ctx, pt)
-			if err != nil {
-				slog.Error("failed to run saver remote", "error", err)
-				if header.Retries < maxRetries {
-					msg, ok := interface{}(message).(protoreflect.ProtoMessage)
-					if !ok {
-						slog.Error("message is not a proto message")
-						return
-					}
-					err := publishMessage(ctx, conn, queue, msg, header.Retries+1)
-					if err != nil {
-						slog.Error("failed to republish message", "error", err)
-					}
-				} else {
-					slog.Info("message exceeded max retries", "retries", header.Retries)
-				}
-			}
-		}()
-
-		go func() {
-			select {
-			case <-ctx.Done():
-				msg.Nak()
-			case <-done:
-				msg.Ack()
-				return
-			case <-time.Tick(5 * time.Second):
-				msg.InProgress()
-			}
-		}()
-
-		select {
-		case <-ctx.Done():
-			return errors.Join(ctx.Err(), subscription.Drain())
-		default:
-		}
+	select {
+	case <-ctx.Done():
+		return errors.Join(ctx.Err(), subscription.Drain())
 	}
 }

@@ -46,11 +46,14 @@ services:
       context: postgres/
     networks:
       - licenta-network
+    ports:
+      - "1001:5432"
     env_file:
       - docker.env
 
   nats:
     image: nats:latest
+    command: -DV
     ports:
       - "4222:4222"
     networks:
