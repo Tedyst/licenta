@@ -154,13 +154,13 @@ paths:
                 $ref: '#/components/schemas/Error'
   /worker:
     get:
-      summary: Get all workers for a project
+      summary: Get all workers for an organization
       tags:
         - worker
       parameters:
-        - name: project
+        - name: organization
           in: query
-          description: The project to filter for
+          description: The organization to filter for
           required: true
           schema:
             type: integer
@@ -188,7 +188,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     post:
-      summary: Create a new worker for a project
+      summary: Create a new worker for a organization
       tags:
         - worker
       requestBody:
@@ -1426,6 +1426,60 @@ paths:
                     type: boolean
                   project:
                     $ref: '#/components/schemas/Project'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: Update project by ID
+      security:
+        - sessionAuth: []
+      tags:
+        - project
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the project
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: The project object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchProject'
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - project
+                properties:
+                  success:
+                    type: boolean
+                  project:
+                    $ref: '#/components/schemas/Project'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         "401":
           description: Unauthorized
           content:
@@ -2867,6 +2921,11 @@ components:
           type: integer
           description: The number of scans that have been run on the project
           example: 0
+    PatchProject:
+      type: object
+      properties:
+        remote:
+          type: boolean
     CVE:
       required:
         - id

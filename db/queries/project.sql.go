@@ -216,3 +216,32 @@ func (q *Queries) GetProjectsByOrganization(ctx context.Context, organizationID 
 	}
 	return items, nil
 }
+
+const updateProject = `-- name: UpdateProject :one
+UPDATE
+    projects
+SET
+    remote = $2
+WHERE
+    id = $1
+RETURNING
+    id, name, organization_id, remote, created_at
+`
+
+type UpdateProjectParams struct {
+	ID     int64 `json:"id"`
+	Remote bool  `json:"remote"`
+}
+
+func (q *Queries) UpdateProject(ctx context.Context, arg UpdateProjectParams) (*Project, error) {
+	row := q.db.QueryRow(ctx, updateProject, arg.ID, arg.Remote)
+	var i Project
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.OrganizationID,
+		&i.Remote,
+		&i.CreatedAt,
+	)
+	return &i, err
+}

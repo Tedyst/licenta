@@ -29,7 +29,7 @@
 </div>
 
 <div class="divider">Project Actions</div>
-<div class="flex flex-col gap-2 lg:justify-center lg:flex-row justify-stretch">
+<div class="flex flex-col gap-2 lg:justify-center lg:flex-row justify-stretch flex-wrap">
 	<a
 		href="/dashboard/{data.organization?.name}/{data.project?.name}/add-scanner"
 		class="btn btn-primary">Add a Scanned Database to the project</a
@@ -44,6 +44,14 @@
 		<input type="hidden" name="projectId" value={data.project?.id} />
 		<button type="submit" class="btn btn-primary grow lg:grow-0"
 			>Run all sources and scanners</button
+		>
+	</form>
+
+	<form method="POST" use:enhance action="?/toggle_remote" class="grow flex lg:grow-0">
+		<input type="hidden" name="projectId" value={data.project?.id} />
+		<input type="hidden" name="remote" value={!data.project?.remote} />
+		<button type="submit" class="btn btn-primary grow lg:grow-0"
+			>{!data.project?.remote ? 'Enable' : 'Disable'} the external workers for this project</button
 		>
 	</form>
 </div>

@@ -288,3 +288,48 @@ func (server *serverHandler) DeleteProjectsId(ctx context.Context, request gener
 		Success: true,
 	}, nil
 }
+
+func (server *serverHandler) PatchProjectsId(ctx context.Context, request generated.PatchProjectsIdRequestObject) (generated.PatchProjectsIdResponseObject, error) {
+	user, err := server.userAuth.GetUser(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user: %w", err)
+	}
+
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	project, err := server.DatabaseProvider.GetProject(ctx, request.Id)
+	if err != nil {
+		return nil, fmt.Errorf("error getting project: %w", err)
+	}
+
+	ok, err := server.authorization.UserHasPermissionForProject(ctx, project, user, authorization.Admin)
+	if err != nil {
+		return nil, fmt.Errorf("error checking permissions: %w", err)
+	}
+
+	if !ok {
+		return generated.PatchProjectsId401JSONResponse{
+			Message: "Not allowed to update project",
+			Success: false,
+		}, nil
+	}
+
+	var remote bool
+	if request.Body.Remote != nil {
+		remote = *request.Body.Remote
+	}
+
+	_, err = server.DatabaseProvider.UpdateProject(ctx, queries.UpdateProjectParams{
+		ID:     request.Id,
+		Remote: remote,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error updating project: %w", err)
+	}
+
+	return generated.PatchProjectsId200JSONResponse{
+		Success: true,
+	}, nil
+}

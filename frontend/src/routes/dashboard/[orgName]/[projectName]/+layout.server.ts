@@ -3,7 +3,7 @@ import type { LayoutServerLoad } from './$types';
 import type { paths } from '$lib/api/v1';
 import { env } from '$env/dynamic/public';
 
-export const load: LayoutServerLoad = async ({ params, parent, fetch, url, depends }) => {
+export const load: LayoutServerLoad = async ({ params, parent, fetch, depends }) => {
 	const parentData = await parent();
 
 	const currentProject =

@@ -77,3 +77,11 @@ INSERT INTO workers(organization, name, token)
 RETURNING
     *;
 
+-- name: GetWorkersForOrganization :many
+SELECT
+    workers.*
+FROM
+    workers
+WHERE
+    workers.organization = $1;
+

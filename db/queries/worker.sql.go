@@ -223,6 +223,41 @@ func (q *Queries) GetWorkersByProject(ctx context.Context, projectID int64) ([]*
 	return items, nil
 }
 
+const getWorkersForOrganization = `-- name: GetWorkersForOrganization :many
+SELECT
+    workers.id, workers.token, workers.name, workers.organization, workers.created_at
+FROM
+    workers
+WHERE
+    workers.organization = $1
+`
+
+func (q *Queries) GetWorkersForOrganization(ctx context.Context, organization int64) ([]*Worker, error) {
+	rows, err := q.db.Query(ctx, getWorkersForOrganization, organization)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*Worker
+	for rows.Next() {
+		var i Worker
+		if err := rows.Scan(
+			&i.ID,
+			&i.Token,
+			&i.Name,
+			&i.Organization,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getWorkersForProject = `-- name: GetWorkersForProject :many
 SELECT
     workers.id, workers.token, workers.name, workers.organization, workers.created_at

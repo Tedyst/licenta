@@ -118,15 +118,18 @@ func (server *serverHandler) DeleteWorkerId(ctx context.Context, request generat
 }
 
 func (server *serverHandler) GetWorker(ctx context.Context, request generated.GetWorkerRequestObject) (generated.GetWorkerResponseObject, error) {
-	_, project, response, err := checkUserHasProjectPermission[generated.GetWorker401JSONResponse](server, ctx, int64(request.Params.Project), authorization.Viewer)
+	_, _, hasPerm, _, err := server.checkForOrganizationPermission(ctx, int64(request.Params.Organization), authorization.Viewer)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot check for organization permission: %w", err)
 	}
-	if response.Success == false {
-		return response, nil
+	if !hasPerm {
+		return generated.GetWorker401JSONResponse{
+			Success: false,
+			Message: "Unauthorized",
+		}, nil
 	}
 
-	workers, err := server.DatabaseProvider.GetWorkersByProject(ctx, int64(project.ID))
+	workers, err := server.DatabaseProvider.GetWorkersForOrganization(ctx, int64(request.Params.Organization))
 	if err != nil {
 		return nil, fmt.Errorf("cannot get workers: %w", err)
 	}

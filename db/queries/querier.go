@@ -143,6 +143,7 @@ type Querier interface {
 	GetWorkerForProject(ctx context.Context, arg GetWorkerForProjectParams) (*Worker, error)
 	GetWorkerForScan(ctx context.Context, id int64) (*Worker, error)
 	GetWorkersByProject(ctx context.Context, projectID int64) ([]*Worker, error)
+	GetWorkersForOrganization(ctx context.Context, organization int64) ([]*Worker, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error
@@ -161,6 +162,7 @@ type Querier interface {
 	UpdateNvdCPE(ctx context.Context, arg UpdateNvdCPEParams) error
 	UpdatePostgresDatabase(ctx context.Context, arg UpdatePostgresDatabaseParams) error
 	UpdatePostgresVersion(ctx context.Context, arg UpdatePostgresVersionParams) error
+	UpdateProject(ctx context.Context, arg UpdateProjectParams) (*Project, error)
 	UpdateRedisDatabase(ctx context.Context, arg UpdateRedisDatabaseParams) error
 	UpdateRedisVersion(ctx context.Context, arg UpdateRedisVersionParams) error
 	UpdateScanBruteforceResult(ctx context.Context, arg UpdateScanBruteforceResultParams) error

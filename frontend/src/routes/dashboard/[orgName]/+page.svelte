@@ -1,9 +1,11 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	export let data: PageData;
+	export let form: ActionData;
 
 	import ListMembers from '$lib/utils/ListMembers.svelte';
 	import OrganizationProject from '$lib/utils/OrganizationProject.svelte';
+	import { enhance } from '$app/forms';
 </script>
 
 <svelte:head>
@@ -13,6 +15,12 @@
 {#if data.organization === null}
 	This organization does not exist or you do not have permission to see it
 {:else}
+	{#if form?.error}
+		<div class="alert alert-error">
+			{form.error}
+		</div>
+	{/if}
+
 	<div class="hero bg-base-200">
 		<div class="hero-content text-center">
 			<div class="max-w-md">
@@ -42,14 +50,56 @@
 	<div class="divider" />
 
 	<div class="flex-col flex lg:flex-row w-full">
-		<div class="grid flex-grow place-content-center h-auto flex-1">
+		<div class="grid flex-grow place-content-center h-auto flex-1 w-full">
 			<h1 class="text-3xl font-bold">Organization Settings</h1>
 			<div class="form-control mt-6">
 				<a href="/dashboard/{data.organization.name}/delete" class="btn btn-error"
 					>Delete organization</a
 				>
 			</div>
+
+			<div class="divider">Workers</div>
+
+			{#if data.workers.length !== 0}
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Worker Name</th>
+							<th>Token</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.workers as worker}
+							<tr>
+								<td>{worker.name}</td>
+								<td>{worker.token}</td>
+								<td>
+									<form method="POST" use:enhance action="?/delete_worker">
+										<input type="hidden" name="workerId" value={worker.id} />
+										<button type="submit" class="btn btn-error">Delete</button>
+									</form>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/if}
+
+			<form class="form-control mt-1" method="POST" use:enhance action="?/create_worker">
+				<input type="hidden" name="organizationId" value={data.organization.id} />
+				<div class="form-control mt-4">
+					<input
+						type="text"
+						name="workerName"
+						placeholder="Worker name"
+						class="input input-primary"
+					/>
+				</div>
+				<button type="submit" class="btn btn-info mt-1">Create new Worker</button>
+			</form>
 		</div>
+
 		<div class="divider divider-horizontal" />
 		<ListMembers organization={data.organization} />
 	</div>

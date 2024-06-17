@@ -59,3 +59,13 @@ SELECT
 FROM
     projects;
 
+-- name: UpdateProject :one
+UPDATE
+    projects
+SET
+    remote = $2
+WHERE
+    id = $1
+RETURNING
+    *;
+

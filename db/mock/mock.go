@@ -5178,6 +5178,45 @@ func (c *MockTransactionQuerierGetWorkersByProjectCall) DoAndReturn(f func(conte
 	return c
 }
 
+// GetWorkersForOrganization mocks base method.
+func (m *MockTransactionQuerier) GetWorkersForOrganization(ctx context.Context, organization int64) ([]*queries.Worker, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetWorkersForOrganization", ctx, organization)
+	ret0, _ := ret[0].([]*queries.Worker)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetWorkersForOrganization indicates an expected call of GetWorkersForOrganization.
+func (mr *MockTransactionQuerierMockRecorder) GetWorkersForOrganization(ctx, organization any) *MockTransactionQuerierGetWorkersForOrganizationCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkersForOrganization", reflect.TypeOf((*MockTransactionQuerier)(nil).GetWorkersForOrganization), ctx, organization)
+	return &MockTransactionQuerierGetWorkersForOrganizationCall{Call: call}
+}
+
+// MockTransactionQuerierGetWorkersForOrganizationCall wrap *gomock.Call
+type MockTransactionQuerierGetWorkersForOrganizationCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierGetWorkersForOrganizationCall) Return(arg0 []*queries.Worker, arg1 error) *MockTransactionQuerierGetWorkersForOrganizationCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierGetWorkersForOrganizationCall) Do(f func(context.Context, int64) ([]*queries.Worker, error)) *MockTransactionQuerierGetWorkersForOrganizationCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierGetWorkersForOrganizationCall) DoAndReturn(f func(context.Context, int64) ([]*queries.Worker, error)) *MockTransactionQuerierGetWorkersForOrganizationCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
 // GetWorkersForProject mocks base method.
 func (m *MockTransactionQuerier) GetWorkersForProject(ctx context.Context, projectID int64) ([]*queries.Worker, error) {
 	m.ctrl.T.Helper()
@@ -5905,6 +5944,45 @@ func (c *MockTransactionQuerierUpdatePostgresVersionCall) Do(f func(context.Cont
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockTransactionQuerierUpdatePostgresVersionCall) DoAndReturn(f func(context.Context, queries.UpdatePostgresVersionParams) error) *MockTransactionQuerierUpdatePostgresVersionCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// UpdateProject mocks base method.
+func (m *MockTransactionQuerier) UpdateProject(ctx context.Context, arg queries.UpdateProjectParams) (*queries.Project, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProject", ctx, arg)
+	ret0, _ := ret[0].(*queries.Project)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateProject indicates an expected call of UpdateProject.
+func (mr *MockTransactionQuerierMockRecorder) UpdateProject(ctx, arg any) *MockTransactionQuerierUpdateProjectCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProject", reflect.TypeOf((*MockTransactionQuerier)(nil).UpdateProject), ctx, arg)
+	return &MockTransactionQuerierUpdateProjectCall{Call: call}
+}
+
+// MockTransactionQuerierUpdateProjectCall wrap *gomock.Call
+type MockTransactionQuerierUpdateProjectCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockTransactionQuerierUpdateProjectCall) Return(arg0 *queries.Project, arg1 error) *MockTransactionQuerierUpdateProjectCall {
+	c.Call = c.Call.Return(arg0, arg1)
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockTransactionQuerierUpdateProjectCall) Do(f func(context.Context, queries.UpdateProjectParams) (*queries.Project, error)) *MockTransactionQuerierUpdateProjectCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockTransactionQuerierUpdateProjectCall) DoAndReturn(f func(context.Context, queries.UpdateProjectParams) (*queries.Project, error)) *MockTransactionQuerierUpdateProjectCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

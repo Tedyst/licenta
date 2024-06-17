@@ -120,6 +120,99 @@ export interface paths {
       };
     };
   };
+  "/worker": {
+    /** Get all workers for an organization */
+    get: {
+      parameters: {
+        query: {
+          /** @description The organization to filter for */
+          organization: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              workers: components["schemas"]["Worker"][];
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Create a new worker for a organization */
+    post: {
+      /** @description The worker object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["CreateWorker"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        201: {
+          content: {
+            "application/json": {
+              success: boolean;
+              worker: components["schemas"]["Worker"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
+  "/worker/{id}": {
+    /** Delete worker by ID */
+    delete: {
+      parameters: {
+        path: {
+          /** @description The ID of the worker to delete */
+          id: number;
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        204: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Worker not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+  };
   "/worker/get-task": {
     /** Get a task for the worker */
     get: {
@@ -1060,6 +1153,50 @@ export interface paths {
             "application/json": {
               success: boolean;
             };
+          };
+        };
+        /** @description Unauthorized */
+        401: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+        /** @description Project not found */
+        404: {
+          content: {
+            "application/json": components["schemas"]["Error"];
+          };
+        };
+      };
+    };
+    /** Update project by ID */
+    patch: {
+      parameters: {
+        path: {
+          /** @description The ID of the project */
+          id: number;
+        };
+      };
+      /** @description The project object */
+      requestBody: {
+        content: {
+          "application/json": components["schemas"]["PatchProject"];
+        };
+      };
+      responses: {
+        /** @description Successful operation */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              project: components["schemas"]["Project"];
+            };
+          };
+        };
+        /** @description Invalid body */
+        400: {
+          content: {
+            "application/json": components["schemas"]["Error"];
           };
         };
         /** @description Unauthorized */
@@ -2197,6 +2334,9 @@ export interface components {
        */
       scans: number;
     };
+    PatchProject: {
+      remote?: boolean;
+    };
     CVE: {
       /**
        * Format: int64
@@ -2711,6 +2851,38 @@ export interface components {
       success: boolean;
       /** @description Error message */
       message: string;
+    };
+    Worker: {
+      /**
+       * Format: int64
+       * @description The internal ID of the worker
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description The name of the worker
+       * @example My Worker
+       */
+      name: string;
+      /**
+       * @description The token of the worker
+       * @example asdasdasd
+       */
+      token: string;
+      organization: number;
+      /**
+       * @description The date the worker was created
+       * @example "2019-01-23T16:00:00.000Z"
+       */
+      created_at: string;
+    };
+    CreateWorker: {
+      /**
+       * @description The name of the worker
+       * @example My Worker
+       */
+      name: string;
+      organization: number;
     };
   };
   responses: never;
