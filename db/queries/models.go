@@ -326,13 +326,7 @@ type WebauthnCredential struct {
 type Worker struct {
 	ID           int64              `json:"id"`
 	Token        string             `json:"token"`
+	Name         string             `json:"name"`
 	Organization int64              `json:"organization"`
 	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-}
-
-type WorkerProject struct {
-	ID        int64              `json:"id"`
-	ProjectID int64              `json:"project_id"`
-	WorkerID  int64              `json:"worker_id"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
 }

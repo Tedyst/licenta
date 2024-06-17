@@ -43,9 +43,77 @@ func (q *Queries) BindScanToWorker(ctx context.Context, arg BindScanToWorkerPara
 	return &i, err
 }
 
+const createWorker = `-- name: CreateWorker :one
+INSERT INTO workers(organization, name, token)
+    VALUES ($1, $2, $3)
+RETURNING
+    id, token, name, organization, created_at
+`
+
+type CreateWorkerParams struct {
+	Organization int64  `json:"organization"`
+	Name         string `json:"name"`
+	Token        string `json:"token"`
+}
+
+func (q *Queries) CreateWorker(ctx context.Context, arg CreateWorkerParams) (*Worker, error) {
+	row := q.db.QueryRow(ctx, createWorker, arg.Organization, arg.Name, arg.Token)
+	var i Worker
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Name,
+		&i.Organization,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const deleteWorker = `-- name: DeleteWorker :one
+DELETE FROM workers
+WHERE id = $1
+RETURNING
+    id, token, name, organization, created_at
+`
+
+func (q *Queries) DeleteWorker(ctx context.Context, id int64) (*Worker, error) {
+	row := q.db.QueryRow(ctx, deleteWorker, id)
+	var i Worker
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Name,
+		&i.Organization,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
+const getWorker = `-- name: GetWorker :one
+SELECT
+    id, token, name, organization, created_at
+FROM
+    workers
+WHERE
+    id = $1
+`
+
+func (q *Queries) GetWorker(ctx context.Context, id int64) (*Worker, error) {
+	row := q.db.QueryRow(ctx, getWorker, id)
+	var i Worker
+	err := row.Scan(
+		&i.ID,
+		&i.Token,
+		&i.Name,
+		&i.Organization,
+		&i.CreatedAt,
+	)
+	return &i, err
+}
+
 const getWorkerByToken = `-- name: GetWorkerByToken :one
 SELECT
-    id, token, organization, created_at
+    id, token, name, organization, created_at
 FROM
     workers
 WHERE
@@ -58,6 +126,7 @@ func (q *Queries) GetWorkerByToken(ctx context.Context, token string) (*Worker, 
 	err := row.Scan(
 		&i.ID,
 		&i.Token,
+		&i.Name,
 		&i.Organization,
 		&i.CreatedAt,
 	)
@@ -66,26 +135,28 @@ func (q *Queries) GetWorkerByToken(ctx context.Context, token string) (*Worker, 
 
 const getWorkerForProject = `-- name: GetWorkerForProject :one
 SELECT
-    workers.id, workers.token, workers.organization, workers.created_at
+    workers.id, workers.token, workers.name, workers.organization, workers.created_at
 FROM
     workers
-    INNER JOIN worker_projects ON workers.id = worker_projects.worker_id
+    INNER JOIN organizations ON workers.organization = organizations.id
+    INNER JOIN projects ON organizations.id = projects.organization_id
 WHERE
-    worker_projects.project_id = $1
-    AND workers.token = $2
+    projects.id = $2
+    AND workers.token = $1
 `
 
 type GetWorkerForProjectParams struct {
-	ProjectID int64  `json:"project_id"`
 	Token     string `json:"token"`
+	ProjectID int64  `json:"project_id"`
 }
 
 func (q *Queries) GetWorkerForProject(ctx context.Context, arg GetWorkerForProjectParams) (*Worker, error) {
-	row := q.db.QueryRow(ctx, getWorkerForProject, arg.ProjectID, arg.Token)
+	row := q.db.QueryRow(ctx, getWorkerForProject, arg.Token, arg.ProjectID)
 	var i Worker
 	err := row.Scan(
 		&i.ID,
 		&i.Token,
+		&i.Name,
 		&i.Organization,
 		&i.CreatedAt,
 	)
@@ -94,7 +165,7 @@ func (q *Queries) GetWorkerForProject(ctx context.Context, arg GetWorkerForProje
 
 const getWorkerForScan = `-- name: GetWorkerForScan :one
 SELECT
-    workers.id, workers.token, workers.organization, workers.created_at
+    workers.id, workers.token, workers.name, workers.organization, workers.created_at
 FROM
     workers
     INNER JOIN scans ON workers.id = scans.worker_id
@@ -108,20 +179,59 @@ func (q *Queries) GetWorkerForScan(ctx context.Context, id int64) (*Worker, erro
 	err := row.Scan(
 		&i.ID,
 		&i.Token,
+		&i.Name,
 		&i.Organization,
 		&i.CreatedAt,
 	)
 	return &i, err
 }
 
-const getWorkersForProject = `-- name: GetWorkersForProject :many
+const getWorkersByProject = `-- name: GetWorkersByProject :many
 SELECT
-    workers.id, workers.token, workers.organization, workers.created_at
+    workers.id, workers.token, workers.name, workers.organization, workers.created_at
 FROM
     workers
-    INNER JOIN worker_projects ON workers.id = worker_projects.worker_id
+    INNER JOIN organizations ON workers.organization = organizations.id
+    INNER JOIN projects ON organizations.id = projects.organization_id
 WHERE
-    worker_projects.project_id = $1
+    projects.id = $1
+`
+
+func (q *Queries) GetWorkersByProject(ctx context.Context, projectID int64) ([]*Worker, error) {
+	rows, err := q.db.Query(ctx, getWorkersByProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []*Worker
+	for rows.Next() {
+		var i Worker
+		if err := rows.Scan(
+			&i.ID,
+			&i.Token,
+			&i.Name,
+			&i.Organization,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getWorkersForProject = `-- name: GetWorkersForProject :many
+SELECT
+    workers.id, workers.token, workers.name, workers.organization, workers.created_at
+FROM
+    workers
+    INNER JOIN organizations ON workers.organization_id = organizations.id
+    INNER JOIN projects ON organizations.id = projects.organization_id
+WHERE
+    projects.id = $1
 `
 
 func (q *Queries) GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error) {
@@ -136,6 +246,7 @@ func (q *Queries) GetWorkersForProject(ctx context.Context, projectID int64) ([]
 		if err := rows.Scan(
 			&i.ID,
 			&i.Token,
+			&i.Name,
 			&i.Organization,
 			&i.CreatedAt,
 		); err != nil {

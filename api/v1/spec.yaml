@@ -152,6 +152,116 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /worker:
+    get:
+      summary: Get all workers for a project
+      tags:
+        - worker
+      parameters:
+        - name: project
+          in: query
+          description: The project to filter for
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - workers
+                properties:
+                  success:
+                    type: boolean
+                  workers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Worker'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new worker for a project
+      tags:
+        - worker
+      requestBody:
+        description: The worker object
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorker'
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - worker
+                properties:
+                  success:
+                    type: boolean
+                  worker:
+                    $ref: '#/components/schemas/Worker'
+        "400":
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /worker/{id}:
+    delete:
+      summary: Delete worker by ID
+      tags:
+        - worker
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the worker to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Worker not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /worker/get-task:
     get:
       summary: Get a task for the worker
@@ -3808,6 +3918,44 @@ components:
         message:
           type: string
           description: Error message
+    Worker:
+      required:
+        - id
+        - name
+        - token
+        - organization
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the worker
+          example: 1
+        name:
+          type: string
+          description: The name of the worker
+          example: My Worker
+        token:
+          type: string
+          description: The token of the worker
+          example: asdasdasd
+        organization:
+          type: integer
+        created_at:
+          type: string
+          description: The date the worker was created
+          example: 2019-01-23T16:00:00Z
+    CreateWorker:
+      required:
+        - name
+        - organization
+      properties:
+        name:
+          type: string
+          description: The name of the worker
+          example: My Worker
+        organization:
+          type: integer
   securitySchemes:
     sessionAuth:
       type: apiKey

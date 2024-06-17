@@ -47,6 +47,7 @@ type Querier interface {
 	CreateTOTPSecretForUser(ctx context.Context, arg CreateTOTPSecretForUserParams) (*TotpSecretToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (*User, error)
 	CreateWebauthnCredential(ctx context.Context, arg CreateWebauthnCredentialParams) (*WebauthnCredential, error)
+	CreateWorker(ctx context.Context, arg CreateWorkerParams) (*Worker, error)
 	DeleteDockerImage(ctx context.Context, id int64) error
 	DeleteGitRepository(ctx context.Context, id int64) error
 	DeleteMongoDatabase(ctx context.Context, id int64) error
@@ -59,6 +60,7 @@ type Querier interface {
 	DeleteRememberMeTokenByUserAndToken(ctx context.Context, arg DeleteRememberMeTokenByUserAndTokenParams) error
 	DeleteRememberMeTokensForUser(ctx context.Context, userID int64) error
 	DeleteUser(ctx context.Context, id int64) error
+	DeleteWorker(ctx context.Context, id int64) (*Worker, error)
 	GetAllOrganizationMembersForOrganizationsThatContainUser(ctx context.Context, userID int64) ([]*GetAllOrganizationMembersForOrganizationsThatContainUserRow, error)
 	GetAllOrganizationProjectsForUser(ctx context.Context, userID int64) ([]*GetAllOrganizationProjectsForUserRow, error)
 	GetBruteforcePasswordsForProjectCount(ctx context.Context, projectID int64) (int64, error)
@@ -136,9 +138,11 @@ type Querier interface {
 	GetUserByUsernameOrEmail(ctx context.Context, arg GetUserByUsernameOrEmailParams) (*User, error)
 	GetUserByWebauthnCredentialID(ctx context.Context, credentialID []byte) (*GetUserByWebauthnCredentialIDRow, error)
 	GetWebauthnCredentialsByUserID(ctx context.Context, userID int64) ([]*WebauthnCredential, error)
+	GetWorker(ctx context.Context, id int64) (*Worker, error)
 	GetWorkerByToken(ctx context.Context, token string) (*Worker, error)
 	GetWorkerForProject(ctx context.Context, arg GetWorkerForProjectParams) (*Worker, error)
 	GetWorkerForScan(ctx context.Context, id int64) (*Worker, error)
+	GetWorkersByProject(ctx context.Context, projectID int64) ([]*Worker, error)
 	GetWorkersForProject(ctx context.Context, projectID int64) ([]*Worker, error)
 	InsertBruteforcePasswords(ctx context.Context, passwords []string) error
 	InvalidateResetPasswordToken(ctx context.Context, id uuid.UUID) error

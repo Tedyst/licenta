@@ -177,6 +177,13 @@ type CreateScanResult struct {
 	Severity int    `json:"severity"`
 }
 
+// CreateWorker defines model for CreateWorker.
+type CreateWorker struct {
+	// Name The name of the worker
+	Name         string `json:"name"`
+	Organization int    `json:"organization"`
+}
+
 // DockerImage defines model for DockerImage.
 type DockerImage struct {
 	DockerImage                   string   `json:"docker_image"`
@@ -624,6 +631,22 @@ type User struct {
 	Username string `json:"username"`
 }
 
+// Worker defines model for Worker.
+type Worker struct {
+	// CreatedAt The date the worker was created
+	CreatedAt string `json:"created_at"`
+
+	// Id The internal ID of the worker
+	Id int64 `json:"id"`
+
+	// Name The name of the worker
+	Name         string `json:"name"`
+	Organization int    `json:"organization"`
+
+	// Token The token of the worker
+	Token string `json:"token"`
+}
+
 // GetDockerParams defines parameters for GetDocker.
 type GetDockerParams struct {
 	// Project The project to filter for
@@ -729,6 +752,12 @@ type GetUsersParams struct {
 	Email *string `form:"email,omitempty" json:"email,omitempty"`
 }
 
+// GetWorkerParams defines parameters for GetWorker.
+type GetWorkerParams struct {
+	// Project The project to filter for
+	Project int `form:"project" json:"project"`
+}
+
 // PatchBruteforcedPasswordsIdJSONRequestBody defines body for PatchBruteforcedPasswordsId for application/json ContentType.
 type PatchBruteforcedPasswordsIdJSONRequestBody = UpdateBruteforcedPassword
 
@@ -800,6 +829,9 @@ type PostScanIdResultJSONRequestBody = CreateScanResult
 
 // PostUsersMeChangePasswordJSONRequestBody defines body for PostUsersMeChangePassword for application/json ContentType.
 type PostUsersMeChangePasswordJSONRequestBody = ChangePasswordLoggedIn
+
+// PostWorkerJSONRequestBody defines body for PostWorker for application/json ContentType.
+type PostWorkerJSONRequestBody = CreateWorker
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -1102,8 +1134,19 @@ type ClientInterface interface {
 	// GetUsersId request
 	GetUsersId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetWorker request
+	GetWorker(ctx context.Context, params *GetWorkerParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostWorkerWithBody request with any body
+	PostWorkerWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostWorker(ctx context.Context, body PostWorkerJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetWorkerGetTask request
 	GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteWorkerId request
+	DeleteWorkerId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) PatchBruteforcedPasswordsIdWithBody(ctx context.Context, id int64, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -2114,8 +2157,56 @@ func (c *Client) GetUsersId(ctx context.Context, id int64, reqEditors ...Request
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetWorker(ctx context.Context, params *GetWorkerParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetWorkerRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostWorkerWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostWorkerRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostWorker(ctx context.Context, body PostWorkerJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostWorkerRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetWorkerGetTask(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetWorkerGetTaskRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteWorkerId(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteWorkerIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -4682,6 +4773,91 @@ func NewGetUsersIdRequest(server string, id int64) (*http.Request, error) {
 	return req, nil
 }
 
+// NewGetWorkerRequest generates requests for GetWorker
+func NewGetWorkerRequest(server string, params *GetWorkerParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/worker")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "project", runtime.ParamLocationQuery, params.Project); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostWorkerRequest calls the generic PostWorker builder with application/json body
+func NewPostWorkerRequest(server string, body PostWorkerJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostWorkerRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostWorkerRequestWithBody generates requests for PostWorker with any type of body
+func NewPostWorkerRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/worker")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetWorkerGetTaskRequest generates requests for GetWorkerGetTask
 func NewGetWorkerGetTaskRequest(server string) (*http.Request, error) {
 	var err error
@@ -4702,6 +4878,40 @@ func NewGetWorkerGetTaskRequest(server string) (*http.Request, error) {
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewDeleteWorkerIdRequest generates requests for DeleteWorkerId
+func NewDeleteWorkerIdRequest(server string, id int64) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/worker/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -4980,8 +5190,19 @@ type ClientWithResponsesInterface interface {
 	// GetUsersIdWithResponse request
 	GetUsersIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*GetUsersIdResponse, error)
 
+	// GetWorkerWithResponse request
+	GetWorkerWithResponse(ctx context.Context, params *GetWorkerParams, reqEditors ...RequestEditorFn) (*GetWorkerResponse, error)
+
+	// PostWorkerWithBodyWithResponse request with any body
+	PostWorkerWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostWorkerResponse, error)
+
+	PostWorkerWithResponse(ctx context.Context, body PostWorkerJSONRequestBody, reqEditors ...RequestEditorFn) (*PostWorkerResponse, error)
+
 	// GetWorkerGetTaskWithResponse request
 	GetWorkerGetTaskWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetWorkerGetTaskResponse, error)
+
+	// DeleteWorkerIdWithResponse request
+	DeleteWorkerIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteWorkerIdResponse, error)
 }
 
 type PatchBruteforcedPasswordsIdResponse struct {
@@ -6590,6 +6811,59 @@ func (r GetUsersIdResponse) StatusCode() int {
 	return 0
 }
 
+type GetWorkerResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Success bool     `json:"success"`
+		Workers []Worker `json:"workers"`
+	}
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r GetWorkerResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetWorkerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostWorkerResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *struct {
+		Success bool   `json:"success"`
+		Worker  Worker `json:"worker"`
+	}
+	JSON400 *Error
+	JSON401 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r PostWorkerResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostWorkerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetWorkerGetTaskResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6612,6 +6886,32 @@ func (r GetWorkerGetTaskResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetWorkerGetTaskResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteWorkerIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON204      *struct {
+		Success bool `json:"success"`
+	}
+	JSON401 *Error
+	JSON404 *Error
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteWorkerIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteWorkerIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7350,6 +7650,32 @@ func (c *ClientWithResponses) GetUsersIdWithResponse(ctx context.Context, id int
 	return ParseGetUsersIdResponse(rsp)
 }
 
+// GetWorkerWithResponse request returning *GetWorkerResponse
+func (c *ClientWithResponses) GetWorkerWithResponse(ctx context.Context, params *GetWorkerParams, reqEditors ...RequestEditorFn) (*GetWorkerResponse, error) {
+	rsp, err := c.GetWorker(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetWorkerResponse(rsp)
+}
+
+// PostWorkerWithBodyWithResponse request with arbitrary body returning *PostWorkerResponse
+func (c *ClientWithResponses) PostWorkerWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostWorkerResponse, error) {
+	rsp, err := c.PostWorkerWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostWorkerResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostWorkerWithResponse(ctx context.Context, body PostWorkerJSONRequestBody, reqEditors ...RequestEditorFn) (*PostWorkerResponse, error) {
+	rsp, err := c.PostWorker(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostWorkerResponse(rsp)
+}
+
 // GetWorkerGetTaskWithResponse request returning *GetWorkerGetTaskResponse
 func (c *ClientWithResponses) GetWorkerGetTaskWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetWorkerGetTaskResponse, error) {
 	rsp, err := c.GetWorkerGetTask(ctx, reqEditors...)
@@ -7357,6 +7683,15 @@ func (c *ClientWithResponses) GetWorkerGetTaskWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParseGetWorkerGetTaskResponse(rsp)
+}
+
+// DeleteWorkerIdWithResponse request returning *DeleteWorkerIdResponse
+func (c *ClientWithResponses) DeleteWorkerIdWithResponse(ctx context.Context, id int64, reqEditors ...RequestEditorFn) (*DeleteWorkerIdResponse, error) {
+	rsp, err := c.DeleteWorkerId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteWorkerIdResponse(rsp)
 }
 
 // ParsePatchBruteforcedPasswordsIdResponse parses an HTTP response from a PatchBruteforcedPasswordsIdWithResponse call
@@ -9955,6 +10290,85 @@ func ParseGetUsersIdResponse(rsp *http.Response) (*GetUsersIdResponse, error) {
 	return response, nil
 }
 
+// ParseGetWorkerResponse parses an HTTP response from a GetWorkerWithResponse call
+func ParseGetWorkerResponse(rsp *http.Response) (*GetWorkerResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetWorkerResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Success bool     `json:"success"`
+			Workers []Worker `json:"workers"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostWorkerResponse parses an HTTP response from a PostWorkerWithResponse call
+func ParsePostWorkerResponse(rsp *http.Response) (*PostWorkerResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostWorkerResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest struct {
+			Success bool   `json:"success"`
+			Worker  Worker `json:"worker"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetWorkerGetTaskResponse parses an HTTP response from a GetWorkerGetTaskWithResponse call
 func ParseGetWorkerGetTaskResponse(rsp *http.Response) (*GetWorkerGetTaskResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -9993,6 +10407,48 @@ func ParseGetWorkerGetTaskResponse(rsp *http.Response) (*GetWorkerGetTaskRespons
 			return nil, err
 		}
 		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteWorkerIdResponse parses an HTTP response from a DeleteWorkerIdWithResponse call
+func ParseDeleteWorkerIdResponse(rsp *http.Response) (*DeleteWorkerIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteWorkerIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest struct {
+			Success bool `json:"success"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest Error
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -10181,9 +10637,18 @@ type ServerInterface interface {
 	// Get user by ID
 	// (GET /users/{id})
 	GetUsersId(w http.ResponseWriter, r *http.Request, id int64)
+	// Get all workers for a project
+	// (GET /worker)
+	GetWorker(w http.ResponseWriter, r *http.Request, params GetWorkerParams)
+	// Create a new worker for a project
+	// (POST /worker)
+	PostWorker(w http.ResponseWriter, r *http.Request)
 	// Get a task for the worker
 	// (GET /worker/get-task)
 	GetWorkerGetTask(w http.ResponseWriter, r *http.Request)
+	// Delete worker by ID
+	// (DELETE /worker/{id})
+	DeleteWorkerId(w http.ResponseWriter, r *http.Request, id int64)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -10550,9 +11015,27 @@ func (_ Unimplemented) GetUsersId(w http.ResponseWriter, r *http.Request, id int
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
+// Get all workers for a project
+// (GET /worker)
+func (_ Unimplemented) GetWorker(w http.ResponseWriter, r *http.Request, params GetWorkerParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new worker for a project
+// (POST /worker)
+func (_ Unimplemented) PostWorker(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
 // Get a task for the worker
 // (GET /worker/get-task)
 func (_ Unimplemented) GetWorkerGetTask(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete worker by ID
+// (DELETE /worker/{id})
+func (_ Unimplemented) DeleteWorkerId(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -12331,6 +12814,64 @@ func (siw *ServerInterfaceWrapper) GetUsersId(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r.WithContext(ctx))
 }
 
+// GetWorker operation middleware
+func (siw *ServerInterfaceWrapper) GetWorker(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetWorkerParams
+
+	// ------------- Required query parameter "project" -------------
+
+	if paramValue := r.URL.Query().Get("project"); paramValue != "" {
+
+	} else {
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "project"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "project", r.URL.Query(), &params.Project)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "project", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetWorker(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// PostWorker operation middleware
+func (siw *ServerInterfaceWrapper) PostWorker(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostWorker(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
 // GetWorkerGetTask operation middleware
 func (siw *ServerInterfaceWrapper) GetWorkerGetTask(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -12339,6 +12880,36 @@ func (siw *ServerInterfaceWrapper) GetWorkerGetTask(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetWorkerGetTask(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r.WithContext(ctx))
+}
+
+// DeleteWorkerId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteWorkerId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int64
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, chi.URLParam(r, "id"), &id)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	ctx = context.WithValue(ctx, SessionAuthScopes, []string{})
+
+	ctx = context.WithValue(ctx, WorkerAuthScopes, []string{})
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteWorkerId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -12642,7 +13213,16 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/users/{id}", wrapper.GetUsersId)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/worker", wrapper.GetWorker)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/worker", wrapper.PostWorker)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/worker/get-task", wrapper.GetWorkerGetTask)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/worker/{id}", wrapper.DeleteWorkerId)
 	})
 
 	return r
@@ -14971,6 +15551,73 @@ func (response GetUsersId404JSONResponse) VisitGetUsersIdResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetWorkerRequestObject struct {
+	Params GetWorkerParams
+}
+
+type GetWorkerResponseObject interface {
+	VisitGetWorkerResponse(w http.ResponseWriter) error
+}
+
+type GetWorker200JSONResponse struct {
+	Success bool     `json:"success"`
+	Workers []Worker `json:"workers"`
+}
+
+func (response GetWorker200JSONResponse) VisitGetWorkerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetWorker401JSONResponse Error
+
+func (response GetWorker401JSONResponse) VisitGetWorkerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostWorkerRequestObject struct {
+	Body *PostWorkerJSONRequestBody
+}
+
+type PostWorkerResponseObject interface {
+	VisitPostWorkerResponse(w http.ResponseWriter) error
+}
+
+type PostWorker201JSONResponse struct {
+	Success bool   `json:"success"`
+	Worker  Worker `json:"worker"`
+}
+
+func (response PostWorker201JSONResponse) VisitPostWorkerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostWorker400JSONResponse Error
+
+func (response PostWorker400JSONResponse) VisitPostWorkerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostWorker401JSONResponse Error
+
+func (response PostWorker401JSONResponse) VisitPostWorkerResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetWorkerGetTaskRequestObject struct {
 }
 
@@ -15005,6 +15652,43 @@ type GetWorkerGetTask401JSONResponse Error
 func (response GetWorkerGetTask401JSONResponse) VisitGetWorkerGetTaskResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteWorkerIdRequestObject struct {
+	Id int64 `json:"id"`
+}
+
+type DeleteWorkerIdResponseObject interface {
+	VisitDeleteWorkerIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteWorkerId204JSONResponse struct {
+	Success bool `json:"success"`
+}
+
+func (response DeleteWorkerId204JSONResponse) VisitDeleteWorkerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(204)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteWorkerId401JSONResponse Error
+
+func (response DeleteWorkerId401JSONResponse) VisitDeleteWorkerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteWorkerId404JSONResponse Error
+
+func (response DeleteWorkerId404JSONResponse) VisitDeleteWorkerIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -15191,9 +15875,18 @@ type StrictServerInterface interface {
 	// Get user by ID
 	// (GET /users/{id})
 	GetUsersId(ctx context.Context, request GetUsersIdRequestObject) (GetUsersIdResponseObject, error)
+	// Get all workers for a project
+	// (GET /worker)
+	GetWorker(ctx context.Context, request GetWorkerRequestObject) (GetWorkerResponseObject, error)
+	// Create a new worker for a project
+	// (POST /worker)
+	PostWorker(ctx context.Context, request PostWorkerRequestObject) (PostWorkerResponseObject, error)
 	// Get a task for the worker
 	// (GET /worker/get-task)
 	GetWorkerGetTask(ctx context.Context, request GetWorkerGetTaskRequestObject) (GetWorkerGetTaskResponseObject, error)
+	// Delete worker by ID
+	// (DELETE /worker/{id})
+	DeleteWorkerId(ctx context.Context, request DeleteWorkerIdRequestObject) (DeleteWorkerIdResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHttpHandlerFunc
@@ -16936,6 +17629,63 @@ func (sh *strictHandler) GetUsersId(w http.ResponseWriter, r *http.Request, id i
 	}
 }
 
+// GetWorker operation middleware
+func (sh *strictHandler) GetWorker(w http.ResponseWriter, r *http.Request, params GetWorkerParams) {
+	var request GetWorkerRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetWorker(ctx, request.(GetWorkerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetWorker")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetWorkerResponseObject); ok {
+		if err := validResponse.VisitGetWorkerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostWorker operation middleware
+func (sh *strictHandler) PostWorker(w http.ResponseWriter, r *http.Request) {
+	var request PostWorkerRequestObject
+
+	var body PostWorkerJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostWorker(ctx, request.(PostWorkerRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostWorker")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostWorkerResponseObject); ok {
+		if err := validResponse.VisitPostWorkerResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // GetWorkerGetTask operation middleware
 func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request) {
 	var request GetWorkerGetTaskRequestObject
@@ -16960,104 +17710,133 @@ func (sh *strictHandler) GetWorkerGetTask(w http.ResponseWriter, r *http.Request
 	}
 }
 
+// DeleteWorkerId operation middleware
+func (sh *strictHandler) DeleteWorkerId(w http.ResponseWriter, r *http.Request, id int64) {
+	var request DeleteWorkerIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteWorkerId(ctx, request.(DeleteWorkerIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteWorkerId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteWorkerIdResponseObject); ok {
+		if err := validResponse.VisitDeleteWorkerIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"1WnwcPvw7wAAAP//pWIR7owRAQA=",
+	"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",
+	"///BkaCWNxwBAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

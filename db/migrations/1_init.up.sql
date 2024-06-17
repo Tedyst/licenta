@@ -66,7 +66,6 @@ CREATE INDEX projects_organization_id_idx ON projects(organization_id);
 
 CREATE INDEX projects_name_orgianization_id_idx ON projects(name, organization_id);
 
-
 CREATE TABLE git_repositories(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -203,7 +202,7 @@ CREATE TABLE scan_groups(
 CREATE TABLE workers(
     id bigserial PRIMARY KEY,
     token text NOT NULL UNIQUE,
-    organization bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    organization_id bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -253,13 +252,6 @@ CREATE TABLE bruteforced_passwords(
     last_bruteforce_id bigint,
     project_id bigint REFERENCES projects(id) ON DELETE CASCADE,
     UNIQUE (hash, username, project_id)
-);
-
-CREATE TABLE worker_projects(
-    id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    worker_id bigint NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE remember_me_tokens(
