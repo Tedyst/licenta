@@ -222,6 +222,10 @@ func (runner *baseSaver) runScanner(ctx context.Context) error {
 		}
 
 		for _, cve := range cves {
+			if nvd.IsCVEIgnored(cve.NvdCfe.CveID) {
+				slog.DebugContext(ctx, "Ignoring CVE", "cveId", cve.NvdCfe.CveID)
+				continue
+			}
 			if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
 				ScanID:     runner.scan.ID,
 				Severity:   int32(scanner.SEVERITY_HIGH),

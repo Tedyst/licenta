@@ -61,5 +61,10 @@ func init() {
 		panic(err)
 	}
 
+	natsCmd.Flags().String("email-sendgrid", "", "Sendgrid API Key")
+
+	natsCmd.Flags().String("email-sender", "no-reply@tedyst.ro", "Email sender")
+	natsCmd.Flags().String("email-senderName", "Licenta", "Email sender name")
+
 	rootCmd.AddCommand(natsCmd)
 }
