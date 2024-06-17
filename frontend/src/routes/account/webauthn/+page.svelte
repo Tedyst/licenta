@@ -27,7 +27,6 @@
 				error = e.message;
 			}
 		);
-		console.log(registerResponse);
 	};
 
 	// const testLogin = async () => {

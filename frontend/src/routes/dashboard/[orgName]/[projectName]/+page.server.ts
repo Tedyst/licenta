@@ -1,8 +1,5 @@
 import type { Actions } from './$types';
 import { clientFromFetch } from '$lib/client';
-import { invalidateAll } from '$app/navigation';
-import { env } from '$env/dynamic/public';
-invalidateAll;
 
 export const actions = {
 	run: async ({ request, fetch }) => {

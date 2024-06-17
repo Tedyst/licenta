@@ -1,5 +1,4 @@
-<script lang="ts">
-	import Login_2fa from '$lib/login/login-2fa.svelte';
-</script>
+<h1 class="text-2xl font-bold">Please choose the 2FA method</h1>
 
-<Login_2fa />
+<a href="/login/totp" class="btn btn-primary">TOTP</a>
+<a href="/login/webauthn" class="btn btn-primary">WebAuthn</a>

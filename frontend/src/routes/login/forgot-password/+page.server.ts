@@ -3,7 +3,7 @@ import type { Actions } from './$types';
 import { requestResetPassword } from '$lib/client';
 
 export const actions = {
-	default: async ({ request, fetch, url }) => {
+	default: async ({ request, fetch }) => {
 		const data = await request.formData();
 
 		const username = data.get('username')?.toString() || '';

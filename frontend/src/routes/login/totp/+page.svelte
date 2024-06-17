@@ -1,27 +1,42 @@
 <script lang="ts">
-	import Login2fa from '$lib/login/login-totp.svelte';
-	import { goto } from '$app/navigation';
-	import { loginTOTP } from '$lib/client';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
-	let error = '';
-
-	let onSubmit = (e: SubmitEvent) => {
-		const formData = new FormData(e.target as HTMLFormElement);
-		let token = formData.get('token');
-		if (typeof token !== 'string') {
-			throw new Error('Token must be a string');
-		}
-		loginTOTP(token)
-			.then((res) => {
-				if (res.success) {
-					goto('/login/successful');
-				}
-				error = res?.errors?.code?.at(0) || res?.message || '';
-			})
-			.catch((err) => {
-				error = err.message;
-			});
-	};
+	export let form: ActionData;
 </script>
 
-<Login2fa bind:error on:submit={onSubmit} />
+<form use:enhance method="POST">
+	<div class="form-control">
+		<label class="label" for="token">
+			<span class="label-text">2FA Token</span>
+		</label>
+		<input
+			type="text"
+			placeholder="token"
+			class="input input-bordered {form?.error
+				? 'wiggle input-error'
+				: ''} transition-colors duration-300 ease-in-out"
+			id="token"
+			name="token"
+		/>
+		{#if form?.error}
+			<div class="label text-error text-xs">
+				{form?.error}
+			</div>
+		{/if}
+
+		<div class="label">
+			<a class="label-text-alt link link-hover" href="/login">
+				Click here to go back to the login page
+			</a>
+		</div>
+	</div>
+	<div class="form-control mt-6">
+		<button
+			class="btn {!form?.error
+				? 'btn-primary'
+				: 'btn-error'} transition-colors duration-300 ease-in-out"
+			type="submit">Login</button
+		>
+	</div>
+</form>

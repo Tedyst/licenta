@@ -45,13 +45,19 @@ type webauthnRegisterBeginResponse = {
 	response: PublicKeyCredentialCreationOptionsJSON;
 };
 
-export async function webauthnRegisterBegin(): Promise<webauthnRegisterBeginResponse> {
-	return await csrfFetch('/api/auth/webauthn/register/begin', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	}).then((response) => {
+export async function webauthnRegisterBegin(
+	f: typeof fetch = fetch
+): Promise<webauthnRegisterBeginResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/webauthn/register/begin',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		},
+		f
+	).then((response) => {
 		if (response.ok) {
 			return response.json() as Promise<webauthnRegisterBeginResponse>;
 		}
@@ -64,15 +70,20 @@ type webauthnRegisterFinishResponse = {
 };
 
 export async function webauthnRegisterFinish(
-	body: string
+	body: string,
+	f: typeof fetch = fetch
 ): Promise<webauthnRegisterFinishResponse> {
-	return await csrfFetch('/api/auth/webauthn/register/finish', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/webauthn/register/finish',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body
 		},
-		body
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response.ok) {
 			return response.json() as Promise<webauthnRegisterFinishResponse>;
 		}
@@ -86,15 +97,20 @@ type webauthnLoginBeginResponse = {
 };
 
 export async function webauthnLoginBegin(
-	username: string | null = null
+	username: string | null = null,
+	f: typeof fetch = fetch
 ): Promise<webauthnLoginBeginResponse> {
-	return await csrfFetch('/api/auth/webauthn/login/begin', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/webauthn/login/begin',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ username: username })
 		},
-		body: JSON.stringify({ username: username })
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response.ok) {
 			return response.json() as Promise<webauthnLoginBeginResponse>;
 		}
@@ -106,14 +122,21 @@ type webauthnLoginFinishResponse = {
 	success: true;
 };
 
-export async function webauthnLoginFinish(body: string): Promise<webauthnLoginFinishResponse> {
-	return await csrfFetch('/api/auth/webauthn/login/finish', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+export async function webauthnLoginFinish(
+	body: string,
+	f: typeof fetch = fetch
+): Promise<webauthnLoginFinishResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/webauthn/login/finish',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body
 		},
-		body
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response.ok) {
 			return response.json() as Promise<webauthnLoginFinishResponse>;
 		}
@@ -158,13 +181,19 @@ type RegisterTOTPBeginResponse = {
 	success: true;
 };
 
-export async function registerTOTPBegin(): Promise<RegisterTOTPBeginResponse> {
-	return await csrfFetch('/api/auth/2fa/totp/setup', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	}).then((response) => {
+export async function registerTOTPBegin(
+	f: typeof fetch = fetch
+): Promise<RegisterTOTPBeginResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/2fa/totp/setup',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		},
+		f
+	).then((response) => {
 		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPBeginResponse>;
 		}
@@ -177,13 +206,19 @@ type RegisterTOTPGetSecretResponse = {
 	totp_secret: string;
 };
 
-export async function registerTOTPGetSecret(): Promise<RegisterTOTPGetSecretResponse> {
-	return await csrfFetch('/api/auth/2fa/totp/confirm', {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	}).then((response) => {
+export async function registerTOTPGetSecret(
+	f: typeof fetch = fetch
+): Promise<RegisterTOTPGetSecretResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/2fa/totp/confirm',
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		},
+		f
+	).then((response) => {
 		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPGetSecretResponse>;
 		}
@@ -196,14 +231,21 @@ type RegisterTOTPFinishResponse = {
 	recovery_codes: string[];
 };
 
-export async function registerTOTPFinish(code: string): Promise<RegisterTOTPFinishResponse> {
-	return await csrfFetch('/api/auth/2fa/totp/confirm', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+export async function registerTOTPFinish(
+	code: string,
+	f: typeof fetch = fetch
+): Promise<RegisterTOTPFinishResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/2fa/totp/confirm',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ code })
 		},
-		body: JSON.stringify({ code })
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPFinishResponse>;
 		}
@@ -234,17 +276,22 @@ type LoginTOTPResponse = {
 	errors?: {
 		code?: string[];
 	};
+	error?: string;
 	message?: string;
 };
 
-export async function loginTOTP(code: string): Promise<LoginTOTPResponse> {
-	return await csrfFetch('/api/auth/2fa/totp/validate', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
+export async function loginTOTP(code: string, f: typeof fetch = fetch): Promise<LoginTOTPResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/2fa/totp/validate',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ code })
 		},
-		body: JSON.stringify({ code })
-	}).then((response) => {
+		f
+	).then((response) => {
 		if (response.ok) {
 			return response.json() as Promise<LoginTOTPResponse>;
 		}

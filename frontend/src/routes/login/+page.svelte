@@ -4,9 +4,11 @@
 
 	export let form: ActionData;
 	export let data: PageData;
+
+	let username = data?.username ?? '';
 </script>
 
-<form method="POST" use:enhance>
+<form method="POST" use:enhance action="?/password">
 	<div class="form-control">
 		{#if form?.error}
 			<label class="label" for="username">
@@ -27,13 +29,17 @@
 			id="username"
 			name="username"
 			autocomplete="username"
-			value={data?.username}
+			bind:value={username}
 			autofocus
 		/>
 	</div>
 	<div class="form-control mt-4">
 		<div class="label">
-			<a href="/login/webauthn" class="label-text-alt link link-hover">Sign in using a passkey</a>
+			<form method="POST" use:enhance action="?/webauthn">
+				<input type="hidden" name="username" value={username} />
+				<button type="submit" class="label-text-alt link link-hover">Sign in using a passkey</button
+				>
+			</form>
 		</div>
 		<div class="label pt-0 mt-0">
 			<a href="/register" class="label-text-alt link link-hover"> Register an account </a>

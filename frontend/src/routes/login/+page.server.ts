@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions = {
-	default: async ({ request }) => {
+	password: async ({ request }) => {
 		const data = await request.formData();
 
 		const error = validateUsername(data.get('username')?.toString() || null);
@@ -12,5 +12,10 @@ export const actions = {
 		}
 
 		redirect(302, '/login/password?username=' + data.get('username')?.toString() || '');
+	},
+	webauthn: async ({ request }) => {
+		const data = await request.formData();
+
+		redirect(302, '/login/webauthn?username=' + data.get('username')?.toString() || '');
 	}
 } satisfies Actions;
