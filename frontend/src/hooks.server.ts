@@ -2,16 +2,32 @@ import type { HandleFetch } from '@sveltejs/kit';
 import { env } from '$env/dynamic/public';
 
 export const handleFetch = (async ({ event, request, fetch }) => {
-	if (!request.url.startsWith(env.PUBLIC_BACKEND_URL)) {
-		request = new Request(env.PUBLIC_BACKEND_URL + request.url, {
-			...request,
-			credentials: 'include'
-		});
-	}
+	const newRequest = new Request(request, { credentials: 'include' });
 
 	const cookies = event.request.headers.get('cookie');
 
-	request.headers.set('cookie', cookies!);
+	newRequest.headers.set('cookie', cookies!);
 
-	return fetch(request);
+	return fetch(newRequest).then((response) => {
+		const headers = new Headers(response.headers);
+
+		headers.getSetCookie().forEach((setCookie) => {
+			const name = setCookie.split('=')[0];
+			const value = decodeURI(setCookie).replace(`${name}=`, '').split(';')[0];
+			console.log(value);
+
+			event.cookies.set(name, value, {
+				path: '/',
+				encode(value: string) {
+					return value;
+				}
+			});
+		});
+
+		if (headers.has('X-CSRF-Token')) {
+			event.setHeaders({ 'X-CSRF-Token': headers.get('X-CSRF-Token') || '' });
+		}
+
+		return response;
+	});
 }) satisfies HandleFetch;
