@@ -1,5 +1,4 @@
 import type { HandleFetch } from '@sveltejs/kit';
-import { env } from '$env/dynamic/public';
 
 export const handleFetch = (async ({ event, request, fetch }) => {
 	const newRequest = new Request(request, { credentials: 'include' });
@@ -14,7 +13,6 @@ export const handleFetch = (async ({ event, request, fetch }) => {
 		headers.getSetCookie().forEach((setCookie) => {
 			const name = setCookie.split('=')[0];
 			const value = decodeURI(setCookie).replace(`${name}=`, '').split(';')[0];
-			console.log(value);
 
 			event.cookies.set(name, value, {
 				path: '/',
@@ -24,9 +22,9 @@ export const handleFetch = (async ({ event, request, fetch }) => {
 			});
 		});
 
-		if (headers.has('X-CSRF-Token')) {
-			event.setHeaders({ 'X-CSRF-Token': headers.get('X-CSRF-Token') || '' });
-		}
+		// if (headers.has('X-CSRF-Token')) {
+		// 	event.setHeaders({ 'X-CSRF-Token': headers.get('X-CSRF-Token') || '' });
+		// }
 
 		return response;
 	});

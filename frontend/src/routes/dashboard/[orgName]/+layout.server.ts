@@ -15,8 +15,6 @@ export const load: LayoutServerLoad = async ({ params, parent, fetch }) => {
 		params: { query: { organization: currentOrganization?.id || 0 } }
 	});
 
-	console.log(workers);
-
 	return {
 		...parentData,
 		organization: currentOrganization,

@@ -21,7 +21,6 @@ export const actions = {
 			redirect(302, '/login/successful');
 		}
 
-		console.log(response);
 		redirect(302, '/login/webauthn/failed');
 	}
 } satisfies Actions;

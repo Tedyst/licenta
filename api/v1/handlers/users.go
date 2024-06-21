@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/db/queries"
@@ -76,12 +77,24 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 		}, nil
 	}
 
+	creds, err := server.DatabaseProvider.GetWebauthnCredentialsByUserID(ctx, user.ID)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("GetUsersMe: error getting webauthn credentials: %w", err)
+	}
+
+	hasWebauthn := false
+	if len(creds) > 0 {
+		hasWebauthn = true
+	}
+
 	return generated.GetUsersMe200JSONResponse{
 		Success: true,
 		User: generated.User{
-			Id:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
+			Id:          user.ID,
+			Username:    user.Username,
+			Email:       user.Email,
+			HasTotp:     &user.TotpSecret.Valid,
+			HasWebauthn: &hasWebauthn,
 		},
 	}, nil
 }

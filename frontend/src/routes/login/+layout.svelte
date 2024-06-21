@@ -3,8 +3,8 @@
 		<div class="text-center lg:text-left">
 			<h1 class="text-5xl font-bold">Login now!</h1>
 			<p class="py-6 md:w-max max-w-md">
-				Please appreciate my login animation. I spent 8 hours on it instead of working for my job.
-				Help
+				Here you can login to your account. If you don't have an account yet, you can register
+				below.
 			</p>
 		</div>
 		<div

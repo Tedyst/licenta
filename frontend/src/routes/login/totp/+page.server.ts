@@ -14,7 +14,6 @@ export const actions = {
 			redirect(302, '/login/successful');
 		}
 
-		console.log(response);
 		return {
 			error: response?.errors?.code?.join(';') || response?.error || 'Internal server error'
 		};

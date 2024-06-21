@@ -2712,10 +2712,15 @@ export interface components {
        */
       email: string;
       /**
-       * @description The phone number of the user
-       * @example 1234567890
+       * @description Whether the user has TOTP enabled
+       * @example true
        */
-      phone?: string;
+      has_totp?: boolean;
+      /**
+       * @description Whether the user has WebAuthn enabled
+       * @example true
+       */
+      has_webauthn?: boolean;
     };
     CreateOrganization: {
       /**

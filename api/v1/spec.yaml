@@ -3762,7 +3762,6 @@ components:
         - id
         - username
         - email
-        - admin
       properties:
         id:
           type: integer
@@ -3777,10 +3776,14 @@ components:
           type: string
           description: The email of the user
           example:
-        phone:
-          type: string
-          description: The phone number of the user
-          example: +1234567890
+        has_totp:
+          type: boolean
+          description: Whether the user has TOTP enabled
+          example: true
+        has_webauthn:
+          type: boolean
+          description: Whether the user has WebAuthn enabled
+          example: true
     CreateOrganization:
       required:
         - name
