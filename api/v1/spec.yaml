@@ -3762,6 +3762,9 @@ components:
         - id
         - username
         - email
+        - has_totp
+        - has_webauthn
+        - webauthn_keys
       properties:
         id:
           type: integer
@@ -3784,6 +3787,24 @@ components:
           type: boolean
           description: Whether the user has WebAuthn enabled
           example: true
+        webauthn_keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/WebAuthnKey"
+    WebAuthnKey:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The internal ID of the WebAuthn key
+          example: 1
+        name:
+          type: string
+          description: The name of the WebAuthn key
+          example: My Key
     CreateOrganization:
       required:
         - name

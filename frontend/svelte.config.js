@@ -7,7 +7,10 @@ const config = {
 
 	kit: {
 		adapter: adapter(),
-		inlineStyleThreshold: Infinity
+		inlineStyleThreshold: Infinity,
+		csrf: {
+			checkOrigin: process.env.NODE_ENV === 'development' ? false : true
+		}
 	},
 };
 

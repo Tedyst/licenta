@@ -83,10 +83,12 @@ export async function webauthnRegisterFinish(
 			body
 		},
 		f
-	).then((response) => {
+	).then(async (response) => {
 		if (response.ok) {
 			return response.json() as Promise<webauthnRegisterFinishResponse>;
 		}
+		const d = await response.text();
+		console.log(d);
 		throw new Error('Failed to fetch');
 	});
 }

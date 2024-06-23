@@ -251,7 +251,7 @@ func (a *authbossStorer) GetWebauthnCredentials(ctx context.Context, pid string)
 	return credentials, nil
 }
 
-func (a *authbossStorer) CreateWebauthnCredential(ctx context.Context, pid string, credential authbosswebauthn.Credential) error {
+func (a *authbossStorer) CreateWebauthnCredential(ctx context.Context, pid string, credential authbosswebauthn.Credential, name string) error {
 	user, err := a.querier.GetUserByUsernameOrEmail(ctx, queries.GetUserByUsernameOrEmailParams{
 		Username: pid,
 		Email:    pid,
@@ -279,6 +279,7 @@ func (a *authbossStorer) CreateWebauthnCredential(ctx context.Context, pid strin
 		SignCount:       int32(credential.Authenticator.SignCount),
 		CloneWarning:    credential.Authenticator.CloneWarning,
 		Attachment:      string(credential.Authenticator.Attachment),
+		Name:            name,
 	})
 	return err
 }

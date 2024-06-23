@@ -309,6 +309,7 @@ type User struct {
 type WebauthnCredential struct {
 	ID              int64    `json:"id"`
 	UserID          int64    `json:"user_id"`
+	Name            string   `json:"name"`
 	CredentialID    []byte   `json:"credential_id"`
 	PublicKey       []byte   `json:"public_key"`
 	AttestationType string   `json:"attestation_type"`

@@ -87,14 +87,23 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 		hasWebauthn = true
 	}
 
+	responseCreds := make([]generated.WebAuthnKey, len(creds))
+	for i, cred := range creds {
+		responseCreds[i] = generated.WebAuthnKey{
+			Id:   cred.ID,
+			Name: cred.Name,
+		}
+	}
+
 	return generated.GetUsersMe200JSONResponse{
 		Success: true,
 		User: generated.User{
-			Id:          user.ID,
-			Username:    user.Username,
-			Email:       user.Email,
-			HasTotp:     &user.TotpSecret.Valid,
-			HasWebauthn: &hasWebauthn,
+			Id:           user.ID,
+			Username:     user.Username,
+			Email:        user.Email,
+			HasTotp:      user.TotpSecret.Valid,
+			HasWebauthn:  hasWebauthn,
+			WebauthnKeys: responseCreds,
 		},
 	}, nil
 }

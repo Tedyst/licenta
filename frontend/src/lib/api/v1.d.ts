@@ -2715,12 +2715,26 @@ export interface components {
        * @description Whether the user has TOTP enabled
        * @example true
        */
-      has_totp?: boolean;
+      has_totp: boolean;
       /**
        * @description Whether the user has WebAuthn enabled
        * @example true
        */
-      has_webauthn?: boolean;
+      has_webauthn: boolean;
+      webauthn_keys: components["schemas"]["WebAuthnKey"][];
+    };
+    WebAuthnKey: {
+      /**
+       * Format: int64
+       * @description The internal ID of the WebAuthn key
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description The name of the WebAuthn key
+       * @example My Key
+       */
+      name: string;
     };
     CreateOrganization: {
       /**

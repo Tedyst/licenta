@@ -264,6 +264,7 @@ CREATE TABLE remember_me_tokens(
 CREATE TABLE webauthn_credentials(
     id bigserial PRIMARY KEY,
     user_id bigint REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    name text NOT NULL,
     credential_id bytea NOT NULL UNIQUE,
     public_key bytea NOT NULL,
     attestation_type text NOT NULL,

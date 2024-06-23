@@ -1,93 +1,66 @@
 <script lang="ts">
-	import { webauthnRegisterBegin, webauthnRegisterFinish } from '$lib/client';
+	import { browser } from '$app/environment';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import {
 		JSONtoPublicKeyCredentialCreationOptions,
 		PublicKeyCredentialToJSON
 	} from '$lib/webauthn';
+	import type { ActionData, PageData } from './$types';
 
+	export let data: PageData;
+	export let form: ActionData;
+
+	let name: string;
 	let error: string | null = null;
+	let formData: string;
+	let f: HTMLFormElement;
 
-	const registerWebauthn = async () => {
-		const registerData = await webauthnRegisterBegin().catch((e) => {
-			error = e.message;
-		});
-		if (!registerData) {
+	$: (async () => {
+		console.log(form);
+		if (!form?.setupCredential || !browser) {
 			return;
 		}
-		const options = JSONtoPublicKeyCredentialCreationOptions(registerData.response);
-		const credential = await navigator.credentials.create({ publicKey: options }).catch((e) => {
-			error = e.message;
-		});
+		const options = JSONtoPublicKeyCredentialCreationOptions(form.setupCredential);
+		const credential = await navigator.credentials.create({ publicKey: options });
 		if (!credential) {
+			error = 'Failed to create credential';
 			return;
 		}
 		const credentialJSON = PublicKeyCredentialToJSON(credential);
-		const registerResponse = await webauthnRegisterFinish(JSON.stringify(credentialJSON)).catch(
-			(e) => {
-				error = e.message;
-			}
-		);
-	};
+		const formData = new FormData(f);
 
-	// const testLogin = async () => {
-	// 	const data = await fetchWebauthnLogin();
+		formData.set('data', JSON.stringify(credentialJSON));
+		formData.set('name', name);
 
-	// 	console.log(data);
+		const response = await fetch(f.action, {
+			method: f.method,
+			body: formData
+		});
 
-	// 	const asd = {
-	// 		publicKey: data.response
-	// 	};
-
-	// 	asd.publicKey.challenge = Base64Binary.decode(asd.publicKey.challenge, null);
-	// 	asd.publicKey?.allowCredentials?.forEach((cred: any) => {
-	// 		cred.id = Base64Binary.decode(cred.id, null);
-	// 	});
-
-	// 	console.log(asd);
-	// 	let credential: any = await navigator.credentials.get(asd);
-
-	// 	console.log(credential);
-	// 	if (!credential) {
-	// 		return;
-	// 	}
-	// 	fetch('/api/auth/webauthn/login/finish', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 			'X-CSRF-Token': await getCSRFToken()
-	// 		},
-	// 		body: JSON.stringify({
-	// 			id: credential.id,
-	// 			rawId: Base64Binary.encode(credential.rawId),
-	// 			type: credential.type,
-	// 			response: {
-	// 				authenticatorData: Base64Binary.encode(credential.response.authenticatorData),
-	// 				clientDataJSON: Base64Binary.encode(credential.response.clientDataJSON),
-	// 				signature: Base64Binary.encode(credential.response.signature),
-	// 				userHandle: Base64Binary.encode(credential.response.userHandle)
-	// 			}
-	// 		})
-	// 	});
-	// };
+		invalidateAll();
+	})();
 </script>
 
-<button class="btn btn-primary" on:click={registerWebauthn}>Register</button>
-<br />
 {#if error}
-	<div role="alert" class="alert alert-error">
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			class="stroke-current shrink-0 h-6 w-6"
-			fill="none"
-			viewBox="0 0 24 24"
-			><path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-			/></svg
-		>
-		<span>{error}</span>
-	</div>
+	<p>{error}</p>
 {/if}
-<!-- <button on:click={testLogin}>Login</button> -->
+
+{#if form?.setupCredential}
+	{form?.setupCredential}
+{/if}
+
+<form action="?/start" use:enhance method="POST">
+	<input type="text" name="name" placeholder="Name" required bind:value={name} />
+	<button type="submit" class="btn btn-primary">Add key</button>
+</form>
+
+<form action="?/finish" use:enhance method="POST" bind:this={f}>
+	<input type="hidden" name="name" bind:value={name} />
+	<input type="hidden" name="data" value={formData} />
+</form>
+
+Keys:
+{#each data?.user?.webauthn_keys || [] as key}
+	{key.id} - {key.name}
+{/each}

@@ -31,7 +31,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
 	github.com/sqlc-dev/sqlc v1.26.0
-	github.com/tedyst/authbosswebauthn v0.0.0-20240526084728-30f31d7f2fbf
+	github.com/tedyst/authbosswebauthn v0.0.0-20240623143129-7dbae3e315c8
 	github.com/ttys3/slogx v0.2.2
 	github.com/valyala/quicktemplate v1.7.0
 	github.com/volatiletech/authboss-clientstate v0.0.0-20230313034706-0b930a6c0713

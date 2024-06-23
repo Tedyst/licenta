@@ -145,7 +145,7 @@ func init() {
 	serveCmd.Flags().String("email-sender", "no-reply@tedyst.ro", "Email sender")
 	serveCmd.Flags().String("email-senderName", "Licenta", "Email sender name")
 
-	serveCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
+	serveCmd.Flags().String("baseurl", "localhost", "Base URL")
 
 	serveCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 

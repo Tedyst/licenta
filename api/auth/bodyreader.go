@@ -20,11 +20,12 @@ const (
 	FormValuePassword = "password"
 	FormValueUsername = "username"
 
-	FormValueConfirm      = "cnf"
-	FormValueToken        = "token"
-	FormValueCode         = "code"
-	FormValueRecoveryCode = "recovery_code"
-	FormValuePhoneNumber  = "phone_number"
+	FormValueCredentialName = "name"
+	FormValueConfirm        = "cnf"
+	FormValueToken          = "token"
+	FormValueCode           = "code"
+	FormValueRecoveryCode   = "recovery_code"
+	FormValuePhoneNumber    = "phone_number"
 )
 
 // WebauthnValues from the login form
@@ -33,6 +34,7 @@ type WebauthnValues struct {
 
 	PID string
 
+	Name                string
 	CreationCredential  *protocol.ParsedCredentialCreationData
 	CredentialAssertion *protocol.ParsedCredentialAssertionData
 }
@@ -48,6 +50,10 @@ func (u WebauthnValues) GetCreationCredential() protocol.ParsedCredentialCreatio
 
 func (u WebauthnValues) GetCredentialAssertion() protocol.ParsedCredentialAssertionData {
 	return *u.CredentialAssertion
+}
+
+func (u WebauthnValues) GetCredentialName() string {
+	return u.Name
 }
 
 func (u WebauthnValues) GetShouldRemember() bool {
@@ -120,10 +126,16 @@ func newAuthbossBodyReader() *authbossBodyReader {
 	}
 }
 
+type CreateWebauthnCredential struct {
+	protocol.CredentialCreationResponse
+
+	Name string
+}
+
 // Read the form pages
 func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validator, error) {
 	if page == authbosswebauthn.PageWebauthnSetupFinish {
-		var values protocol.CredentialCreationResponse
+		var values CreateWebauthnCredential
 
 		b, err := io.ReadAll(r.Body)
 		r.Body.Close()
@@ -142,6 +154,7 @@ func (h authbossBodyReader) Read(page string, r *http.Request) (authboss.Validat
 
 		return WebauthnValues{
 			CreationCredential: creds,
+			Name:               values.Name,
 		}, nil
 	} else if page == authbosswebauthn.PageWebauthnLoginFinish {
 		var values protocol.CredentialAssertionResponse

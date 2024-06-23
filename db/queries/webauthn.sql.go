@@ -10,15 +10,16 @@ import (
 )
 
 const createWebauthnCredential = `-- name: CreateWebauthnCredential :one
-INSERT INTO webauthn_credentials(user_id, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+INSERT INTO webauthn_credentials(user_id, credential_id, name, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 RETURNING
-    id, user_id, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
+    id, user_id, name, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
 `
 
 type CreateWebauthnCredentialParams struct {
 	UserID          int64    `json:"user_id"`
 	CredentialID    []byte   `json:"credential_id"`
+	Name            string   `json:"name"`
 	PublicKey       []byte   `json:"public_key"`
 	AttestationType string   `json:"attestation_type"`
 	Transport       []string `json:"transport"`
@@ -36,6 +37,7 @@ func (q *Queries) CreateWebauthnCredential(ctx context.Context, arg CreateWebaut
 	row := q.db.QueryRow(ctx, createWebauthnCredential,
 		arg.UserID,
 		arg.CredentialID,
+		arg.Name,
 		arg.PublicKey,
 		arg.AttestationType,
 		arg.Transport,
@@ -52,6 +54,7 @@ func (q *Queries) CreateWebauthnCredential(ctx context.Context, arg CreateWebaut
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.Name,
 		&i.CredentialID,
 		&i.PublicKey,
 		&i.AttestationType,
@@ -108,7 +111,7 @@ func (q *Queries) GetUserByWebauthnCredentialID(ctx context.Context, credentialI
 
 const getWebauthnCredentialsByUserID = `-- name: GetWebauthnCredentialsByUserID :many
 SELECT
-    id, user_id, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
+    id, user_id, name, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
 FROM
     webauthn_credentials
 WHERE
@@ -127,6 +130,7 @@ func (q *Queries) GetWebauthnCredentialsByUserID(ctx context.Context, userID int
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.Name,
 			&i.CredentialID,
 			&i.PublicKey,
 			&i.AttestationType,
@@ -170,7 +174,7 @@ SET
 WHERE
     id = $14
 RETURNING
-    id, user_id, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
+    id, user_id, name, credential_id, public_key, attestation_type, transport, user_present, user_verified, backup_eligible, backup_state, aa_guid, sign_count, clone_warning, attachment
 `
 
 type UpdateWebauthnCredentialParams struct {
@@ -211,6 +215,7 @@ func (q *Queries) UpdateWebauthnCredential(ctx context.Context, arg UpdateWebaut
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.Name,
 		&i.CredentialID,
 		&i.PublicKey,
 		&i.AttestationType,

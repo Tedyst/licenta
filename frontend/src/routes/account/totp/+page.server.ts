@@ -1,5 +1,5 @@
 import type { Actions } from './$types';
-import { clientFromFetch, disableTOTP, registerTOTPBegin, registerTOTPFinish } from '$lib/client';
+import { disableTOTP, registerTOTPBegin, registerTOTPFinish } from '$lib/client';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {

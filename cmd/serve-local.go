@@ -101,7 +101,7 @@ var serveLocalCmd = &cobra.Command{
 }
 
 func init() {
-	serveLocalCmd.Flags().String("baseurl", "http://localhost:8080", "Base URL")
+	serveLocalCmd.Flags().String("baseurl", "localhost", "Base URL")
 
 	serveLocalCmd.Flags().Int16P("port", "p", 5000, "Port to listen on")
 
