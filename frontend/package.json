@@ -52,6 +52,7 @@
 		"@preline/toggle-password": "^2.1.0",
 		"material-icons": "^1.13.12",
 		"material-symbols": "^0.17.4",
+		"openapi_optimise": "^1.1.0",
 		"openapi-fetch": "^0.9.5",
 		"svelte-daisy-toast": "^0.0.2",
 		"svelte-local-storage-store": "^0.6.4",

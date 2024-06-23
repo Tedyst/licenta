@@ -22,10 +22,6 @@ export const handleFetch = (async ({ event, request, fetch }) => {
 			});
 		});
 
-		// if (headers.has('X-CSRF-Token')) {
-		// 	event.setHeaders({ 'X-CSRF-Token': headers.get('X-CSRF-Token') || '' });
-		// }
-
 		return response;
 	});
 }) satisfies HandleFetch;

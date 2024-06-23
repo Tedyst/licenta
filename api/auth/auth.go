@@ -30,7 +30,7 @@ import (
 	"github.com/volatiletech/authboss/v3/remember"
 )
 
-const sessionCookieName = "session"
+const sessionCookieName = "sess"
 
 type requestStorer struct{}
 
@@ -122,6 +122,7 @@ func (auth *authenticationProvider) Middleware(next http.Handler) http.Handler {
 	return auth.authboss.LoadClientStateMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		shouldRemember, ok := authboss.GetSession(r, "should_remember")
 		r = r.WithContext(context.WithValue(r.Context(), authboss.CTXKeyValues, rememberer{remember: ok && shouldRemember == "true"}))
+		authboss.DelSession(w, authboss.SessionHalfAuthKey)
 		next.ServeHTTP(w, r)
 	}))
 }

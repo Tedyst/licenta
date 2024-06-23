@@ -190,7 +190,8 @@ export async function registerTOTPBegin(
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
-			}
+			},
+			credentials: 'include'
 		},
 		f
 	).then((response) => {
@@ -215,7 +216,8 @@ export async function registerTOTPGetSecret(
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json'
-			}
+			},
+			credentials: 'include'
 		},
 		f
 	).then((response) => {
@@ -227,8 +229,8 @@ export async function registerTOTPGetSecret(
 }
 
 type RegisterTOTPFinishResponse = {
-	success: true;
-	recovery_codes: string[];
+	success?: true;
+	recovery_codes?: string[];
 };
 
 export async function registerTOTPFinish(
@@ -248,6 +250,54 @@ export async function registerTOTPFinish(
 	).then((response) => {
 		if (response?.ok) {
 			return response.json() as Promise<RegisterTOTPFinishResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+type DisableTOTPResponse = {
+	success: boolean;
+	errors?: {
+		code?: string[];
+	};
+};
+
+export async function disableTOTP(
+	code: string,
+	f: typeof fetch = fetch
+): Promise<DisableTOTPResponse> {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/2fa/totp/remove',
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ code })
+		},
+		f
+	).then((response) => {
+		if (response?.ok) {
+			return response.json() as Promise<DisableTOTPResponse>;
+		}
+		throw new Error('Failed to fetch');
+	});
+}
+
+export async function getQRCode(f: typeof fetch = fetch) {
+	return await csrfFetch(
+		env.PUBLIC_BACKEND_URL + '/api/auth/2fa/totp/qr',
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			credentials: 'include'
+		},
+		f
+	).then((response) => {
+		if (response.ok) {
+			return response.blob();
 		}
 		throw new Error('Failed to fetch');
 	});

@@ -1,63 +1,61 @@
 <script lang="ts">
-	import { registerTOTPBegin, registerTOTPFinish, registerTOTPGetSecret } from '$lib/client';
-	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
+	import type { PageData } from './$types';
 
-	let promise = new Promise(() => {});
-	let totpSecret = '';
-	let recoveryCodes: string[] = [];
-	let error = '';
-
-	onMount(() => {
-		promise = (async () => {
-			await registerTOTPBegin().catch((error) => {
-				error = error;
-			});
-			await registerTOTPGetSecret()
-				.then((response) => {
-					totpSecret = response.totp_secret;
-				})
-				.catch((error) => {
-					error = error;
-				});
-		})();
-	});
-
-	const onSubmit = (e: SubmitEvent) => {
-		const formData = new FormData(e.target as HTMLFormElement);
-		const code = formData.get('code') as string;
-		registerTOTPFinish(code)
-			.then((response) => {
-				recoveryCodes = response.recovery_codes;
-			})
-			.catch((error) => {
-				error = error;
-			});
-	};
+	export let data: PageData;
+	export let form: ActionData;
 </script>
 
-{#await promise}
-	<p>loading...</p>
-{:then}
-	{#if error}
-		<p style="color: red">{error}</p>
-	{/if}
-
-	<p>TOTP Secret: {totpSecret}</p>
-	<img src="/api/auth/2fa/totp/qr" alt="QR Code" />
-	<form action="/api/auth/2fa/totp/confirm" on:submit|preventDefault={onSubmit}>
-		<label for="code">Code</label>
-		<input type="text" name="code" id="code" />
-		<button type="submit">Submit</button>
-	</form>
-
-	{#if recoveryCodes.length > 0}
-		<h2>Recovery Codes</h2>
-		<ul>
-			{#each recoveryCodes as code}
-				<li>{code}</li>
-			{/each}
-		</ul>
-	{/if}
-{:catch error}
-	<p style="color: red">{error.message}</p>
-{/await}
+{#if !data.user?.has_totp}
+	<div class="hero min-h-screen bg-base-200">
+		<div class="text-center hero-content">
+			<div class="max-w-md">
+				<h1 class="text-5xl font-bold">Start TOTP Registration</h1>
+				<p class="py-6">
+					Click the button below to begin the process of setting up Time-based One-Time Password
+					(TOTP) authentication.
+				</p>
+				{#if form?.error}
+					<div class="alert alert-error">
+						{form.error}
+					</div>
+				{/if}
+				<form use:enhance method="POST" action="?/start">
+					<button type="submit" class="btn btn-primary">Start TOTP Registration</button>
+				</form>
+			</div>
+		</div>
+	</div>
+{:else}
+	<div class="hero min-h-screen bg-base-200">
+		<div class="text-center hero-content">
+			<div class="max-w-md">
+				<h1 class="text-5xl font-bold">Remove TOTP</h1>
+				<p class="py-6">
+					You cannot start TOTP registration because you have already set up TOTP authentication.
+					Enter your current TOTP token below to remove TOTP authentication.
+				</p>
+				{#if form?.error}
+					<div class="alert alert-error">
+						{form.error}
+					</div>
+				{/if}
+				<form use:enhance method="POST" class="flex gap-2 flex-col" action="?/remove">
+					<div class="form-control">
+						<label class="label" for="token">
+							<span class="label-text">Current Token</span>
+						</label>
+						<input
+							type="text"
+							name="token"
+							placeholder="Current Token"
+							class="input input-bordered"
+						/>
+					</div>
+					<button type="submit" class="btn btn-primary">Remove TOTP</button>
+				</form>
+			</div>
+		</div>
+	</div>
+{/if}
