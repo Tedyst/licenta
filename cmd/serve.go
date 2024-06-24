@@ -20,7 +20,7 @@ import (
 	"github.com/tedyst/licenta/cache"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	localExchange "github.com/tedyst/licenta/messages/local"
+	natsexchange "github.com/tedyst/licenta/messages/nats"
 	"github.com/tedyst/licenta/tasks/nats"
 )
 
@@ -64,14 +64,16 @@ var serveCmd = &cobra.Command{
 		redisConn := redis.NewClient(redisUrl)
 		defer redisConn.Close()
 
-		localExchange := localExchange.NewLocalExchange()
-
 		natsConn, err := n.Connect(viper.GetString("nats"))
 		if err != nil {
 			return err
 		}
 		defer natsConn.Close()
 		natsTaskRunner := nats.NewTaskSender(natsConn)
+		natsExchange, err := natsexchange.NewNATSExchange(natsConn)
+		if err != nil {
+			return err
+		}
 
 		userCacheProvider, err := cache.NewRedisCacheProvider[queries.User](redisConn, "user-cache:")
 		if err != nil {
@@ -100,7 +102,7 @@ var serveCmd = &cobra.Command{
 			Debug:                viper.GetBool("debug"),
 			Origin:               viper.GetString("baseurl"),
 			TaskRunner:           natsTaskRunner,
-			MessageExchange:      localExchange,
+			MessageExchange:      natsExchange,
 			WorkerAuth:           workerAuth,
 			UserAuth:             userAuth,
 			Database:             db,

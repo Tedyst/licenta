@@ -9,7 +9,7 @@ import (
 	"github.com/tedyst/licenta/bruteforce"
 	database "github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/email"
-	localExchange "github.com/tedyst/licenta/messages/local"
+	natsexchange "github.com/tedyst/licenta/messages/nats"
 	"github.com/tedyst/licenta/tasks/local"
 	"github.com/tedyst/licenta/tasks/nats"
 )
@@ -27,7 +27,11 @@ var natsCmd = &cobra.Command{
 		}
 		defer natsConn.Close()
 
-		localExchange := localExchange.NewLocalExchange()
+		natsExchange, err := natsexchange.NewNATSExchange(natsConn)
+		if err != nil {
+			return err
+		}
+
 		bruteforceProvider := bruteforce.NewDatabaseBruteforceProvider(db)
 
 		emailSender := email.NewSendGridEmailSender(
@@ -36,7 +40,7 @@ var natsCmd = &cobra.Command{
 			viper.GetString("email-sender"),
 		)
 
-		localRunner := local.NewLocalRunner(viper.GetBool("debug"), emailSender, db, localExchange, bruteforceProvider, viper.GetString("db-encryption-salt"))
+		localRunner := local.NewLocalRunner(viper.GetBool("debug"), emailSender, db, natsExchange, bruteforceProvider, viper.GetString("db-encryption-salt"))
 
 		taskRunner := nats.NewAllTasksRunner(natsConn, localRunner, db, 10, viper.GetString("db-encryption-salt"))
 
