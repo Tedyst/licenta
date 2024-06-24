@@ -22,6 +22,8 @@ linters:
     - scopelint
     - mnd
     - intrange
+    - dupl
+    - dogsled
   fast: true
 
 issues:
