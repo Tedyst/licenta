@@ -24,6 +24,8 @@ linters:
     - intrange
     - dupl
     - dogsled
+    - prealloc
+    - forcetypeassert
   fast: true
 
 issues:
