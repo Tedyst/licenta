@@ -26,6 +26,7 @@ linters:
     - dogsled
     - prealloc
     - forcetypeassert
+    - nosprintfhostport
   fast: true
 
 issues:
