@@ -3,15 +3,11 @@ version: "3.8"
 services:
   redis:
     image: redis:latest
-    ports:
-      - "6379:6379"
     networks:
       - licenta-network
 
   application:
     build: .
-    ports:
-      - "5001:5000"
     networks:
       - licenta-network
     depends_on:
@@ -36,8 +32,6 @@ services:
     image: swaggerapi/swagger-ui
     networks:
       - licenta-network
-    ports:
-      - "5002:8080"
     volumes:
       - ./api/v1/spec.yaml:/swagger.json:ro
     environment:
@@ -49,15 +43,13 @@ services:
     networks:
       - licenta-network
     ports:
-      - "1001:5432"
+      - "5432:5432"
     env_file:
       - docker.env
 
   nats:
     image: nats:latest
     command: -DV
-    ports:
-      - "4222:4222"
     networks:
       - licenta-network
 
@@ -69,16 +61,17 @@ services:
       - licenta-network
     depends_on:
       - application
+    env_file:
+      - docker.env
     environment:
       - PUBLIC_BACKEND_URL=http://application:5000
-      - ORIGIN=http://localhost:5003
 
   nginx:
     build:
       context: .
       dockerfile: nginx/Dockerfile
     ports:
-      - "5003:80"
+      - "1000:80"
     networks:
       - licenta-network
     depends_on:
@@ -94,14 +87,6 @@ services:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     networks:
       - licenta-network
-    ports:
-      - 1888:1888 # pprof extension
-      - 8888:8888 # Prometheus metrics exposed by the Collector
-      - 8889:8889 # Prometheus exporter metrics
-      - 13133:13133 # health_check extension
-      - 4317:4317 # OTLP gRPC receiver
-      - 4318:4318 # OTLP http receiver
-      - 55679:55679 # zpages extension
 
   jaeger:
     image: jaegertracing/all-in-one:${JAEGER_IMAGE_TAG:-latest}
@@ -127,9 +112,6 @@ services:
       - licenta-network
     volumes:
       - "./prometheus.yml:/etc/prometheus/prometheus.yml"
-    ports:
-      - "9090:9090"
-
 networks:
   licenta-network:
     driver: bridge

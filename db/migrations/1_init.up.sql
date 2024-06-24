@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE users(
     id bigserial PRIMARY KEY,
     username text NOT NULL UNIQUE,
@@ -39,6 +41,7 @@ CREATE TABLE totp_secret_tokens(
 CREATE TABLE organizations(
     id bigserial PRIMARY KEY,
     name text NOT NULL UNIQUE,
+    encryption_key bytea NOT NULL DEFAULT gen_random_bytes(64),
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -70,9 +73,9 @@ CREATE TABLE git_repositories(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     git_repository text NOT NULL,
-    username text,
-    password text,
-    private_key text,
+    username text NOT NULL,
+    password text NOT NULL,
+    private_key text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -80,6 +83,10 @@ CREATE TABLE git_commits(
     id bigserial PRIMARY KEY,
     repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE,
     commit_hash text NOT NULL UNIQUE,
+    author text,
+    author_email text,
+    commit_date timestamp with time zone,
+    description text,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
@@ -101,8 +108,8 @@ CREATE TABLE docker_images(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     docker_image text NOT NULL,
-    username text,
-    password text,
+    username text NOT NULL,
+    password text NOT NULL,
     min_probability float,
     probability_decrease_multiplier float,
     probability_increase_multiplier float,
@@ -111,31 +118,20 @@ CREATE TABLE docker_images(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-CREATE TABLE docker_scans(
-    id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    docker_image bigint REFERENCES docker_images(id) ON DELETE CASCADE NOT NULL,
-    finished boolean NOT NULL DEFAULT FALSE,
-    scanned_layers integer NOT NULL DEFAULT 0,
-    layers_to_scan integer NOT NULL DEFAULT 0,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
 CREATE TABLE docker_layers(
     id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    scan_id bigint REFERENCES docker_scans(id) ON DELETE CASCADE NOT NULL,
+    image_id bigint REFERENCES docker_images(id) ON DELETE CASCADE NOT NULL,
     layer_hash text NOT NULL UNIQUE,
     scanned_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE docker_results(
     id bigserial PRIMARY KEY,
-    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
     layer_id bigint REFERENCES docker_layers(id) ON DELETE CASCADE NOT NULL,
     name text NOT NULL,
     line text NOT NULL,
     line_number integer NOT NULL,
+    previous_lines text NOT NULL,
     match text NOT NULL,
     probability float NOT NULL,
     username text,
@@ -192,23 +188,48 @@ CREATE TABLE postgres_databases(
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE mongo_databases(
+    id bigserial PRIMARY KEY,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    host text NOT NULL,
+    port integer NOT NULL,
+    database_name text NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    version text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE TABLE redis_databases(
+    id bigserial PRIMARY KEY,
+    project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    host text NOT NULL,
+    port integer NOT NULL,
+    username text NOT NULL,
+    password text NOT NULL,
+    version text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 CREATE TABLE scan_groups(
     id bigserial PRIMARY KEY,
     project_id bigint NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-    created_by bigint REFERENCES users(id) ON DELETE CASCADE,
+    created_by bigint,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE workers(
     id bigserial PRIMARY KEY,
     token text NOT NULL UNIQUE,
-    organization_id bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    name text NOT NULL,
+    organization bigint NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE scans(
     id bigserial PRIMARY KEY,
     scan_group_id bigint NOT NULL REFERENCES scan_groups(id) ON DELETE CASCADE,
+    scan_type integer NOT NULL,
     status integer NOT NULL,
     error text,
     worker_id bigint REFERENCES workers(id) ON DELETE CASCADE,
@@ -216,10 +237,34 @@ CREATE TABLE scans(
     ended_at timestamp with time zone
 );
 
+CREATE TABLE git_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    repository_id bigint NOT NULL REFERENCES git_repositories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE docker_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    image_id bigint NOT NULL REFERENCES docker_images(id) ON DELETE CASCADE
+);
+
 CREATE TABLE postgres_scans(
     id bigserial PRIMARY KEY,
     scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     database_id bigint NOT NULL REFERENCES postgres_databases(id) ON DELETE CASCADE
+);
+
+CREATE TABLE mongo_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    database_id bigint NOT NULL REFERENCES mongo_databases(id) ON DELETE CASCADE
+);
+
+CREATE TABLE redis_scans(
+    id bigserial PRIMARY KEY,
+    scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
+    database_id bigint NOT NULL REFERENCES redis_databases(id) ON DELETE CASCADE
 );
 
 CREATE TABLE scan_results(
@@ -296,4 +341,32 @@ CREATE TABLE mysql_scans(
     scan_id bigint NOT NULL REFERENCES scans(id) ON DELETE CASCADE,
     database_id bigint NOT NULL REFERENCES mysql_databases(id) ON DELETE CASCADE
 );
+
+CREATE OR REPLACE FUNCTION encrypt_data(project_id bigint, salt_key text, data text)
+    RETURNS text
+    AS $$
+    SELECT
+        encode(pgp_sym_encrypt(data,(
+                    SELECT
+                        CONCAT(organizations.encryption_key, salt_key)
+                    FROM organizations
+                    INNER JOIN projects ON projects.organization_id = organizations.id
+                    WHERE
+                        projects.id = project_id)), 'hex')
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION decrypt_data(project_id bigint, salt_key text, data text)
+    RETURNS text
+    AS $$
+    SELECT
+        pgp_sym_decrypt(decode(data, 'hex'),(
+                SELECT
+                    CONCAT(organizations.encryption_key, salt_key)
+                FROM organizations
+                INNER JOIN projects ON projects.organization_id = organizations.id
+                WHERE
+                    projects.id = project_id))
+$$
+LANGUAGE sql;
 

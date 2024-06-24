@@ -16,7 +16,7 @@
 
 <PlausibleAnalytics
 	apiHost="https://plausible.tedyst.ro"
-	domain="laptop.tedyst.ro"
+	domain="licenta.tedyst.ro"
 	enabled={true}
 />
 
