@@ -3,6 +3,10 @@ version: "3.8"
 services:
   redis:
     image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis.yml:/usr/local/etc/redis/redis.conf
     networks:
       - licenta-network
 
@@ -49,7 +53,11 @@ services:
 
   nats:
     image: nats:latest
-    command: -DV
+    command: -DV --user $NATS_USER --pass $NATS_PASSWORD
+    ports:
+      - "4222:4222"
+    env_file:
+      - docker.env
     networks:
       - licenta-network
 

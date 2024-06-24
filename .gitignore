@@ -2,3 +2,4 @@
 tmp/
 __debug_bin*
 data/
+redis.yml
