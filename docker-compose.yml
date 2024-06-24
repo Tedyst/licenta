@@ -52,8 +52,8 @@ services:
       - docker.env
 
   nats:
-    image: nats:latest
-    command: -DV --user $NATS_USER --pass $NATS_PASSWORD
+    image: bitnami/nats:latest
+    command: nats-server -DV
     ports:
       - "4222:4222"
     env_file:
