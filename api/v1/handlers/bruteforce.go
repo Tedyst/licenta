@@ -44,9 +44,28 @@ func (server *serverHandler) GetProjectsIdBruteforcePasswords(ctx context.Contex
 		}, nil
 	}
 
-	count, err := server.DatabaseProvider.GetBruteforcePasswordsForProjectCount(ctx, request.Id)
+	var count int
+
+	c, ok, err := server.cache.Get(ctx, "bruteforce-passwords-count-"+strconv.Itoa(int(request.Id)))
 	if err != nil {
 		return nil, err
+	}
+
+	if ok {
+		count, err = strconv.Atoi(c)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		count, err := server.DatabaseProvider.GetBruteforcePasswordsForProjectCount(ctx, request.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		err = server.cache.Set(ctx, "bruteforce-passwords-count-"+strconv.Itoa(int(request.Id)), strconv.Itoa(int(count)))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var results []generated.BruteforcePassword

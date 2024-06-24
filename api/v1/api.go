@@ -7,30 +7,16 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/tedyst/licenta/api/authorization"
 	"github.com/tedyst/licenta/api/v1/generated"
 	"github.com/tedyst/licenta/api/v1/handlers"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/tasks"
 )
 
 type ApiV1Config struct {
+	handlers.HandlerConfig
+
 	Debug   bool
 	BaseURL string
-
-	TaskRunner      tasks.TaskRunner
-	MessageExchange messages.Exchange
-
-	WorkerAuth workerAuth
-	UserAuth   userAuth
-
-	AuthorizationManager authorization.AuthorizationManager
-
-	DatabaseProvider db.TransactionQuerier
-
-	SaltKey string
 }
 
 type workerAuth interface {
@@ -44,15 +30,7 @@ type userAuth interface {
 }
 
 func RegisterHandler(app chi.Router, config ApiV1Config) http.Handler {
-	serverHandler := handlers.NewServerHandler(handlers.HandlerConfig{
-		DatabaseProvider:     config.DatabaseProvider,
-		TaskRunner:           config.TaskRunner,
-		MessageExchange:      config.MessageExchange,
-		WorkerAuth:           config.WorkerAuth,
-		UserAuth:             config.UserAuth,
-		AuthorizationManager: config.AuthorizationManager,
-		SaltKey:              config.SaltKey,
-	})
+	serverHandler := handlers.NewServerHandler(config.HandlerConfig)
 	api := generated.NewStrictHandlerWithOptions(serverHandler, nil, generated.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
 			var message = "Invalid request"

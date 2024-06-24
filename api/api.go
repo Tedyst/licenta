@@ -13,32 +13,18 @@ import (
 	"github.com/justinas/nosurf"
 	"github.com/riandyrn/otelchi"
 	slogchi "github.com/samber/slog-chi"
-	"github.com/tedyst/licenta/api/authorization"
 	v1 "github.com/tedyst/licenta/api/v1"
 	buildid "github.com/tedyst/licenta/api/v1/middleware/buildID"
 	"github.com/tedyst/licenta/api/v1/middleware/cache"
 	"github.com/tedyst/licenta/api/v1/middleware/options"
 	requestid "github.com/tedyst/licenta/api/v1/middleware/requestID"
-	"github.com/tedyst/licenta/db"
 	"github.com/tedyst/licenta/db/queries"
-	"github.com/tedyst/licenta/messages"
-	"github.com/tedyst/licenta/tasks"
 )
 
 type ApiConfig struct {
-	Debug  bool
+	v1.ApiV1Config
+
 	Origin string
-
-	TaskRunner      tasks.TaskRunner
-	MessageExchange messages.Exchange
-
-	WorkerAuth workerAuth
-	UserAuth   userAuth
-
-	AuthorizationManager authorization.AuthorizationManager
-
-	Database db.TransactionQuerier
-	SaltKey  string
 }
 
 type workerAuth interface {
@@ -103,16 +89,6 @@ func Initialize(config ApiConfig) (http.Handler, error) {
 		r.Use(config.UserAuth.APIMiddleware)
 	})
 
-	v1.RegisterHandler(apiRouter, v1.ApiV1Config{
-		Debug:                config.Debug,
-		BaseURL:              "",
-		TaskRunner:           config.TaskRunner,
-		MessageExchange:      config.MessageExchange,
-		WorkerAuth:           config.WorkerAuth,
-		UserAuth:             config.UserAuth,
-		DatabaseProvider:     config.Database,
-		AuthorizationManager: config.AuthorizationManager,
-		SaltKey:              config.SaltKey,
-	})
+	v1.RegisterHandler(apiRouter, config.ApiV1Config)
 	return app, nil
 }

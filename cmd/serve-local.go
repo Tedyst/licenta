@@ -12,6 +12,8 @@ import (
 	"github.com/tedyst/licenta/api/auth"
 	"github.com/tedyst/licenta/api/auth/workerauth"
 	"github.com/tedyst/licenta/api/authorization"
+	v1 "github.com/tedyst/licenta/api/v1"
+	"github.com/tedyst/licenta/api/v1/handlers"
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/cache"
 	database "github.com/tedyst/licenta/db"
@@ -75,16 +77,27 @@ var serveLocalCmd = &cobra.Command{
 		}
 		authorizationManager := authorization.NewAuthorizationManager(db, authorizationCache)
 
+		serverCache, err := cache.NewLocalCacheProvider[string]()
+		if err != nil {
+			return err
+		}
+
 		app, err := api.Initialize(api.ApiConfig{
-			Debug:                viper.GetBool("debug"),
-			Origin:               viper.GetString("baseurl"),
-			TaskRunner:           taskRunner,
-			MessageExchange:      localExchange,
-			WorkerAuth:           workerAuth,
-			UserAuth:             userAuth,
-			Database:             db,
-			AuthorizationManager: authorizationManager,
-			SaltKey:              viper.GetString("db-encryption-salt"),
+			Origin: viper.GetString("baseurl"),
+			ApiV1Config: v1.ApiV1Config{
+				Debug: viper.GetBool("debug"),
+				HandlerConfig: handlers.HandlerConfig{
+					TaskRunner:           taskRunner,
+					MessageExchange:      localExchange,
+					AuthorizationManager: authorizationManager,
+					SaltKey:              viper.GetString("db-encryption-salt"),
+					DatabaseProvider:     db,
+					WorkerAuth:           workerAuth,
+					UserAuth:             userAuth,
+					Cache:                serverCache,
+				},
+				BaseURL: viper.GetString("baseurl"),
+			},
 		})
 		if err != nil {
 			return err
