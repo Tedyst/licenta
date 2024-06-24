@@ -38,12 +38,12 @@ SELECT
     SUM(count)
 FROM (
     SELECT
-        COUNT(*)
+        COUNT(*) AS count
     FROM
         default_bruteforce_passwords
     UNION ALL
     SELECT
-        COUNT(*)
+        COUNT(*) AS count
     FROM
         docker_results
         INNER JOIN docker_layers ON docker_results.layer_id = docker_layers.id
@@ -52,7 +52,7 @@ FROM (
         docker_images.project_id = $1
     UNION ALL
     SELECT
-        COUNT(*)
+        COUNT(*) AS count
     FROM
         git_results
         INNER JOIN git_commits ON git_results.commit = git_commits.id
