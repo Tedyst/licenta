@@ -17,7 +17,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.20.0"
 )
 
-func initTracer(collectorEndpoint string) error {
+func initTracer(collectorEndpoint string, service string) error {
 	var err error
 	var exporter sdktrace.SpanExporter
 	if collectorEndpoint == "" {
@@ -44,7 +44,7 @@ func initTracer(collectorEndpoint string) error {
 		sdktrace.WithResource(
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
-				semconv.ServiceNameKey.String("backend"),
+				semconv.ServiceNameKey.String(service),
 			)),
 	)
 	otel.SetTracerProvider(tp)
@@ -71,8 +71,8 @@ func initMetric(collectorEndpoint string) error {
 	return nil
 }
 
-func InitTelemetry(collectorEndpoint string) error {
-	if err := initTracer(collectorEndpoint); err != nil {
+func InitTelemetry(collectorEndpoint string, service string) error {
+	if err := initTracer(collectorEndpoint, service); err != nil {
 		return fmt.Errorf("failed to init tracer: %w", err)
 	}
 	if err := initMetric(collectorEndpoint); err != nil {

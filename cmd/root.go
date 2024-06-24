@@ -38,7 +38,7 @@ var rootCmd = &cobra.Command{
 		slog.SetDefault(handler)
 
 		if viper.GetBool("telemetry") {
-			if err := telemetry.InitTelemetry(viper.GetString("telemetry-collector-endpoint")); err != nil {
+			if err := telemetry.InitTelemetry(viper.GetString("telemetry-collector-endpoint"), cmd.CommandPath()); err != nil {
 				return err
 			}
 		}
