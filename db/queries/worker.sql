@@ -3,7 +3,7 @@ SELECT
     workers.*
 FROM
     workers
-    INNER JOIN organizations ON workers.organization_id = organizations.id
+    INNER JOIN organizations ON workers.organization = organizations.id
     INNER JOIN projects ON organizations.id = projects.organization_id
 WHERE
     projects.id = sqlc.arg(project_id);

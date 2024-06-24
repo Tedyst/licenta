@@ -263,7 +263,7 @@ SELECT
     workers.id, workers.token, workers.name, workers.organization, workers.created_at
 FROM
     workers
-    INNER JOIN organizations ON workers.organization_id = organizations.id
+    INNER JOIN organizations ON workers.organization = organizations.id
     INNER JOIN projects ON organizations.id = projects.organization_id
 WHERE
     projects.id = $1
