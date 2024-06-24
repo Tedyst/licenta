@@ -10,18 +10,32 @@
 
 	export let data: PageData;
 
-	let responseData: string = '';
 	let form: HTMLFormElement;
 
 	const webauthnLogin = async () => {
 		try {
 			const attestation = JSONtoPublicKeyCredentialRequestOptions(data.loginStartData.response);
 			const credential = await navigator.credentials.get({ publicKey: attestation });
-			responseData = JSON.stringify(LoginPublicKeyCredentialToJSON(credential));
-			form.requestSubmit();
+
+			const formData = new FormData(form);
+
+			formData.set('username', data.username);
+			formData.set('data', JSON.stringify(LoginPublicKeyCredentialToJSON(credential)));
+
+			const response = await fetch(form.action, {
+				method: form.method,
+				body: formData
+			}).then((res) => res.json());
+
+			if (response?.type === 'redirect') {
+				goto('/login/successful');
+			} else {
+				console.error(response);
+				goto('/login/webauthn/failed?username' + data.username);
+			}
 		} catch (e) {
 			console.error(e);
-			goto('/login/webauthn/failed');
+			goto('/login/webauthn/failed?username' + data.username);
 		}
 	};
 
@@ -30,7 +44,7 @@
 
 <form bind:this={form} use:enhance method="POST">
 	<input type="hidden" name="username" value={data.username} />
-	<input type="hidden" name="data" value={responseData} />
+	<input type="hidden" name="data" />
 </form>
 
 <h1 class="text-2xl font-bold">Login using a Passkey</h1>

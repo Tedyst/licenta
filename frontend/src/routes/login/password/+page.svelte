@@ -51,7 +51,7 @@
 		>
 	</div>
 	<div class="label mt-0 pt-0">
-		<a href="/login/webauthn" class="label-text-alt link link-hover"
+		<a href="/login/webauthn?username={data.username}" class="label-text-alt link link-hover"
 			>Login using a passkey associated with account</a
 		>
 	</div>

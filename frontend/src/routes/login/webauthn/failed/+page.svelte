@@ -1,3 +1,9 @@
+<script lang="ts">
+	import type { PageData } from './$types';
+
+	export let data: PageData;
+</script>
+
 <h1 class="text-2xl font-bold">Login using a Passkey</h1>
 <div class="label flex flex-col justify-center items-center">
 	<div class="w-max h-max relative">
@@ -11,7 +17,7 @@
 <h1 class="text-sm font-bold">Logging in failed. Please try again.</h1>
 
 <div class="label mt-8 mb-0 pb-0">
-	<a href="/login/webauthn" class="label-text-alt link link-hover">
+	<a href={'/login/webauthn?username=' + data.username} class="label-text-alt link link-hover">
 		Click here to go back to try again
 	</a>
 </div>
