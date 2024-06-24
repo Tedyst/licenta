@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/spf13/viper"
 	"github.com/tedyst/licenta/api/v1/generated"
@@ -90,8 +91,9 @@ func (server *serverHandler) GetUsersMe(ctx context.Context, request generated.G
 	responseCreds := make([]generated.WebAuthnKey, len(creds))
 	for i, cred := range creds {
 		responseCreds[i] = generated.WebAuthnKey{
-			Id:   cred.ID,
-			Name: cred.Name,
+			Id:     cred.ID,
+			Name:   cred.Name,
+			Aaguid: uuid.UUID([16]byte(cred.AaGuid)).String(),
 		}
 	}
 

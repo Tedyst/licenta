@@ -41,6 +41,7 @@ export function JSONtoPublicKeyCredentialCreationOptions(
 export type PublicKeyCredentialJSON = {
 	id: string;
 	type: PublicKeyCredentialType;
+	authenticatorAttachment: AuthenticatorAttachment;
 	rawId: string;
 	response: {
 		clientDataJSON: string;
@@ -51,7 +52,9 @@ export type PublicKeyCredentialJSON = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function PublicKeyCredentialToJSON(credential: any): PublicKeyCredentialJSON {
 	return {
-		...credential,
+		id: credential.id,
+		authenticatorAttachment: credential.authenticatorAttachment,
+		type: credential.type,
 		rawId: Base64Binary.encode(new Uint8Array(credential.rawId)),
 		response: {
 			...credential.response,

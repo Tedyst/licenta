@@ -2735,6 +2735,11 @@ export interface components {
        * @example My Key
        */
       name: string;
+      /**
+       * @description The AAGUID of the WebAuthn key
+       * @example 00000000-0000-0000-0000-000000000000
+       */
+      aaguid: string;
     };
     CreateOrganization: {
       /**
