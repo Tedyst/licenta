@@ -5,11 +5,12 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/tedyst/licenta/scanner"
 )
 
-var extractRegex = regexp.MustCompile("user ([a-zA-Z0-9]*) on (.*) #([a-zA-Z0-9]*) ")
+var extractRegex = regexp.MustCompile("user ([a-zA-Z0-9]*) on (.*) ([a-zA-Z0-9-]*) ")
 
 type redisUser struct {
 	name     string
@@ -61,7 +62,7 @@ func (sc *redisScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {
 
 		users = append(users, &redisUser{
 			name:     matches[1],
-			password: matches[3],
+			password: strings.TrimPrefix(matches[3], "#"),
 		})
 	}
 

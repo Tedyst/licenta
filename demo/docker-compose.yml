@@ -1,6 +1,7 @@
 services:
   redis:
     image: redis:latest
+    container_name: redis
     volumes:
       - ./redis.yml:/usr/local/etc/redis/redis.conf
     networks:
@@ -10,6 +11,7 @@ services:
     build:
       context: ../
     command: worker
+    container_name: worker
     env_file:
       - .env
     networks:

@@ -153,7 +153,7 @@ WHERE
     docker_images.project_id = $1
 UNION ALL
 SELECT
-    PASSWORD
+    git_results.PASSWORD
 FROM
     git_results
     INNER JOIN git_commits ON git_results.commit = git_commits.id

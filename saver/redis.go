@@ -48,7 +48,7 @@ func NewRedisSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 	}
 
 	conn := r.NewClient(&r.Options{
-		Addr:     db.Host,
+		Addr:     db.Host + ":" + fmt.Sprint(db.Port),
 		Username: db.Username,
 		Password: db.Password,
 		DB:       0,

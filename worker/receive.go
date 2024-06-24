@@ -61,12 +61,12 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 
 			err := runner.RunSaverRemote(ctx, &scan, "all")
 			if err != nil {
-				return fmt.Errorf("error running task: %w", err)
+				slog.ErrorContext(ctx, "Error running saver", "error", err)
 			}
 
 			continue
 		case http.StatusAccepted:
-			slog.Debug("No task available yet, retrying in 5 seconds...")
+			slog.Debug("No task available yet, retrying...")
 		case http.StatusUnauthorized:
 			slog.ErrorContext(ctx, "Received Unauthorized response from server", "response", string(task.Body))
 			return errors.New("error receiving task")
@@ -78,7 +78,7 @@ func ReceiveTasks(ctx context.Context, client generated.ClientWithResponsesInter
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-time.After(5 * time.Second):
+		default:
 		}
 	}
 }
