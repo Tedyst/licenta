@@ -83,7 +83,6 @@ var serveLocalCmd = &cobra.Command{
 		}
 
 		app, err := api.Initialize(api.ApiConfig{
-			Origin: viper.GetString("baseurl"),
 			ApiV1Config: v1.ApiV1Config{
 				Debug: viper.GetBool("debug"),
 				HandlerConfig: handlers.HandlerConfig{
@@ -96,7 +95,6 @@ var serveLocalCmd = &cobra.Command{
 					UserAuth:             userAuth,
 					Cache:                serverCache,
 				},
-				BaseURL: viper.GetString("baseurl"),
 			},
 		})
 		if err != nil {
