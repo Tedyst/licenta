@@ -69,7 +69,7 @@ func (p *databasePasswordProvider) readBatch() error {
 }
 
 func (d *databasePasswordProvider) GetCount() (int64, error) {
-	return d.count, nil
+	return d.total, nil
 }
 
 func (d *databasePasswordProvider) GetSpecificPassword(password string) (int64, bool, error) {
@@ -112,8 +112,25 @@ func (d *databasePasswordProvider) Current() (int64, string, error) {
 
 func (d *databasePasswordProvider) Start(index int64) error {
 	d.currentBatch = []*queries.DefaultBruteforcePassword{}
+	if index == 0 {
+		return d.readBatch()
+	}
+	err := d.readBatch()
+	if err != nil {
+		return err
+	}
 	d.firstItem = false
-	d.count = 0
+	d.count = index
+	newbatch := make([]*queries.DefaultBruteforcePassword, len(d.currentBatch))
+	copy(newbatch, d.currentBatch)
+	d.currentBatch = []*queries.DefaultBruteforcePassword{
+		{
+			ID:       index,
+			Password: "",
+		},
+	}
+	d.readBatch()
+	d.currentBatch = append(newbatch, d.currentBatch...)
 	return nil
 }
 
