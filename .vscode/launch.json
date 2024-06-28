@@ -54,8 +54,10 @@
             "program": ".",
             "args": [
                 "worker",
+                "--api",
+                "https://licenta.tedyst.ro",
                 "--worker-token",
-                "asdasd",
+                "652399c3-7489-4657-8a63-6f6b488a3430",
                 "-d"
             ]
         },
@@ -68,8 +70,7 @@
             "args": [
                 "extract",
                 "docker",
-                "test",
-                "--local",
+                "ghcr.io/tedyst/licenta",
                 "-d"
             ]
         },

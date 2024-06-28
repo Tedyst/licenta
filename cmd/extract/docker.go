@@ -15,7 +15,7 @@ import (
 )
 
 var extractDockerCmd = &cobra.Command{
-	Use:   "docker [filename]",
+	Use:   "docker [image]",
 	Short: "Run the docker extractor",
 	Long:  `This command scans all the layers from a docker image and extracts the usernames and passwords from each layer. It does not require a database running. It can use the local Docker daemon to load images. If Docker daemon is not available, it will use the remote registry. The results will be printed to stdout.`,
 	Args:  cobra.ExactArgs(1),

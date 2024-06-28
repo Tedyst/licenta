@@ -59,7 +59,7 @@ services:
   nats:
     image: bitnami/nats:latest
     restart: always
-    command: nats-server -DV
+    command: nats-server -DV -js
     ports:
       - "4222:4222"
     env_file:

@@ -4,13 +4,14 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strings"
 
 	"github.com/tedyst/licenta/scanner"
 )
 
-var extractRegex = regexp.MustCompile("user ([a-zA-Z0-9]*) on (.*) ([a-zA-Z0-9-]*) ")
+var extractRegex = regexp.MustCompile("user ([a-zA-Z0-9]*) on (.*) #([a-zA-Z0-9-]*) ")
 
 type redisUser struct {
 	name     string
@@ -57,7 +58,8 @@ func (sc *redisScanner) GetUsers(ctx context.Context) ([]scanner.User, error) {
 	for _, user := range u {
 		matches := extractRegex.FindStringSubmatch(user.(string))
 		if len(matches) != 4 {
-			return nil, fmt.Errorf("unexpected user format: %s", user)
+			slog.Error("unexpected user format: %s", user)
+			return nil, nil
 		}
 
 		users = append(users, &redisUser{
