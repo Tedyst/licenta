@@ -3,6 +3,7 @@ version: "3.8"
 services:
   redis:
     image: redis:latest
+    restart: always
     ports:
       - "6379:6379"
     volumes:
@@ -14,6 +15,7 @@ services:
     build: .
     networks:
       - licenta-network
+    restart: always
     depends_on:
       - db
       - nats
@@ -24,6 +26,7 @@ services:
   nats-worker:
     build: .
     command: nats
+    restart: always
     networks:
       - licenta-network
     depends_on:
@@ -34,6 +37,7 @@ services:
 
   swagger:
     image: swaggerapi/swagger-ui
+    restart: always
     networks:
       - licenta-network
     volumes:
@@ -44,6 +48,7 @@ services:
   db:
     build:
       context: postgres/
+    restart: always
     networks:
       - licenta-network
     ports:
@@ -53,6 +58,7 @@ services:
 
   nats:
     image: bitnami/nats:latest
+    restart: always
     command: nats-server -DV
     ports:
       - "4222:4222"
@@ -67,6 +73,7 @@ services:
       dockerfile: frontend/Dockerfile
     networks:
       - licenta-network
+    restart: always
     depends_on:
       - application
     env_file:
@@ -80,6 +87,7 @@ services:
       dockerfile: nginx/Dockerfile
     ports:
       - "1000:80"
+    restart: always
     networks:
       - licenta-network
     depends_on:
@@ -91,6 +99,8 @@ services:
 
   otelcollector:
     image: otel/opentelemetry-collector-contrib
+    container_name: otelcollector
+    restart: always
     volumes:
       - ./otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     networks:
@@ -98,6 +108,7 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:${JAEGER_IMAGE_TAG:-latest}
+    restart: always
     volumes:
       - "./jaeger-ui.json:/etc/jaeger/jaeger-ui.json"
     command: --query.ui-config /etc/jaeger/jaeger-ui.json
@@ -116,6 +127,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    restart: always
     networks:
       - licenta-network
     volumes:

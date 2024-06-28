@@ -89,7 +89,7 @@
 
 {#each data?.redisDatabases || [] as redisDatabase}
 	<BaseListItem
-		databaseUrl={`redis://${redisDatabase.username}@****:${redisDatabase.host}:${redisDatabase.port}/0}`}
+		databaseUrl={`redis://${redisDatabase.username}@****:${redisDatabase.host}:${redisDatabase.port}/0`}
 		databaseIcon={RedisIcon}
 		databaseType="Redis"
 		deleteURL={`/dashboard/${data.organization?.name}/${data.project?.name}/delete-scanner/redis/?id=${redisDatabase.id}`}
