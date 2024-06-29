@@ -298,8 +298,6 @@ func (q *remoteQuerier) GetBruteforcePasswordsPaginated(ctx context.Context, arg
 		return nil, err
 	}
 
-	slog.DebugContext(ctx, "Got response from server", "response", string(response.Body), "endpoint", "GetBruteforcePasswordsPaginated")
-
 	switch response.StatusCode() {
 	case http.StatusOK:
 		var result []*queries.DefaultBruteforcePassword

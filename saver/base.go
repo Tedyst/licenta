@@ -276,6 +276,9 @@ func (runner *baseSaver) ScanForPublicAccessOnly(ctx context.Context) error {
 		return nil
 	}
 
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
 	if _, err := runner.queries.CreateScanResult(ctx, queries.CreateScanResultParams{
 		ScanID:     runner.scan.ID,
 		Severity:   int32(scanner.SEVERITY_INFORMATIONAL),

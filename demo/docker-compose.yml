@@ -37,6 +37,7 @@ services:
       context: ../
     command: worker
     container_name: worker
+    restart: always
     env_file:
       - .env
     networks:

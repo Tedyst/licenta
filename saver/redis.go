@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	r "github.com/redis/go-redis/v9"
@@ -48,10 +49,15 @@ func NewRedisSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 	}
 
 	conn := r.NewClient(&r.Options{
-		Addr:     db.Host + ":" + fmt.Sprint(db.Port),
-		Username: db.Username,
-		Password: db.Password,
-		DB:       0,
+		Addr:                  db.Host + ":" + fmt.Sprint(db.Port),
+		Username:              db.Username,
+		Password:              db.Password,
+		DB:                    0,
+		DialTimeout:           5 * time.Second,
+		ReadTimeout:           5 * time.Second,
+		WriteTimeout:          5 * time.Second,
+		ContextTimeoutEnabled: true,
+		PoolTimeout:           5 * time.Second,
 	})
 
 	sc, err := redis.NewScanner(ctx, conn)
