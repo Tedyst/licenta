@@ -61,7 +61,8 @@ func NewPostgresSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforcePr
 		CreatedAt:    db.CreatedAt,
 	}))
 	if err != nil {
-		return nil, fmt.Errorf("could not connect to database: %w", err)
+		slog.ErrorContext(ctx, "could not connect to database", "err", err)
+		conn = nil
 	}
 
 	sc, err := postgres.NewScanner(ctx, conn)

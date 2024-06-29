@@ -33,10 +33,16 @@ func (result *postgresScanResult) Detail() string {
 }
 
 func (sc *postgresScanner) Ping(ctx context.Context) error {
+	if sc.db == nil {
+		return fmt.Errorf("database connection is nil")
+	}
 	return sc.db.Ping(ctx)
 }
 
 func (sc *postgresScanner) CheckPermissions(ctx context.Context) error {
+	if sc.db == nil {
+		return fmt.Errorf("database connection is nil")
+	}
 	row, err := sc.db.Query(ctx, "SELECT * FROM information_schema.role_table_grants;")
 	if err != nil {
 		return fmt.Errorf("could not see table information_schema.role_table_grants: %w", err)
