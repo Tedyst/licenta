@@ -89,19 +89,7 @@ func (r *SaverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, 
 				return fmt.Errorf("could not publish message: %w", err)
 			}
 		}
-	}
 
-	err = r.RunSaverForPublic(ctx, scan, scanType)
-	if err != nil {
-		return err
-	}
-
-	if !project.Remote {
-		err = r.RunSaverRemote(ctx, scan, scanType)
-		if err != nil {
-			return err
-		}
-	} else {
 		go func() {
 			for {
 				time.Sleep(5 * time.Second)
@@ -116,14 +104,30 @@ func (r *SaverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, 
 					return
 				}
 
-				err = r.RunSaverRemote(ctx, &scan.Scan, scanType)
-				if err != nil {
-					slog.ErrorContext(ctx, "failed to re-schedule saver run", "error", err)
+				message := messages.GetStartScanMessage(&scan.Scan)
+
+				for _, worker := range workers {
+					err := r.messageExchange.PublishSendScanToWorkerMessage(ctx, worker, message)
+					if err != nil {
+						slog.ErrorContext(ctx, "could not publish message", "err", err)
+					}
 				}
 
 				slog.InfoContext(ctx, "Rescheduled scan", "project", project.ID, "scan", scan.Scan.ID, "worker", scan.Scan.WorkerID.Int64)
 			}
 		}()
+	}
+
+	err = r.RunSaverForPublic(ctx, scan, scanType)
+	if err != nil {
+		return err
+	}
+
+	if !project.Remote {
+		err = r.RunSaverRemote(ctx, scan, scanType)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
