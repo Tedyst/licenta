@@ -101,7 +101,7 @@ func (r *SaverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, 
 		if err != nil {
 			return err
 		}
-
+	} else {
 		go func() {
 			for {
 				time.Sleep(5 * time.Second)
