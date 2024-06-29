@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/spf13/viper"
@@ -63,7 +64,12 @@ func NewMongoSaver(ctx context.Context, baseQuerier BaseQuerier, bruteforceProvi
 			Password:     db.Password,
 			Version:      db.Version,
 			CreatedAt:    db.CreatedAt,
-		})))
+		})),
+		options.Client().SetConnectTimeout(time.Second*5),
+		options.Client().SetTimeout(time.Second*5),
+		options.Client().SetSocketTimeout(time.Second*5),
+		options.Client().SetServerSelectionTimeout(time.Second*5),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create database connection: %w", err)
 	}
