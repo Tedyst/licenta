@@ -96,7 +96,7 @@ func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries
 	}
 
 	for _, scan := range scans {
-		if scan.Status == int32(models.SCAN_FINISHED) {
+		if scan.Status == int32(models.SCAN_FINISHED) || scan.WorkerID.Valid {
 			continue
 		}
 		if err := runner.ScheduleSaverRun(ctx, &queries.Scan{
