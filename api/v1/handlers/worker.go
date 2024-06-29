@@ -40,6 +40,18 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 		}, nil
 	}
 
+	scan, err := server.DatabaseProvider.GetScan(ctx, int64(message.ScanID))
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("cannot get scan: %w", err)
+	}
+
+	if scan.Scan.WorkerID.Valid && scan.Scan.WorkerID.Int64 != int64(w.ID) {
+		return generated.GetWorkerGetTask202JSONResponse{
+			Success: false,
+			Message: "Task already taken",
+		}, nil
+	}
+
 	boundScan, err := server.DatabaseProvider.BindScanToWorker(ctx, queries.BindScanToWorkerParams{
 		ID:       int64(message.ScanID),
 		WorkerID: sql.NullInt64{Int64: int64(w.ID), Valid: true},
@@ -53,11 +65,6 @@ func (server *serverHandler) GetWorkerGetTask(ctx context.Context, request gener
 			Success: false,
 			Message: "Task already taken",
 		}, nil
-	}
-
-	scan, err := server.DatabaseProvider.GetScan(ctx, int64(message.ScanID))
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, fmt.Errorf("cannot get scan: %w", err)
 	}
 
 	scanGroup, err := server.DatabaseProvider.GetScanGroup(ctx, scan.Scan.ScanGroupID)

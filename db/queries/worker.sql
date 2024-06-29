@@ -15,7 +15,6 @@ SET
     worker_id = $2
 WHERE
     id = $1
-    AND worker_id IS NULL
 RETURNING
     *;
 

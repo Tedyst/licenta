@@ -17,7 +17,6 @@ SET
     worker_id = $2
 WHERE
     id = $1
-    AND worker_id IS NULL
 RETURNING
     id, scan_group_id, scan_type, status, error, worker_id, created_at, ended_at
 `
