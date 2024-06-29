@@ -108,6 +108,9 @@ func (br *bruteforcer) savePasswordHash(_ context.Context, user scanner.User, pa
 	if err != nil {
 		return fmt.Errorf("could not get hashed password: %w", err)
 	}
+	if hash == "" {
+		return nil
+	}
 	return br.passwordProvider.SavePasswordHash(username, hash, password, br.status[user].MaximumInternalID)
 }
 
