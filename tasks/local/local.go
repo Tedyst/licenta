@@ -113,33 +113,6 @@ func (runner *localRunner) ScheduleFullRun(ctx context.Context, project *queries
 		}
 	}
 
-	go func() {
-		time.Sleep(5 * time.Second)
-		scans, err := runner.queries.GetScansForScanGroup(ctx, scanGroup.ID)
-		if err != nil {
-			slog.ErrorContext(ctx, "failed to get scans for scan group", "error", err)
-		}
-
-		ok := true
-
-		for _, scan := range scans {
-			if scan.Status != int32(models.SCAN_FINISHED) {
-				ok = false
-			}
-		}
-
-		if ok {
-			slog.InfoContext(ctx, "All scans finished", "project", project.ID, "scangroup", scanGroup.ID)
-			return
-		}
-
-		slog.InfoContext(ctx, "Not all scans finished, re-scheduling full run", "project", project.ID, "scangroup", scanGroup.ID)
-
-		if err := runner.ScheduleFullRun(ctx, project, scanGroup, sourceType, scanType); err != nil {
-			slog.ErrorContext(ctx, "failed to re-schedule full run", "error", err)
-		}
-	}()
-
 	return nil
 }
 

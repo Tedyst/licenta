@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/tedyst/licenta/bruteforce"
 	"github.com/tedyst/licenta/db/queries"
@@ -100,6 +101,29 @@ func (r *SaverRunner) ScheduleSaverRun(ctx context.Context, scan *queries.Scan, 
 		if err != nil {
 			return err
 		}
+
+		go func() {
+			for {
+				time.Sleep(5 * time.Second)
+				scan, err := r.queries.GetScan(ctx, scan.ID)
+				if err != nil {
+					slog.ErrorContext(ctx, "failed to get scan", "error", err)
+					return
+				}
+
+				if scan.Scan.WorkerID.Valid {
+					slog.InfoContext(ctx, "Scan finished", "project", project.ID, "scan", scan.Scan.ID)
+					return
+				}
+
+				err = r.RunSaverRemote(ctx, &scan.Scan, scanType)
+				if err != nil {
+					slog.ErrorContext(ctx, "failed to re-schedule saver run", "error", err)
+				}
+
+				slog.InfoContext(ctx, "Rescheduled scan", "project", project.ID, "scan", scan.Scan.ID, "worker", scan.Scan.WorkerID.Int64)
+			}
+		}()
 	}
 
 	return nil
