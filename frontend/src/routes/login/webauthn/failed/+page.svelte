@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import ShieldKey from 'svelte-material-icons/ShieldKey.svelte';
 
 	export let data: PageData;
 </script>
@@ -9,7 +10,7 @@
 	<div class="w-max h-max relative">
 		<div class="loading loading-ring w-32 opacity-0" />
 		<div class="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2">
-			<i class="material-symbols-outlined text-5xl">passkey</i>
+			<ShieldKey class="text-5xl" />
 		</div>
 	</div>
 </div>

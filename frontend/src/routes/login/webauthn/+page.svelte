@@ -7,6 +7,7 @@
 		LoginPublicKeyCredentialToJSON
 	} from '$lib/webauthn';
 	import { enhance } from '$app/forms';
+	import ShieldKey from 'svelte-material-icons/ShieldKey.svelte';
 
 	export let data: PageData;
 
@@ -52,7 +53,8 @@
 	<div class="w-max h-max relative">
 		<div class="loading loading-ring w-32" />
 		<div class="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2">
-			<i class="material-symbols-outlined text-5xl">passkey</i>
+			<!-- <i class="material-symbols-outlined text-5xl">passkey</i> -->
+			<ShieldKey class="text-5xl" />
 		</div>
 	</div>
 </div>
